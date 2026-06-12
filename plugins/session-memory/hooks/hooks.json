@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'r=$(git rev-parse --show-toplevel 2>/dev/null || pwd); m=\"$r/.ai/memory\"; if [ -f \"$m/HANDOFF.md\" ]; then d=$(sed -n \"s/^Saved: //p\" \"$m/HANDOFF.md\" | head -1); echo \"Parked session handoff at .ai/memory/HANDOFF.md (saved: ${d:-unknown}). If the first user message relates to that prior work, offer to resume it via the session-handoff skill. If it is an unrelated new task, mention the parked handoff in one line and move on.\"; fi; if [ -f \"$m/LESSONS.md\" ]; then echo \"$(grep -c \"^## \" \"$m/LESSONS.md\") project lesson(s) recorded in .ai/memory/LESSONS.md - before acting, consult entries whose When condition matches the work.\"; fi'",
+            "timeout": 10,
+            "statusMessage": "Checking .ai/memory/"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "overclock",
+  "description": "Overclock — Claude Code plugins that run your model past spec.",
+  "owner": {
+    "name": "Luka Zivkovic"
+  },
+  "plugins": [
+    {
+      "name": "session-memory",
+      "source": "./plugins/session-memory",
+      "description": "Stop losing your working state. Warm session resume (handoffs with git-anchored drift detection) plus lessons that persist across sessions — corrections stop evaporating, failed approaches stop being retried.",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": ["memory", "session", "handoff", "resume", "lessons", "continuity", "context"]
+    }
+  ]
+}
