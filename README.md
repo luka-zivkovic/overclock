@@ -3,7 +3,7 @@
 **Claude Code plugins that run your model past spec.**
 
 ```
-/plugin marketplace add lukazivkovic/overclock
+/plugin marketplace add luka-zivkovic/overclock
 /plugin install session-memory@overclock
 ```
 
