@@ -1,0 +1,102 @@
+{
+  "skill_name": "session-handoff",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "We've been refactoring the auth middleware: we decided to switch from session cookies to JWTs because the mobile client can't hold cookies, we tried storing refresh tokens in localStorage but abandoned that since it's XSS-exposed, and the next step is to add the httpOnly refresh-token endpoint in src/routes/auth.ts. I'm about to run out of context \u2014 save our state so the next session can pick this up.",
+      "expected_output": "A new .ai/memory/HANDOFF.md containing the goal, the JWT decision with rationale, the localStorage refresh-token attempt recorded as a failed approach with its XSS cause, concrete next steps naming src/routes/auth.ts, and environment anchors (git branch, short HEAD sha, dirty-file list, date), plus a one-line confirmation in conversation.",
+      "files": [],
+      "expectations": [
+        "A file is written at .ai/memory/HANDOFF.md (directories created if needed) and nothing outside .ai/memory/ is written or deleted.",
+        "HANDOFF.md starts with the <!-- memory-schema: v1 --> marker and contains the contract's section order: Current goal, Plan, Decisions, Failed approaches, Open questions, Next steps, Key files, Environment anchors.",
+        "The Failed approaches section records the localStorage refresh-token attempt with its diagnosed cause (XSS exposure), not just 'tried and failed'.",
+        "The Environment anchors section contains a git branch name and a short HEAD sha obtained by running git commands during the session (process: git branch/rev-parse/status were actually executed).",
+        "No git commit is made and no secrets/tokens appear in the written file."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Resume where we left off on this project.",
+      "expected_output": "In a project with no .ai/memory/ directory: a plain statement that no saved session state exists, an offer to start tracking state from now on, and no invented prior context.",
+      "files": [],
+      "expectations": [
+        "The response plainly states that no saved handoff/session state exists for this project.",
+        "No prior goals, plans, decisions, or work history are fabricated \u2014 the response contains no claims about what 'we were working on'.",
+        "The response offers to begin tracking state (e.g., create a handoff at the next checkpoint).",
+        "Process: the skill checked for .ai/memory/HANDOFF.md (e.g., a Read/Glob/ls attempt is visible) before concluding the start is cold.",
+        "No HANDOFF.md is fabricated or written as part of merely answering the resume request."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Pick up where we stopped last week.",
+      "expected_output": "Given a HANDOFF.md whose anchors record branch feat/rate-limiting at sha 8c41f2a, while the repo is now on main several commits later: a warm-start brief that names the saved goal and next steps but explicitly warns that the repo has drifted (branch changed, N commits since the saved sha) and asks the user to confirm direction before executing the old plan.",
+      "files": [
+        {
+          "name": ".ai/memory/HANDOFF.md",
+          "description": "A schema-v1 handoff saved on branch feat/rate-limiting at short sha 8c41f2a; the test repo's current state is branch main, several commits ahead."
+        }
+      ],
+      "expectations": [
+        "Process: current git state is checked (branch/sha) and compared against the handoff's Environment anchors.",
+        "The saved sha is unreachable in this fixture: the brief explicitly states that history was rewritten (or the saved commit no longer exists) and does NOT misread it as 'no commits since the handoff'; drift is quantified from what is observable (branch change, dated log).",
+        "All Plan step statuses are treated as unverified or re-verified against the actual code, not trusted from checkboxes.",
+        "The brief still surfaces the saved goal, failed approaches, and next steps from HANDOFF.md instead of re-deriving them from scratch.",
+        "The warm-start brief follows the fixed shape (Goal, Plan status, Decisions in force, Do-not-retry, Drift & lessons, Proposed next step + confirmation) and stays within ~15 lines of brief content.",
+        "The skill asks the user to confirm direction before executing any step of the saved plan.",
+        "HANDOFF.md is not modified or overwritten during resume."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Commit the current changes with a sensible message.",
+      "expected_output": "The dirty file is committed as an ordinary git operation. The handoff on disk is irrelevant: no resume flow, no warm-start brief, no save flow, no archiving, and .ai/memory/ is byte-identical afterwards. (Tests the description's anti-trigger: ordinary git commit/push requests are not session-state requests.)",
+      "files": [
+        {
+          "name": ".ai/memory/HANDOFF.md",
+          "description": "Valid schema-v1 handoff for the in-progress TS migration, present to tempt a spurious resume/save flow."
+        },
+        {
+          "name": "src/util/parse.js",
+          "description": "Dirty working-tree change to give the commit request something real to commit."
+        }
+      ],
+      "expectations": [
+        "A git commit is created containing the dirty change, with a sensible message.",
+        "No warm-start brief or resume flow: the response does not present goal/plan/decisions from HANDOFF.md.",
+        "No save flow: HANDOFF.md is not rewritten and no archive/ entry is created; .ai/memory/ is byte-identical to the fixture.",
+        "The handoff file is not committed unless it was already tracked; the commit is scoped to the working-tree change."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Resume where we left off.",
+      "expected_output": "The handoff is ~3 weeks old and the repo has moved ~35 commits past the saved anchor. Instead of line-by-line reconciliation, the response reports the gap (age and commit count), quotes the old handoff's goal/failed-approaches as background, and offers a choice with fresh start as the default suggestion (archiving the old handoff) vs full reconciliation.",
+      "files": [
+        {
+          "name": ".ai/memory/HANDOFF.md",
+          "description": "Valid schema-v1 handoff dated >14 days ago, anchored to a reachable but ~35-commits-behind sha."
+        }
+      ],
+      "expectations": [
+        "The gap is quantified: handoff age in days/weeks AND commit count since the saved sha.",
+        "No line-by-line plan reconciliation is attempted; the response says the handoff is too stale for that.",
+        "The old handoff's goal and failed approaches are quoted as background, not silently discarded.",
+        "The user is offered a choice with fresh start (archiving the old handoff) as the default suggestion; nothing is executed and the handoff is not modified before they answer."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I'm on my new laptop so there's no saved state here, but I copied our handoff before wiping the old machine \u2014 here it is:\n\n# Session Handoff\nSaved: 2026-06-09T18:00:00\n\n## Current goal\nGet the CSV import endpoint to stream instead of buffering whole files in memory.\n\n## Failed approaches\n- Buffering the multer upload then parsing \u2014 FAILED because 300MB files OOM the 512MB container. Do not retry; stream with busboy instead.\n\n## Next steps\n1. Replace multer with busboy in src/routes/import.ts.",
+      "expected_output": "The pasted handoff is accepted: goal, failed approach, and next step are used; the missing sections (Plan, Decisions, Open questions, Key files, Environment anchors) are named; anchors are noted as absent/unverifiable so nothing about repo state is assumed; the skill offers to persist the pasted handoff to .ai/memory/HANDOFF.md before or while proceeding.",
+      "files": [],
+      "expectations": [
+        "The pasted content is used as the resume source: the brief reflects the streaming goal, the multer-OOM dead end, and the busboy next step.",
+        "Missing sections are explicitly named (at minimum Environment anchors; ideally Plan/Decisions too) rather than fabricated.",
+        "Because anchors are missing, repo state is checked fresh or marked unverified \u2014 no claims about branch/commits are invented.",
+        "The skill offers to write the pasted handoff to .ai/memory/HANDOFF.md (creating directories as needed), and does not do so silently without mentioning it.",
+        "Direction is confirmed with the user before executing the next step."
+      ]
+    }
+  ]
+}

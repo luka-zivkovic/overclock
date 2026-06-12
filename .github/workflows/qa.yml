@@ -1,0 +1,57 @@
+name: QA
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # version-bump guard needs the merge-base
+
+      - name: Validate skill structure
+        run: |
+          set -e
+          for d in plugins/*/skills/*/; do
+            python3 tools/validate_skill.py "$d"
+          done
+
+      - name: Shared files byte-identical
+        run: python3 tools/check_shared_files.py
+
+      - name: Version bumped for changed plugins
+        run: python3 tools/check_version_bump.py --base origin/main
+
+      - name: Hook changes require the hook-change label
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          base=$(git merge-base origin/main HEAD)
+          if git diff --name-only "$base" HEAD | grep -q 'hooks/hooks\.json'; then
+            echo "hooks.json changed — checking for the hook-change label"
+            gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json labels -q '.labels[].name' | grep -qx 'hook-change' \
+              || { echo '::error::hooks.json changed without the hook-change label. Hooks run on every user session start — this diff needs deliberate eyes. Add the label to acknowledge.'; exit 1; }
+          else
+            echo "no hook changes"
+          fi
+
+      - name: Audit report (non-blocking)
+        run: |
+          python3 tools/audit_skills.py plugins --out audit.md || true
+          { echo '## Skill audit'; cat audit.md 2>/dev/null || echo '(audit produced no report)'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Official plugin validation
+        continue-on-error: true   # static parse; demoted if the CLI ever requires auth here
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate .
+          for p in plugins/*/; do claude plugin validate "$p"; done

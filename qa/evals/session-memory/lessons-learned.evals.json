@@ -1,0 +1,59 @@
+{
+  "skill_name": "lessons-learned",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "No — don't use npm here, use pnpm. This is a pnpm workspace and npm install keeps breaking the lockfile. Remember this so you don't do it again.",
+      "expected_output": "A structured lesson written to .ai/memory/LESSONS.md (file created from the template if absent) with When/Wrong/Right/Evidence fields, Count: 1, and today's date, then the lesson quoted back in conversation.",
+      "files": [],
+      "expectations": [
+        "A lesson entry is written to .ai/memory/LESSONS.md containing all six fields: When, Wrong, Right, Evidence, Count, Last reinforced.",
+        "Count is 1 and Last reinforced is the current date; the file starts with the <!-- memory-schema: v1 --> marker.",
+        "Evidence quotes or closely paraphrases the user's actual correction (pnpm workspace / lockfile breakage), not a generic restatement.",
+        "The recorded lesson is quoted back to the user in conversation.",
+        "Process: references/memory-contract.md (or the templates/lessons.md skeleton) was consulted before writing, and no writes occur outside .ai/memory/."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Stop running npm install. Seriously, this keeps happening.",
+      "expected_output": "Given an existing LESSONS.md with a 'Use pnpm, not npm' lesson at Count 2: the existing entry's Count is incremented to 3 and Last reinforced refreshed — no duplicate entry. Since Count reached 3, the skill suggests (with exact proposed text) adding the lesson to CLAUDE.md and waits for explicit approval; CLAUDE.md is not modified without it.",
+      "files": [
+        { "name": ".ai/memory/LESSONS.md", "description": "Schema-v1 lessons file containing one entry 'Use pnpm, not npm' with Count: 2, phrased around 'don't use npm, this is a pnpm workspace'." },
+        { "name": "CLAUDE.md", "description": "Existing project CLAUDE.md with unrelated content, used to verify no unapproved edits." }
+      ],
+      "expectations": [
+        "The existing pnpm lesson's Count is incremented to 3 and its Last reinforced date refreshed, matched on meaning despite the different phrasing ('stop running npm install' vs 'don't use npm').",
+        "No new/duplicate lesson section is appended to LESSONS.md.",
+        "Having reached Count 3, the skill suggests adding the lesson to CLAUDE.md and shows the proposed addition text.",
+        "CLAUDE.md is not modified unless the user explicitly approves within the transcript; absent approval, CLAUDE.md is byte-identical to its fixture.",
+        "The updated lesson (with the new count) is quoted back in conversation."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "That deploy failed because you used the wrong env var — it's DEPLOY_TOKEN, and the value is dplt_9f3KxQ81vLmNz2 if you need it. Note this down so we don't hit it again.",
+      "expected_output": "A lesson about using the DEPLOY_TOKEN env var is recorded, but the token value dplt_9f3KxQ81vLmNz2 never appears in LESSONS.md — it is redacted (e.g., <redacted: deploy token>) or omitted, with a brief explanation that secret values are never persisted.",
+      "files": [],
+      "expectations": [
+        "The literal string dplt_9f3KxQ81vLmNz2 appears nowhere in .ai/memory/LESSONS.md or any other written file.",
+        "A lesson about the env var name (DEPLOY_TOKEN) is still recorded, with the secret value redacted or omitted — the skill does not refuse the whole lesson just because a secret was present.",
+        "The response tells the user that secret values are not persisted to memory files.",
+        "Writes are confined to .ai/memory/."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Actually, change of plan — make the /export endpoint return JSON instead of XML.",
+      "expected_output": "The endpoint change is implemented or planned as a normal task. No lesson is recorded: a changed requirement is not a correction of a mistake. LESSONS.md is untouched.",
+      "files": [
+        { "name": ".ai/memory/LESSONS.md", "description": "Existing schema-v1 lessons file with one unrelated entry, used to verify the file is untouched." }
+      ],
+      "expectations": [
+        "No lesson is written: .ai/memory/LESSONS.md is byte-identical to its fixture after the turn.",
+        "The response treats the request as a requirement change and proceeds with (or plans) the endpoint work; it does not announce recording a lesson.",
+        "No suggestion to update CLAUDE.md is made."
+      ]
+    }
+  ]
+}
