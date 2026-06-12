@@ -83,3 +83,4 @@ This skill fires when the user asks; it cannot fire merely because a handoff exi
 - **Warn on drift, don't obey a stale plan.** Anchors exist precisely so the resume flow can distrust the file when the repo moved on.
 - **Writes confined to `.ai/memory/`; no secrets; no auto-commit.** These keep the skill safe to ship in real repositories.
 - **Concurrent sessions** are last-writer-wins on HANDOFF.md; the archive preserves the loser. Mention the limitation if the user hits it; do not build locking.
+
