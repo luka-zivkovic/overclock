@@ -24,9 +24,9 @@ Do NOT record:
 - **One-off contextual choices** — "use port 4000 just for this test" applies once; persisting it would misfire later.
 - **Conversational disambiguation** — "no, I meant the other file" corrects the conversation, not behavior.
 - **In-the-moment preferences not confirmed as standing rules** — wait until the user repeats them.
-- **Anything containing secrets, tokens, credentials, or personal data** — redact the secret (`<redacted: ...>`) and record the lesson without it, or decline to persist and say why. Hard rule from the contract, no exceptions.
+- **Anything containing secrets, tokens, credentials, or personal data** — redact the secret (`<redacted: ...>`) and record the lesson without it, or decline to persist and say why. Hard rule from the contract, no exceptions. An explicit record request that happens to contain a secret ("note this down", "remember this") IS consent to record the redacted version: record immediately with the secret redacted and say so — do not bounce the request back as "should I save it without the secret?"; that makes the user repeat themselves.
 
-When a signal is borderline (a preference that might be standing), ask: "Should I record that as a standing lesson for this project?" — one question beats a polluted ledger.
+When a signal is borderline (a preference that might be standing), ask: "Should I record that as a standing lesson for this project?" — one question beats a polluted ledger. An explicit "remember/note this" is never borderline.
 
 ## Record flow
 
