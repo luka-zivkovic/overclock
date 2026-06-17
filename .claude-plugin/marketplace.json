@@ -20,6 +20,22 @@
         "continuity",
         "context"
       ]
+    },
+    {
+      "name": "learning-loop",
+      "source": "./plugins/learning-loop",
+      "description": "A self-improvement loop for your agent. Corrections (\"no, use pnpm, not npm\") and diagnosed failures become durable, evidence-counted lessons in .ai/memory/LESSONS.md, deduplicated by meaning and surfaced in later sessions so the same mistakes stop recurring. Standalone — no session-handoff needed; the ledger format is compatible with session-memory if you run both.",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": [
+        "lessons",
+        "learning",
+        "self-improvement",
+        "memory",
+        "corrections",
+        "continuity",
+        "context"
+      ]
     }
   ]
 }

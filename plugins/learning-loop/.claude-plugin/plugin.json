@@ -1,0 +1,19 @@
+{
+  "name": "learning-loop",
+  "displayName": "Learning Loop",
+  "description": "A self-improvement loop for your agent: corrections and diagnosed failures become durable, deduplicated, evidence-counted lessons in .ai/memory/LESSONS.md, then surface in later sessions so the same mistakes stop recurring. Standalone — one skill (lessons-learned) over a tool-agnostic markdown contract, with a bundled SessionStart hook that surfaces the lesson count automatically. No session-handoff dependency; the LESSONS.md format is byte-compatible with the session-memory plugin, so the two interoperate if you run both.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "lessons",
+    "learning",
+    "self-improvement",
+    "memory",
+    "corrections",
+    "continuity",
+    "context"
+  ]
+}

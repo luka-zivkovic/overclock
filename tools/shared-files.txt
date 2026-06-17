@@ -2,3 +2,4 @@
 # These files are duplicated across skills by design; CI fails if copies drift.
 plugins/session-memory/skills/session-handoff/references/memory-contract.md,plugins/session-memory/skills/lessons-learned/references/memory-contract.md
 plugins/session-memory/skills/session-handoff/references/session-start-hook.md,plugins/session-memory/skills/lessons-learned/references/session-start-hook.md
+plugins/session-memory/skills/lessons-learned/templates/lessons.md,plugins/learning-loop/skills/lessons-learned/templates/lessons.md

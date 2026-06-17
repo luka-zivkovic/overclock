@@ -20,7 +20,17 @@ Claude Code sessions are stateless. Close one (or hit compaction) and the next s
 
 Everything lives in plain, diffable markdown under your project's `.ai/memory/` — a deliberately **tool-agnostic** location. The skills run in Claude Code, but the memory belongs to your project, not to a vendor: teammates on Cursor, Codex, or anything else can read the same handoffs and lessons, and write their own in the documented format. Commit `.ai/memory/` to share warm state with your team, or gitignore it to keep it local — the skills never auto-commit, never write outside `.ai/memory/`, and never persist secrets (hard rules, tested).
 
-## This plugin ships a hook (read this)
+### learning-loop — a self-improvement loop
+
+```
+/plugin install learning-loop@overclock
+```
+
+Want the lessons without the handoff machinery? `learning-loop` is the `lessons-learned` skill on its own. Same loop — corrections (*"no, use pnpm, not npm"*) and diagnosed failures become evidence-counted entries in `.ai/memory/LESSONS.md`, deduplicate by meaning, propose a CLAUDE.md line at 3+ reinforcements (only with your yes), and never persist secrets — but with a memory contract and SessionStart hook scoped to `LESSONS.md` alone, no `session-handoff` anywhere. Drop it into your own workflow as an automatic self-improvement loop, or run it standalone.
+
+The `LESSONS.md` format is a strict subset of `session-memory`'s, so the two are interoperable on one ledger. **Pick one, though:** install `session-memory` if you want handoff **and** lessons, or `learning-loop` if you want **only** the learning loop. Installing both double-counts the lesson reminder at session start (both ship a hook that reads `LESSONS.md`).
+
+## These plugins ship a hook (read this)
 
 `session-memory` bundles a **SessionStart hook** that activates when you install the plugin. At session start it runs one shell command that:
 
@@ -29,6 +39,8 @@ Everything lives in plain, diffable markdown under your project's `.ai/memory/` 
 - prints nothing — a complete no-op — in projects that have no `.ai/memory/`.
 
 That hook is what makes resume automatic instead of something you must remember to ask for. The exact command is in [`plugins/session-memory/hooks/hooks.json`](plugins/session-memory/hooks/hooks.json) — it's a dozen lines of `sh`, auditable in ten seconds. Don't want it? Disable the plugin's hooks in `/plugin`, or install the two skills standalone (copy `plugins/session-memory/skills/*` into `~/.claude/skills/`) and skip the hook entirely.
+
+`learning-loop` bundles the same idea, scoped down: its [`plugins/learning-loop/hooks/hooks.json`](plugins/learning-loop/hooks/hooks.json) checks only `.ai/memory/LESSONS.md`, injects the lesson count when present, and is a complete no-op otherwise. Disable or install-standalone the same way. (As above: don't run both plugins — the lesson reminder would print twice.)
 
 ## Evidence, not vibes
 
