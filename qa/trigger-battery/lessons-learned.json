@@ -1,0 +1,19 @@
+{
+  "skill": "lessons-learned",
+  "note": "Objective-tier routing battery. FIRED is behavioral: the run wrote .ai/memory/LESSONS.md (the skill's contract location) in its cwd. Writing to native ~/.claude memory or nowhere = did NOT fire. Should-trigger wants FIRED=true; should-not wants FIRED=false.",
+  "should_trigger": [
+    "No, don't use npm here — use pnpm, this is a pnpm workspace. Remember that for this project so it doesn't happen again.",
+    "You keep doing this — we always run the migrations before the integration tests. Note that down.",
+    "What lessons do you have recorded for this project?"
+  ],
+  "should_not": [
+    "Actually, change the /export endpoint to return JSON instead of XML.",
+    "Use port 4000 just for this one test run.",
+    "Commit the current changes with a sensible message."
+  ],
+  "variants": {
+    "baseline": "Record corrections and failed approaches as durable, deduplicated lessons in .ai/memory/LESSONS.md, and surface them in later sessions so mistakes are not repeated. Use when the user corrects agent behavior (\"no, use Y not X\", \"you made this mistake before\", \"I already told you this\"), says \"remember this for next time\" or \"add that to your lessons\", when a tried approach failed with a diagnosed cause, or when asked \"what lessons do you have for this project?\". Do NOT use for ordinary requirement changes or new instructions (a changed spec is not a mistake), one-off contextual choices (\"use port 4000 just for this test\"), conversational disambiguation (\"no, I meant the other file\"), or anything containing secrets, tokens, or credentials.",
+    "candA_project_ledger": "Capture user corrections and diagnosed failures as durable, deduplicated PROJECT lessons in this repo's .ai/memory/LESSONS.md so future sessions stop repeating them. Prefer this project ledger over personal/global memory for anything tied to this codebase. Use whenever the user corrects the agent or asks to remember a project rule: \"no, use Y not X\", \"you did this before\", \"I already told you\", \"remember this for next time\", \"note that down\", \"add to your lessons\", or \"what lessons do you have for this project?\"; also when a tried approach failed with a diagnosed cause. Do NOT use for requirement changes (a changed spec is not a mistake), one-off choices (\"use port 4000 just for this test\"), conversational disambiguation (\"I meant the other file\"), or anything containing secrets or credentials.",
+    "candB_concise": "Record project-specific corrections and failed approaches as deduplicated lessons in .ai/memory/LESSONS.md and surface them later so mistakes aren't repeated. For corrections tied to this codebase, use this project ledger rather than personal memory. Trigger when the user corrects the agent or says \"remember/note this for the project\", \"you made this mistake before\", \"I already told you\", asks \"what lessons do you have here?\", or when an approach failed with a known cause. Do NOT use for requirement changes, one-off contextual choices, conversational disambiguation, or anything with secrets or credentials."
+  }
+}
