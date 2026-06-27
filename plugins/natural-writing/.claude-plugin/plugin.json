@@ -1,0 +1,19 @@
+{
+  "name": "natural-writing",
+  "displayName": "Natural Writing",
+  "description": "Make AI drafts read like a human wrote them. A prose writing/editing skill for blog posts, articles, and essays that strips the tells which mark text as AI-generated (em-dashes, words like 'delve'/'leverage', uniform sentence rhythm, bot scaffolding) so you can use AI without rewriting everything by hand.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "writing",
+    "prose",
+    "blog",
+    "editing",
+    "style",
+    "natural-language",
+    "anti-ai-tell"
+  ]
+}

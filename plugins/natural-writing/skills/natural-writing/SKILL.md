@@ -1,0 +1,61 @@
+---
+name: natural-writing
+description: Write or edit prose (blog posts, articles, essays, newsletters, narrative docs) so it reads as naturally human-written, not AI-flavored. Use when drafting or revising human-facing prose for publication and you want to avoid the tells that make text read as AI-generated: em-dashes, words like "delve"/"tapestry"/"leverage", uniform sentence rhythm, hedging, analogies, and bot scaffolding ("In conclusion", "Let's dive in"). Do NOT use for code, code comments, commit messages, API/reference docs that need precise terms, one-line UI strings, or quotes to preserve verbatim.
+---
+
+# Natural Writing
+
+AI prose has a sound: even sentence lengths, em-dashes everywhere, a handful of overused words, tidy scaffolding like "Furthermore" and "In conclusion." Readers now spot it and discount it. This skill writes and edits prose so the draft reads like a person wrote it, so you can use AI for a blog post or article without rewriting it line by line to undo the tells.
+
+It is stateless and lightweight on purpose: a writing discipline, not a tool. No memory, no ceremony.
+
+## When it fires (and when it doesn't)
+
+Fires for **multi-sentence prose meant for human readers**: blog posts, articles, essays, newsletters, landing copy, narrative sections of docs.
+
+Stay silent. Do not apply this for:
+- Code, code comments, config.
+- Commit messages, PR titles.
+- API / reference docs where a precise technical term is the *right* word.
+- One-line UI strings, labels, error messages.
+- Quotes, citations, or data you must keep verbatim.
+- Legal or precise technical text where a qualifier is load-bearing.
+
+Never run the full pass on a single sentence. If someone asks to reword one line, just reword it.
+
+## The rules
+
+1. **No em-dashes or en-dashes.** Use a comma, a period, or two short sentences. Use "to" for ranges (9 to 5, not 9–5). This is the single loudest AI tell, so it is rule one.
+2. **Cut AI-tell vocabulary.** Replace with the plain word: delve → look at; leverage → use; utilize → use; tapestry / realm / landscape → drop; testament to → shows; underscore / highlight → show; crucial / pivotal / vital → important (or cut); robust / seamless / synergy / paradigm / "boasts" → say what you mean; "it's worth noting" / "in today's fast-paced world" → delete.
+3. **Drop bot scaffolding.** No "In conclusion", "Furthermore", "Moreover", "Firstly / Secondly", "Let's dive in", "Without further ado", "Buckle up." Just say the thing. Don't preview an argument before you make it or recap it after.
+4. **Vary the rhythm.** Mix short sentences with longer ones. Uniform sentence length is the second loudest tell. A two-word sentence is fine. Don't chain clauses with "and… and… and."
+5. **Use everyday words and contractions.** Write the way you'd explain it to a smart friend. "Don't", "it's", "you'll" are natural, not sloppy.
+6. **Be concrete.** Prefer a specific noun, number, or example over a vague placeholder ("situation", "process", "factor"), and a named source over "experts say" or "studies show."
+7. **Lead with the point, hedge after.** State the claim cleanly first, then the one caveat that actually matters. Cut the pile of qualifiers before the claim ("while it's mixed and context-dependent, there may be some reason to think…"). Keep the real caveat; drop the throat-clearing.
+8. **No analogies or metaphors.** Say the thing directly. Skip "it's like…", the symphony, the dance, the journey.
+9. **Strong verbs.** Don't bury the action in a noun: "decide", not "make a decision"; "investigate", not "conduct an investigation"; "to configure the runner, set…", not "configuring the runner involves…".
+10. **Active voice; name who did what.** "The team missed the deadline", not "the deadline was missed." Passive is fine only when the actor is genuinely unknown or irrelevant.
+
+See `references/examples.md` for before/after pairs that show each rule in action (curated from the `mine-writing-rules` corpus).
+
+## How to work
+
+- **Drafting:** write it naturally with these rules from the start, not as a cleanup afterthought.
+- **Revising a draft — two passes:**
+  - *Pass 1 — fix violations.* Go rule by rule above and fix what breaks them.
+  - *Pass 2 — cut what doesn't earn its place.* Remove words, sentences, and whole sections that add nothing. A first draft usually runs ~25% longer than it needs to. But preserve the author's meaning and voice, and keep the one caveat that matters. Cutting a real qualifier to sound confident is worse than leaving it.
+- Match how the author actually writes. Don't flatten their voice into a generic plain one.
+
+## Revision report (on request only)
+
+By default, just return the rewritten prose. When the user asks to *see what changed* (or for a long, heavily-edited piece), produce the visual diff:
+
+1. Copy `assets/revision-report.html` to a new file (e.g. `revision-report.out.html`).
+2. Replace the line `const DATA = __DATA__;` with `const DATA = { ... };` filled per the schema documented at the top of that template (original, revised, and a list of changes, each with `type` = `keep` | `delete` | `rewrite`, the text, and a one-line `reason`).
+3. Tell the user the file path. It renders three tabs: Original, Revised, and a Diff (removed in red, rewritten in green, hover a change for its reason).
+
+Never generate the report for a one-liner or a trivial edit. It is opt-in, so it stays out of the way.
+
+## Overrides
+
+These are sensible defaults, not laws. If the project's `CLAUDE.md` or the user states a style preference (keep em-dashes, use our house terms, a specific tone), that preference wins.
