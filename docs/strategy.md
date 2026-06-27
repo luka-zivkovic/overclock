@@ -9,29 +9,38 @@ so it ships to no user and needs no version bump.
 
 ## Operating principles
 
-1. **Baseline-gap before building.** Ground every candidate against what already
-   exists — built-in commands, official plugins, cloud features — *before* writing a
-   line. A skill earns existence only if existing tools do the job measurably worse.
-   In this project the test has killed or narrowed every "workflow" idea we've had
-   (see groundings below); it has only ever *strengthened* the memory-backed ones.
+> **The bar is usefulness, full stop (clarified 2026-06-22, sharpened 2026-06-25).** Overclock is a
+> personal toolkit, not a product line — skills exist to be useful to the people who use them, not to
+> be defensible against a marketplace. The one test a skill must pass: does it reliably save effort or
+> improve an outcome on something you actually do? **Reliable triggering of a wanted behavior counts
+> as value even if the base model could do it when prompted** — automating a preference you'd
+> otherwise re-type every time IS the gap, not a reason to skip it. The "memory + right-sizing moat"
+> and every "defensible / marketplace / don't-reimplement" phrase in this repo's history are
+> **DESCRIPTIVE, never gates.** Do not KILL a useful skill for "stateless", "no moat", "a published
+> skill already does it", or "the base model could do it when asked."
 
-2. **The moat is memory + adaptivity, not workflow.** The official tools (plan mode,
-   feature-dev, Ultraplan, /code-review, /security-review) are **stateless** and
-   **one-size**. They will always out-resource any workflow ceremony we build. Our
-   defensible edge is precisely what they structurally won't do:
-   - **Persistence across sessions** — session-memory; a per-repo review precedent
-     corpus; decaying learnings.
-   - **Right-sizing** — scaling rigor to task size/blast-radius instead of running
-     one fixed ceremony.
-   Build those. Do not reimplement an official plugin's workflow.
+1. **Usefulness is the only gate.** A skill earns its place if you'd reliably reach for it on real
+   work. It does **not** need to be novel, stateful, adaptive, or unavailable elsewhere. The honest
+   question is "would I reach for this," not "is this defensible."
 
-3. **Right-size or it's bloat.** A skill that runs full ceremony on a trivial task is
-   worse than no skill. Every skill needs a triage/altitude gate and real
-   anti-triggers, or it fails its own baseline-gap test.
+2. **Two quality checks — on craft, not on existence.** Once a skill is worth having, it must be
+   *well-made*:
+   - **Right-sized.** Fires only when wanted, with real anti-triggers and should-NOT-trigger evals
+     from day one. A skill that misfires on trivial work is worse than no skill. (This is the one
+     genuinely load-bearing discipline — keep it strict.)
+   - **No collision.** It must not fight another skill *already in this kit* for the same trigger.
+     Non-redundancy is scoped to **your installed kit**, not the whole ecosystem.
 
-4. **Creation bar (all three required).** Observed recurring demand (the same unmet
-   need seen ≥2–3×, evidenced — not imagined), a proven baseline gap, and it ships
-   with should-NOT-trigger evals from day one. One observation never births a skill.
+3. **Grounding is research, not a gate.** Check what already exists — built-ins, official plugins,
+   published skills, the base model's own ability — to build the skill **better** and avoid pointless
+   reinvention. "It exists elsewhere" informs the design; it does not kill the skill. Wanting your own
+   version, tuned to you and under your control, is a legitimate reason to build anyway. The only
+   redundancy that kills is true duplication of something already *in this kit*.
+
+4. **Demand: a real reason is enough; pure speculation still waits.** A direct request, or a concrete
+   use you can name, is sufficient to build — you do not need ≥2–3 logged incidents for something you
+   know you want. The guard remains only against speculative "might be nice" skills that nobody asked
+   for and nothing points to.
 
 ## Skill candidate ledger
 
@@ -88,6 +97,8 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
 
 ## Standing conclusion
 
-The dev-workflow space (plan, build, review) is saturated by capable, well-resourced
-official tools. Overclock's wins come from the axes they ignore — **memory** and
-**right-sizing** — not from better ceremony. Weight new candidates accordingly.
+Overclock is a personal toolkit. A skill is worth building when it reliably helps with real work and
+is well-made (right-sized, with real anti-triggers, not colliding with another skill already in the
+kit). Memory and right-sizing are great *when the task needs them*, but they are not the point and
+never a requirement. Weigh new candidates on "would I reach for this, and is it well-made" — not on
+defensibility, novelty, or whether something similar exists elsewhere.
