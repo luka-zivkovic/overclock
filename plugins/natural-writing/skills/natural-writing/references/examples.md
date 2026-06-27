@@ -77,3 +77,11 @@ This is a fixed snapshot, not a runtime dependency.
 
 - ✗ The sun came out and the ice melted and the streets flooded and traffic stopped.
 - ✓ When the sun came out, the ice melted. Streets flooded and traffic halted.
+
+## Don't bold for decoration (rule 11)
+
+- ✗ **First,** set up the project. **Then,** install the dependencies. **Finally,** run the build.
+- ✓ First set up the project, then install the dependencies, then run the build.
+
+- ✓ (bold as a real header is fine) **Live feedback loop.** Poll the file and react as events arrive.
+

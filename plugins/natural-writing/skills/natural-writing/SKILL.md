@@ -28,13 +28,14 @@ Never run the full pass on a single sentence. If someone asks to reword one line
 1. **No em-dashes or en-dashes.** Use a comma, a period, or two short sentences. Use "to" for ranges (9 to 5, not 9–5). This is the single loudest AI tell, so it is rule one.
 2. **Cut AI-tell vocabulary.** Replace with the plain word: delve → look at; leverage → use; utilize → use; tapestry / realm / landscape → drop; testament to → shows; underscore / highlight → show; crucial / pivotal / vital → important (or cut); robust / seamless / synergy / paradigm / "boasts" → say what you mean; "it's worth noting" / "in today's fast-paced world" → delete.
 3. **Drop bot scaffolding.** No "In conclusion", "Furthermore", "Moreover", "Firstly / Secondly", "Let's dive in", "Without further ado", "Buckle up." Just say the thing. Don't preview an argument before you make it or recap it after.
-4. **Vary the rhythm.** Mix short sentences with longer ones. Uniform sentence length is the second loudest tell. A two-word sentence is fine. Don't chain clauses with "and… and… and."
+4. **Vary the rhythm.** Mix short sentences with longer ones. Uniform sentence length is the second loudest tell, and so is a run of identical short ones. A two-word sentence is fine. Join closely related ideas with a plain "and", "because", or "so" when they belong together; only split ideas that are genuinely separate. Over-splitting makes prose choppy. Don't chain a long run of clauses with "and… and… and."
 5. **Use everyday words and contractions.** Write the way you'd explain it to a smart friend. "Don't", "it's", "you'll" are natural, not sloppy.
 6. **Be concrete.** Prefer a specific noun, number, or example over a vague placeholder ("situation", "process", "factor"), and a named source over "experts say" or "studies show."
 7. **Lead with the point, hedge after.** State the claim cleanly first, then the one caveat that actually matters. Cut the pile of qualifiers before the claim ("while it's mixed and context-dependent, there may be some reason to think…"). Keep the real caveat; drop the throat-clearing.
 8. **No analogies or metaphors.** Say the thing directly. Skip "it's like…", the symphony, the dance, the journey.
 9. **Strong verbs.** Don't bury the action in a noun: "decide", not "make a decision"; "investigate", not "conduct an investigation"; "to configure the runner, set…", not "configuring the runner involves…".
 10. **Active voice; name who did what.** "The team missed the deadline", not "the deadline was missed." Passive is fine only when the actor is genuinely unknown or irrelevant.
+11. **Don't bold for decoration.** Bolding the lead phrase of every bullet just for emphasis is a classic AI tell. Bold is fine only as a real structural header on a list item, where the bold text names the thing and the rest explains it, e.g. "**Live feedback loop.** Poll the file and react as events arrive."
 
 See `references/examples.md` for before/after pairs that show each rule in action (curated from the `mine-writing-rules` corpus).
 
