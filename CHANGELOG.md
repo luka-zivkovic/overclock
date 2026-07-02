@@ -3,6 +3,27 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## discipline-gates
+
+### 0.1.0 — 2026-07-03
+- Initial unpublished release (not yet in marketplace.json; publish gated on
+  live-eval results). Two pre-action gates over real oracles, packaged per
+  `docs/brainstorm/packaging-discipline-gates.md`:
+  - **test-discipline** — one multi-mode skill: `repro` (commit a test that
+    fails for the stated reason before fixing a reported bug), `characterize`
+    (pin untested code's current behavior as committed green tests before
+    refactoring), `validate` (mutate the code under a freshly-green test,
+    demand red, restore unconditionally — kills vacuous tests).
+  - **git-archaeologist** — before deleting/weakening a guard, retry, sleep,
+    lock, clamp, or "redundant" check: blame → introducing commit → linked
+    PR/issue → Chesterton's-fence warning with quoted evidence; never invents
+    intent.
+  - Shared should-NOT-trigger surface single-sourced as byte-identical
+    per-skill references (CI-guarded via `tools/shared-files.txt`).
+- Build decision: the packaging doc's §6 incident-tally demand gate is
+  superseded by strategy.md principle 4 (direct request suffices) — built on
+  the maintainer's direct pick, 2026-07-03.
+
 ## learning-loop
 
 ### 1.0.0 — 2026-06-17

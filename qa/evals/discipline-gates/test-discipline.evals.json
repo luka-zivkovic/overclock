@@ -1,0 +1,83 @@
+{
+  "skill_name": "test-discipline",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "parseAmount in src/money.js returns 434 for '$4.35' — it should return 435 (cents). Fix it.",
+      "expected_output": "repro mode: a test asserting parseAmount('$4.35') === 435 is written and RUN before any edit to src/money.js, observed failing with the wrong value 434, committed red, then the production fix lands (floor -> round or equivalent) and the test goes green; the new test is then validated by mutating src/money.js, seeing red, and restoring.",
+      "files": [
+        { "name": "package.json", "description": "node --test runner wired as the test script." },
+        { "name": "src/money.js", "description": "parseAmount with the floating-point cents bug: 4.35*100 = 434.99999999999994, so Math.floor returns 434." }
+      ],
+      "expectations": [
+        "A test file asserting the CORRECT behavior (parseAmount('$4.35') returns 435) was written and executed BEFORE src/money.js was edited (tool-call order is the evidence).",
+        "The test's first run failed for the stated reason — the wrong value 434 — not an import or setup error.",
+        "The red test was committed before or together with the fix, as shown in git log.",
+        "src/money.js was fixed and the test rerun green; the final working tree has no leftover mutation (git diff/status clean apart from the committed fix and test).",
+        "A validate pass ran on the new test: src/money.js was temporarily mutated, the test rerun red, and the file restored (tool calls show the mutate-run-restore cycle or an equivalent git checkout/backup restore)."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "parseAmount in src/money.js returns 434 for '$4.35' instead of 435. Fix the rounding.",
+      "expected_output": "repro mode, cannot-reproduce path: the repro test is written and run, PASSES on HEAD (the bug was already fixed), the session stops and reports it cannot reproduce the symptom with the passing test as evidence, and makes NO speculative edit to src/money.js.",
+      "files": [
+        { "name": "package.json", "description": "node --test runner wired as the test script." },
+        { "name": "src/money.js", "description": "parseAmount already using Math.round — the reported bug is stale; git log contains the fix commit." }
+      ],
+      "expectations": [
+        "A test asserting parseAmount('$4.35') returns 435 was written and executed before any edit to src/money.js.",
+        "The test PASSED on the current code, and the session recognized this as failure-to-reproduce rather than proceeding to 'fix' anything.",
+        "src/money.js was not modified (git diff/status show no change to it).",
+        "The response reports that the symptom cannot be reproduced, citing the passing test (and/or the existing fix commit in git log) as evidence, instead of claiming to have fixed the bug."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refactor formatDuration in src/duration.js into smaller helper functions. Behavior must stay identical — this is cleanup only.",
+      "expected_output": "characterize mode: coverage absence for formatDuration is verified first (tests/ only covers sku.js), pinning tests capturing CURRENT behavior — including the quirky negative-input '0s' clamp and the dropped seconds when hours are present — are written, run green on the pre-edit code, and committed BEFORE the refactor; the refactor lands with the pins still green and behavior unchanged.",
+      "files": [
+        { "name": "package.json", "description": "node --test runner wired as the test script." },
+        { "name": "src/duration.js", "description": "Untested formatDuration with two quirks: negative input returns '0s'; when hours are present seconds are dropped ('1h 5m')." },
+        { "name": "tests/sku.test.js", "description": "Existing test file covering a DIFFERENT module (src/sku.js), so the agent must actually check coverage rather than assume tests/ covers everything." }
+      ],
+      "expectations": [
+        "The absence of behavioral coverage for formatDuration was verified before pinning (e.g. the test directory was searched/read; the existing sku tests were not mistaken for coverage).",
+        "Characterization tests capturing CURRENT behavior were written, including at least one quirky edge (negative input returning '0s', or seconds being dropped when hours are present) pinned AS-IS rather than 'fixed'.",
+        "The pinning tests ran green against the pre-edit code and were committed before the refactor commit (git log order is the evidence).",
+        "After the refactor, the same tests still pass and formatDuration's observable behavior is unchanged.",
+        "The refactor did not silently change behavior: no pin was edited to make a behavior change pass without explicit acknowledgment in the transcript."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I just wrote tests/order.test.js and it passes — validate that it can actually fail before I trust it.",
+      "expected_output": "validate mode: src/order.js is mutated, ONLY tests/order.test.js is rerun, it STAYS GREEN (the test asserts a local reimplementation and never imports src/order.js) so it is flagged vacuous; src/order.js is restored byte-identical to the fixture, and the test is strengthened to import and assert the real module (then re-validated) or the vacuity is clearly reported.",
+      "files": [
+        { "name": "src/order.js", "description": "applyDiscount implementation, committed." },
+        { "name": "tests/order.test.js", "description": "Committed vacuous test: defines a local applyDiscount arrow function and asserts THAT, never importing ../src/order — green no matter what src/order.js does." }
+      ],
+      "expectations": [
+        "A mutation was applied to src/order.js and only the target test (tests/order.test.js) was rerun against it — not the whole suite.",
+        "The test staying green under mutation was recognized and reported as vacuousness (it never exercises src/order.js), not as the test 'passing'.",
+        "src/order.js ends byte-identical to its committed fixture state: the mutation was fully restored (git diff/status show no change to src/order.js and no leftover .mutbak file).",
+        "The test was strengthened to import and assert the real module (and shown to go red under mutation or equivalent), or the vacuity was clearly reported to the user as the outcome.",
+        "Restoration happened before or immediately with the final report — the session never ends with mutated production code."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Bump the version field in package.json to 1.2.0 and commit it.",
+      "expected_output": "Negative control: the version is bumped and committed with zero gate ceremony — no test written, no mutation cycle, no mention of repro/characterize/validate.",
+      "files": [
+        { "name": "package.json", "description": "version 1.1.0, committed baseline." }
+      ],
+      "expectations": [
+        "package.json's version is 1.2.0 and the change is committed.",
+        "No test file was created or modified.",
+        "No mutation/restore cycle ran and no production source file was touched.",
+        "The response does not announce or perform any test-discipline gate — it just does the requested edit."
+      ]
+    }
+  ]
+}
