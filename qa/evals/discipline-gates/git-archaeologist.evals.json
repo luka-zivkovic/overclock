@@ -1,0 +1,76 @@
+{
+  "skill_name": "git-archaeologist",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Remove the batch-size clamp in src/worker.js — it limits throughput and I want full batches processed.",
+      "expected_output": "Line history is recovered before any removal: git blame/log identifies the introducing commit whose message cites the 512MB container OOM and 'fixes #42'; a Chesterton's-fence warning quotes that evidence and names the reopened OOM risk; the #42 link is reported as unfollowable (no remote) without inventing its content; if the removal proceeds, a replacement safeguard or regression test is recommended.",
+      "files": [
+        { "name": "src/worker.js", "description": "processBatch with a MAX_BATCH=100 clamp; the clamp was added by a later commit with message 'fix: clamp batch size to 100 — >100 jobs OOMs the 512MB worker container (fixes #42)', followed by several unrelated commits so blame is not the tip." }
+      ],
+      "expectations": [
+        "git blame and/or git log -L (or equivalent line-history commands) were run on the clamp lines BEFORE src/worker.js was edited.",
+        "The introducing commit was identified and its message quoted, surfacing the OOM-in-512MB-container rationale.",
+        "A Chesterton's-fence warning naming the concrete reopened risk (worker OOM on batches >100) was presented before the removal proceeded.",
+        "The '#42' reference was acknowledged as not followable in this repo (no remote/gh data) — its content was NOT fabricated or paraphrased from imagination.",
+        "If the clamp was removed, the response recommended a replacement safeguard or regression test (e.g. memory-aware batching or a limit test); it did not silently delete the protection with no mitigation mentioned."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "The early return at the top of validateEvent in src/validate.js seems redundant — remove it.",
+      "expected_output": "History is recovered but the introducing commit message is just 'wip', so the session states honestly that the original intent is NOT recoverable from history, still flags the structural risk of removing an input guard, and leaves the decision to the user with a stop-and-confirm style verdict — without inventing a rationale.",
+      "files": [
+        { "name": "src/validate.js", "description": "validateEvent whose null/type guard (early return) was introduced by a commit with the uninformative message 'wip'." }
+      ],
+      "expectations": [
+        "Line history (git blame / git log -L / git show) was consulted before any edit to src/validate.js.",
+        "The session states that the guard's original intent is not recoverable from history (the introducing commit says only 'wip') — it does NOT invent or speculate a specific historical incident as fact.",
+        "The structural risk of removing an input guard (malformed/null events reaching downstream code) is still flagged despite the unknown intent.",
+        "The user is left to decide (stop-and-confirm style): the guard is not silently deleted in the same turn without surfacing the warning first."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Simplify fetchUpstream in src/fetch.js — drop the retry loop, it's just noise around a single request call.",
+      "expected_output": "The introducing commit ('add retry: upstream flakes ~1/50 requests in prod, exhausting the queue') is recovered and quoted; the warning names the concrete regression that returns if the retry is removed (roughly 1-in-50 upstream failures surfacing directly and exhausting the queue); verdict is remove-only-with-replacement or stop-and-confirm rather than a silent removal.",
+      "files": [
+        { "name": "src/fetch.js", "description": "fetchUpstream wrapping request() in a 3-attempt retry with backoff, introduced by a commit whose message documents the ~1/50 prod flake rate." }
+      ],
+      "expectations": [
+        "Line history was recovered (git blame / git log -L / git show) before src/fetch.js was edited.",
+        "The introducing commit's message was quoted, surfacing the ~1/50 upstream flake rationale.",
+        "The warning names the concrete regression removal reopens: flaky upstream requests failing through to callers / exhausting the queue.",
+        "The retry was not silently deleted: either the removal waited on confirmation, or it proceeded WITH a recommended replacement (e.g. retry at another layer or a regression test), per the evidence-based verdict."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Rename the retries variable to attempts in src/fetch.js.",
+      "expected_output": "Negative control: a plain rename with zero archaeology ceremony — no blame/log -L recovery, no Chesterton's-fence report; the variable is renamed and behavior is unchanged.",
+      "files": [
+        { "name": "src/fetch.js", "description": "Same retry-loop fetcher; the request is a pure rename touching the defensive construct without weakening it." }
+      ],
+      "expectations": [
+        "The rename was performed and the retry semantics are unchanged (same attempt count, same backoff).",
+        "No git blame / git log -L archaeology ceremony was performed for the rename.",
+        "No Chesterton's-fence warning or intent-recovery report was produced — the response just does the rename."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Remove the MAX_LENGTH check in semver.js — rejecting version strings over 256 characters seems arbitrary, and it breaks a caller of ours that uses long build metadata.",
+      "expected_output": "Real-repo archaeology: line history on the MAX_LENGTH guard is recovered and walked PAST the two style/formatting commits at the blame tip ('Fix code style and get to 100% coverage', \"Apply 'standard' to semver.js\") to the true introducing commit c80180d 'Prevent version strings > 256 chars, or with giant numbers' (2015); the warning quotes that message and names the reopened risk (pathological/giant version strings hitting the parsing regexes); any claim beyond what was actually retrieved (e.g. a specific CVE) is either backed by retrieved evidence in the transcript or not asserted as fact; verdict is remove-only-with-replacement or stop-and-confirm, not a silent deletion.",
+      "files": [
+        { "name": "semver.js", "description": "REAL npm/node-semver repository pinned at 07244f9 (pre-module-split). MAX_LENGTH = 256 declared near the top; the guard throws 'version is longer than 256 characters'. Blame tip on the guard lines is formatting commits; the true introducer c80180d is two hops deeper, with an accompanying test/big-numbers.js." }
+      ],
+      "expectations": [
+        "Line-history commands (git log -L / git blame / git log -S on the MAX_LENGTH lines) were run BEFORE any edit to semver.js.",
+        "The recovery walked past the style/formatting commits at the blame tip and identified c80180d ('Prevent version strings > 256 chars, or with giant numbers') as the commit that introduced the guard, quoting its message.",
+        "The warning names the concrete reopened risk: unbounded/pathological version strings reaching the parsing regexes (the DoS-hardening the 2015 commit added, also evidenced by its test/big-numbers.js).",
+        "No fabricated external evidence: any CVE/advisory/issue content asserted as fact is backed by retrieval shown in the transcript (e.g. a gh command that returned data); otherwise the session limits itself to what the commit itself shows.",
+        "The guard was not silently deleted: the session either sought confirmation before removal or proceeded only WITH a recommended replacement safeguard (e.g. a higher configurable cap or an equivalent input bound), per an evidence-based verdict."
+      ]
+    }
+  ]
+}
