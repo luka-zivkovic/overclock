@@ -467,4 +467,80 @@ git clone -q --no-hardlinks "$CACHE" "$GA/eval-4"
 ( cd "$GA/eval-4" && git checkout -qb pinned "$SEMVER_SHA" \
   && git remote set-url origin "$SEMVER_URL" )
 
+# ---------- natural-writing ----------
+NW="$ROOT/natural-writing"
+
+# eval-0: draft from scratch — near-empty blog project
+mkdir -p "$NW/eval-0/blog"
+printf '# team blog\nPosts live in blog/.\n' > "$NW/eval-0/README.md"
+( cd "$NW/eval-0" && git init -q -b main && git add -A && git commit -qm "blog scaffold" )
+
+# eval-1: revise an AI-flavored draft in place; one load-bearing caveat must survive
+mkdir -p "$NW/eval-1/draft"
+cat > "$NW/eval-1/draft/launch-post.md" <<'EOF'
+# Announcing QueryPilot — Your Data's New Best Friend
+
+In today's fast-paced world, teams need to leverage their data more than ever. That's why we're
+thrilled to announce QueryPilot — a robust, seamless analytics layer that lets you delve into
+your data warehouse without writing a single line of SQL.
+
+**Effortless setup.** Getting started is like conducting an orchestra — every integration plays
+its part in perfect harmony. Simply connect your warehouse and QueryPilot handles the rest.
+
+**Powerful insights.** Furthermore, QueryPilot doesn't just surface numbers — it weaves a rich
+tapestry of context around every metric. It's worth noting that while results may vary and every
+data stack is different and your mileage may depend on configuration, QueryPilot only supports
+Postgres 14 or newer — older versions silently return incomplete results.
+
+**Built to scale.** QueryPilot is a testament to what modern infrastructure can achieve. It
+utilizes cutting-edge caching to deliver crucial performance gains.
+
+In conclusion, QueryPilot represents a paradigm shift in how teams interact with data. Buckle up —
+the journey is just beginning. Let's dive in together.
+EOF
+( cd "$NW/eval-1" && git init -q -b main && git add -A && git commit -qm "launch post draft" )
+
+# eval-2: verbatim preservation — customer quote (with AI tells INSIDE it) must stay byte-identical
+mkdir -p "$NW/eval-2/site"
+cat > "$NW/eval-2/site/customers.md" <<'EOF'
+# What our customers say
+
+Our platform helps teams leverage synergies and delve into robust, seamless workflows — empowering
+stakeholders to unlock crucial value at every touchpoint. Furthermore, it's worth noting that our
+solution represents a paradigm shift in the landscape of modern collaboration.
+
+> "We rolled it out in a week — the team was able to leverage it immediately, and honestly it just
+> works. Couldn't be happier." — Dana R., VP Engineering at Coastline Freight
+
+In conclusion, teams that embrace our platform embark on a transformative journey toward a rich
+tapestry of productivity.
+EOF
+( cd "$NW/eval-2" && git init -q -b main && git add -A && git commit -qm "customers page" )
+
+# eval-3: negative control — commit message request on a real staged change
+mkdir -p "$NW/eval-3/src"
+cat > "$NW/eval-3/src/retry.js" <<'EOF'
+async function withRetry(fn, attempts = 3) {
+  for (;;) {
+    try { return await fn(); }
+    catch (err) { if (--attempts <= 0) throw err; }
+  }
+}
+module.exports = { withRetry };
+EOF
+( cd "$NW/eval-3" && git init -q -b main && git add -A && git commit -qm "retry helper" \
+  && sed -i.bak 's/attempts = 3/attempts = 5/' src/retry.js && rm -f src/retry.js.bak )
+
+# eval-4: negative control — single-line reword; rest of the file must stay untouched
+mkdir -p "$NW/eval-4/site"
+cat > "$NW/eval-4/site/index.md" <<'EOF'
+# Ship your changelog automatically, every single week, without thinking about it
+
+Changelog entries write themselves from your merged PRs — you review, click publish, and your
+users stay in the loop. Integrates with GitHub and GitLab.
+
+Pricing starts at $12/month for teams of any size.
+EOF
+( cd "$NW/eval-4" && git init -q -b main && git add -A && git commit -qm "landing page" )
+
 echo "fixtures ready under $ROOT"

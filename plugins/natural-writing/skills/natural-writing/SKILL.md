@@ -1,6 +1,6 @@
 ---
 name: natural-writing
-description: Write or edit prose (blog posts, articles, essays, newsletters, narrative docs) so it reads as naturally human-written, not AI-flavored. Use when drafting or revising human-facing prose for publication and you want to avoid the tells that make text read as AI-generated: em-dashes, words like "delve"/"tapestry"/"leverage", uniform sentence rhythm, hedging, analogies, and bot scaffolding ("In conclusion", "Let's dive in"). Do NOT use for code, code comments, commit messages, API/reference docs that need precise terms, one-line UI strings, or quotes to preserve verbatim.
+description: "Write or edit prose (blog posts, articles, essays, newsletters, narrative docs) so it reads as naturally human-written, not AI-flavored. Use when drafting or revising human-facing prose for publication and you want to avoid the tells that make text read as AI-generated: em-dashes, words like 'delve'/'tapestry'/'leverage', uniform sentence rhythm, hedging, analogies, and bot scaffolding ('In conclusion', 'Let's dive in'). Do NOT use for code, code comments, commit messages, API/reference docs that need precise terms, one-line UI strings, or quotes to preserve verbatim."
 ---
 
 # Natural Writing
