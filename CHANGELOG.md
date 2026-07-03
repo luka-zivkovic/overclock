@@ -3,6 +3,18 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## natural-writing
+
+### 1.0.0 — 2026-07-03
+- First published release (added to marketplace.json). A stateless prose
+  writing/editing skill that strips AI tells — em-dashes, tell vocabulary
+  ("delve"/"leverage"/"tapestry"), bot scaffolding, uniform rhythm, decorative
+  bold — while preserving quotes verbatim, keeping load-bearing caveats, and
+  staying silent on code, commit messages, and one-line edits. Ships with
+  mined before/after examples and an opt-in HTML revision report.
+- Live eval suite added (5 cases, including the caveat-must-survive and
+  byte-identical-quote traps and two negative controls): 5/5 green.
+
 ## discipline-gates
 
 ### 0.1.0 — 2026-07-03

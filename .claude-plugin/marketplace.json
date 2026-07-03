@@ -36,6 +36,22 @@
         "continuity",
         "context"
       ]
+    },
+    {
+      "name": "natural-writing",
+      "source": "./plugins/natural-writing",
+      "description": "Make AI drafts read like a human wrote them. A prose writing/editing skill for blog posts, articles, and essays that strips the tells which mark text as AI-generated (em-dashes, words like 'delve'/'leverage', uniform sentence rhythm, bot scaffolding) so you can use AI without rewriting everything by hand. Preserves quotes verbatim and stays silent on code, commit messages, and one-line edits.",
+      "version": "1.0.0",
+      "category": "writing",
+      "keywords": [
+        "writing",
+        "prose",
+        "blog",
+        "editing",
+        "style",
+        "natural-language",
+        "anti-ai-tell"
+      ]
     }
   ]
 }
