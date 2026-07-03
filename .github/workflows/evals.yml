@@ -8,7 +8,7 @@ on:
       skill:
         description: Which skill to evaluate
         type: choice
-        options: [both, session-handoff, lessons-learned]
+        options: [both, session-handoff, lessons-learned, test-discipline, git-archaeologist]
         default: both
 
 permissions:

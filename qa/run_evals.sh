@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Live regression evals for the session-memory plugin.
+# Live regression evals for Overclock skills.
 #
 # For each eval case: fresh `claude -p` session in its fixture (skill installed
 # project-level), transcript captured, then a SECOND session with a different
 # model judges the transcript + post-run file state against the case's
 # expectations. Exits non-zero if any case fails.
 #
-# Usage: qa/run_evals.sh [skill ...]        (default: both skills)
+# A skill's cases live at qa/evals/<plugin>/<skill>.evals.json; the plugin dir
+# is derived from that path, so new plugins need no harness changes.
+#
+# Usage: qa/run_evals.sh [skill ...]        (default: the session-memory pair)
 # Requires: claude CLI on PATH, authenticated (ANTHROPIC_API_KEY in CI).
 # Cost: one runner session + one judge session per case (~10 cases total).
 set -uo pipefail
@@ -29,7 +32,9 @@ FAILED=0
 TOTAL=0
 
 for SKILL in "${SKILLS[@]}"; do
-  EVALS="$QA/evals/session-memory/$SKILL.evals.json"
+  EVALS=$(ls "$QA"/evals/*/"$SKILL.evals.json" 2>/dev/null | head -n 1)
+  [ -n "$EVALS" ] || { echo "no eval suite found for skill '$SKILL' under qa/evals/*/" >&2; exit 1; }
+  PLUGIN=$(basename "$(dirname "$EVALS")")
   N=$(python3 -c "import json;print(len(json.load(open('$EVALS'))['evals']))")
   for ((i=0; i<N; i++)); do
     # EVAL_ONLY=<id> re-runs a single case (debugging / post-fix verification)
@@ -43,13 +48,13 @@ for SKILL in "${SKILLS[@]}"; do
     # Install the skill project-level in the fixture
     mkdir -p "$WORK/.claude/skills"
     rm -rf "$WORK/.claude/skills/$SKILL"
-    cp -R "$REPO/plugins/session-memory/skills/$SKILL" "$WORK/.claude/skills/$SKILL"
+    cp -R "$REPO/plugins/$PLUGIN/skills/$SKILL" "$WORK/.claude/skills/$SKILL"
 
     echo "=== $SKILL eval-$i: run"
     # stream-json (requires --verbose) exposes tool calls, so the judge can grade
     # process expectations ("the contract was read") on evidence, not inference.
     ( cd "$WORK" && claude -p "$PROMPT" --output-format stream-json --verbose --no-session-persistence \
-        --allowedTools "Bash(git *),Read,Glob,Grep,Skill,Bash(ls*),Bash(cat*),Bash(mkdir*),Bash(mv*),Write,Edit" \
+        --allowedTools "Bash(git *),Read,Glob,Grep,Skill,Bash(ls*),Bash(cat*),Bash(mkdir*),Bash(mv*),Bash(cp*),Bash(node*),Bash(npm test*),Bash(gh *),Write,Edit" \
       ) > "$OUT/stdout.jsonl" 2> "$OUT/stderr.log"
     python3 - "$OUT" <<'PY'
 import json, sys
@@ -75,11 +80,18 @@ open(f"{out}/transcript.md", "w").write(result)
 open(f"{out}/toolcalls.txt", "w").write("\n".join(tools) + "\n")
 PY
 
-    # Snapshot post-run memory state + git for the judge
+    # Snapshot post-run memory state + git for the judge. Skills that write no
+    # .ai/memory (e.g. discipline-gates) are graded on git evidence instead:
+    # committed tests, restored files, and untracked leftovers.
     rm -rf "$OUT/state"; mkdir -p "$OUT/state"
     [ -d "$WORK/.ai/memory" ] && cp -R "$WORK/.ai/memory" "$OUT/state/memory"
     ( cd "$WORK" && git status --porcelain > "$OUT/state/git_status.txt" 2>/dev/null
-      git log --oneline -n 5 > "$OUT/state/git_log.txt" 2>/dev/null ) || true
+      git log --oneline -n 8 > "$OUT/state/git_log.txt" 2>/dev/null
+      git diff HEAD > "$OUT/state/git_diff.txt" 2>/dev/null
+      git log -p -n 8 > "$OUT/state/git_log_full.txt" 2>/dev/null
+      git ls-files --others --exclude-standard | grep -v '^\.claude/' | while read -r f; do
+        printf '\n=== untracked: %s ===\n' "$f"; cat "$f" 2>/dev/null
+      done > "$OUT/state/untracked.txt" ) || true
 
     # Judge with a different model, fresh context
     python3 - "$EVALS" "$i" "$OUT" > "$OUT/judge-prompt.txt" <<'PY'
@@ -92,7 +104,7 @@ if mem.exists():
     for f in sorted(mem.rglob("*")):
         if f.is_file():
             state += f"\n--- {f.relative_to(out/'state')} ---\n{f.read_text(errors='replace')}\n"
-for name in ("git_status.txt", "git_log.txt"):
+for name in ("git_status.txt", "git_log.txt", "git_diff.txt", "git_log_full.txt", "untracked.txt"):
     p = out / "state" / name
     if p.exists() and p.read_text().strip():
         state += f"\n--- {name} ---\n{p.read_text()}\n"

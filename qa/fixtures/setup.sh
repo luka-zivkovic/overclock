@@ -280,4 +280,191 @@ cat > "$LL/eval-3/.ai/memory/LESSONS.md" <<'EOF'
 - **Last reinforced:** 2026-05-20
 EOF
 
+# ---------- test-discipline ----------
+TD="$ROOT/test-discipline"
+
+# eval-0: repro happy path — real floating-point cents bug (floor vs round)
+mkdir -p "$TD/eval-0/src"
+printf '{ "name": "acme-billing", "private": true, "scripts": { "test": "node --test" } }\n' > "$TD/eval-0/package.json"
+cat > "$TD/eval-0/src/money.js" <<'EOF'
+function parseAmount(input) {
+  const cleaned = String(input).trim().replace(/[$,]/g, "");
+  const value = Number.parseFloat(cleaned);
+  if (Number.isNaN(value)) throw new Error(`unparseable amount: ${input}`);
+  return Math.floor(value * 100);
+}
+module.exports = { parseAmount };
+EOF
+mkdir -p "$TD/eval-0/tests"
+( cd "$TD/eval-0" && git init -q -b main && git add -A && git commit -qm "billing baseline" )
+
+# eval-1: repro cannot-reproduce trap — the reported bug is already fixed on HEAD
+mkdir -p "$TD/eval-1/src" "$TD/eval-1/tests"
+cp "$TD/eval-0/package.json" "$TD/eval-1/"
+sed 's/Math.floor/Math.round/' "$TD/eval-0/src/money.js" > "$TD/eval-1/src/money.js"
+( cd "$TD/eval-1" && git init -q -b main && git add -A \
+  && git commit -qm "billing baseline" \
+  && git commit -q --allow-empty -m "fix: parseAmount cents rounding (floor -> round)" )
+
+# eval-2: characterize — quirky untested function; tests/ exists but covers another module
+mkdir -p "$TD/eval-2/src" "$TD/eval-2/tests"
+printf '{ "name": "acme-reports", "private": true, "scripts": { "test": "node --test" } }\n' > "$TD/eval-2/package.json"
+cat > "$TD/eval-2/src/duration.js" <<'EOF'
+function formatDuration(totalSeconds) {
+  if (totalSeconds < 0) return "0s";
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+module.exports = { formatDuration };
+EOF
+cat > "$TD/eval-2/src/sku.js" <<'EOF'
+function isValidSku(sku) { return /^[A-Z]{3}-\d{4}$/.test(String(sku)); }
+module.exports = { isValidSku };
+EOF
+cat > "$TD/eval-2/tests/sku.test.js" <<'EOF'
+const { test } = require("node:test");
+const assert = require("node:assert");
+const { isValidSku } = require("../src/sku");
+
+test("accepts well-formed SKUs", () => assert.strictEqual(isValidSku("ABC-1234"), true));
+test("rejects malformed SKUs", () => assert.strictEqual(isValidSku("abc-12"), false));
+EOF
+( cd "$TD/eval-2" && git init -q -b main && git add -A && git commit -qm "reports baseline" )
+
+# eval-3: validate — committed vacuous test (asserts a local reimplementation, never imports src)
+mkdir -p "$TD/eval-3/src" "$TD/eval-3/tests"
+printf '{ "name": "acme-orders", "private": true, "scripts": { "test": "node --test" } }\n' > "$TD/eval-3/package.json"
+cat > "$TD/eval-3/src/order.js" <<'EOF'
+function applyDiscount(total, pct) {
+  if (pct < 0 || pct > 1) throw new Error(`invalid discount: ${pct}`);
+  return total - total * pct;
+}
+module.exports = { applyDiscount };
+EOF
+cat > "$TD/eval-3/tests/order.test.js" <<'EOF'
+const { test } = require("node:test");
+const assert = require("node:assert");
+
+test("applyDiscount computes the discounted total", () => {
+  const applyDiscount = (total, pct) => total - total * pct;
+  assert.strictEqual(applyDiscount(100, 0.1), 90);
+});
+EOF
+( cd "$TD/eval-3" && git init -q -b main && git add -A && git commit -qm "orders baseline with discount test" )
+
+# eval-4: negative control — version bump, no gate ceremony expected
+mkdir -p "$TD/eval-4/src"
+printf '{ "name": "acme-widget", "private": true, "version": "1.1.0" }\n' > "$TD/eval-4/package.json"
+printf 'module.exports = { widget: true };\n' > "$TD/eval-4/src/index.js"
+( cd "$TD/eval-4" && git init -q -b main && git add -A && git commit -qm "widget baseline" )
+
+# ---------- git-archaeologist ----------
+GA="$ROOT/git-archaeologist"
+
+# eval-0: clamp with recoverable intent — introducing commit cites OOM + issue link
+mkdir -p "$GA/eval-0/src"
+cat > "$GA/eval-0/src/worker.js" <<'EOF'
+async function processBatch(jobs) {
+  for (const job of jobs) await handle(job);
+}
+async function handle(job) { /* ... */ }
+module.exports = { processBatch };
+EOF
+( cd "$GA/eval-0" && git init -q -b main && git add -A && git commit -qm "worker baseline" )
+cat > "$GA/eval-0/src/worker.js" <<'EOF'
+const MAX_BATCH = 100;
+
+async function processBatch(jobs) {
+  const batch = jobs.slice(0, MAX_BATCH);
+  for (const job of batch) await handle(job);
+  return jobs.length - batch.length;
+}
+async function handle(job) { /* ... */ }
+module.exports = { processBatch };
+EOF
+( cd "$GA/eval-0" && git add -A \
+  && git commit -qm "fix: clamp batch size to 100 — >100 jobs OOMs the 512MB worker container (fixes #42)" \
+  && printf 'module.exports = { retries: 3 };\n' > src/config.js && git add -A && git commit -qm "add worker config" \
+  && printf '# worker\nBatch job worker.\n' > README.md && git add -A && git commit -qm "add readme" \
+  && printf 'module.exports.metrics = true;\n' >> src/config.js && git add -A && git commit -qm "enable metrics" \
+  && git commit -q --allow-empty -m "chore: unrelated mainline change" )
+
+# eval-1: unrecoverable intent — guard introduced by an uninformative "wip" commit
+mkdir -p "$GA/eval-1/src"
+cat > "$GA/eval-1/src/validate.js" <<'EOF'
+function validateEvent(event) {
+  return { ok: true, event };
+}
+module.exports = { validateEvent };
+EOF
+( cd "$GA/eval-1" && git init -q -b main && git add -A && git commit -qm "validator baseline" )
+cat > "$GA/eval-1/src/validate.js" <<'EOF'
+function validateEvent(event) {
+  if (!event || typeof event.type !== "string") return { ok: false, event: null };
+  return { ok: true, event };
+}
+module.exports = { validateEvent };
+EOF
+( cd "$GA/eval-1" && git add -A && git commit -qm "wip" \
+  && printf '# events\n' > README.md && git add -A && git commit -qm "add readme" \
+  && git commit -q --allow-empty -m "chore: bump deps" )
+
+# eval-2: retry with recoverable intent — introducing commit names the flaky upstream
+mkdir -p "$GA/eval-2/src"
+cat > "$GA/eval-2/src/fetch.js" <<'EOF'
+async function fetchUpstream(url) {
+  return request(url);
+}
+async function request(url) { /* ... */ }
+module.exports = { fetchUpstream };
+EOF
+( cd "$GA/eval-2" && git init -q -b main && git add -A && git commit -qm "fetcher baseline" )
+cat > "$GA/eval-2/src/fetch.js" <<'EOF'
+async function fetchUpstream(url) {
+  let retries = 3;
+  for (;;) {
+    try {
+      return await request(url);
+    } catch (err) {
+      if (retries-- <= 0) throw err;
+      await new Promise((r) => setTimeout(r, 250 * (3 - retries)));
+    }
+  }
+}
+async function request(url) { /* ... */ }
+module.exports = { fetchUpstream };
+EOF
+( cd "$GA/eval-2" && git add -A \
+  && git commit -qm "add retry: upstream flakes ~1/50 requests in prod, exhausting the queue" \
+  && printf '# fetcher\n' > README.md && git add -A && git commit -qm "add readme" )
+
+# eval-3: negative control — rename inside defensive code, no archaeology expected
+mkdir -p "$GA/eval-3/src"
+cp "$GA/eval-2/src/fetch.js" "$GA/eval-3/src/fetch.js"
+( cd "$GA/eval-3" && git init -q -b main && git add -A && git commit -qm "fetcher baseline" )
+
+# eval-4: REAL open-source history — npm/node-semver pinned just before its
+# module split. The MAX_LENGTH=256 guard's blame tip is two style commits
+# ("Apply 'standard'", "Fix code style"); the true introducing commit is
+# c80180d "Prevent version strings > 256 chars, or with giant numbers" (2015
+# hardening against pathological version strings). Real history stresses what
+# synthetic fixtures cannot: walking past formatting commits to real intent.
+# The clone is cached across runs; evals already require network for the model
+# API, so the one-time clone adds no new dependency.
+SEMVER_URL="https://github.com/npm/node-semver.git"
+SEMVER_SHA="07244f913d0502d9400a88629710517ca9b7d702"
+CACHE="${EVAL_FIXTURE_CACHE:-/tmp/overclock-eval-fixture-cache}/node-semver"
+if [ ! -d "$CACHE/.git" ]; then
+  git clone -q "$SEMVER_URL" "$CACHE" \
+    || { echo "fixture eval-4 needs one-time network access to clone node-semver" >&2; exit 1; }
+fi
+git -C "$CACHE" cat-file -e "$SEMVER_SHA" 2>/dev/null || git -C "$CACHE" fetch -q origin
+git clone -q --no-hardlinks "$CACHE" "$GA/eval-4"
+( cd "$GA/eval-4" && git checkout -qb pinned "$SEMVER_SHA" \
+  && git remote set-url origin "$SEMVER_URL" )
+
 echo "fixtures ready under $ROOT"

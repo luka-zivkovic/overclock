@@ -87,8 +87,13 @@ def main() -> int:
             failures += 1
         entry = entries.get(name)
         if entry is None:
-            print(f"ERROR: {name}: no marketplace.json entry", file=sys.stderr)
-            failures += 1
+            if base_raw is None:
+                # Plugin is new since base and not yet published: an absent
+                # marketplace entry ships nothing, so there is no silent-ship risk.
+                print(f"WARN: {name}: new plugin not yet in marketplace.json (unpublished)")
+            else:
+                print(f"ERROR: {name}: no marketplace.json entry", file=sys.stderr)
+                failures += 1
         elif entry.get("version") != new_version:
             print(f"ERROR: {name}: marketplace.json entry version {entry.get('version')!r} "
                   f"!= plugin.json version {new_version!r}", file=sys.stderr)

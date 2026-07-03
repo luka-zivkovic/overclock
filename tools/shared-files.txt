@@ -3,3 +3,5 @@
 plugins/session-memory/skills/session-handoff/references/memory-contract.md,plugins/session-memory/skills/lessons-learned/references/memory-contract.md
 plugins/session-memory/skills/session-handoff/references/session-start-hook.md,plugins/session-memory/skills/lessons-learned/references/session-start-hook.md
 plugins/session-memory/skills/lessons-learned/templates/lessons.md,plugins/learning-loop/skills/lessons-learned/templates/lessons.md
+plugins/discipline-gates/skills/test-discipline/references/anti-triggers.md,plugins/discipline-gates/skills/git-archaeologist/references/anti-triggers.md
+plugins/discipline-gates/skills/test-discipline/references/right-sizing.md,plugins/discipline-gates/skills/git-archaeologist/references/right-sizing.md
