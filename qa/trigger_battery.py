@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Measure skill routing precision against should/should-not-trigger prompts.
 
-Each prompt runs in a fresh temporary project with one skill installed. Skills that
-write a deterministic contract file can use a contract-file detector; other skills
+Each prompt runs in a fresh temporary project with the skill's real plugin loaded.
+This exercises shipped namespaces, sibling skills, agents, hooks, and manifests. Skills
+that write a deterministic contract file can use a contract-file detector; other skills
 are detected from the Claude Code `Skill` tool call in stream-json output. CLI errors
 abort the run instead of being misclassified as "did not trigger".
 
@@ -106,11 +107,10 @@ def run_prompt(skill_dir: Path, skill: str, description: str, prompt: str, model
                detector: dict) -> dict:
     with tempfile.TemporaryDirectory() as temp:
         cwd = Path(temp)
-        destination = cwd / ".claude" / "skills" / skill
-        shutil.copytree(skill_dir, destination)
-        plugin_agents = skill_dir.parent.parent / "agents"
-        if plugin_agents.is_dir():
-            shutil.copytree(plugin_agents, cwd / ".claude" / "agents")
+        source_plugin = skill_dir.parent.parent
+        destination_plugin = cwd / "plugin-under-test"
+        shutil.copytree(source_plugin, destination_plugin)
+        destination = destination_plugin / "skills" / skill
         skill_md = destination / "SKILL.md"
         skill_md.write_text(
             swap_description(skill_md.read_text(encoding="utf-8"), description),
@@ -121,7 +121,8 @@ def run_prompt(skill_dir: Path, skill: str, description: str, prompt: str, model
             [
                 "claude", "-p", prompt, "--model", model,
                 "--output-format", "stream-json", "--verbose",
-                "--no-session-persistence", "--allowedTools", ALLOWED,
+                "--no-session-persistence", "--plugin-dir", str(destination_plugin),
+                "--setting-sources", "project,local", "--allowedTools", ALLOWED,
             ],
             cwd=cwd,
             capture_output=True,

@@ -4,10 +4,10 @@
   "note": "Routing battery for independent-research. FIRED means the stream-json transcript contains a Skill tool call selecting independent-research. should_trigger wants FIRED=true; should_not wants FIRED=false.",
   "should_trigger": [
     "Inspect the referenced repository and verify whether Redis is actually the source of truth.",
-    "Research this claim from primary sources instead of trusting my summary.",
-    "Check the current official API documentation and tell me whether this endpoint still exists.",
+    "Research this claim from the checked-in project sources instead of trusting my summary.",
+    "Inspect the referenced local API specification and tell me whether this endpoint is declared.",
     "Verify what runtime version this project really uses by inspecting its config and CI.",
-    "Read the paper itself and check whether the headline matches its methods and results.",
+    "Read the saved paper in ./papers and check whether the headline matches its methods and results.",
     "Look through the accessible logs and determine whether the outage explanation is supported."
   ],
   "should_not": [

@@ -82,10 +82,14 @@ A green test that cannot go red is worse than no test. Right after any new test 
 
 1. **Pick one mutation** in the code under test — the regression the test claims to catch
    (invert the fixed condition, wrong constant, skip the guard). One file only.
-2. **Back up the exact pre-mutation file before mutating.** Copy it to a unique adjacent
-   `.mutbak` path and refuse to overwrite a pre-existing backup. This protects both committed
-   and uncommitted content and avoids restoring from a possibly different HEAD snapshot.
-3. **Mutate → run ONLY the target test → restore.** Restore executes unconditionally — on
+2. **Back up the exact pre-mutation file before mutating.** Run
+   `python3 "${CLAUDE_SKILL_DIR}/scripts/mutation_backup.py" backup FILE --root "${CLAUDE_PROJECT_DIR}"`.
+   The helper creates the adjacent `FILE.mutbak`, refuses a pre-existing backup, and refuses
+   symlinked, hard-linked, special, or out-of-project targets. Do not substitute `cp`, `mv`,
+   a HEAD snapshot, or a hand-rolled backup command.
+3. **Mutate → run ONLY the target test → restore.** Run
+   `python3 "${CLAUDE_SKILL_DIR}/scripts/mutation_backup.py" restore FILE --root "${CLAUDE_PROJECT_DIR}"`
+   unconditionally — on
    red, on green, on runner crash, on anything unexpected — before reporting results or
    asking the user anything. Then rerun the test once to prove the tree is back to green.
 4. **Verdict.** Went red → the test is real; say so in one line. Stayed green → the test is

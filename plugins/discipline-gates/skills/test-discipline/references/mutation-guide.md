@@ -19,16 +19,19 @@ module, not that it observes behavior. Prefer a mutation that keeps the code run
 ## Applying and restoring — the contract
 
 - Mutate exactly ONE file. Never stack mutations.
-- Back up the exact pre-mutation bytes BEFORE mutating: copy the file to a unique adjacent
-  `<file>.mutbak` path. Refuse to overwrite an existing backup; investigate it first. This
-  single mechanism protects both committed and uncommitted content and avoids restoring a
-  different snapshot from HEAD.
+- Back up the exact pre-mutation bytes BEFORE mutating with
+  `python3 "${CLAUDE_SKILL_DIR}/scripts/mutation_backup.py" backup FILE --root "${CLAUDE_PROJECT_DIR}"`.
+  It creates adjacent `<file>.mutbak` and refuses a pre-existing backup, a symlink, a
+  hard-linked file, a special file, a linked parent, or an out-of-project path. Do not replace
+  this helper with `cp`, `mv`, a HEAD snapshot, or a hand-rolled command.
 - Run ONLY the target test (single file or single test filter), never the whole suite.
-- **Restore FIRST, unconditionally** — before reading results closely, before reporting,
-  before asking the user anything, even if the runner crashed or something looks wrong.
+- **Restore FIRST, unconditionally** by running
+  `python3 "${CLAUDE_SKILL_DIR}/scripts/mutation_backup.py" restore FILE --root "${CLAUDE_PROJECT_DIR}"`
+  — before reading results closely, before reporting, before asking the user anything, even if
+  the runner crashed or something looks wrong.
 - After restoring, rerun the test once to prove the tree is back to green.
-- If a session is interrupted mid-mutation, recovery is one command
-  (`mv <file>.mutbak <file>`); a leftover `.mutbak` file means restoration did not complete.
+- If a session is interrupted mid-mutation, rerun the helper's `restore` action; a leftover
+  `.mutbak` file means restoration did not complete.
 
 ## Verdicts
 

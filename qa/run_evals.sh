@@ -29,13 +29,19 @@ ALLOWED_TOOLS="Bash(git *),Read,Glob,Grep,Skill,Agent,Bash(ls*),Bash(cat*),Bash(
 command -v claude >/dev/null || { echo "claude CLI not found" >&2; exit 1; }
 command -v python3 >/dev/null || { echo "python3 not found" >&2; exit 1; }
 
+if [ -n "${EVAL_FIXTURE_DIR:-}" ]; then
+  FIXTURE_ROOT="$EVAL_FIXTURE_DIR"
+else
+  FIXTURE_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/overclock-eval-fixtures.XXXXXX")
+  trap 'rm -rf "$FIXTURE_ROOT"' EXIT
+fi
 mkdir -p "$QA/_work"
 RESULTS="$QA/_work/results"
 mkdir -p "$RESULTS"
 FAILED=0
+INFRA_FAILED=0
 TOTAL=0
-RUN_LABELS=()
-bash fixtures/setup.sh
+RUN_OUTS=()
 
 for TARGET in "${TARGETS[@]}"; do
   if [[ "$TARGET" == */* ]]; then
@@ -54,13 +60,26 @@ for TARGET in "${TARGETS[@]}"; do
     EVALS=${MATCHES[0]}
     PLUGIN=$(basename "$(dirname "$EVALS")")
   fi
+  [[ "$PLUGIN" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+    echo "unsafe plugin name '$PLUGIN'" >&2
+    exit 1
+  }
+  [[ "$SKILL" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+    echo "unsafe skill name '$SKILL'" >&2
+    exit 1
+  }
 
   # A distribution may reuse an identical behavioral suite without duplicating it.
-  EVALS=$(python3 - "$EVALS" <<'PY'
+  EVALS=$(python3 - "$EVALS" "$QA/evals" <<'PY'
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1]).resolve()
+boundary = pathlib.Path(sys.argv[2]).resolve()
 seen = set()
 while True:
+    try:
+        path.relative_to(boundary)
+    except ValueError:
+        raise SystemExit(f"eval extends path escapes qa/evals: {path}")
     if path in seen:
         raise SystemExit(f"cyclic eval extends chain at {path}")
     seen.add(path)
@@ -74,17 +93,27 @@ PY
 )
   LABEL="$PLUGIN-$SKILL"
   [ "$BASELINE" -eq 1 ] && LABEL="$LABEL-baseline"
-  RUN_LABELS+=("$LABEL")
+  # Rebuild before every distribution. Two plugins may expose the same skill name;
+  # neither may inherit files mutated by the distribution that ran first.
+  EVAL_FIXTURE_DIR="$FIXTURE_ROOT" bash fixtures/setup.sh
   N=$(python3 -c "import json;print(len(json.load(open('$EVALS'))['evals']))")
   for ((i=0; i<N; i++)); do
     CASE_ID=$(python3 -c "import json;c=json.load(open('$EVALS'))['evals'][$i];print(c.get('id', $i))")
+    [[ "$CASE_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]] || {
+      echo "unsafe eval id '$CASE_ID' in $EVALS" >&2
+      exit 1
+    }
     # EVAL_ONLY=<id> re-runs a single declared case id.
     [ -n "${EVAL_ONLY:-}" ] && [ "$CASE_ID" != "$EVAL_ONLY" ] && continue
     TOTAL=$((TOTAL+1))
-    WORK="${EVAL_FIXTURE_DIR:-/tmp/overclock-eval-fixtures}/$SKILL/eval-$i"
-    OUT="$RESULTS/$LABEL-eval-$CASE_ID"
+    WORK="$FIXTURE_ROOT/$SKILL/eval-$i"
+    # Artifact paths are derived only from the numeric array index. The declared id is
+    # metadata/filtering input and can never influence a deletion target.
+    OUT="$RESULTS/$LABEL-eval-$i"
     rm -rf "$OUT"
     mkdir -p "$OUT"
+    printf '%s\n' "$CASE_ID" > "$OUT/case-id.txt"
+    RUN_OUTS+=("$OUT")
     : > "$OUT/stderr.log"
     PROMPT=$(python3 -c "import json;print(json.load(open('$EVALS'))['evals'][$i]['prompt'])")
 
@@ -104,7 +133,8 @@ PY
         fi
         echo "=== $SKILL eval-$i: setup turn $((turn+1))/$SETUP_N"
         ( cd "$WORK" && claude -p "$SETUP_PROMPT" --output-format json \
-            "${SETUP_SESSION_ARGS[@]}" --disable-slash-commands --allowedTools "$ALLOWED_TOOLS" \
+            "${SETUP_SESSION_ARGS[@]}" --disable-slash-commands \
+            --setting-sources project,local --allowedTools "$ALLOWED_TOOLS" \
           ) > "$OUT/setup-$turn.json" 2>> "$OUT/stderr.log"
         python3 - "$SETUP_PROMPT" "$OUT/setup-$turn.json" >> "$OUT/context-transcript.md" <<'PY'
 import json, pathlib, sys
@@ -116,32 +146,26 @@ PY
       FINAL_SESSION_ARGS=(--resume "$SESSION_ID")
     fi
 
-    # Install only for the evaluated turn. Baselines disable every skill, including
-    # user/global skills, so they measure the underlying model rather than another plugin.
-    rm -rf "$WORK/.claude/skills"
-    rm -rf "$WORK/.claude/agents"
-    mkdir -p "$WORK/.claude/skills"
-    FINAL_SKILL_ARGS=""
+    # Load the real plugin for the evaluated turn so namespaces, agents, hooks, and
+    # manifest discovery are exercised. Ignore user settings to prevent unrelated
+    # installed plugins from influencing the fixture.
     if [ "$BASELINE" -eq 0 ]; then
-      SKILLS_TO_INSTALL=$(python3 -c "import json;c=json.load(open('$EVALS'))['evals'][$i];print(' '.join(['$SKILL', *c.get('additional_skills', [])]))")
-      for INSTALL_SKILL in $SKILLS_TO_INSTALL; do
-        SOURCE_SKILL="$REPO/plugins/$PLUGIN/skills/$INSTALL_SKILL"
-        [ -f "$SOURCE_SKILL/SKILL.md" ] || { echo "missing integration skill: $SOURCE_SKILL" >&2; exit 1; }
-        cp -R "$SOURCE_SKILL" "$WORK/.claude/skills/$INSTALL_SKILL"
-      done
-      if [ -d "$REPO/plugins/$PLUGIN/agents" ]; then
-        mkdir -p "$WORK/.claude/agents"
-        cp -R "$REPO/plugins/$PLUGIN/agents/." "$WORK/.claude/agents/"
-      fi
+      SOURCE_PLUGIN="$REPO/plugins/$PLUGIN"
+      [ -f "$SOURCE_PLUGIN/.claude-plugin/plugin.json" ] || {
+        echo "missing plugin manifest: $SOURCE_PLUGIN" >&2
+        exit 1
+      }
+      FINAL_MODE_ARGS=(--plugin-dir "$SOURCE_PLUGIN")
     else
-      FINAL_SKILL_ARGS="--disable-slash-commands --disallowedTools Agent"
+      FINAL_MODE_ARGS=(--disable-slash-commands --disallowedTools Agent)
     fi
 
     echo "=== $SKILL eval-$CASE_ID: run ($VARIANT)"
     # stream-json (requires --verbose) exposes tool calls, so the judge can grade
     # process expectations ("the contract was read") on evidence, not inference.
     ( cd "$WORK" && claude -p "$PROMPT" --output-format stream-json --verbose \
-        "${FINAL_SESSION_ARGS[@]}" $FINAL_SKILL_ARGS --allowedTools "$ALLOWED_TOOLS" \
+        "${FINAL_SESSION_ARGS[@]}" "${FINAL_MODE_ARGS[@]}" \
+        --setting-sources project,local --allowedTools "$ALLOWED_TOOLS" \
       ) > "$OUT/stdout.jsonl" 2>> "$OUT/stderr.log"
     python3 - "$OUT" <<'PY'
 import json, sys
@@ -184,12 +208,12 @@ PY
     # committed tests, restored files, and untracked leftovers.
     rm -rf "$OUT/state"; mkdir -p "$OUT/state"
     [ -d "$WORK/.ai/memory" ] && cp -R "$WORK/.ai/memory" "$OUT/state/memory"
-    ( cd "$WORK" && git status --porcelain --untracked-files=all 2>/dev/null \
-        | grep -Ev '^\?\? \.claude/(skills|agents)/' > "$OUT/state/git_status.txt" || true
+    ( cd "$WORK" && git status --porcelain --untracked-files=all \
+        > "$OUT/state/git_status.txt" 2>/dev/null || true
       git log --oneline -n 8 > "$OUT/state/git_log.txt" 2>/dev/null
       git diff HEAD > "$OUT/state/git_diff.txt" 2>/dev/null
       git log -p -n 8 > "$OUT/state/git_log_full.txt" 2>/dev/null
-      git ls-files --others --exclude-standard | grep -Ev '^\.claude/(skills|agents)/' | while read -r f; do
+      git ls-files --others --exclude-standard | while read -r f; do
         printf '\n=== untracked: %s ===\n' "$f"; cat "$f" 2>/dev/null
       done > "$OUT/state/untracked.txt" ) || true
 
@@ -234,19 +258,10 @@ Respond with ONLY a JSON object: {{"verdicts": [{{"expectation": "...", "verdict
 PY
     claude -p "$(cat "$OUT/judge-prompt.txt")" --model "$JUDGE_MODEL" --output-format json \
       --no-session-persistence --allowedTools "" > "$OUT/judge-raw.json" 2>> "$OUT/stderr.log"
-    VERDICT=$(python3 - "$OUT" <<'PY'
-import json, re, sys
-out = sys.argv[1]
-raw = json.load(open(f"{out}/judge-raw.json")).get("result", "")
-m = re.search(r"\{.*\}", raw, re.S)
-try:
-    g = json.loads(m.group(0))
-    json.dump(g, open(f"{out}/grading.json", "w"), indent=1)
-    print("PASS" if g["passed"] == g["total"] else f"FAIL {g['passed']}/{g['total']}")
-except Exception as e:
-    print(f"JUDGE-ERROR {e}")
-PY
-)
+    JUDGE_STATUS=0
+    VERDICT=$(python3 "$QA/validate_judge_result.py" \
+      "$OUT/judge-raw.json" "$EVALS" "$i" "$OUT/grading.json") || JUDGE_STATUS=$?
+    [ "$JUDGE_STATUS" -eq 0 ] || INFRA_FAILED=1
     python3 - "$OUT" "$VARIANT" <<'PY'
 import glob, json, pathlib, sys
 out, variant = pathlib.Path(sys.argv[1]), sys.argv[2]
@@ -279,17 +294,22 @@ PY
   done
 done
 
+[ "$TOTAL" -gt 0 ] || {
+  echo "no eval cases matched${EVAL_ONLY:+ EVAL_ONLY=$EVAL_ONLY}" >&2
+  exit 1
+}
+
 echo
 echo "RESULT: $((TOTAL-FAILED))/$TOTAL cases passed ($VARIANT; artifacts in qa/_work/results/)"
-python3 - "$RESULTS" "$VARIANT" "${RUN_LABELS[@]}" <<'PY'
+python3 - "$VARIANT" "${RUN_OUTS[@]}" <<'PY'
 import json, pathlib, sys
-root, variant, labels = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
+variant, outputs = sys.argv[1], [pathlib.Path(item) for item in sys.argv[2:]]
 rows = []
-for label in labels:
-    for path in root.glob(f"{label}-eval-*/metrics.json"):
-        data = json.loads(path.read_text())
-        if data.get("variant") == variant:
-            rows.append(data)
+for output in outputs:
+    path = output / "metrics.json"
+    data = json.loads(path.read_text())
+    if data.get("variant") == variant:
+        rows.append(data)
 print(
     "METRICS: "
     f"${sum(r['total_cost_usd'] for r in rows):.4f}, "
@@ -299,4 +319,5 @@ print(
     f"{sum(r['output_tokens'] for r in rows)} output tokens"
 )
 PY
+[ "$INFRA_FAILED" -eq 0 ] || exit 1
 [ "$BASELINE" -eq 1 ] || [ "$FAILED" -eq 0 ]

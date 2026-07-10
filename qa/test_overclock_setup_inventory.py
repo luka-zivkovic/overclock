@@ -106,6 +106,71 @@ else:
             self.assertFalse(item["final_newline"])
             self.assertNotIn("secret-looking-line", json.dumps(result))
 
+    def test_symlinked_claude_directory_is_blocked_before_reading(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            root = base / "project"
+            outside = base / "outside"
+            root.mkdir()
+            outside.mkdir()
+            (outside / "CLAUDE.md").write_text(
+                "PRIVATE_INSTRUCTION=do-not-disclose\n", encoding="utf-8"
+            )
+            (outside / "settings.json").write_text(
+                json.dumps({"enabledPlugins": {"learning-loop@overclock": True}}),
+                encoding="utf-8",
+            )
+            (root / ".claude").symlink_to(outside, target_is_directory=True)
+            env = dict(os.environ)
+            env["CLAUDE_CONFIG_DIR"] = str(base / "user-config")
+            env["PATH"] = ""
+
+            result = inventory.collect_inventory(root, env)
+            serialized = json.dumps(result)
+
+            blocked = [
+                item
+                for item in result["instruction_files"]
+                if item["path"].endswith(".claude/CLAUDE.md")
+            ]
+            self.assertEqual(blocked[0]["kind"], "blocked")
+            self.assertIn("symlinked path component", blocked[0]["reason"])
+            self.assertNotIn("PRIVATE_INSTRUCTION", serialized)
+            self.assertNotIn(
+                "learning-loop@overclock",
+                json.dumps(result["settings_overclock_state"]),
+            )
+
+    def test_standalone_scan_uses_frontmatter_after_first_hundred_directories(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            skills = root / ".claude" / "skills"
+            skills.mkdir(parents=True)
+            for index in range(120):
+                folder = skills / f"filler-{index:03d}"
+                folder.mkdir()
+                (folder / "SKILL.md").write_text(
+                    f"---\nname: filler-{index:03d}\ndescription: filler\n---\n",
+                    encoding="utf-8",
+                )
+            renamed = skills / "z-renamed-lessons"
+            renamed.mkdir()
+            (renamed / "SKILL.md").write_text(
+                "---\nname: lessons-learned\ndescription: durable lessons\n---\n",
+                encoding="utf-8",
+            )
+            env = dict(os.environ)
+            env["CLAUDE_CONFIG_DIR"] = str(root / "user-config")
+            env["PATH"] = ""
+
+            result = inventory.collect_inventory(root, env)
+
+            self.assertEqual(
+                [item["folder"] for item in result["standalone_overlaps"]],
+                ["z-renamed-lessons"],
+            )
+            self.assertEqual(result["standalone_overlaps"][0]["name"], "lessons-learned")
+
 
 if __name__ == "__main__":
     unittest.main()

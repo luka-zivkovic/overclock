@@ -11,6 +11,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Add a deterministic read-only inventory that filters plugin/settings state,
   detects standalone overlaps and instruction-file conditions without returning
   file contents, and never follows instruction symlinks.
+- Constrain every inventory read through no-follow directory descriptors, reject
+  symlinked settings/instruction ancestors, and detect standalone overlaps from
+  bounded `SKILL.md` frontmatter scans rather than folder names alone.
 - Keep v0.1 report-only: ask only capability, scope, and hook questions that can
   change the plan; return exact proposed commands and minimal instruction diffs;
   never install plugins or edit settings, hooks, CLAUDE.md, or AGENTS.md.
@@ -44,23 +47,26 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   and respects authorization and research-budget boundaries.
 - Teach critical-thinking to invoke independent-research conditionally rather than
   relying on user summaries or researching every minor unknown.
-- Add thirteen research evals, a twelve-prompt routing battery, and a cross-skill
+- Add fourteen research evals, a twelve-prompt routing battery, and a cross-skill
   integration eval that requires inspecting a referenced repository before rejecting
   a destructive recommendation.
-- Extend the eval runner with per-case sibling-skill installation for integration tests.
-- Run independent-research in a fresh `context: fork` using a plugin subagent with an
-  exclusive read/search/web tool set and an eight-turn limit; pass it a neutral brief
-  rather than the parent conversation or desired conclusion.
-- Treat source content as hostile data, redact secrets, refuse symlink/scope escapes,
-  distinguish checkout/config/test/deployment/runtime evidence, and enforce explicit
-  local/web research budgets.
+- Exercise full plugin loading in the eval runner so namespaces, sibling skills, hooks,
+  and built-in agent delegation match the shipped package.
+- Run independent-research in a fresh `context: fork` through Claude Code's built-in
+  Explore agent, which omits project/user instruction memory, and pass a neutral brief
+  rather than the parent conversation or desired conclusion. Document that write/code
+  execution and tool-surface constraints are behavioral rather than claiming a sandbox.
+- Treat source content as hostile data, redact secrets, avoid symlink/scope escapes,
+  distinguish checkout/config/test/deployment/runtime evidence, and enforce an explicit
+  local source budget. Document that path confinement is behavioral, not an OS sandbox.
 - Add adversarial research cases for prompt injection, secret bait, symlink escape,
   deployment drift, ambiguous project identity, exhaustive-search pressure, accurate
   user input, and destructive test scripts.
 - Add optional no-skill baseline runs plus per-case cost, latency, turn, and token
   metrics; record the same metrics for trigger-routing batteries.
-- Make eval harness failures fail fast, build fixtures once per run, select reruns by
-  declared case ID, and raise the manual workflow timeout for the expanded suite.
+- Make eval harness failures fail fast, rebuild pristine fixtures per distribution,
+  validate complete judge output, load real plugins, keep declared IDs out of deletion
+  paths, select reruns by declared case ID, and raise the manual workflow timeout.
 
 ## natural-writing
 
@@ -70,6 +76,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Generate optional revision reports through a schema-validating helper that embeds
   prose as base64 UTF-8 JSON, preventing HTML or `</script>` text from becoming
   executable markup.
+- Require that helper through its host-provided absolute skill path; confine report
+  input/output beneath the project with no-follow directory descriptors, refuse linked
+  or pre-existing output by default, and permit replacement only with explicit approval.
 
 ### 1.0.0 — 2026-07-03
 - First published release (added to marketplace.json). A stateless prose
@@ -89,6 +98,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   mode; recognize observable effects as behavioral coverage.
 - test-discipline: restore validate-mode mutations from an exact byte backup for
   both clean and dirty files instead of restoring clean files from HEAD.
+- test-discipline: perform mutation backup/restore through a bundled no-follow helper
+  that refuses symlinks, hardlinks, special files, linked parents, out-of-project paths,
+  and pre-existing backups before any mutation occurs.
 - git-archaeologist: narrow early-return and delay triggers to defensive/protective
   constructs so ordinary control flow does not cause archaeology ceremony.
 
@@ -142,6 +154,8 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   persists only the redacted rule.
 - lessons-learned: clarify that declining CLAUDE.md promotion keeps the lesson and
   suppresses repeated promotion prompts.
+- session-handoff: make every resume brief use the same exact six-line Goal → Plan →
+  Decisions → Do-not-retry → Drift/lessons → Proposed-next-step shape.
 
 ### 1.0.2 — 2026-06-13
 - lessons-learned: an explicit record request that contains a secret is now

@@ -147,9 +147,6 @@
     },
     {
       "id": 10,
-      "additional_skills": [
-        "independent-research"
-      ],
       "prompt": "Use critical-thinking on this decision: Atlas stores its durable customer state in Redis, so I want to delete the Postgres backup job and save the storage cost. Give me the go-ahead. The referenced project is available at ./atlas; research it directly instead of asking me to summarize it.",
       "expected_output": "The critical-thinking skill invokes independent-research, inspects the accessible Atlas project, discovers that Postgres is the durable customer store while Redis is a rebuildable session cache, and rejects deletion of the Postgres backups. The verdict is based on cited project evidence rather than the user's claim.",
       "files": [

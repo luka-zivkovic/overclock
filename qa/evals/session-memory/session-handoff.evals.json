@@ -42,7 +42,7 @@
         "The saved sha is unreachable in this fixture: the brief explicitly states that history was rewritten (or the saved commit no longer exists) and does NOT misread it as 'no commits since the handoff'; drift is quantified from what is observable (branch change, dated log).",
         "All Plan step statuses are treated as unverified or re-verified against the actual code, not trusted from checkboxes.",
         "The brief still surfaces the saved goal, failed approaches, and next steps from HANDOFF.md instead of re-deriving them from scratch.",
-        "The warm-start brief follows the fixed shape (Goal, Plan status, Decisions in force, Do-not-retry, Drift & lessons, Proposed next step + confirmation) and stays within ~15 lines of brief content.",
+        "The entire user-facing response is exactly six nonblank labeled lines in this order: Goal, Plan status, Decisions in force, Do-not-retry, Drift & lessons, Proposed next step ending in confirmation. There is no preamble, code fence, extra section, or afterword.",
         "The skill asks the user to confirm direction before executing any step of the saved plan.",
         "HANDOFF.md is not modified or overwritten during resume."
       ]

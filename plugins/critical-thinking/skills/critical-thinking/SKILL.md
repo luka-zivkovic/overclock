@@ -32,11 +32,13 @@ Do not force this sequence into headings or a checklist. Keep simple answers sim
 
 Before giving a verdict, identify factual uncertainties whose resolution could change it.
 
-- When a material uncertainty is checkable through an accessible project, document, dataset, or
-  current primary source, invoke `independent-research` before concluding. It runs in a separate
-  read-only context that does not inherit this conversation.
+- When a material uncertainty is checkable through an accessible local project, document,
+  dataset, saved paper, exported log, or checked-in specification, invoke
+  `independent-research` before concluding. It runs through the built-in Explore agent in a fresh
+  read-only context that receives the neutral brief, not this conversation or project/user
+  instruction memory.
 - Pass a neutral research brief as the skill arguments containing only: the checkable question,
-  exact authorized roots/URLs, evidence that would support or refute it, and the default bounded
+  exact authorized local roots, evidence that would support or refute it, and the default bounded
   budget. Do not pass the user's preferred verdict, prior assistant conclusions, praise/blame,
   sunk cost, or unrelated conversation history.
 - For a referenced project, include its exact path when known. Do not ask the user to summarize
@@ -45,9 +47,13 @@ Before giving a verdict, identify factual uncertainties whose resolution could c
   preferences, goals, constraints, and private experiences as inputs that research cannot replace.
 - Skip research when the uncertainty is immaterial, the answer would not change, the claim is
   inherently subjective, or the needed access is outside scope. Do not perform research theater.
-- If `independent-research` is unavailable or its read-only tools cannot reach the needed source,
-  name the gap and make the conclusion conditional. Do not silently research in the framing-heavy
-  main context or request broader access as a shortcut.
+- For a current website, external API, or other live source, use the host's normal research tools
+  when available. First restate the question neutrally and say that this check is happening in the
+  main context, not the clean local-evidence context. Do not pretend `independent-research` can
+  browse when it cannot.
+- If `independent-research` is unavailable or its inspection tools cannot reach the needed local
+  source, name the gap and make the conclusion conditional. Do not request broader access as a
+  shortcut.
 - Incorporate the evidence packet into the reasoning, including contradictions and unknowns.
   Do not cherry-pick only findings that support the user's desired conclusion.
 

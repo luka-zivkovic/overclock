@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -18,6 +19,8 @@ from typing import Iterable, Mapping
 
 MAX_FILE_BYTES = 1_000_000
 MAX_DISCOVERED_FILES = 100
+MAX_SCANNED_SKILL_DIRS = 10_000
+MAX_SKILL_FRONTMATTER_BYTES = 8_192
 COMMAND_TIMEOUT_SECONDS = 8
 
 
@@ -29,6 +32,115 @@ def load_catalog() -> dict:
 def safe_text(value: object, limit: int = 500) -> str:
     text = str(value).replace("\x00", "�")
     return text if len(text) <= limit else text[:limit] + "…"
+
+
+def lexical_absolute(path: Path) -> Path:
+    return Path(os.path.abspath(os.fspath(path.expanduser())))
+
+
+def path_safety(
+    path: Path, *, authorized_root: Path, allow_final_symlink: bool = False
+) -> tuple[bool, str | None]:
+    """Reject escapes and symlinks in every component before a file is opened."""
+    candidate = lexical_absolute(path)
+    boundary = lexical_absolute(authorized_root)
+    try:
+        relative = candidate.relative_to(boundary)
+    except ValueError:
+        return False, "path is outside its authorized root"
+
+    current = boundary
+    components = [boundary]
+    for part in relative.parts:
+        current = current / part
+        components.append(current)
+    for component in components:
+        try:
+            details = component.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            return False, f"path component could not be inspected: {safe_text(exc, 120)}"
+        if stat.S_ISLNK(details.st_mode):
+            if allow_final_symlink and component == candidate:
+                break
+            return False, f"symlinked path component: {safe_text(component, 240)}"
+
+    # Resolve only after lstat-checking the lexical chain. When the final component is
+    # intentionally being reported as a symlink, constrain its parent instead.
+    containment_target = candidate
+    try:
+        if allow_final_symlink and candidate.is_symlink():
+            containment_target = candidate.parent
+        resolved_boundary = boundary.resolve(strict=False)
+        resolved_target = containment_target.resolve(strict=False)
+        resolved_target.relative_to(resolved_boundary)
+    except (OSError, ValueError):
+        return False, "resolved path escapes its authorized root"
+    return True, None
+
+
+def open_regular_file(
+    path: Path, *, authorized_root: Path
+) -> tuple[int, os.stat_result]:
+    """Open a regular file through no-follow directory descriptors."""
+    required = {os.open, os.stat}
+    if not required.issubset(os.supports_dir_fd):
+        raise RuntimeError("secure inventory reads require dir_fd support")
+    candidate = lexical_absolute(path)
+    boundary = lexical_absolute(authorized_root)
+    relative = candidate.relative_to(boundary)
+    if not relative.parts:
+        raise ValueError("inventory path must name a file below its authorized root")
+
+    directory_flags = (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    current_fd = os.open(boundary, directory_flags)
+    try:
+        for component in relative.parts[:-1]:
+            child_fd = os.open(
+                component, directory_flags, dir_fd=current_fd
+            )
+            os.close(current_fd)
+            current_fd = child_fd
+        file_fd = os.open(
+            relative.name,
+            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=current_fd,
+        )
+        details = os.fstat(file_fd)
+        if not stat.S_ISREG(details.st_mode):
+            os.close(file_fd)
+            raise ValueError("inventory target is not a regular file")
+        return file_fd, details
+    finally:
+        os.close(current_fd)
+
+
+def read_regular_bytes(
+    path: Path, *, authorized_root: Path, limit: int
+) -> tuple[os.stat_result, bytes]:
+    file_fd, details = open_regular_file(path, authorized_root=authorized_root)
+    try:
+        if details.st_size > limit:
+            raise OverflowError(f"file exceeds {limit} bytes")
+        chunks: list[bytes] = []
+        remaining = limit + 1
+        while remaining > 0:
+            chunk = os.read(file_fd, min(1024 * 1024, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        data = b"".join(chunks)
+        if len(data) > limit:
+            raise OverflowError(f"file exceeds {limit} bytes")
+        return details, data
+    finally:
+        os.close(file_fd)
 
 
 def run(command: list[str], *, cwd: Path, env: Mapping[str, str]) -> tuple[int, str]:
@@ -65,8 +177,21 @@ def git_root(start: Path, env: Mapping[str, str]) -> Path | None:
         return None
 
 
-def path_metadata(path: Path, *, scope: str, role: str) -> dict | None:
+def path_metadata(
+    path: Path, *, scope: str, role: str, authorized_root: Path
+) -> dict | None:
     """Describe a path without following symlinks or returning its contents."""
+    safe, reason = path_safety(
+        path, authorized_root=authorized_root, allow_final_symlink=True
+    )
+    if not safe:
+        return {
+            "path": safe_text(path),
+            "scope": scope,
+            "role": role,
+            "kind": "blocked",
+            "reason": reason,
+        }
     try:
         details = path.lstat()
     except (FileNotFoundError, OSError):
@@ -88,13 +213,27 @@ def path_metadata(path: Path, *, scope: str, role: str) -> dict | None:
         item["kind"] = "other"
         return item
 
-    item.update({"kind": "file", "bytes": details.st_size, "writable": os.access(path, os.W_OK)})
+    item.update(
+        {
+            "kind": "file",
+            "bytes": details.st_size,
+            "writable": bool(details.st_mode & (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)),
+        }
+    )
     if details.st_size > MAX_FILE_BYTES:
         item["content_metadata"] = "skipped: file exceeds 1 MB"
         return item
     try:
-        data = path.read_bytes()
-    except OSError:
+        opened_details, data = read_regular_bytes(
+            path, authorized_root=authorized_root, limit=MAX_FILE_BYTES
+        )
+        if (opened_details.st_dev, opened_details.st_ino) != (
+            details.st_dev,
+            details.st_ino,
+        ):
+            item["content_metadata"] = "changed during inventory"
+            return item
+    except (OSError, OverflowError, RuntimeError, ValueError):
         item["content_metadata"] = "unreadable"
         return item
 
@@ -124,8 +263,11 @@ def parents_to_root(start: Path, root: Path) -> list[Path]:
     return paths
 
 
-def markdown_files_without_following_links(base: Path) -> Iterable[Path]:
-    if not base.is_dir() or base.is_symlink():
+def markdown_files_without_following_links(
+    base: Path, *, authorized_root: Path
+) -> Iterable[Path]:
+    safe, _ = path_safety(base, authorized_root=authorized_root)
+    if not safe or not base.is_dir() or base.is_symlink():
         return []
     found: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(base, followlinks=False):
@@ -140,23 +282,23 @@ def markdown_files_without_following_links(base: Path) -> Iterable[Path]:
 
 
 def instruction_inventory(start: Path, root: Path, config_dir: Path) -> list[dict]:
-    candidates: list[tuple[Path, str, str]] = []
+    candidates: list[tuple[Path, str, str, Path]] = []
     for directory in parents_to_root(start, root):
         label = "project-root" if directory == root else "project-parent"
         candidates.extend(
             [
-                (directory / "CLAUDE.md", label, "claude-instructions"),
-                (directory / "CLAUDE.local.md", "local", "claude-instructions"),
-                (directory / ".claude" / "CLAUDE.md", label, "claude-instructions"),
-                (directory / "AGENTS.md", label, "provider-neutral-instructions"),
+                (directory / "CLAUDE.md", label, "claude-instructions", root),
+                (directory / "CLAUDE.local.md", "local", "claude-instructions", root),
+                (directory / ".claude" / "CLAUDE.md", label, "claude-instructions", root),
+                (directory / "AGENTS.md", label, "provider-neutral-instructions", root),
             ]
         )
     candidates.extend(
         [
-            (config_dir / "CLAUDE.md", "user", "claude-instructions"),
-            (config_dir / "settings.json", "user", "claude-settings"),
-            (root / ".claude" / "settings.json", "project", "claude-settings"),
-            (root / ".claude" / "settings.local.json", "local", "claude-settings"),
+            (config_dir / "CLAUDE.md", "user", "claude-instructions", config_dir),
+            (config_dir / "settings.json", "user", "claude-settings", config_dir),
+            (root / ".claude" / "settings.json", "project", "claude-settings", root),
+            (root / ".claude" / "settings.local.json", "local", "claude-settings", root),
         ]
     )
     for rules_root, scope in (
@@ -164,31 +306,47 @@ def instruction_inventory(start: Path, root: Path, config_dir: Path) -> list[dic
         (root / ".claude" / "rules", "project"),
     ):
         candidates.extend(
-            (path, scope, "claude-rule")
-            for path in markdown_files_without_following_links(rules_root)
+            (path, scope, "claude-rule", config_dir if scope == "user" else root)
+            for path in markdown_files_without_following_links(
+                rules_root, authorized_root=config_dir if scope == "user" else root
+            )
         )
 
     result: list[dict] = []
     seen: set[str] = set()
-    for path, scope, role in candidates:
+    for path, scope, role, authorized_root in candidates:
         key = os.path.abspath(os.fspath(path))
         if key in seen:
             continue
         seen.add(key)
-        metadata = path_metadata(path, scope=scope, role=role)
+        metadata = path_metadata(
+            path, scope=scope, role=role, authorized_root=authorized_root
+        )
         if metadata:
             result.append(metadata)
     return result[:MAX_DISCOVERED_FILES]
 
 
-def read_enabled_plugins(path: Path, *, scope: str, package_ids: set[str]) -> dict:
-    if path.is_symlink() or not path.is_file():
+def read_enabled_plugins(
+    path: Path, *, scope: str, package_ids: set[str], authorized_root: Path
+) -> dict:
+    safe, reason = path_safety(path, authorized_root=authorized_root)
+    if not safe:
+        return {"scope": scope, "plugins": {}, "error": reason}
+    try:
+        details = path.lstat()
+    except OSError:
+        return {}
+    if not stat.S_ISREG(details.st_mode):
         return {}
     try:
-        if path.stat().st_size > MAX_FILE_BYTES:
-            return {"_error": "settings file exceeds 1 MB"}
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        _, raw = read_regular_bytes(
+            path, authorized_root=authorized_root, limit=MAX_FILE_BYTES
+        )
+        data = json.loads(raw.decode("utf-8"))
+    except OverflowError:
+        return {"_error": "settings file exceeds 1 MB"}
+    except (OSError, RuntimeError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
         return {"_error": "settings file could not be parsed as UTF-8 JSON"}
     enabled = data.get("enabledPlugins", {})
     if not isinstance(enabled, dict):
@@ -209,33 +367,110 @@ def settings_plugin_inventory(root: Path, config_dir: Path, package_ids: set[str
         (root / ".claude" / "settings.json", "project"),
         (root / ".claude" / "settings.local.json", "local"),
     ):
-        entry = read_enabled_plugins(path, scope=scope, package_ids=package_ids)
+        authorized_root = config_dir if scope == "user" else root
+        entry = read_enabled_plugins(
+            path,
+            scope=scope,
+            package_ids=package_ids,
+            authorized_root=authorized_root,
+        )
         if entry:
             entry["path"] = safe_text(path)
             result.append(entry)
     return result
 
 
-def standalone_skills(root: Path, config_dir: Path, package_ids: set[str]) -> list[dict]:
+def declared_skill_name(skill_md: Path, *, authorized_root: Path) -> str | None:
+    safe, _ = path_safety(skill_md, authorized_root=authorized_root)
+    if not safe:
+        return None
+    try:
+        details = skill_md.lstat()
+    except OSError:
+        return None
+    if not stat.S_ISREG(details.st_mode):
+        return None
+    try:
+        _, raw = read_regular_bytes(
+            skill_md,
+            authorized_root=authorized_root,
+            limit=MAX_SKILL_FRONTMATTER_BYTES,
+        )
+        text = raw.decode("utf-8")
+    except (OSError, OverflowError, RuntimeError, ValueError, UnicodeDecodeError):
+        return None
+    if not text.startswith("---\n"):
+        return None
+    end = text.find("\n---", 4)
+    if end < 0:
+        return None
+    match = re.search(r"(?m)^name:\s*['\"]?([a-z0-9][a-z0-9-]{0,62})['\"]?\s*$", text[4:end])
+    return match.group(1) if match else None
+
+
+def standalone_skills(
+    root: Path, config_dir: Path, package_ids: set[str]
+) -> tuple[list[dict], list[str]]:
     result: list[dict] = []
+    warnings: list[str] = []
     for base, scope in (
         (config_dir / "skills", "user"),
         (root / ".claude" / "skills", "project"),
     ):
+        authorized_root = config_dir if scope == "user" else root
+        safe, reason = path_safety(base, authorized_root=authorized_root)
+        if not safe:
+            warnings.append(f"{scope} standalone skill scan blocked: {reason}")
+            continue
         if not base.is_dir() or base.is_symlink():
             continue
+        children: list[Path] = []
         try:
-            children = sorted(base.iterdir(), key=lambda item: item.name)
+            with os.scandir(base) as entries:
+                for index, entry in enumerate(entries):
+                    if index >= MAX_SCANNED_SKILL_DIRS:
+                        warnings.append(
+                            f"{scope} standalone skill scan stopped after "
+                            f"{MAX_SCANNED_SKILL_DIRS} entries"
+                        )
+                        break
+                    if entry.is_dir(follow_symlinks=False):
+                        children.append(Path(entry.path))
+            children.sort(key=lambda item: item.name)
         except OSError:
             continue
-        for child in children[:MAX_DISCOVERED_FILES]:
+        for child in children:
             skill_md = child / "SKILL.md"
-            if child.is_symlink() or not skill_md.is_file():
+            child_safe, _ = path_safety(child, authorized_root=authorized_root)
+            skill_safe, _ = path_safety(skill_md, authorized_root=authorized_root)
+            if not child_safe or not skill_safe or child.is_symlink():
                 continue
-            name = child.name
-            if name in package_ids or name in {"lessons-learned", "session-handoff"}:
-                result.append({"name": safe_text(name), "scope": scope, "path": safe_text(skill_md)})
-    return result
+            try:
+                skill_details = skill_md.lstat()
+            except OSError:
+                continue
+            if not stat.S_ISREG(skill_details.st_mode):
+                continue
+            folder_name = child.name
+            declared_name = declared_skill_name(
+                skill_md, authorized_root=authorized_root
+            )
+            names = {folder_name, declared_name}
+            if names & (package_ids | {"lessons-learned", "session-handoff"}):
+                result.append(
+                    {
+                        "name": safe_text(declared_name or folder_name),
+                        "folder": safe_text(folder_name),
+                        "scope": scope,
+                        "path": safe_text(skill_md),
+                    }
+                )
+                if len(result) >= MAX_DISCOVERED_FILES:
+                    warnings.append(
+                        f"standalone overlap results truncated after {MAX_DISCOVERED_FILES} matches"
+                    )
+                    return result, warnings
+    return result, warnings
 
 
 def cli_plugin_inventory(root: Path, env: Mapping[str, str], package_ids: set[str]) -> dict:
@@ -296,6 +531,7 @@ def collect_inventory(project_dir: Path, environ: Mapping[str, str] | None = Non
 
     catalog = load_catalog()
     package_ids = {entry["id"] for entry in catalog["packages"]}
+    overlaps, overlap_warnings = standalone_skills(root, config_dir, package_ids)
     return {
         "inventory_schema": 1,
         "warning": (
@@ -309,13 +545,14 @@ def collect_inventory(project_dir: Path, environ: Mapping[str, str] | None = Non
         },
         "host": cli_plugin_inventory(root, env, package_ids),
         "settings_overclock_state": settings_plugin_inventory(root, config_dir, package_ids),
-        "standalone_overlaps": standalone_skills(root, config_dir, package_ids),
+        "standalone_overlaps": overlaps,
         "instruction_files": instruction_inventory(start, root, config_dir),
         "catalog": catalog,
         "limitations": [
             "Managed settings are not inspected.",
             "Nested instruction files below the start directory load on demand and are not exhaustively scanned.",
             "File contents are intentionally omitted; inspect only a proposed project-local target before drafting a diff.",
+            *overlap_warnings,
         ],
     }
 

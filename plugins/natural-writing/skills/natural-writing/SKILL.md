@@ -57,9 +57,16 @@ By default, just return the rewritten prose. When the user asks to *see what cha
 1. Build a JSON file using the schema documented at the top of
    `assets/revision-report.html` (original, revised, and ordered changes with `type` =
    `keep` | `delete` | `rewrite`).
-2. Run `scripts/build_revision_report.py <data.json> <output.html>`. The script validates
-   the schema and embeds UTF-8 JSON as base64, so prose containing HTML or `</script>` cannot
-   break out into executable markup. Do not hand-edit data into a JavaScript literal.
+2. Run the bundled helper through its host-provided absolute skill path:
+   ```bash
+   python3 "${CLAUDE_SKILL_DIR}/scripts/build_revision_report.py" DATA_JSON OUTPUT_HTML --root "${CLAUDE_PROJECT_DIR}"
+   ```
+   This helper is mandatory: it validates the schema, confines input/output paths to the project,
+   refuses linked or existing output paths, and embeds UTF-8 JSON as base64 so HTML or `</script>`
+   cannot become executable markup. Do not call Read on the report template or any file under
+   `assets/`; the helper owns that trusted asset. Never insert report data manually. If
+   the helper cannot run, report the error and do not create a fallback HTML report. Use
+   `--replace` only after the user explicitly approves replacing the named existing regular file.
 3. Remove the temporary JSON data file unless the user asked to keep it, then tell the user
    the report path. It renders Original, Revised, and Diff tabs.
 
