@@ -6,10 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       skill:
-        description: Which skill to evaluate
+        description: Which skill or plugin group to evaluate
         type: choice
-        options: [both, session-handoff, lessons-learned, test-discipline, git-archaeologist, natural-writing]
-        default: both
+        options: [all, overclock-setup, session-memory, learning-loop, discipline-gates, setup, session-handoff, lessons-learned, test-discipline, git-archaeologist, natural-writing, critical-thinking, independent-research]
+        default: all
+      compare_baseline:
+        description: Also run the same cases with all skills disabled
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,7 +21,7 @@ permissions:
 jobs:
   evals:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 180
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
@@ -29,24 +33,55 @@ jobs:
       - name: Run live eval suite
         env:
           SKILL: ${{ inputs.skill }}
+          COMPARE_BASELINE: ${{ inputs.compare_baseline }}
         run: |
-          if [ "$SKILL" = "both" ]; then
-            bash qa/run_evals.sh
-          else
-            bash qa/run_evals.sh "$SKILL"
-          fi
+          run_suite() {
+            local status=0
+            bash qa/run_evals.sh "$@" || status=$?
+            if [ "$COMPARE_BASELINE" = "true" ]; then
+              BASELINE=1 bash qa/run_evals.sh "$@" || return $?
+            fi
+            return "$status"
+          }
+          case "$SKILL" in
+            all)
+              run_suite overclock-setup/setup session-memory/session-handoff session-memory/lessons-learned learning-loop/lessons-learned discipline-gates/test-discipline discipline-gates/git-archaeologist natural-writing/natural-writing critical-thinking/critical-thinking critical-thinking/independent-research
+              ;;
+            overclock-setup|setup)
+              run_suite overclock-setup/setup
+              ;;
+            session-memory)
+              run_suite session-memory/session-handoff session-memory/lessons-learned
+              ;;
+            learning-loop)
+              run_suite learning-loop/lessons-learned
+              ;;
+            discipline-gates)
+              run_suite discipline-gates/test-discipline discipline-gates/git-archaeologist
+              ;;
+            session-handoff)
+              run_suite session-memory/session-handoff
+              ;;
+            lessons-learned)
+              run_suite session-memory/lessons-learned
+              ;;
+            test-discipline|git-archaeologist)
+              run_suite "discipline-gates/$SKILL"
+              ;;
+            natural-writing)
+              run_suite natural-writing/natural-writing
+              ;;
+            critical-thinking)
+              run_suite critical-thinking/critical-thinking critical-thinking/independent-research
+              ;;
+            independent-research)
+              run_suite critical-thinking/independent-research
+              ;;
+          esac
 
       - name: Job summary
         if: always()
-        run: |
-          {
-            echo '## Live eval results'
-            for g in qa/_work/results/*/grading.json; do
-              [ -f "$g" ] || continue
-              name=$(basename "$(dirname "$g")")
-              python3 -c "import json;g=json.load(open('$g'));print(f'- **$name**: {g[\"passed\"]}/{g[\"total\"]}')"
-            done
-          } >> "$GITHUB_STEP_SUMMARY"
+        run: python3 qa/summarize_eval_results.py qa/_work/results >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload transcripts and gradings
         if: always()

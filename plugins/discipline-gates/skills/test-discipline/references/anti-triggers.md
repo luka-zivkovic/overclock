@@ -18,7 +18,7 @@ standalone; `tools/shared-files.txt` guards the copies against drift.
 
 ## Mode-specific silences
 
-- **test-discipline / characterize:** code already covered by behavioral tests — tests that assert its output values; mock-only or import-only references don't count — needs no pinning. The suite is the pin.
+- **test-discipline / characterize:** code already covered by behavioral tests — tests that assert observable return values, state changes, emitted events, errors, or other externally visible effects; mock-only or import-only references don't count — needs no pinning. The suite is the pin.
 - **git-archaeologist:** pure additions and uncommitted or brand-new code have no history to recover; stay silent.
 
 ## The rule

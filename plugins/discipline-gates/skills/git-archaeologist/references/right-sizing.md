@@ -9,8 +9,8 @@ Answer ONE binary question before engaging any gate:
 
 - A **structural trigger** is a concrete action class named in the skill: about to fix a
   reported bug with a stated symptom; about to edit code with no behavioral test coverage; a
-  new test just went green; about to delete or weaken a guard / early return / retry / sleep /
-  lock / clamp. Never a vibe ("this code looks risky / surprising").
+  new test just went green; about to delete or weaken a guard / invalid-state early return /
+  retry / protective sleep / lock / clamp. Never a vibe ("this code looks risky / surprising").
 - If the answer is no, or the change matches `anti-triggers.md` → **silent no-op**. Do the
   requested work without mentioning the gate.
 - If yes → engage exactly the one matching mode. The structural check IS the right-size gate;

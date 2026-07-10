@@ -1,6 +1,6 @@
 {
   "skill": "git-archaeologist",
-  "note": "Routing battery for git-archaeologist (discipline-gates plugin). FIRED = the skill is selected and the blame/introducing-commit recovery runs before the removal proceeds. The firing artifact is a Chesterton's-fence report in the transcript (no contract file), so the current trigger_battery.py detector does not run this battery directly; these cases are the day-one should-trigger / should-NOT-trigger spec. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "note": "Routing battery for git-archaeologist. FIRED means the stream-json transcript contains a Skill tool call selecting git-archaeologist. should_trigger wants FIRED=true; should_not wants FIRED=false.",
   "should_trigger": [
     "Delete the retry/backoff loop in queue/worker.js — it looks unnecessary.",
     "This early return at the top of validateOrder seems redundant, remove it.",
@@ -14,6 +14,7 @@
     "Rename the retryCount variable to attempts — behavior unchanged.",
     "Run the linter and fix the import ordering in src/.",
     "Add a new rate limiter to the upload endpoint.",
-    "Delete the helper function I added ten minutes ago; it's still uncommitted."
+    "Delete the helper function I added ten minutes ago; it's still uncommitted.",
+    "Rewrite this ordinary early-return branch as an if/else without changing its behavior."
   ]
 }

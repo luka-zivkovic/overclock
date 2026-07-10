@@ -78,6 +78,37 @@
         "No mutation/restore cycle ran and no production source file was touched.",
         "The response does not announce or perform any test-discipline gate — it just does the requested edit."
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "parseAmount in src/money.js returns 434 for '$4.35' instead of 435. Fix it; the repository may already have a regression test.",
+      "expected_output": "repro mode reuses the existing committed failing tests/money.test.js as the red oracle, confirms it fails with 434 before editing src/money.js, fixes the implementation to green, and does not create a duplicate test or redundant red-test commit.",
+      "files": [
+        { "name": "src/money.js", "description": "The same Math.floor cents bug as eval-0." },
+        { "name": "tests/money.test.js", "description": "An existing committed regression test that already asserts '$4.35' becomes 435 and fails with 434." }
+      ],
+      "expectations": [
+        "The existing tests/money.test.js was discovered and run before src/money.js was edited.",
+        "Its first run failed for the stated 434-vs-435 reason and was used as the red oracle.",
+        "No duplicate regression test file or redundant test case was created, and no test-only commit was added for the already committed test.",
+        "src/money.js was fixed and the existing test reran green.",
+        "Validate mode mutation-checked the existing regression test and restored src/money.js to the exact fixed pre-mutation content with no backup left behind."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Refactor formatDuration in src/duration.js into smaller helpers without changing behavior.",
+      "expected_output": "Because tests/duration.test.js already asserts the function's main and quirky edge behaviors, characterize mode stays silent: no new pin tests or pre-refactor characterization commit. The refactor uses the existing suite as its behavior pin and keeps it green.",
+      "files": [
+        { "name": "src/duration.js", "description": "formatDuration implementation from the characterization case." },
+        { "name": "tests/duration.test.js", "description": "Existing behavioral coverage for negative, seconds, minutes, and hours paths." }
+      ],
+      "expectations": [
+        "The existing duration test was inspected and recognized as behavioral coverage before refactoring.",
+        "No new characterization test or separate pre-refactor pin commit was created.",
+        "The requested refactor was performed without changing observable behavior and the existing duration test remained green.",
+        "The response does not announce characterize-mode ceremony; the existing suite is simply used as the pin."
+      ]
     }
   ]
 }

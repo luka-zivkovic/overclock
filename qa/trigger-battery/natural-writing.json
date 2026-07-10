@@ -1,6 +1,6 @@
 {
   "skill": "natural-writing",
-  "note": "Routing battery for natural-writing. FIRED = the skill is selected and applies the prose rules. Unlike the session-memory skills, natural-writing writes no contract file, so firing is detected by skill selection, not a file write; the current trigger_battery.py (contract-file detector) does not run this directly. These cases are the day-one should-trigger / should-NOT-trigger spec. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "note": "Routing battery for natural-writing. FIRED means the stream-json transcript contains a Skill tool call selecting natural-writing. should_trigger wants FIRED=true; should_not wants FIRED=false.",
   "should_trigger": [
     "Draft a blog post intro about why small teams ship faster.",
     "Make this draft sound more natural and less like AI wrote it: <pastes 3 paragraphs>",

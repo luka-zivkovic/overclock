@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: Save and restore working state across Claude Code sessions via a structured HANDOFF.md under .ai/memory/. Use when the user wants to stop and preserve state ("let's stop here for today", "checkpoint this session", "write a handoff", "I'm about to run out of context, save our state") or to restore it ("resume where we left off", "continue from last session", "what were we working on?"). Produces a handoff file with goal, plan, decisions, failed approaches, next steps, and git anchors, plus a warm-start brief on resume. Do NOT use for ordinary git commit/push requests, for "continue" meaning the next step of the current in-conversation task, or for human-facing summaries like PR descriptions or status reports.
+description: Save and restore working state across Claude Code sessions via a structured HANDOFF.md under .ai/memory/. Use when the user wants to stop and preserve state ("let's stop here for today", "checkpoint this session", "write a handoff", "I'm about to run out of context, save our state") or to restore it ("resume where we left off", "continue from last session", "what were we working on?"); also use when the user has no local handoff file but pastes or says they copied a handoff from another machine. Produces a handoff file with goal, plan, decisions, failed approaches, next steps, and git anchors, plus a warm-start brief on resume. Do NOT use for ordinary git commit/push requests, for "continue" meaning the next step of the current in-conversation task, or for human-facing summaries like PR descriptions or status reports.
 ---
 
 # Session Handoff
@@ -57,13 +57,18 @@ Run when the user asks to resume, continue from a past session, or asks what was
    - **Rewritten history:** if the saved sha is unreachable (`git cat-file -e <sha>` fails or `rev-list` errors — rebase, force-push, shallow clone), say so explicitly, fall back to `git log --oneline --since=<saved date>` for a picture of what happened, treat ALL Plan step statuses as unverified, and get explicit user confirmation before executing any step of the saved plan. Never read an unreachable sha as "no commits since the handoff".
    - **Staleness threshold:** if the handoff is more than ~14 days old or more than ~30 commits behind, do not attempt line-by-line reconciliation — state explicitly that the handoff is too stale for that. Report the gap, quote the handoff's goal/decisions/failed-approaches as background, and RECOMMEND a fresh start (archiving the old handoff) as the default, naming full reconciliation only as the alternative if the user insists. Do not present "resume as planned" as the leading option for a stale handoff.
 5. **Surface lessons.** If `.ai/memory/LESSONS.md` exists, read it and quote the entries whose **When:** condition matches the work being resumed (read-only). If a lesson contradicts a handoff Decision, the lesson outranks it — flag the conflict in the brief, don't silently pick.
-6. **Present the warm-start brief** — fixed shape, hard cap **15 lines**, sections in this order:
-   1. **Goal** — one line.
-   2. **Plan status** — done / next, compressed.
-   3. **Decisions in force** — only ones that still bind.
-   4. **Do-not-retry** — failed approaches with their cause.
-   5. **Drift & lessons** — anchor mismatches from step 4, lesson conflicts from step 5; omit the section if clean.
-   6. **Proposed next step + confirmation question.**
+6. **Return the warm-start brief** in exactly this six-line shape and order. For a resume request,
+   these six lines are the entire user-facing response: no preamble, verification report, code
+   fence, blank lines, extra sections, recommendations after the brief, or reordered labels.
+   Fold drift, stale-state choices, missing sections, and fresh-start advice into the labeled
+   values. Compress values rather than wrapping the structure; use `none recorded` / `none found`
+   when a field has no content:
+   Goal: ...
+   Plan status: ...
+   Decisions in force: ...
+   Do-not-retry: ...
+   Drift & lessons: ...
+   Proposed next step: ... Confirm?
 7. **Confirm direction before acting.** The brief ends with the proposed next step and a question — the user may have changed direction since the save. Do not start executing until they confirm.
 
 ## Auto-load at session start (optional hook)

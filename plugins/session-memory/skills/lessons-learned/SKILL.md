@@ -1,6 +1,6 @@
 ---
 name: lessons-learned
-description: Record corrections and failed approaches as durable, deduplicated lessons in .ai/memory/LESSONS.md, and surface them in later sessions so mistakes are not repeated. Use when the user corrects agent behavior ("no, use Y not X", "you made this mistake before", "I already told you this"), says "remember this for next time" or "add that to your lessons", when a tried approach failed with a diagnosed cause, or when asked "what lessons do you have for this project?". Do NOT use for ordinary requirement changes or new instructions (a changed spec is not a mistake), one-off contextual choices ("use port 4000 just for this test"), conversational disambiguation ("no, I meant the other file"), or anything containing secrets, tokens, or credentials.
+description: Record corrections and failed approaches as durable, deduplicated lessons in .ai/memory/LESSONS.md, and surface them in later sessions so mistakes are not repeated. Use when the user corrects agent behavior ("no, use Y not X", "you made this mistake before", "I already told you this"), says "remember this for next time" or "add that to your lessons", when a tried approach failed with a diagnosed cause, or when asked "what lessons do you have for this project?". Do NOT use for ordinary requirement changes or new instructions (a changed spec is not a mistake), one-off contextual choices ("use port 4000 just for this test"), or conversational disambiguation ("no, I meant the other file"). Secrets are never persisted. An explicit remember/note-this request that includes a secret still uses this skill, but records only the redacted rule.
 ---
 
 # Lessons Learned
@@ -40,7 +40,7 @@ When a signal is borderline (a preference that might be standing), ask: "Should 
 
 ## Promotion to CLAUDE.md
 
-When an update brings a lesson to **Count ≥ 3**, it is proven enough for always-on context. After quoting the update, SUGGEST: show the exact line(s) that would be added to CLAUDE.md and ask for approval. Only edit CLAUDE.md after an explicit yes — CLAUDE.md loads every session, and silently editing the user's project memory breaks trust and the contract's write-safety rule. On approval, append minimally; note in the lesson's Evidence that it was promoted. On decline, drop it — do not re-ask on every reinforcement.
+When an update brings a lesson to **Count ≥ 3**, it is proven enough for always-on context. After quoting the update, SUGGEST: show the exact line(s) that would be added to CLAUDE.md and ask for approval. Only edit CLAUDE.md after an explicit yes — CLAUDE.md loads every session, and silently editing the user's project memory breaks trust and the contract's write-safety rule. On approval, append minimally; note in the lesson's Evidence that it was promoted. On decline, keep the lesson, note the declined promotion in Evidence, and do not re-ask unless the user later requests promotion or the rule materially changes.
 
 ## Surfacing
 

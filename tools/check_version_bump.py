@@ -5,14 +5,16 @@ Marketplace semantics make the version field the ship switch: users only
 receive updates when the version string changes. A PR that edits
 plugins/<name>/** but leaves the version untouched merges cleanly and ships
 nothing — the worst kind of green build. This check compares the working tree
-against a base ref (default origin/main) and requires, for every plugin with
+against a base ref (default origin/master) and requires, for every plugin with
 content changes:
 
   1. plugin.json "version" differs from the base ref's version, and
   2. the marketplace.json entry for that plugin carries the same new version.
 
 Manifest-only edits (e.g. fixing a description) also count as content changes
-on purpose: they ship to users too.
+on purpose: they ship to users too. A plugin that was already absent from the
+base marketplace may continue iterating unpublished; adding it to marketplace.json
+remains the explicit publication switch.
 """
 from __future__ import annotations
 
@@ -40,7 +42,7 @@ def file_at_ref(ref: str, path: str) -> str | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base", default="origin/main")
+    parser.add_argument("--base", default="origin/master")
     args = parser.parse_args()
 
     try:
@@ -63,6 +65,9 @@ def main() -> int:
 
     marketplace = json.loads((REPO / ".claude-plugin" / "marketplace.json").read_text())
     entries = {e["name"]: e for e in marketplace.get("plugins", [])}
+    base_marketplace_raw = file_at_ref(merge_base, ".claude-plugin/marketplace.json")
+    base_marketplace = json.loads(base_marketplace_raw) if base_marketplace_raw else {"plugins": []}
+    base_entries = {e["name"]: e for e in base_marketplace.get("plugins", [])}
 
     failures = 0
     for name in touched_plugins:
@@ -87,12 +92,12 @@ def main() -> int:
             failures += 1
         entry = entries.get(name)
         if entry is None:
-            if base_raw is None:
-                # Plugin is new since base and not yet published: an absent
-                # marketplace entry ships nothing, so there is no silent-ship risk.
-                print(f"WARN: {name}: new plugin not yet in marketplace.json (unpublished)")
+            if name not in base_entries:
+                # The plugin was already unpublished at the base. An absent
+                # marketplace entry still ships nothing, so iteration is safe.
+                print(f"WARN: {name}: plugin remains unpublished (not in marketplace.json)")
             else:
-                print(f"ERROR: {name}: no marketplace.json entry", file=sys.stderr)
+                print(f"ERROR: {name}: marketplace.json entry was removed", file=sys.stderr)
                 failures += 1
         elif entry.get("version") != new_version:
             print(f"ERROR: {name}: marketplace.json entry version {entry.get('version')!r} "

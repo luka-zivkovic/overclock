@@ -1,6 +1,6 @@
 ---
 name: git-archaeologist
-description: Before deleting or weakening a structural defensive construct — a guard clause, early return, retry/backoff, sleep/delay, lock/mutex, clamp/bounds check, or any check commented as "redundant"/"defensive"/"shouldn't happen" — recover why it exists. git blame the lines, read the introducing commit, follow any linked PR or issue, then surface a Chesterton's-fence warning with the evidence before the removal proceeds. The trigger is that structural pattern list, never "this code looks surprising". Use when a change would remove or relax such a construct in existing committed code. Do NOT use for trivial typo/copy fixes, config/version/dependency bumps, pure renames or signature-only changes, formatting/lint-only diffs, generated/vendored/lockfile hunks, new feature work, pure additions, or uncommitted code with no git history.
+description: Before deleting or weakening a structural defensive construct — a guard clause, an early return that rejects invalid or unsafe state, retry/backoff, protective sleep/delay, lock/mutex, clamp/bounds check, or any check commented as "redundant"/"defensive"/"shouldn't happen" — recover why it exists. git blame the lines, read the introducing commit, follow any linked PR or issue, then surface a Chesterton's-fence warning with the evidence before the removal proceeds. The trigger is that structural pattern list, never "this code looks surprising". Use when a change would remove or relax such a construct in existing committed code. Do NOT use for ordinary control-flow early returns, trivial typo/copy fixes, config/version/dependency bumps, pure renames or signature-only changes, formatting/lint-only diffs, generated/vendored/lockfile hunks, new feature work, pure additions, or uncommitted code with no git history.
 ---
 
 # Git Archaeologist
@@ -15,9 +15,9 @@ evidence in front of the decision. It warns; it does not block.
 Fires when the change at hand would **delete or weaken** one of these in existing committed
 code:
 
-- a guard clause or early return
+- a guard clause or early return that rejects invalid, unsafe, or unexpected state
 - a retry / backoff loop
-- a `sleep` / delay / debounce
+- a protective `sleep` / delay / debounce used for ordering, backpressure, or race avoidance
 - a lock, mutex, or synchronization primitive
 - a clamp, bounds check, or limit
 - any check commented as "redundant", "defensive", "just in case", or "shouldn't happen"

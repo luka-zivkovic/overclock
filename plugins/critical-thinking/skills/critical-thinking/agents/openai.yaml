@@ -1,0 +1,4 @@
+interface:
+  display_name: "Critical Thinking"
+  short_description: "Challenge assumptions and verify material claims"
+  default_prompt: "Use $critical-thinking to reassess my reasoning, delegate material local-evidence uncertainties to fresh read-only research, and treat prior agreement as untrusted."

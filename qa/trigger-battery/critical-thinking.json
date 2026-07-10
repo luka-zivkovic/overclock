@@ -1,0 +1,21 @@
+{
+  "skill": "critical-thinking",
+  "note": "Routing battery for critical-thinking. FIRED means the stream-json transcript contains a Skill tool call selecting critical-thinking. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "should_trigger": [
+    "I think we should rewrite the API in Rust because Rust is faster. Am I right?",
+    "Stress-test my plan to put all of our marketing budget into the channel that won last month.",
+    "My competitor raised prices, so they must be desperate. We should undercut them, right?",
+    "Sanity-check this argument: remote employees produce less because I see fewer Slack messages.",
+    "Which of these two launch plans would you choose, and what assumptions could make your recommendation wrong?",
+    "The clinical trial headline sounds promising. Is that enough reason to put half my savings into the company?",
+    "Reassess the conclusion we reached earlier from scratch; treat our prior agreement as untrusted."
+  ],
+  "should_not": [
+    "Convert 14:30 UTC to Europe/Belgrade time.",
+    "Rename retryCount to attempts without changing behavior.",
+    "Format this JSON and sort its keys.",
+    "I'm upset that the launch missed its deadline.",
+    "Give me twenty playful names for a neighborhood bakery. Don't evaluate them yet.",
+    "We already chose Postgres. Add the connection pool configuration described in the ticket."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "skill": "independent-research",
+  "plugin": "critical-thinking",
+  "note": "Routing battery for independent-research. FIRED means the stream-json transcript contains a Skill tool call selecting independent-research. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "should_trigger": [
+    "Inspect the referenced repository and verify whether Redis is actually the source of truth.",
+    "Research this claim from the checked-in project sources instead of trusting my summary.",
+    "Inspect the referenced local API specification and tell me whether this endpoint is declared.",
+    "Verify what runtime version this project really uses by inspecting its config and CI.",
+    "Read the saved paper in ./papers and check whether the headline matches its methods and results.",
+    "Look through the accessible logs and determine whether the outage explanation is supported."
+  ],
+  "should_not": [
+    "I prefer the blue design. Help me explain that preference to the team.",
+    "Give me twenty names for a bakery; don't research or evaluate them yet.",
+    "Format this JSON and sort the keys.",
+    "What is 17 multiplied by 24?",
+    "I'm disappointed that the release slipped and just need to vent.",
+    "Use only the facts in this prompt and do not browse: imagine a company with two equal competitors."
+  ]
+}
