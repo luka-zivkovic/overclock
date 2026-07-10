@@ -13,7 +13,7 @@ export const meta = {
 }
 
 // ---- Shared context every agent must read first ----
-const REPO = '/Users/makina/startups/overclock'
+const REPO = '.'
 const CONTEXT = `
 You are working inside the Overclock repo at ${REPO} — a SERIOUS, well-tested
 collection of Claude Code plugins/skills (it has CI, eval harnesses, a strategy doc).
@@ -48,10 +48,11 @@ THE BAR IS USEFULNESS (clarified by the user 2026-06-22 — this overrides any o
    economy, portability, artifact-to-action) are equally welcome if they make a useful skill.
 
 DON'T RE-PROPOSE JUDGED IDEAS:
-- The repo already ships session-handoff, lessons-learned, and has a STRONG candidate
-  (PR-reviewer). DO NOT propose a mode/variant/wrapper of those, of CLAUDE.md, or anything
-  already carrying a verdict in strategy.md / SHORTLIST.md. If the pitch could just be
-  appended to an existing skill as "also it can X", it's already covered — skip it.
+- The repo already contains session-handoff, lessons-learned (distributed by session-memory
+  and learning-loop), natural-writing, test-discipline, and git-archaeologist, and has a
+  STRONG candidate (PR-reviewer). DO NOT propose a mode/variant/wrapper of those, of CLAUDE.md,
+  or anything already carrying a verdict in strategy.md / SHORTLIST.md. If the pitch could
+  just be appended to an existing skill as "also it can X", it's already covered — skip it.
 - Explore broadly across the daily-work surface: data/schema, observability/logs,
   dependency & supply-chain hygiene, infra & env config, performance, migrations, API/
   contract work, docs/onboarding, the token/cost economy of agents, multi-repo, team

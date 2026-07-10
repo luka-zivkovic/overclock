@@ -3,7 +3,73 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## overclock-setup
+
+### 0.1.0 — 2026-07-10
+- Publish a manual `/overclock-setup:setup` advisor focused on Overclock product
+  selection rather than duplicating Claude's built-in project initializer.
+- Add a deterministic read-only inventory that filters plugin/settings state,
+  detects standalone overlaps and instruction-file conditions without returning
+  file contents, and never follows instruction symlinks.
+- Keep v0.1 report-only: ask only capability, scope, and hook questions that can
+  change the plan; return exact proposed commands and minimal instruction diffs;
+  never install plugins or edit settings, hooks, CLAUDE.md, or AGENTS.md.
+- Add a structured capability catalog with publication, dependency, conflict,
+  hook, persistent-file, and minimum-host metadata. Enforce the current
+  `session-memory` XOR `learning-loop` rule and prohibit install commands for
+  preview plugins.
+- Add catalog drift validation, inventory unit tests, real local-marketplace
+  install smoke coverage, and eleven passing adversarial live evals for conflicting scopes,
+  duplicate hooks, prompt injection, secrets, symlinks, idempotency, previews,
+  hook refusal, and requests to bypass report-only mode.
+
+## critical-thinking
+
+### 0.1.0 — 2026-07-10
+- Add a stateless reasoning skill that tests user framing independently, separates
+  evidence from assumptions, surfaces material counterarguments and alternatives,
+  and calibrates confidence without praise or reflexive contrarianism.
+- Scale scrutiny to decision stakes while staying silent on routine execution,
+  open-ended ideation, and emotional acknowledgment.
+- Reset commitment, but not evidence, when reassessing conclusions reached earlier
+  in a long conversation; treat repetition, consensus, sunk cost, and the assistant's
+  own prior advice as non-evidence.
+- Add eleven behavioral evals and a thirteen-prompt routing battery covering leading
+  premises, warranted agreement, concise correction, decision risk, anti-triggers,
+  long-context anchoring, self-defense, social proof, and evidence-based reversal.
+- Extend the live-eval runner with optional persisted setup turns so context cases
+  test the model against its own prior answers instead of a pasted mock transcript.
+- Add an `independent-research` companion skill that verifies material uncertainties
+  from accessible primary evidence, preserves provenance, reports contradictions,
+  and respects authorization and research-budget boundaries.
+- Teach critical-thinking to invoke independent-research conditionally rather than
+  relying on user summaries or researching every minor unknown.
+- Add thirteen research evals, a twelve-prompt routing battery, and a cross-skill
+  integration eval that requires inspecting a referenced repository before rejecting
+  a destructive recommendation.
+- Extend the eval runner with per-case sibling-skill installation for integration tests.
+- Run independent-research in a fresh `context: fork` using a plugin subagent with an
+  exclusive read/search/web tool set and an eight-turn limit; pass it a neutral brief
+  rather than the parent conversation or desired conclusion.
+- Treat source content as hostile data, redact secrets, refuse symlink/scope escapes,
+  distinguish checkout/config/test/deployment/runtime evidence, and enforce explicit
+  local/web research budgets.
+- Add adversarial research cases for prompt injection, secret bait, symlink escape,
+  deployment drift, ambiguous project identity, exhaustive-search pressure, accurate
+  user input, and destructive test scripts.
+- Add optional no-skill baseline runs plus per-case cost, latency, turn, and token
+  metrics; record the same metrics for trigger-routing batteries.
+- Make eval harness failures fail fast, build fixtures once per run, select reruns by
+  declared case ID, and raise the manual workflow timeout for the expanded suite.
+
 ## natural-writing
+
+### 1.0.1 — 2026-07-09
+- Preserve original metaphors that carry the author's meaning or voice while still
+  removing canned decorative analogies.
+- Generate optional revision reports through a schema-validating helper that embeds
+  prose as base64 UTF-8 JSON, preventing HTML or `</script>` text from becoming
+  executable markup.
 
 ### 1.0.0 — 2026-07-03
 - First published release (added to marketplace.json). A stateless prose
@@ -17,9 +83,19 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## discipline-gates
 
+### 0.1.1 — 2026-07-09
+- test-discipline: reuse an adequate existing failing regression test instead of
+  creating a duplicate; scope the existing-coverage anti-trigger to characterize
+  mode; recognize observable effects as behavioral coverage.
+- test-discipline: restore validate-mode mutations from an exact byte backup for
+  both clean and dirty files instead of restoring clean files from HEAD.
+- git-archaeologist: narrow early-return and delay triggers to defensive/protective
+  constructs so ordinary control flow does not cause archaeology ceremony.
+
 ### 0.1.0 — 2026-07-03
-- Initial unpublished release (not yet in marketplace.json; publish gated on
-  live-eval results). Two pre-action gates over real oracles, packaged per
+- Initial unpublished release (not yet in marketplace.json; its live evals
+  passed and publication remains pending the audited 0.1.1 rerun). Two
+  pre-action gates over real oracles, packaged per
   `docs/brainstorm/packaging-discipline-gates.md`:
   - **test-discipline** — one multi-mode skill: `repro` (commit a test that
     fails for the stated reason before fixing a reported bug), `characterize`
@@ -32,11 +108,20 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
     intent.
   - Shared should-NOT-trigger surface single-sourced as byte-identical
     per-skill references (CI-guarded via `tools/shared-files.txt`).
+- Live eval suite: 10/10 cases green (5 per skill), including negative controls,
+  byte-identical mutation restoration, and a SHA-pinned real-repository history case.
 - Build decision: the packaging doc's §6 incident-tally demand gate is
   superseded by strategy.md principle 4 (direct request suffices) — built on
   the maintainer's direct pick, 2026-07-03.
 
 ## learning-loop
+
+### 1.0.1 — 2026-07-09
+- Align secret-bearing explicit record requests with the redaction contract: the
+  skill now still routes, records only the redacted rule, and never persists the
+  supplied secret value.
+- Clarify declined CLAUDE.md promotion: keep the lesson, record the decline, and
+  do not repeatedly ask on later reinforcement.
 
 ### 1.0.0 — 2026-06-17
 - Initial release. Extracts the lessons-learned skill into a standalone,
@@ -50,6 +135,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   `templates/lessons.md` skeleton is kept byte-identical (CI-enforced).
 
 ## session-memory
+
+### 1.0.3 — 2026-07-09
+- lessons-learned: align the routing description with the existing secret-redaction
+  behavior so an explicit record request containing a secret still triggers but
+  persists only the redacted rule.
+- lessons-learned: clarify that declining CLAUDE.md promotion keeps the lesson and
+  suppresses repeated promotion prompts.
 
 ### 1.0.2 — 2026-06-13
 - lessons-learned: an explicit record request that contains a secret is now

@@ -18,7 +18,8 @@ Stay silent. Do not apply this for:
 - Commit messages, PR titles.
 - API / reference docs where a precise technical term is the *right* word.
 - One-line UI strings, labels, error messages.
-- Quotes, citations, or data you must keep verbatim.
+- Do not rewrite quoted/cited spans or verbatim data inside an otherwise in-scope piece;
+  preserve those spans byte-for-byte while editing the surrounding prose.
 - Legal or precise technical text where a qualifier is load-bearing.
 
 Never run the full pass on a single sentence. If someone asks to reword one line, just reword it.
@@ -32,7 +33,9 @@ Never run the full pass on a single sentence. If someone asks to reword one line
 5. **Use everyday words and contractions.** Write the way you'd explain it to a smart friend. "Don't", "it's", "you'll" are natural, not sloppy.
 6. **Be concrete.** Prefer a specific noun, number, or example over a vague placeholder ("situation", "process", "factor"), and a named source over "experts say" or "studies show."
 7. **Lead with the point, hedge after.** State the claim cleanly first, then the one caveat that actually matters. Cut the pile of qualifiers before the claim ("while it's mixed and context-dependent, there may be some reason to think…"). Keep the real caveat; drop the throat-clearing.
-8. **No analogies or metaphors.** Say the thing directly. Skip "it's like…", the symphony, the dance, the journey.
+8. **Cut canned or decorative analogies.** Say the thing directly instead of reaching for
+   the stock symphony, dance, tapestry, or journey. Preserve an author's original metaphor
+   when it carries meaning or voice, and do not invent a new one unless the user wants it.
 9. **Strong verbs.** Don't bury the action in a noun: "decide", not "make a decision"; "investigate", not "conduct an investigation"; "to configure the runner, set…", not "configuring the runner involves…".
 10. **Active voice; name who did what.** "The team missed the deadline", not "the deadline was missed." Passive is fine only when the actor is genuinely unknown or irrelevant.
 11. **Don't bold for decoration.** Bolding the lead phrase of every bullet just for emphasis is a classic AI tell. Bold is fine only as a real structural header on a list item, where the bold text names the thing and the rest explains it, e.g. "**Live feedback loop.** Poll the file and react as events arrive."
@@ -51,9 +54,14 @@ See `references/examples.md` for before/after pairs that show each rule in actio
 
 By default, just return the rewritten prose. When the user asks to *see what changed* (or for a long, heavily-edited piece), produce the visual diff:
 
-1. Copy `assets/revision-report.html` to a new file (e.g. `revision-report.out.html`).
-2. Replace the line `const DATA = __DATA__;` with `const DATA = { ... };` filled per the schema documented at the top of that template (original, revised, and a list of changes, each with `type` = `keep` | `delete` | `rewrite`, the text, and a one-line `reason`).
-3. Tell the user the file path. It renders three tabs: Original, Revised, and a Diff (removed in red, rewritten in green, hover a change for its reason).
+1. Build a JSON file using the schema documented at the top of
+   `assets/revision-report.html` (original, revised, and ordered changes with `type` =
+   `keep` | `delete` | `rewrite`).
+2. Run `scripts/build_revision_report.py <data.json> <output.html>`. The script validates
+   the schema and embeds UTF-8 JSON as base64, so prose containing HTML or `</script>` cannot
+   break out into executable markup. Do not hand-edit data into a JavaScript literal.
+3. Remove the temporary JSON data file unless the user asked to keep it, then tell the user
+   the report path. It renders Original, Revised, and Diff tabs.
 
 Never generate the report for a one-liner or a trivial edit. It is opt-in, so it stays out of the way.
 

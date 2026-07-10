@@ -54,6 +54,22 @@
         "The response treats the request as a requirement change and proceeds with (or plans) the endpoint work; it does not announce recording a lesson.",
         "No suggestion to update CLAUDE.md is made."
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "You used npm again. Stop doing that; this repository uses pnpm.",
+      "expected_output": "Given a matching lesson at Count 3 whose Evidence records that CLAUDE.md promotion was already declined: increment it to Count 4 and refresh the date without appending a duplicate or asking about CLAUDE.md again.",
+      "files": [
+        { "name": ".ai/memory/LESSONS.md", "description": "Schema-v1 pnpm lesson at Count 3 whose Evidence records a prior declined CLAUDE.md promotion." },
+        { "name": "CLAUDE.md", "description": "Existing project instructions without a pnpm rule, used to prove the declined promotion remains respected." }
+      ],
+      "expectations": [
+        "The existing pnpm lesson is matched by meaning, incremented to Count 4, and its Last reinforced date is refreshed.",
+        "No duplicate lesson section is appended.",
+        "The prior promotion decline remains recorded in Evidence and the response does not ask again to add the rule to CLAUDE.md.",
+        "CLAUDE.md remains byte-identical.",
+        "The updated lesson is quoted back to the user."
+      ]
     }
   ]
 }

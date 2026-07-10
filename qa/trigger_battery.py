@@ -1,105 +1,244 @@
 #!/usr/bin/env python3
-"""Trigger-battery scored loop (objective tier) — optimize a skill's frontmatter
-`description` for routing precision.
+"""Measure skill routing precision against should/should-not-trigger prompts.
 
-For each description VARIANT: install the skill with that description into a fresh
-cwd, run each battery prompt as a `claude -p` session, and detect — BEHAVIORALLY —
-whether the skill fired: did the run write the skill's contract file
-(.ai/memory/LESSONS.md) in its cwd? Writing to native ~/.claude memory, or nowhere,
-counts as NOT fired. No judge needed — routing is mechanically observable.
+Each prompt runs in a fresh temporary project with one skill installed. Skills that
+write a deterministic contract file can use a contract-file detector; other skills
+are detected from the Claude Code `Skill` tool call in stream-json output. CLI errors
+abort the run instead of being misclassified as "did not trigger".
 
-Score = correct routing decisions / total (should-trigger wants fired; should-not
-wants silent). The winning variant is the description we'd ship. This is one round
-of the loop (score variants -> pick best); a full loop regenerates candidates from
-the losers and repeats until no improvement.
+Usage:
+  qa/trigger_battery.py qa/trigger-battery/lessons-learned.json
+  qa/trigger_battery.py qa/trigger-battery/natural-writing.json --model MODEL
 
-Usage: qa/trigger_battery.py qa/trigger-battery/lessons-learned.json [--model M]
-Local only. Writes results under qa/_work/trigger-battery/. Nothing is committed.
+Results are written under qa/_work/trigger-battery/ and are gitignored.
 """
 from __future__ import annotations
-import argparse, json, re, shutil, subprocess, sys, tempfile
+
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SKILLS = REPO / "plugins/session-memory/skills"
-CONTRACT_FILE = ".ai/memory/LESSONS.md"   # the behavioral signal for lessons-learned
+ALLOWED = "Skill,Agent,Read,Glob,Grep,Bash(ls*),Bash(cat*),Bash(mkdir*),Write,Edit"
 
-ALLOWED = "Skill,Read,Glob,Grep,Bash(ls*),Bash(cat*),Bash(mkdir*),Write,Edit"
-
-
-def swap_description(text: str, desc: str) -> str:
-    return re.sub(r"(?m)^description:.*$", "description: " + desc, text, count=1)
+sys.path.insert(0, str(REPO / "tools"))
+from validate_skill import parse_frontmatter  # noqa: E402
 
 
-def run_prompt(skill: str, desc: str, prompt: str, model: str) -> bool:
-    """Fresh cwd, skill installed with `desc`, run the prompt, return True if the
-    skill's contract file was written (it fired)."""
-    with tempfile.TemporaryDirectory() as td:
-        wd = Path(td)
-        dst = wd / ".claude" / "skills" / skill
-        shutil.copytree(SKILLS / skill, dst)
-        sm = dst / "SKILL.md"
-        sm.write_text(swap_description(sm.read_text(encoding="utf-8"), desc), encoding="utf-8")
-        subprocess.run(
-            ["claude", "-p", prompt, "--model", model, "--output-format", "json",
-             "--no-session-persistence", "--allowedTools", ALLOWED],
-            cwd=wd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+def locate_skill(battery: dict) -> Path:
+    skill = battery["skill"]
+    plugin = battery.get("plugin")
+    if plugin:
+        path = REPO / "plugins" / plugin / "skills" / skill
+        if not (path / "SKILL.md").is_file():
+            raise ValueError(f"skill not found: {path}")
+        return path
+
+    matches = sorted((REPO / "plugins").glob(f"*/skills/{skill}"))
+    matches = [path for path in matches if (path / "SKILL.md").is_file()]
+    if not matches:
+        raise ValueError(f"no plugin contains skill {skill!r}")
+    if len(matches) > 1:
+        choices = ", ".join(str(path.relative_to(REPO)) for path in matches)
+        raise ValueError(f"skill {skill!r} is distributed by multiple plugins; set 'plugin': {choices}")
+    return matches[0]
+
+
+def current_description(skill_dir: Path) -> str:
+    frontmatter, _ = parse_frontmatter((skill_dir / "SKILL.md").read_text(encoding="utf-8"))
+    description = frontmatter.get("description", "")
+    if not description:
+        raise ValueError(f"{skill_dir}/SKILL.md has no description")
+    return description
+
+
+def swap_description(text: str, description: str) -> str:
+    """Replace a one-line description with a JSON-quoted YAML scalar."""
+    quoted = json.dumps(description, ensure_ascii=False)
+    updated, count = re.subn(r"(?m)^description:.*$", f"description: {quoted}", text, count=1)
+    if count != 1:
+        raise ValueError("SKILL.md needs one top-level, one-line description field")
+    return updated
+
+
+def selected_skill(stdout: str, skill: str) -> bool:
+    """Return whether stream-json contains a Skill tool call selecting `skill`."""
+    for raw in stdout.splitlines():
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") != "assistant":
+            continue
+        for block in event.get("message", {}).get("content", []):
+            if block.get("type") != "tool_use" or block.get("name") != "Skill":
+                continue
+            tool_input = block.get("input", {})
+            selected = tool_input.get("skill") or tool_input.get("name") or ""
+            if str(selected).split(":")[-1] == skill:
+                return True
+    return False
+
+
+def result_metadata(stdout: str) -> dict:
+    """Extract cost/latency metadata from the final stream-json result event."""
+    metadata = {"duration_ms": 0, "total_cost_usd": 0.0, "num_turns": 0}
+    for raw in stdout.splitlines():
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") != "result":
+            continue
+        for key in metadata:
+            if event.get(key) is not None:
+                metadata[key] = event[key]
+    return metadata
+
+
+def run_prompt(skill_dir: Path, skill: str, description: str, prompt: str, model: str,
+               detector: dict) -> dict:
+    with tempfile.TemporaryDirectory() as temp:
+        cwd = Path(temp)
+        destination = cwd / ".claude" / "skills" / skill
+        shutil.copytree(skill_dir, destination)
+        plugin_agents = skill_dir.parent.parent / "agents"
+        if plugin_agents.is_dir():
+            shutil.copytree(plugin_agents, cwd / ".claude" / "agents")
+        skill_md = destination / "SKILL.md"
+        skill_md.write_text(
+            swap_description(skill_md.read_text(encoding="utf-8"), description),
+            encoding="utf-8",
         )
-        return (wd / CONTRACT_FILE).exists()
+
+        completed = subprocess.run(
+            [
+                "claude", "-p", prompt, "--model", model,
+                "--output-format", "stream-json", "--verbose",
+                "--no-session-persistence", "--allowedTools", ALLOWED,
+            ],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode != 0:
+            error = completed.stderr.strip() or completed.stdout[-500:].strip()
+            raise RuntimeError(f"claude exited {completed.returncode}: {error}")
+
+        kind = detector.get("type", "skill_tool")
+        if kind == "skill_tool":
+            fired = selected_skill(completed.stdout, skill)
+        elif kind == "contract_file":
+            relative = detector.get("path")
+            if not relative:
+                raise ValueError("contract_file detector requires a path")
+            fired = (cwd / relative).is_file()
+        elif kind == "skill_or_contract":
+            relative = detector.get("path")
+            if not relative:
+                raise ValueError("skill_or_contract detector requires a path")
+            fired = selected_skill(completed.stdout, skill) or (cwd / relative).is_file()
+        else:
+            raise ValueError(f"unknown detector type: {kind}")
+        return {"fired": fired, **result_metadata(completed.stdout)}
 
 
-def score(skill: str, desc: str, battery: dict, model: str) -> dict:
+def score(skill_dir: Path, skill: str, description: str, battery: dict, model: str) -> dict:
+    detector = battery.get("detector", {"type": "skill_tool"})
     rows = []
-    for p in battery["should_trigger"]:
-        rows.append(("should", p, run_prompt(skill, desc, p, model)))
-    for p in battery["should_not"]:
-        rows.append(("should_not", p, run_prompt(skill, desc, p, model)))
-    correct = sum(1 for kind, _, fired in rows if (kind == "should") == fired)
-    return {"correct": correct, "total": len(rows), "rows": rows}
+    for kind, prompts in (("should", battery["should_trigger"]),
+                          ("should_not", battery["should_not"])):
+        for prompt in prompts:
+            result = run_prompt(skill_dir, skill, description, prompt, model, detector)
+            rows.append({"kind": kind, "prompt": prompt, **result})
+    correct = sum(1 for row in rows if (row["kind"] == "should") == row["fired"])
+    return {
+        "correct": correct,
+        "total": len(rows),
+        "duration_ms": sum(row["duration_ms"] for row in rows),
+        "total_cost_usd": sum(row["total_cost_usd"] for row in rows),
+        "num_turns": sum(row["num_turns"] for row in rows),
+        "rows": rows,
+    }
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("battery", type=Path)
-    ap.add_argument("--model", default="claude-sonnet-4-6")
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("battery", type=Path)
+    parser.add_argument("--model", default="claude-sonnet-4-6")
+    args = parser.parse_args()
 
-    b = json.loads(args.battery.read_text())
-    skill = b["skill"]
-    out = REPO / "qa/_work/trigger-battery"
-    out.mkdir(parents=True, exist_ok=True)
+    battery = json.loads(args.battery.read_text(encoding="utf-8"))
+    skill = battery["skill"]
+    skill_dir = locate_skill(battery)
+    variants = battery.get("variants") or {"current": current_description(skill_dir)}
+    output_dir = REPO / "qa" / "_work" / "trigger-battery"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Trigger battery for {skill}  (model={args.model})")
-    print(f"{len(b['should_trigger'])} should-trigger + {len(b['should_not'])} should-not "
-          f"x {len(b['variants'])} variants\n")
+    print(f"Trigger battery for {skill} (model={args.model})")
+    print(f"Source: {skill_dir.relative_to(REPO)}")
+    print(
+        f"{len(battery['should_trigger'])} should-trigger + "
+        f"{len(battery['should_not'])} should-not x {len(variants)} variant(s)\n"
+    )
 
     scores = {}
-    for label, desc in b["variants"].items():
+    for label, description in variants.items():
         print(f"-- scoring variant: {label}")
-        r = score(skill, desc, b, args.model)
-        scores[label] = r
-        for kind, prompt, fired in r["rows"]:
-            ok = "OK " if (kind == "should") == fired else "MISS"
-            want = "fire" if kind == "should" else "silent"
-            got = "fired" if fired else "silent"
-            print(f"     [{ok}] want {want:6} got {got:6} | {prompt[:58]}")
-        print(f"   => {label}: {r['correct']}/{r['total']}\n")
+        result = score(skill_dir, skill, description, battery, args.model)
+        scores[label] = result
+        for row in result["rows"]:
+            kind, prompt, fired = row["kind"], row["prompt"], row["fired"]
+            passed = (kind == "should") == fired
+            print(
+                f"     [{'OK ' if passed else 'MISS'}] "
+                f"want {'fire' if kind == 'should' else 'silent':6} "
+                f"got {'fired' if fired else 'silent':6} | {prompt[:58]} "
+                f"| {row['duration_ms']/1000:.1f}s ${row['total_cost_usd']:.4f}"
+            )
+        print(
+            f"   => {label}: {result['correct']}/{result['total']} | "
+            f"{result['duration_ms']/1000:.1f}s ${result['total_cost_usd']:.4f}\n"
+        )
 
-    (out / f"{skill}.results.json").write_text(json.dumps(scores, indent=1))
-    ranked = sorted(scores.items(), key=lambda kv: kv[1]["correct"], reverse=True)
-    base = scores.get("baseline", {}).get("correct", -1)
+    artifact = {
+        "skill": skill,
+        "source": str(skill_dir.relative_to(REPO)),
+        "model": args.model,
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "scores": scores,
+    }
+    (output_dir / f"{skill}.results.json").write_text(
+        json.dumps(artifact, indent=1) + "\n", encoding="utf-8"
+    )
+
+    ranked = sorted(scores.items(), key=lambda item: item[1]["correct"], reverse=True)
+    baseline_label = "baseline" if "baseline" in scores else next(iter(variants))
+    baseline = scores[baseline_label]["correct"]
     print("scoreboard:")
-    for label, r in ranked:
-        delta = r["correct"] - base if base >= 0 and label != "baseline" else 0
-        tag = "  <- baseline" if label == "baseline" else (f"  (+{delta} vs baseline)" if delta > 0 else (f"  ({delta} vs baseline)" if delta < 0 else "  (= baseline)"))
-        print(f"  {r['correct']}/{r['total']}  {label}{tag}")
-    win_label, win = ranked[0]
-    if win_label == "baseline" or win["correct"] <= base:
-        print(f"\nDECISION: keep baseline ({base}/{win['total']}) — no candidate beat it. "
-              f"Losers go to rejected-edit memory; next round regenerates from them.")
+    for label, result in ranked:
+        delta = result["correct"] - baseline
+        suffix = " <- baseline" if label == baseline_label else f" ({delta:+d} vs baseline)"
+        print(
+            f"  {result['correct']}/{result['total']}  {label}{suffix} | "
+            f"{result['duration_ms']/1000:.1f}s ${result['total_cost_usd']:.4f}"
+        )
+
+    winner, result = ranked[0]
+    if winner == baseline_label or result["correct"] <= baseline:
+        print(f"\nDECISION: keep {baseline_label} ({baseline}/{result['total']}).")
     else:
-        print(f"\nDECISION: accept '{win_label}' ({win['correct']}/{win['total']} vs "
-              f"baseline {base}/{win['total']}). Ship as the new description; re-run to confirm.")
+        print(
+            f"\nDECISION: candidate {winner!r} leads "
+            f"({result['correct']}/{result['total']} vs {baseline}/{result['total']}). "
+            "Re-run before changing the shipped description."
+        )
     return 0
 
 

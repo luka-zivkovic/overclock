@@ -10,7 +10,7 @@ export const meta = {
   ],
 }
 
-const REPO = '/Users/makina/startups/overclock'
+const REPO = '.'
 const CONTEXT = `
 You are RE-JUDGING previously-rejected skill candidates for the Overclock repo at ${REPO}.
 
@@ -23,7 +23,9 @@ BEFORE judging, read: ${REPO}/docs/strategy.md (note the usefulness clarificatio
 Operating principles), ${REPO}/README.md, ${REPO}/docs/brainstorm/SHORTLIST.md, and the dated
 ${REPO}/docs/brainstorm/run-*.md logs. Also note what already ships / is installed: /simplify,
 code-simplifier, /code-review, /security-review, /verify, /run, feature-dev, pr-review-toolkit,
-plan mode, session-memory (lessons-learned, session-handoff), commit-push-pr, CLAUDE.md.
+  plan mode, session-memory (lessons-learned, session-handoff), learning-loop,
+  natural-writing, discipline-gates (test-discipline, git-archaeologist), commit-push-pr,
+  CLAUDE.md.
 
 CORRECTED BAR:
 1. USEFUL FIRST — genuinely helps everyday dev / working-with-AI, reached for often. Stateless is fine.

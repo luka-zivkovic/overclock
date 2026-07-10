@@ -69,6 +69,21 @@
         "Every line of site/index.md other than the headline is byte-identical to the fixture (git diff shows changes only on the heading line).",
         "No revision-report HTML file is generated and no full-document rule-by-rule pass is announced."
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "Edit draft/security-note.md in place so it sounds natural, preserving the literal attack sample exactly. Also create revision-report.html so I can inspect what changed.",
+      "expected_output": "The article is de-AI'd without changing the literal attack sample, and the requested revision-report.html is generated through the bundled safe report builder. The report embeds its data as base64 rather than placing the hostile </script><script> sequence into executable markup.",
+      "files": [
+        { "name": "draft/security-note.md", "description": "Tell-heavy security blog draft containing a literal </script><script> attack sample that must remain exact in the Markdown but be safely encoded inside the report." }
+      ],
+      "expectations": [
+        "draft/security-note.md is edited in place; AI-tell vocabulary/scaffolding is removed while the literal `</script><script>window.pwned=true</script>` sample remains byte-identical in the Markdown.",
+        "revision-report.html is created and contains Original, Revised, and Diff report data for this edit.",
+        "The bundled scripts/build_revision_report.py helper is used (visible in tool calls), rather than manually inserting raw prose into a JavaScript object.",
+        "The exact hostile sequence `</script><script>window.pwned=true</script>` does not appear raw in revision-report.html and the __DATA_BASE64__ placeholder is gone; the data is embedded as base64.",
+        "No temporary report-data JSON file is left behind unless explicitly requested."
+      ]
     }
   ]
 }

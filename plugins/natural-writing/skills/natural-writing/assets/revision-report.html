@@ -1,7 +1,8 @@
 <!doctype html>
 <!--
   natural-writing revision report.
-  Fill DATA below, then open in a browser. Replace the line `const DATA = __DATA__;` with a literal:
+  Generate this file with scripts/build_revision_report.py. The script validates this schema
+  and replaces the data placeholder with base64-encoded UTF-8 JSON:
 
   const DATA = {
     title: "optional heading",
@@ -49,7 +50,9 @@
 <div id="diff" class="pane"></div>
 
 <script>
-const DATA = __DATA__;
+const DATA = JSON.parse(new TextDecoder().decode(
+  Uint8Array.from(atob("__DATA_BASE64__"), c => c.charCodeAt(0))
+));
 
 (function render() {
   if (DATA.title) document.getElementById("title").textContent = DATA.title;

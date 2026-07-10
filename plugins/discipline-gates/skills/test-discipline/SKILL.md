@@ -1,6 +1,6 @@
 ---
 name: test-discipline
-description: Pre-action test gates that make the tests around a code edit trustworthy, in three modes routed by what is about to happen. repro — before fixing a reported bug with an observable wrong behavior (an error, wrong output, or failing case), write and commit a test that fails for that stated reason, then fix to green. characterize — before editing or refactoring a function or module with NO behavioral test coverage, pin its current behavior as committed green tests, confirm green pre-edit, and keep them green through the edit. validate — immediately after ANY new test goes green (including tests the other modes wrote), mutate the code under test, rerun only that test, demand red, then restore the mutation unconditionally; kills vacuous tests that pass no matter what. Use when about to fix a reported bug, refactor untested code, or right after a new test passes. Do NOT use for trivial typo/copy fixes, config/version/dependency bumps, pure renames or signature-only changes, formatting/lint-only diffs, generated/vendored/lockfile changes, new feature work (that is feature-dev territory), or code already covered by behavioral tests.
+description: Use for three test gates around edits to existing code. repro — before fixing a reported bug with an observable symptom, use an existing failing regression test or write and commit a new test that fails for the stated reason, then fix to green. characterize — before refactoring code with no behavioral coverage, commit green tests that pin current observable outputs or effects. validate — after a new test goes green, back up and mutate the code under test, rerun only that test, require red, then restore the exact pre-mutation bytes. Do NOT use for typos/copy, config/version/dependency bumps, behavior-preserving renames, formatting, generated/vendored/lockfile changes, new features, or characterize mode when behavioral coverage already exists.
 ---
 
 # Test Discipline
@@ -38,15 +38,19 @@ freshly-green test.
 
 1. **Restate the symptom as a concrete assertion**: input → expected output vs reported wrong
    output. If the report has no observable symptom, ask for one before writing anything.
-2. **Find the project's test conventions** (runner, directory layout, naming) and follow them.
-3. **Write a test asserting the CORRECT behavior** — the behavior the fix should produce.
+2. **Find the project's test conventions and existing coverage.** If an existing test already
+   asserts the reported behavior and fails for the stated reason, use it as the red oracle;
+   do not add a duplicate. Otherwise follow the runner, layout, and naming conventions.
+3. **When no adequate test exists, write one asserting the CORRECT behavior** — the behavior
+   the fix should produce.
 4. **Run it and confirm it fails for the stated reason.** The failure output must reflect the
    reported symptom (the wrong value, the error), not an import or setup problem. Fails for a
    different reason → fix the test, not the code.
    **If it passes, stop.** The bug may be elsewhere, already fixed, or misreported — report
    "cannot reproduce" with the evidence and go no further; never patch speculatively.
-5. **Commit the red test** as its own commit (e.g. `test: repro <symptom> (red)`), so the
-   reproduction is preserved even if the fix takes several attempts.
+5. **Commit a newly written red test** as its own commit (e.g. `test: repro <symptom> (red)`),
+   so the reproduction is preserved even if the fix takes several attempts. An adequate
+   pre-existing committed test needs no new test commit.
 6. **Fix the production code.** Rerun the test → green. Rerun any suite the project treats as
    the pre-commit bar.
 7. **Chain into `validate`** on the new test (below).
@@ -56,8 +60,9 @@ freshly-green test.
 ## Mode: characterize — pin behavior before you refactor
 
 1. **Verify the no-coverage precondition.** Search the test suite for the symbol under edit.
-   Coverage means tests that assert its output values; mock-only or import-only references
-   don't count. If behavioral coverage exists, this mode does not fire — the suite is the pin.
+   Coverage means tests that assert observable return values, state changes, emitted events,
+   errors, or other externally visible effects; mock-only or import-only references don't
+   count. If behavioral coverage exists, this mode does not fire — the suite is the pin.
 2. **Enumerate the observable behaviors** worth pinning: main paths, edge cases, error paths.
 3. **Write tests capturing CURRENT behavior exactly** — including ugly or suspicious outputs,
    annotated as pinned-not-endorsed (a comment like `// pins current behavior; change
@@ -77,10 +82,9 @@ A green test that cannot go red is worse than no test. Right after any new test 
 
 1. **Pick one mutation** in the code under test — the regression the test claims to catch
    (invert the fixed condition, wrong constant, skip the guard). One file only.
-2. **Choose the restore mechanism before mutating**:
-   - file clean vs HEAD → restore with `git checkout -- <file>`;
-   - file has uncommitted changes (e.g. the fix just applied) → `cp <file> <file>.mutbak`
-     first, restore with `mv <file>.mutbak <file>`.
+2. **Back up the exact pre-mutation file before mutating.** Copy it to a unique adjacent
+   `.mutbak` path and refuse to overwrite a pre-existing backup. This protects both committed
+   and uncommitted content and avoids restoring from a possibly different HEAD snapshot.
 3. **Mutate → run ONLY the target test → restore.** Restore executes unconditionally — on
    red, on green, on runner crash, on anything unexpected — before reporting results or
    asking the user anything. Then rerun the test once to prove the tree is back to green.

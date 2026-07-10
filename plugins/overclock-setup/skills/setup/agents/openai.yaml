@@ -1,0 +1,6 @@
+interface:
+  display_name: "Overclock Setup"
+  short_description: "Audit and plan an Overclock installation"
+  default_prompt: "Use $setup to audit this project and produce a safe, report-only Overclock setup plan."
+policy:
+  allow_implicit_invocation: false

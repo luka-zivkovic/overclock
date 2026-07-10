@@ -1,9 +1,10 @@
 # Packaging design — the discipline-gate family
 
-**Status:** design pass only. **Nothing here is built.** This document decides *how* to package four
-STRONG candidates if/when demand justifies building them; it does not authorize a build. Do not
-scaffold or modify any skill on the basis of this doc, and do not edit `docs/strategy.md`
-(human-curated). Build is gated on the demand evidence in §6.
+**Status:** implemented on 2026-07-03 as `plugins/discipline-gates/`. This document is retained as
+the historical packaging rationale. Its pre-build demand gate was superseded by
+`docs/strategy.md` principle 4: a direct request or concrete use is sufficient demand. Sections
+below preserve the reasoning that led to the two-skill package; statements such as “do not build”
+describe the decision state before implementation, not the current repository state.
 
 ---
 

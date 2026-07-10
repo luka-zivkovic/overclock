@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "marketplace": "overclock",
+  "packages": [
+    {
+      "id": "overclock-setup",
+      "display_name": "Overclock Setup",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "setup-advisor"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": "2.1.196",
+      "selection": "Choose when you want a report-only audit and installation plan for Overclock plugins."
+    },
+    {
+      "id": "session-memory",
+      "display_name": "Session Memory",
+      "version": "1.0.3",
+      "publication_status": "published",
+      "provides": [
+        "session-handoff",
+        "lessons-learned"
+      ],
+      "depends_on": [],
+      "conflicts_with": [
+        "learning-loop"
+      ],
+      "hooks": [
+        "SessionStart: surface HANDOFF.md and LESSONS.md state"
+      ],
+      "persistent_files": [
+        ".ai/memory/HANDOFF.md",
+        ".ai/memory/LESSONS.md"
+      ],
+      "minimum_host_version": null,
+      "selection": "Choose for session handoff plus durable lessons. Do not combine with learning-loop."
+    },
+    {
+      "id": "learning-loop",
+      "display_name": "Learning Loop",
+      "version": "1.0.1",
+      "publication_status": "published",
+      "provides": [
+        "lessons-learned"
+      ],
+      "depends_on": [],
+      "conflicts_with": [
+        "session-memory"
+      ],
+      "hooks": [
+        "SessionStart: surface LESSONS.md state"
+      ],
+      "persistent_files": [
+        ".ai/memory/LESSONS.md"
+      ],
+      "minimum_host_version": null,
+      "selection": "Choose for durable lessons without session handoff. Do not combine with session-memory."
+    },
+    {
+      "id": "natural-writing",
+      "display_name": "Natural Writing",
+      "version": "1.0.1",
+      "publication_status": "published",
+      "provides": [
+        "natural-prose-writing",
+        "natural-prose-editing"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose for drafting or revising multi-paragraph prose without common AI tells."
+    },
+    {
+      "id": "critical-thinking",
+      "display_name": "Critical Thinking",
+      "version": "0.1.0",
+      "publication_status": "preview",
+      "provides": [
+        "critical-thinking",
+        "independent-research"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Preview only; do not emit installation commands until it is published."
+    },
+    {
+      "id": "discipline-gates",
+      "display_name": "Discipline Gates",
+      "version": "0.1.1",
+      "publication_status": "preview",
+      "provides": [
+        "test-discipline",
+        "git-archaeology"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Preview only; do not emit installation commands until it is published."
+    }
+  ]
+}

@@ -19,17 +19,16 @@ module, not that it observes behavior. Prefer a mutation that keeps the code run
 ## Applying and restoring — the contract
 
 - Mutate exactly ONE file. Never stack mutations.
-- Choose the restore mechanism BEFORE mutating:
-  - File clean vs HEAD (`git status --porcelain -- <file>` prints nothing): mutate, run, then
-    `git checkout -- <file>`.
-  - File has uncommitted changes (for example the fix you just applied): `cp <file> <file>.mutbak`,
-    mutate, run, then `mv <file>.mutbak <file>`.
+- Back up the exact pre-mutation bytes BEFORE mutating: copy the file to a unique adjacent
+  `<file>.mutbak` path. Refuse to overwrite an existing backup; investigate it first. This
+  single mechanism protects both committed and uncommitted content and avoids restoring a
+  different snapshot from HEAD.
 - Run ONLY the target test (single file or single test filter), never the whole suite.
 - **Restore FIRST, unconditionally** — before reading results closely, before reporting,
   before asking the user anything, even if the runner crashed or something looks wrong.
 - After restoring, rerun the test once to prove the tree is back to green.
-- If a session is interrupted mid-mutation, recovery is one command (`git checkout -- <file>`
-  or `mv <file>.mutbak <file>`); a leftover `.mutbak` file means restoration did not complete.
+- If a session is interrupted mid-mutation, recovery is one command
+  (`mv <file>.mutbak <file>`); a leftover `.mutbak` file means restoration did not complete.
 
 ## Verdicts
 

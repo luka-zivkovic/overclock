@@ -10,7 +10,7 @@ export const meta = {
   ],
 }
 
-const REPO = '/Users/makina/startups/overclock'
+const REPO = '.'
 const CONTEXT = `
 You are evaluating EXISTING, PUBLISHED third-party skills for the Overclock repo at ${REPO}
 — a PERSONAL TOOLKIT of Claude Code plugins/skills. NOT a product line, NOT a marketplace entry.
@@ -27,7 +27,8 @@ BETTER, not a gate to disqualify on:
 - ${REPO}/docs/brainstorm/SHORTLIST.md — prior verdicts
 - list ${REPO}/plugins/**/skills/  — the EXISTING KIT (the ONLY redundancy set that matters)
 - NOTE overlapping installed tools: /simplify + code-simplifier, /code-review, feature-dev,
-  pr-review-toolkit, plan mode, session-memory (lessons-learned/session-handoff), CLAUDE.md.
+  pr-review-toolkit, plan mode, session-memory (lessons-learned/session-handoff), learning-loop,
+  natural-writing, discipline-gates (test-discipline/git-archaeologist), and CLAUDE.md.
 
 RULES (from strategy.md, usefulness bar):
 1. USEFULNESS IS THE GATE. A skill is worth having if you'd reliably reach for it on real work.

@@ -1,8 +1,8 @@
 {
   "skill": "test-discipline",
-  "note": "Routing battery for test-discipline (discipline-gates plugin). FIRED = the skill is selected and one of its modes (repro/characterize/validate) engages. Firing is behaviorally observable (a test file is written/committed, or a mutate-run-restore cycle appears), but the current trigger_battery.py contract-file detector (.ai/memory/LESSONS.md) does not run this battery directly; these cases are the day-one should-trigger / should-NOT-trigger spec. should_trigger wants FIRED=true; should_not wants FIRED=false. Case 7 of should_not assumes fixture context where the named test suite exists.",
+  "note": "Routing battery for test-discipline. FIRED means the stream-json transcript contains a Skill tool call selecting test-discipline. should_trigger wants FIRED=true; should_not wants FIRED=false. Case 7 of should_not assumes fixture context where the named test suite exists.",
   "should_trigger": [
-    "parseAmount returns 1233 for '$12.34' instead of 1234 — fix it.",
+    "parseAmount returns 434 for '$4.35' instead of 435 — fix it.",
     "The API 500s when the payload has a null email; users are hitting it in prod. Fix the crash.",
     "Refactor src/legacy/pricing.js into smaller functions — there are no tests for it.",
     "Clean up this 300-line formatDuration function; behavior must stay identical. Nothing tests it today.",

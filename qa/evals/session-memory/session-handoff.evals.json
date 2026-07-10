@@ -97,6 +97,22 @@
         "The skill offers to write the pasted handoff to .ai/memory/HANDOFF.md (creating directories as needed), and does not do so silently without mentioning it.",
         "Direction is confirmed with the user before executing the next step."
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "Replace our old checkpoint with the current state and save it: we're moving the cache from Redis to KeyDB because Redis licensing no longer fits deployment, the ioredis cluster attempt failed because it cannot discover our proxy topology, and next we need to add the KeyDB endpoint to src/cache.js.",
+      "expected_output": "The existing HANDOFF.md is archived before the new KeyDB handoff is written. With five archives already present, retention leaves exactly the five newest archives, including the superseded Redis handoff, while removing the oldest prior archive.",
+      "files": [
+        { "name": ".ai/memory/HANDOFF.md", "description": "Existing Redis migration handoff that must be archived rather than overwritten." },
+        { "name": ".ai/memory/archive/", "description": "Five timestamped prior handoffs, used to verify the retention cap after another archive is added." }
+      ],
+      "expectations": [
+        "The previous Redis HANDOFF.md survives under .ai/memory/archive/ with its goal intact; it is not silently overwritten or discarded.",
+        "The new current HANDOFF.md records the KeyDB goal, the licensing rationale, the failed ioredis cluster attempt with its proxy-topology cause, and the next step naming src/cache.js.",
+        "Archive retention is enforced: exactly five archived handoff files remain and the oldest pre-existing archive (the 2026-06-01 checkpoint) is removed.",
+        "Current git anchors are captured for the new handoff and no git commit is created.",
+        "Writes and deletions are confined to .ai/memory/."
+      ]
     }
   ]
 }
