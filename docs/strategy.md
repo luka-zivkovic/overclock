@@ -58,6 +58,10 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
 - **Next:** Phase-0 baseline head-to-head — persona+precedent stack vs the built-ins
   on real n8n PRs, blind-judged with our eval harness — *before* building. If it
   doesn't visibly beat the built-ins, we learn that for a few cents.
+- **Phase-0 scaffolded (2026-07-12):** `qa/experiments/pr-reviewer-phase0/` pins six
+  real merged n8n PRs, the current external candidate commit, a blind rubric, result
+  schema, and a hard 4-of-6 build gate. The actual two-arm reviews remain deliberately
+  manual and can accumulate during normal use; scaffolding is not a build verdict.
 - **Risks:** product-sized (Phase 1 is real work); the n8n-specific corpus/few-shots
   need generalizing into a per-repo ingest story before it's marketplace material;
   the interactive triage needs negative-control evals so it doesn't over-question.

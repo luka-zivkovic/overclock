@@ -1,5 +1,11 @@
 {
   "skill": "critical-thinking",
+  "samples": 3,
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.8,
+    "specificity": 0.9
+  },
   "note": "Routing battery for critical-thinking. FIRED means the stream-json transcript contains a Skill tool call selecting critical-thinking. should_trigger wants FIRED=true; should_not wants FIRED=false.",
   "should_trigger": [
     "I think we should rewrite the API in Rust because Rust is faster. Am I right?",
