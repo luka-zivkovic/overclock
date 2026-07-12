@@ -29,8 +29,11 @@ against.
 
 ## 2. Dogfood bridge — planned, small
 
-Overclock's 6 plugins get `skillguard gate` in CI, making this repo skillguard's first
-real user.
+Overclock's 6 plugins get `skillguard scan` in CI (M0 provides CI exit codes), making
+this repo skillguard's first real user. The full `gate` command is an M2/future
+deliverable — its own demand gates forbid justifying it via dogfooding, so it is not
+part of this bridge. And to keep terms straight with section 1: this is a craft check
+in CI (strategy principle 2), not a gate on what gets built.
 
 **Honest framing: this is an integration test, NOT demand evidence.** Running
 skillguard against our own plugins proves the tool executes end-to-end on a real
@@ -48,17 +51,19 @@ it.
 
 skillguard M1 needs the behavioral-eval mechanics that live in
 [`qa/run_evals.sh`](../qa/run_evals.sh) — but ported to TypeScript. Maintaining two
-harnesses forever (Python here, TS there) is waste.
+harnesses forever (Bash+Python here, TS there) is waste.
 
 **Options:**
 
 - **(a) Port once to TS; Overclock consumes it.** One harness, one set of fixes.
-  Cost: a real port of proven Python machinery, plus migration risk for the 66-case
+  Cost: a real port of proven Bash+Python machinery, plus migration risk for the 66-case
   corpus and the graders that already work. Overclock takes a dependency on a sibling
   repo for its own CI.
-- **(b) Keep Python; defer skillguard M1.** Zero disruption here; the harness that
-  works keeps working. Cost: skillguard M1 stalls, or eventually builds its own TS
-  harness anyway and the duplication becomes permanent.
+- **(b) Keep the current harness; defer the port.** Zero disruption here; the harness
+  that works keeps working. Cost: the duplication question stays open — skillguard M1
+  is blocked by its own sandbox prerequisite and external-M0-usage gate regardless of
+  what Overclock does, and if M1 ever clears those gates, skillguard builds a TS
+  harness anyway.
 
 **Hard prerequisite either way:** skillguard M1 runs *untrusted* skills, which is
 unsafe without container/VM isolation. Overclock's harness only ever evals its own
