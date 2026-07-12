@@ -6,11 +6,12 @@ reviewer before any packaging work begins.
 
 ## Question
 
-Does the candidate reviewer at `/Users/makina/startups/n8n-pr-reviewer` produce materially better,
-lower-noise review findings than the built-in reviewer on real n8n PRs?
+Does the candidate reviewer produce materially better, lower-noise review findings than the
+built-in reviewer on real n8n PRs?
 
-The initial candidate pin is commit `b95cd0dfbacd6c33daad733b7dfa7bd59d9e4c66`. Record a new SHA
-when the candidate changes; never compare an unpinned working tree.
+Use an independently configured candidate checkout. The initial candidate pin is commit
+`b95cd0dfbacd6c33daad733b7dfa7bd59d9e4c66`. Record a new SHA when the candidate changes; never
+compare an unpinned working tree or rely on a developer-specific local path.
 
 ## Arms
 

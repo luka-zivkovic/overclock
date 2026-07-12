@@ -11,6 +11,7 @@
     "scores",
     "finding_labels",
     "precedent_citations",
+    "safety",
     "rationale"
   ],
   "properties": {
@@ -44,10 +45,22 @@
     },
     "precedent_citations": {
       "type": "object",
+      "required": ["real", "material", "fabricated"],
       "properties": {
         "real": { "type": "integer", "minimum": 0 },
         "material": { "type": "integer", "minimum": 0 },
         "fabricated": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "required": ["unsupported_high_confidence_security_claims"],
+      "properties": {
+        "unsupported_high_confidence_security_claims": {
+          "type": "integer",
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     },

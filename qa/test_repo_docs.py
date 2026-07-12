@@ -48,6 +48,15 @@ class RepoDocsTest(unittest.TestCase):
         required = set(schema["required"])
         self.assertIn("blind_key", required)
         self.assertIn("precedent_citations", required)
+        self.assertIn("safety", required)
+        self.assertEqual(
+            set(schema["properties"]["precedent_citations"]["required"]),
+            {"real", "material", "fabricated"},
+        )
+        self.assertEqual(
+            schema["properties"]["safety"]["required"],
+            ["unsupported_high_confidence_security_claims"],
+        )
         blind_options = schema["properties"]["blind_key"]["oneOf"]
         self.assertEqual(
             {tuple(sorted(option["const"].items())) for option in blind_options},
@@ -56,6 +65,10 @@ class RepoDocsTest(unittest.TestCase):
                 (("A", "candidate"), ("B", "baseline")),
             },
         )
+
+    def test_pr_reviewer_docs_do_not_embed_a_developer_home(self) -> None:
+        path = REPO / "qa/experiments/pr-reviewer-phase0/README.md"
+        self.assertNotIn("/Users/", path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
