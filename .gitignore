@@ -1,2 +1,4 @@
 qa/_work/
 .impeccable/
+__pycache__/
+*.py[cod]
