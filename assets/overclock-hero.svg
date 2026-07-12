@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" role="img" aria-labelledby="title description">
+  <title id="title">Overclock</title>
+  <desc id="description">Three inputs converge through a speed dial and four gates into one arrow.</desc>
+  <rect width="1600" height="420" fill="#fff"/>
+
+  <g fill="none" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 125H320C430 125 470 210 610 210H690"/>
+    <path d="M80 210H690"/>
+    <path d="M80 295H320C430 295 470 210 610 210H690"/>
+
+    <circle cx="800" cy="210" r="110" fill="#fff"/>
+    <path d="M735 235A70 70 0 0 1 865 235"/>
+    <path d="M800 210L850 155" stroke-width="10"/>
+    <circle cx="800" cy="210" r="11" fill="#000"/>
+    <path d="M748 188L733 177M800 169V147M852 188L867 177" stroke-width="4"/>
+
+    <path d="M910 210H1510"/>
+    <path d="M1510 210L1475 185M1510 210L1475 235"/>
+
+    <rect x="995" y="170" width="55" height="80" fill="#fff"/>
+    <rect x="1115" y="170" width="55" height="80" fill="#fff"/>
+    <rect x="1235" y="170" width="55" height="80" fill="#fff"/>
+    <rect x="1355" y="170" width="55" height="80" fill="#fff"/>
+  </g>
+
+  <g fill="#000">
+    <circle cx="80" cy="125" r="9"/>
+    <circle cx="80" cy="210" r="9"/>
+    <circle cx="80" cy="295" r="9"/>
+    <circle cx="1022.5" cy="210" r="8"/>
+    <circle cx="1142.5" cy="210" r="8"/>
+    <circle cx="1262.5" cy="210" r="8"/>
+    <circle cx="1382.5" cy="210" r="8"/>
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/overclock-hero.jpg" alt="A precision mechanism routing accelerated energy through four controlled gates" width="100%">
+  <img src="assets/overclock-hero.svg" alt="Three inputs converge through a speed dial and four gates into one arrow" width="100%">
 </p>
 
 <h1 align="center">Overclock</h1>

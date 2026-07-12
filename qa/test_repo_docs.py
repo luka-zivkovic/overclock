@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -21,10 +22,12 @@ class RepoDocsTest(unittest.TestCase):
                 missing.append(target)
         self.assertEqual(missing, [])
 
-        hero = REPO / "assets/overclock-hero.jpg"
-        self.assertIn('src="assets/overclock-hero.jpg"', readme)
+        hero = REPO / "assets/overclock-hero.svg"
+        self.assertIn('src="assets/overclock-hero.svg"', readme)
         self.assertTrue(hero.is_file())
-        self.assertLess(hero.stat().st_size, 500_000)
+        self.assertLess(hero.stat().st_size, 10_000)
+        root = ET.parse(hero).getroot()
+        self.assertEqual(root.attrib["viewBox"], "0 0 1600 420")
 
     def test_pr_reviewer_corpus_is_pinned_and_unique(self) -> None:
         path = REPO / "qa/experiments/pr-reviewer-phase0/cases.json"
