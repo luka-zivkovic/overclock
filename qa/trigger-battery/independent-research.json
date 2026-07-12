@@ -1,6 +1,11 @@
 {
   "skill": "independent-research",
   "plugin": "critical-thinking",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
   "note": "Routing battery for independent-research. Every prompt receives a committed local project with implementation, runtime/CI, API specification, saved paper, and exported logs. FIRED means the Skill tool selected independent-research.",
   "fixture_git": true,
   "fixture_files": {

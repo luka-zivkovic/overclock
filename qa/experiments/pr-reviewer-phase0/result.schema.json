@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR-reviewer Phase-0 case result",
+  "type": "object",
+  "required": [
+    "case_id",
+    "candidate_commit",
+    "baseline",
+    "blind_key",
+    "verdict",
+    "scores",
+    "finding_labels",
+    "precedent_citations",
+    "rationale"
+  ],
+  "properties": {
+    "case_id": { "type": "string" },
+    "candidate_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "baseline": { "type": "string" },
+    "blind_key": {
+      "oneOf": [
+        { "const": { "A": "baseline", "B": "candidate" } },
+        { "const": { "A": "candidate", "B": "baseline" } }
+      ]
+    },
+    "verdict": { "enum": ["A", "B", "tie"] },
+    "scores": {
+      "type": "object",
+      "required": ["A", "B"],
+      "properties": {
+        "A": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "B": { "type": "integer", "minimum": 0, "maximum": 10 }
+      },
+      "additionalProperties": false
+    },
+    "finding_labels": {
+      "type": "object",
+      "required": ["A", "B"],
+      "properties": {
+        "A": { "$ref": "#/$defs/labels" },
+        "B": { "$ref": "#/$defs/labels" }
+      },
+      "additionalProperties": false
+    },
+    "precedent_citations": {
+      "type": "object",
+      "properties": {
+        "real": { "type": "integer", "minimum": 0 },
+        "material": { "type": "integer", "minimum": 0 },
+        "fabricated": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "rationale": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "labels": {
+      "type": "object",
+      "required": ["confirmed", "plausible", "unsupported", "nit"],
+      "properties": {
+        "confirmed": { "type": "integer", "minimum": 0 },
+        "plausible": { "type": "integer", "minimum": 0 },
+        "unsupported": { "type": "integer", "minimum": 0 },
+        "nit": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

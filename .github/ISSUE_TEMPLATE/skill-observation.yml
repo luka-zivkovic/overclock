@@ -1,0 +1,71 @@
+name: Skill behavior observation
+description: Record a real trigger, miss, false positive, or workflow failure from normal use.
+title: "observation: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Real usage is more valuable than invented examples. Remove credentials, private source,
+        customer data, and other secrets before submitting.
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      options:
+        - overclock-setup / setup
+        - session-memory / session-handoff
+        - session-memory / lessons-learned
+        - learning-loop / lessons-learned
+        - natural-writing / natural-writing
+        - critical-thinking / critical-thinking
+        - critical-thinking / independent-research
+        - discipline-gates / test-discipline
+        - discipline-gates / git-archaeologist
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: What happened?
+      options:
+        - Correct trigger and useful behavior
+        - Missed trigger
+        - False-positive trigger
+        - Triggered correctly but workflow failed
+        - Unclear / inconsistent across runs
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Sanitized prompt or situation
+      description: Include the smallest context that still reproduces the behavior.
+      placeholder: What did you ask, and what relevant project state was available?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and evidence
+      description: Include tool selection, relevant output, file effects, or a transcript excerpt.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Claude Code version, model, plugin version, OS, and install scope when known.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, private code, customer data, and identifying information.
+          required: true
