@@ -1,21 +1,35 @@
 {
   "skill": "test-discipline",
-  "note": "Routing battery for test-discipline. FIRED means the stream-json transcript contains a Skill tool call selecting test-discipline. should_trigger wants FIRED=true; should_not wants FIRED=false. Case 7 of should_not assumes fixture context where the named test suite exists.",
+  "note": "Routing battery for test-discipline. Every prompt receives the same committed miniature codebase: named bug/refactor functions exist, pricing/formatDuration have no behavioral tests, rounding has a new passing test, and tax has full behavioral coverage. FIRED means the Skill tool selected test-discipline.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Routing fixture\nA smple committed project.\n",
+    "package.json": "{\"scripts\":{\"test\":\"node --test\"}}\n",
+    "src/money.js": "exports.parseAmount = value => Math.floor(Number(value.slice(1)) * 100);\n",
+    "src/api.js": "exports.userEmail = user => user.email.toLowerCase();\n",
+    "src/legacy/pricing.js": "exports.price = (subtotal, vip) => vip ? subtotal * 0.9 : subtotal;\n",
+    "src/duration.js": "exports.formatDuration = seconds => `${Math.floor(seconds / 60)}m ${seconds % 60}s`;\n",
+    "src/discount.js": "exports.computeDiscount = total => total >= 100 ? 10 : 0;\n",
+    "src/rounding.js": "exports.roundMoney = value => Math.round(value * 100) / 100;\n",
+    "tests/rounding.test.js": "const test = require('node:test'); const assert = require('node:assert/strict'); const {roundMoney} = require('../src/rounding'); test('rounds', () => assert.equal(roundMoney(1.005), 1));\n",
+    "src/tax.js": "exports.tax = amount => amount * 0.2;\n",
+    "tests/tax.test.js": "const test = require('node:test'); const assert = require('node:assert/strict'); const {tax} = require('../src/tax'); test('tax behavior', () => assert.equal(tax(100), 20));\n"
+  },
   "should_trigger": [
-    "parseAmount returns 434 for '$4.35' instead of 435 — fix it.",
+    "parseAmount in src/money.js returns 434 for '$4.35' instead of 435 — fix it.",
     "The API 500s when the payload has a null email; users are hitting it in prod. Fix the crash.",
     "Refactor src/legacy/pricing.js into smaller functions — there are no tests for it.",
-    "Clean up this 300-line formatDuration function; behavior must stay identical. Nothing tests it today.",
+    "Clean up formatDuration in src/duration.js; behavior must stay identical. Nothing tests it today.",
     "I just added tests/rounding.test.js and it passes — are we good?",
     "Write a unit test for computeDiscount."
   ],
   "should_not": [
-    "Fix the typo in the README heading.",
+    "Fix the 'smple' typo in README.md.",
     "Bump lodash to 4.17.21 in package.json.",
     "Rename getUserByID to getUserById everywhere — no behavior change.",
-    "Run prettier on src/ and commit the formatting.",
+    "Reformat src/discount.js to match the project style without changing behavior.",
     "Add a CSV export feature to the reports page.",
     "Regenerate pnpm-lock.yaml and commit it.",
-    "Refactor src/tax.ts — it has a full behavioral test suite in tests/tax.test.ts."
+    "Refactor src/tax.js — it has a full behavioral test suite in tests/tax.test.js."
   ]
 }

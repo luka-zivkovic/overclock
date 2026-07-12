@@ -2,11 +2,17 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from trigger_battery import result_metadata, selected_skill, swap_description  # noqa: E402
+from trigger_battery import (  # noqa: E402
+    materialize_fixture,
+    result_metadata,
+    selected_skill,
+    swap_description,
+)
 
 
 class TriggerBatteryTest(unittest.TestCase):
@@ -42,6 +48,14 @@ class TriggerBatteryTest(unittest.TestCase):
             "total_cost_usd": 0.0125,
             "num_turns": 3,
         })
+
+    def test_materializes_safe_fixture_and_rejects_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            materialize_fixture(root, {"fixture_files": {"src/demo.js": "ok\n"}})
+            self.assertEqual((root / "src/demo.js").read_text(), "ok\n")
+            with self.assertRaisesRegex(ValueError, "unsafe fixture path"):
+                materialize_fixture(root, {"fixture_files": {"../escape": "bad"}})
 
 
 if __name__ == "__main__":

@@ -1,15 +1,24 @@
 {
   "skill": "git-archaeologist",
-  "note": "Routing battery for git-archaeologist. FIRED means the stream-json transcript contains a Skill tool call selecting git-archaeologist. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "note": "Routing battery for git-archaeologist. Every prompt receives a committed miniature project containing the named defensive constructs. FIRED means the Skill tool selected git-archaeologist.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Routing fixture\nA smple committed project.\n",
+    "queue/worker.js": "exports.run = async job => { for (let attempt = 0; attempt < 3; attempt++) { try { return await job(); } catch (error) { if (attempt === 2) throw error; } } };\n",
+    "src/validateOrder.js": "exports.validateOrder = order => { if (!order || !order.id) return false; return true; };\n",
+    "src/cache.js": "const mutex = { runExclusive: fn => fn() }; exports.refresh = () => mutex.runExclusive(() => 'fresh');\n",
+    "src/pagination.js": "exports.pageSize = requested => Math.min(requested, 100);\n",
+    "src/parser.js": "exports.parse = value => { if (value == null) return null; // defensive, shouldn't happen\nreturn JSON.parse(value); };\n"
+  },
   "should_trigger": [
     "Delete the retry/backoff loop in queue/worker.js — it looks unnecessary.",
     "This early return at the top of validateOrder seems redundant, remove it.",
     "Drop the mutex around the cache refresh; I don't think we need locking here.",
-    "Remove the clamp on maxPageSize so callers can request any page size.",
+    "Remove the pageSize clamp in src/pagination.js so callers can request any page size.",
     "There's a check commented '// defensive, shouldn't happen' in the parser — clean it up."
   ],
   "should_not": [
-    "Fix the typo in this code comment.",
+    "Fix the 'smple' typo in README.md.",
     "Bump the Docker base image tag in the Dockerfile.",
     "Rename the retryCount variable to attempts — behavior unchanged.",
     "Run the linter and fix the import ordering in src/.",

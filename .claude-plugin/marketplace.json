@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "development",
       "keywords": [
         "setup",
@@ -66,6 +66,38 @@
         "style",
         "natural-language",
         "anti-ai-tell"
+      ]
+    },
+    {
+      "name": "critical-thinking",
+      "source": "./plugins/critical-thinking",
+      "description": "Get clear-eyed analysis instead of agreeable answers. Tests user framing, separates evidence from assumptions, calibrates uncertainty, and delegates material local-evidence questions to a fresh bounded research context without generic praise or reflexive contrarianism.",
+      "version": "0.1.1",
+      "category": "development",
+      "keywords": [
+        "critical-thinking",
+        "reasoning",
+        "decision-making",
+        "anti-sycophancy",
+        "research",
+        "verification",
+        "evidence"
+      ]
+    },
+    {
+      "name": "discipline-gates",
+      "source": "./plugins/discipline-gates",
+      "description": "Pre-action engineering gates backed by real evidence: reproduce bugs before fixing, characterize untested behavior before refactoring, prove new tests can fail with safe mutation restore, and recover defensive-code intent from git history before weakening it.",
+      "version": "0.1.2",
+      "category": "development",
+      "keywords": [
+        "testing",
+        "tdd",
+        "repro",
+        "characterization-tests",
+        "mutation-testing",
+        "git-history",
+        "discipline"
       ]
     }
   ]

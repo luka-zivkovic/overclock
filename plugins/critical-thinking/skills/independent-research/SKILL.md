@@ -1,6 +1,6 @@
 ---
 name: independent-research
-description: "Verify a decision-relevant factual uncertainty from accessible local evidence in a fresh, read-only research context instead of relying on the user's framing or prior conversation. Use for a referenced repository, project, document, dataset, saved paper, exported log, or checked-in specification; when the user asks to inspect or verify such a local source; or when critical-thinking delegates a neutral local-evidence question. Prefer primary evidence, preserve provenance, report contradictions and access gaps, and return a bounded evidence packet. Do not use for websites or live APIs, preferences, personal facts only the user can know, creative tasks, immaterial uncertainties, or prohibited access."
+description: "Verify decision-relevant facts from accessible local evidence in a fresh research context instead of relying on the user's framing or prior conversation. Always use when the user asks to independently inspect, research, or verify a referenced local repository/project, checked-in source/config/CI, local API specification, saved document/paper, exported log, or dataset rather than trust a summary; also use when critical-thinking delegates a neutral local-evidence question. Prefer primary evidence, preserve provenance, report contradictions and access gaps, and return a bounded evidence packet. Do not use for websites or live APIs, preferences, personal facts only the user can know, creative tasks, immaterial uncertainties, or prohibited access."
 context: fork
 agent: Explore
 ---
