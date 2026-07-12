@@ -5,6 +5,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## overclock-setup
 
+### 0.1.1 — 2026-07-12
+- Publish `critical-thinking` and `discipline-gates` in the bundled capability
+  catalog so setup can recommend exact installation commands for both packages.
+
 ### 0.1.0 — 2026-07-10
 - Publish a manual `/overclock-setup:setup` advisor focused on Overclock product
   selection rather than duplicating Claude's built-in project initializer.
@@ -27,6 +31,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   hook refusal, and requests to bypass report-only mode.
 
 ## critical-thinking
+
+### 0.1.1 — 2026-07-12
+- Publish the plugin in the Overclock marketplace.
+- Make critical-thinking and independent-research route reliably for reassessment,
+  high-stakes evidence checks, and explicitly requested local-source verification.
+- Make evidence-based reversals explain how material experiment-validity signals
+  strengthen or limit the causal conclusion instead of merely listing them.
 
 ### 0.1.0 — 2026-07-10
 - Add a stateless reasoning skill that tests user framing independently, separates
@@ -91,6 +102,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   byte-identical-quote traps and two negative controls): 5/5 green.
 
 ## discipline-gates
+
+### 0.1.2 — 2026-07-12
+- Publish the plugin in the Overclock marketplace.
+- Front-load concrete bug-fix, untested-refactor, and newly-green-test triggers,
+  while making already-covered and behavior-preserving edits explicit exclusions.
+- Route defensive-code archaeology on concrete guards, retries, locks, and caller
+  bounds without triggering on behavior-preserving control-flow rewrites.
 
 ### 0.1.1 — 2026-07-09
 - test-discipline: reuse an adequate existing failing regression test instead of

@@ -1,12 +1,23 @@
 {
   "skill": "independent-research",
   "plugin": "critical-thinking",
-  "note": "Routing battery for independent-research. FIRED means the stream-json transcript contains a Skill tool call selecting independent-research. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "note": "Routing battery for independent-research. Every prompt receives a committed local project with implementation, runtime/CI, API specification, saved paper, and exported logs. FIRED means the Skill tool selected independent-research.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Atlas\nRedis accelerates session lookups. See checked-in source for durable storage.\n",
+    "src/customerStore.js": "exports.customerStore = { durable: 'postgres', cache: 'redis' };\n",
+    "package.json": "{\"engines\":{\"node\":\">=22 <23\"}}\n",
+    ".nvmrc": "22\n",
+    ".github/workflows/ci.yml": "steps:\n  - uses: actions/setup-node@v4\n    with:\n      node-version: 22\n",
+    "spec/openapi.yaml": "paths:\n  /v1/customers:\n    get:\n      operationId: listCustomers\n",
+    "papers/study.md": "# Headline: treatment works\nMethods: randomized, n=40. Result: confidence interval crosses zero.\n",
+    "logs/outage.log": "2026-07-10T10:00Z db_pool_exhausted\n2026-07-10T10:01Z request_timeout\n"
+  },
   "should_trigger": [
     "Inspect the referenced repository and verify whether Redis is actually the source of truth.",
-    "Research this claim from the checked-in project sources instead of trusting my summary.",
-    "Inspect the referenced local API specification and tell me whether this endpoint is declared.",
-    "Verify what runtime version this project really uses by inspecting its config and CI.",
+    "Research my claim that the checked-in customer store at . persists durable data in Redis instead of trusting my summary.",
+    "Independently inspect the local API specification at ./spec/openapi.yaml, without relying on our earlier summary, and verify whether /v1/customers is declared.",
+    "Independently verify what runtime version the project at . really uses by inspecting its config and CI.",
     "Read the saved paper in ./papers and check whether the headline matches its methods and results.",
     "Look through the accessible logs and determine whether the outage explanation is supported."
   ],

@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -80,8 +80,8 @@
     {
       "id": "critical-thinking",
       "display_name": "Critical Thinking",
-      "version": "0.1.0",
-      "publication_status": "preview",
+      "version": "0.1.1",
+      "publication_status": "published",
       "provides": [
         "critical-thinking",
         "independent-research"
@@ -91,13 +91,13 @@
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Preview only; do not emit installation commands until it is published."
+      "selection": "Choose for evidence-based critique, calibrated decisions, and bounded independent research without agreeable filler."
     },
     {
       "id": "discipline-gates",
       "display_name": "Discipline Gates",
-      "version": "0.1.1",
-      "publication_status": "preview",
+      "version": "0.1.2",
+      "publication_status": "published",
       "provides": [
         "test-discipline",
         "git-archaeology"
@@ -107,7 +107,7 @@
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Preview only; do not emit installation commands until it is published."
+      "selection": "Choose for pre-edit test discipline and git-history checks before risky code changes."
     }
   ]
 }

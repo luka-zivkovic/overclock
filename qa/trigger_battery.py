@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -103,10 +104,41 @@ def result_metadata(stdout: str) -> dict:
     return metadata
 
 
+def materialize_fixture(cwd: Path, battery: dict) -> None:
+    """Create optional repo-owned text fixtures for routing prompts that name files."""
+    files = battery.get("fixture_files", {})
+    if not isinstance(files, dict) or not all(
+        isinstance(name, str) and isinstance(content, str)
+        for name, content in files.items()
+    ):
+        raise ValueError("fixture_files must map relative paths to text")
+    for name, content in files.items():
+        relative = Path(name)
+        if relative.is_absolute() or ".." in relative.parts or not relative.parts:
+            raise ValueError(f"unsafe fixture path: {name!r}")
+        destination = cwd / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(content, encoding="utf-8")
+    if battery.get("fixture_git"):
+        env = dict(os.environ)
+        env.update(
+            {
+                "GIT_AUTHOR_NAME": "fixture",
+                "GIT_AUTHOR_EMAIL": "fixture@example.com",
+                "GIT_COMMITTER_NAME": "fixture",
+                "GIT_COMMITTER_EMAIL": "fixture@example.com",
+            }
+        )
+        subprocess.run(["git", "init", "-q", "-b", "main"], cwd=cwd, env=env, check=True)
+        subprocess.run(["git", "add", "-A"], cwd=cwd, env=env, check=True)
+        subprocess.run(["git", "commit", "-qm", "routing fixture"], cwd=cwd, env=env, check=True)
+
+
 def run_prompt(skill_dir: Path, skill: str, description: str, prompt: str, model: str,
-               detector: dict) -> dict:
+               detector: dict, battery: dict) -> dict:
     with tempfile.TemporaryDirectory() as temp:
         cwd = Path(temp)
+        materialize_fixture(cwd, battery)
         source_plugin = skill_dir.parent.parent
         destination_plugin = cwd / "plugin-under-test"
         shutil.copytree(source_plugin, destination_plugin)
@@ -156,7 +188,9 @@ def score(skill_dir: Path, skill: str, description: str, battery: dict, model: s
     for kind, prompts in (("should", battery["should_trigger"]),
                           ("should_not", battery["should_not"])):
         for prompt in prompts:
-            result = run_prompt(skill_dir, skill, description, prompt, model, detector)
+            result = run_prompt(
+                skill_dir, skill, description, prompt, model, detector, battery
+            )
             rows.append({"kind": kind, "prompt": prompt, **result})
     correct = sum(1 for row in rows if (row["kind"] == "should") == row["fired"])
     return {

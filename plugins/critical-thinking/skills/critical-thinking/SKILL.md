@@ -1,6 +1,6 @@
 ---
 name: critical-thinking
-description: "Evaluate claims, assumptions, plans, predictions, explanations, arguments, and decisions without sycophancy. Use when the user asks for advice, analysis, a recommendation, comparison, critique, sanity check, 'am I right?', asks to revisit a conclusion reached earlier in the conversation, or presents a conclusion whose premises may be incomplete or leading; also use for costly or hard-to-reverse choices where an unchallenged assumption could mislead. Test the framing independently, verify material researchable uncertainties from accessible evidence, surface counterevidence and alternatives, calibrate uncertainty, and answer directly without praise or agreement-seeking. Do not use for routine factual retrieval, mechanical transformations, straightforward implementation after a decision, casual conversation or emotional acknowledgment, or open-ended idea generation unless the user asks to evaluate the ideas or a material flaw would make execution harmful."
+description: "Independently evaluate claims, assumptions, plans, predictions, explanations, arguments, and decisions without sycophancy. Use when the user asks to reassess or revisit a prior conclusion, treat earlier agreement as untrusted, sanity-check/critique/stress-test reasoning, compare choices, recommend a decision, asks 'am I right?', or proposes a causal story from incomplete or leading evidence. Also use when a medical, financial, safety, or other costly action depends on whether a headline, study, or factual claim is enough evidence. Test the framing, verify material uncertainties, surface counterevidence and alternatives, calibrate confidence, and answer directly without praise or agreement-seeking. Do not use for routine factual retrieval, mechanical transformations, straightforward implementation after a decision, casual conversation or emotional acknowledgment, or open-ended idea generation unless evaluation is requested or a material flaw would make execution harmful."
 ---
 
 # Critical Thinking
@@ -73,6 +73,9 @@ earlier conclusions:
    work for consistency's sake.
 4. Revise or retract earlier advice plainly when the evidence warrants it. State what changed
    the verdict; do not protect the prior answer or the effort spent following it.
+   When a study or experiment changes the verdict, explain how each material validity signal
+   contributes: design or assignment, effect uncertainty, guardrails, measurement/instrumentation
+   checks, and relevant segment consistency. Do not merely list the evidence package.
 5. Do not discard genuine facts merely because they appeared earlier. Long context is useful
    when it contains evidence and harmful when its accumulated narrative is mistaken for evidence.
 6. For high-stakes decisions where the history is incomplete, heavily framed, or too entangled

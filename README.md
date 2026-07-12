@@ -65,6 +65,10 @@ The `LESSONS.md` format is a strict subset of `session-memory`'s, so the two are
 
 ### critical-thinking — clear-eyed answers, not agreeable ones
 
+```
+/plugin install critical-thinking@overclock
+```
+
 The plugin contains two cooperating skills:
 
 - **critical-thinking** independently tests your framing before it answers. It separates evidence from assumptions, points out causal leaps and credible alternatives, calibrates uncertainty, and gives the conclusion directly without generic praise. When invoked after a long discussion, it preserves raw evidence but treats prior user/assistant conclusions as untrusted hypotheses, so repetition and sunk cost do not masquerade as corroboration.
@@ -74,11 +78,13 @@ Critical-thinking calls research only when resolving the uncertainty could chang
 
 Skill routing is not a reliable always-on tone setting. If you never want congratulatory filler, also put a direct rule such as `Do not praise my questions or agree for social reasons; evaluate claims on evidence` in your user-level `~/.claude/CLAUDE.md`. Use the plugin for the heavier audit and research workflow.
 
-The plugin is built but not yet listed in the marketplace. Its committed live-eval and routing suites must pass before publication.
-
 ### discipline-gates — evidence before risky edits
 
-`discipline-gates` is built but not yet listed in the marketplace. Its original 0.1.0 suite passed 10/10 live cases; the audited 0.1.1 changes in this branch await their final live-eval rerun before publication. It contains two skills:
+```
+/plugin install discipline-gates@overclock
+```
+
+`discipline-gates` contains two skills:
 
 - **test-discipline** — reproduce a reported bug with a red test before fixing it, characterize untested behavior before refactoring it, and mutation-check freshly green tests so vacuous tests cannot pass unnoticed.
 - **git-archaeologist** — recover the history behind guards, retries, locks, clamps, and other defensive code before deleting or weakening them.

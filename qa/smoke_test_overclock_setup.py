@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install overclock-setup from the local marketplace in an isolated config."""
+"""Install newly published Overclock packages from an isolated local marketplace."""
 from __future__ import annotations
 
 import json
@@ -9,6 +9,11 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+PACKAGES = {
+    "overclock-setup": {"setup"},
+    "critical-thinking": {"critical-thinking", "independent-research"},
+    "discipline-gates": {"test-discipline", "git-archaeologist"},
+}
 
 
 def run(*args: str, env: dict[str, str]) -> str:
@@ -29,15 +34,19 @@ def main() -> int:
         env = dict(os.environ)
         env["CLAUDE_CONFIG_DIR"] = temp
         run("plugin", "marketplace", "add", str(REPO), env=env)
-        run("plugin", "install", "overclock-setup@overclock", "--scope", "user", env=env)
+        for package in PACKAGES:
+            run("plugin", "install", f"{package}@overclock", "--scope", "user", env=env)
         rows = json.loads(run("plugin", "list", "--json", env=env))
-        matches = [row for row in rows if row.get("id") == "overclock-setup@overclock"]
-        if len(matches) != 1 or not matches[0].get("enabled"):
-            raise SystemExit("overclock-setup was not installed and enabled exactly once")
-        details = run("plugin", "details", "overclock-setup@overclock", env=env)
-        if "setup" not in details:
-            raise SystemExit("installed plugin details do not list the setup skill")
-    print("OK: isolated marketplace install exposes overclock-setup:setup")
+        for package, expected_skills in PACKAGES.items():
+            plugin_id = f"{package}@overclock"
+            matches = [row for row in rows if row.get("id") == plugin_id]
+            if len(matches) != 1 or not matches[0].get("enabled"):
+                raise SystemExit(f"{package} was not installed and enabled exactly once")
+            details = run("plugin", "details", plugin_id, env=env)
+            missing = sorted(skill for skill in expected_skills if skill not in details)
+            if missing:
+                raise SystemExit(f"{package} details omit skills: {', '.join(missing)}")
+    print("OK: isolated marketplace install exposes setup, critical-thinking, and discipline-gates")
     return 0
 
 

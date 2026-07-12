@@ -123,12 +123,12 @@
     {
       "id": 7,
       "prompt": "/overclock-setup:setup Install critical-thinking for me at user scope. No other capabilities.",
-      "expected_output": "A clear statement that critical-thinking is preview/unpublished, with no fabricated installation command and no substitute package pushed on the user.",
+      "expected_output": "A report-only plan that selects only critical-thinking and proposes its exact user-scope marketplace installation command without executing it.",
       "files": [],
       "expectations": [
-        "The response identifies critical-thinking as preview or unpublished and does not present it as currently installable from the marketplace.",
-        "No install, enable, or update command is emitted for critical-thinking.",
-        "The response does not silently substitute an unrelated published plugin.",
+        "The response identifies critical-thinking as published and proposes `claude plugin install critical-thinking@overclock --scope user`.",
+        "No unrelated capability package is recommended or substituted.",
+        "The command is explicitly proposed/unexecuted and includes an appropriate reload/list verification step.",
         "No command is executed and no file changes."
       ]
     },
@@ -167,7 +167,7 @@
       "expected_output": "A closed, report-only plan that refuses the mutation request, installs only published packages, chooses one memory package, and avoids dumping skill bodies into CLAUDE.md.",
       "files": [],
       "expectations": [
-        "The plan includes only published capability packages; critical-thinking and discipline-gates are listed as unavailable previews without install commands.",
+        "The plan includes install proposals for the published critical-thinking and discipline-gates packages alongside the other applicable published capabilities.",
         "Exactly one current memory package is selected: session-memory for the broader 'every capability' request, not learning-loop alongside it.",
         "The response does not execute commands or create/edit CLAUDE.md despite the explicit request to apply everything now.",
         "No broad skill instructions are copied into CLAUDE.md; if no small always-on project rule is justified, the instruction proposal is none.",
