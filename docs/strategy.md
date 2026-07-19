@@ -46,7 +46,7 @@ so it ships to no user and needs no version bump.
 
 Append-only. Each candidate carries a verdict and the evidence behind it.
 
-### PR-reviewer — STRONG, recommended (2026-06-16)
+### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a
   persona + precedent-PR + embeddings stack; plus an earlier pass). That *is* the
   candidate ledger at Count 2 — observed pain, not ideation.
@@ -54,17 +54,31 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   inline) + decaying, evidence-counted review learnings *per repo*. No official tool
   has this — `/code-review` (incl. ultra), pr-review-toolkit, `/security-review` are
   all amnesiac. This is the one candidate grounding made **stronger**.
-- **Trust model already right:** drafts comments the human pastes; never auto-posts.
-- **Next:** Phase-0 baseline head-to-head — persona+precedent stack vs the built-ins
-  on real n8n PRs, blind-judged with our eval harness — *before* building. If it
-  doesn't visibly beat the built-ins, we learn that for a few cents.
-- **Phase-0 scaffolded (2026-07-12):** `qa/experiments/pr-reviewer-phase0/` pins six
-  real merged n8n PRs, the current external candidate commit, a blind rubric, result
-  schema, and a hard 4-of-6 build gate. The actual two-arm reviews remain deliberately
-  manual and can accumulate during normal use; scaffolding is not a build verdict.
-- **Risks:** product-sized (Phase 1 is real work); the n8n-specific corpus/few-shots
-  need generalizing into a per-repo ingest story before it's marketplace material;
-  the interactive triage needs negative-control evals so it doesn't over-question.
+- **Trust model settled:** drafts comments the human may paste; never auto-fixes, edits, commits,
+  pushes, or posts. Implementation and comment publication are permanently outside `review-pr`.
+- **Next:** run the three-arm Phase-0 comparison on real n8n PRs — built-in baseline, generic
+  pr-kit, and initialized pr-kit — blind-judged with the committed rubric before publishing.
+- **Original Phase-0 scaffold (2026-07-12):** `qa/experiments/pr-reviewer-phase0/` pinned six
+  real merged n8n PRs, the external candidate commit, a blind rubric, result schema, and a hard
+  build gate. The review runs remain deliberately manual; scaffolding is not a build verdict.
+- **Product shape chosen (2026-07-17):** one independently installable `pr-kit` plugin with two
+  explicit skills. `review-pr` must remain repository-agnostic, read-only, adversarial in discovery,
+  conservative in reporting, and useful with no setup. `initialize-pr-kit` is a one-time/refresh
+  initializer whose only write is a source-grounded `.ai/pr-kit/REPOSITORY.md`; it never edits
+  instructions/settings or commits. Current source always outranks the profile.
+- **Phase-0 expanded (2026-07-17):** the experiment now has built-in baseline, generic pr-kit, and
+  initialized pr-kit arms. Generic must beat baseline independently; initialized context must then
+  show material source-valid lift over generic. The skill-shaped candidate lives under the
+  experiment directory and is intentionally unpublished until both gates pass.
+- **Mechanics hardening (2026-07-17):** grounding against EveryInc's compound-engineering plugin
+  added delta-aware profile-input digests, deterministic risk-scope signals, exact changed-line
+  finding validation, a silent-pass verification lens, and positive/negative behavioral controls.
+  The candidate deliberately kept one local read-only reviewer: no fixed persona swarm, external
+  code egress, auto-fixes, commits, posting, or writeful review mode. Those mutations are outside
+  the product boundary, not deferred Phase-0 features.
+- **Risks:** the historical corpus is still one repository; repository-profile quality and setup
+  cost may vary substantially across codebases; stale profiles can mislead unless current-source
+  precedence and source validation remain strict.
 
 ### super-plan-mode — PARKED, narrow at best (2026-06-16)
 - **Intended:** deeper task analysis + better planning than current plan mode.

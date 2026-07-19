@@ -35,6 +35,7 @@ OBJECTIVE_CUES = re.compile(
     r"\b(test|exit code|exact|byte-identical|json|schema|compile|lint|diff|git)\b",
     re.I,
 )
+OPENAI_INTERFACE_FIELDS = ("display_name", "short_description", "default_prompt")
 
 
 def estimate_tokens(text: str) -> int:
@@ -54,6 +55,115 @@ def discover(root: Path) -> list[Path]:
         except OSError:
             continue
     return sorted(by_real.values())
+
+
+def audit_openai_metadata(
+    skill_dir: Path,
+    skill_name: str,
+    *,
+    user_invoked: bool,
+) -> list[tuple[str, str]]:
+    """Check Codex picker metadata and cross-harness invocation parity.
+
+    The repository keeps this parser deliberately small and dependency-free. It
+    validates only the direct `interface` and `policy` fields that Overclock
+    requires, while tolerating unrelated top-level Codex metadata.
+    """
+    findings: list[tuple[str, str]] = []
+    path = skill_dir / "agents" / "openai.yaml"
+    if not path.is_file():
+        return [("FAIL", "Codex metadata is missing: agents/openai.yaml")]
+
+    values: dict[str, tuple[str, int]] = {}
+    section: str | None = None
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for lineno, raw_line in enumerate(lines, start=1):
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        top_level = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_-]*):\s*", raw_line)
+        if top_level:
+            section = top_level.group(1)
+            continue
+        direct_field = re.fullmatch(
+            r"  ([A-Za-z_][A-Za-z0-9_-]*):(?:\s+(.*))?", raw_line
+        )
+        if direct_field and section in {"interface", "policy"}:
+            key = f"{section}.{direct_field.group(1)}"
+            if key in values:
+                findings.append(("FAIL", f"{path.name}:{lineno}: duplicate {key}"))
+            values[key] = ((direct_field.group(2) or "").strip(), lineno)
+
+    decoded: dict[str, str] = {}
+    for field in OPENAI_INTERFACE_FIELDS:
+        key = f"interface.{field}"
+        raw_value, lineno = values.get(key, ("", 0))
+        if not raw_value:
+            findings.append(("FAIL", f"Codex metadata is missing required field {key}"))
+            continue
+        try:
+            value = json.loads(raw_value)
+        except json.JSONDecodeError:
+            findings.append(
+                ("FAIL", f"{path.name}:{lineno}: {key} must be a quoted string")
+            )
+            continue
+        if not isinstance(value, str) or not value.strip():
+            findings.append(("FAIL", f"{path.name}:{lineno}: {key} must be non-empty"))
+            continue
+        decoded[field] = value
+
+    short_description = decoded.get("short_description")
+    if short_description and not 25 <= len(short_description) <= 64:
+        findings.append(
+            (
+                "FAIL",
+                "interface.short_description must contain 25–64 characters "
+                f"(got {len(short_description)})",
+            )
+        )
+
+    default_prompt = decoded.get("default_prompt")
+    invocation_name = skill_name.split(":")[-1]
+    if default_prompt and f"${invocation_name}" not in default_prompt:
+        findings.append(
+            (
+                "FAIL",
+                f"interface.default_prompt must mention ${invocation_name}",
+            )
+        )
+
+    policy_raw, policy_line = values.get("policy.allow_implicit_invocation", ("", 0))
+    policy: bool | None = None
+    if policy_raw:
+        if policy_raw == "true":
+            policy = True
+        elif policy_raw == "false":
+            policy = False
+        else:
+            findings.append(
+                (
+                    "FAIL",
+                    f"{path.name}:{policy_line}: policy.allow_implicit_invocation "
+                    "must be true or false",
+                )
+            )
+
+    if user_invoked and policy is not False:
+        findings.append(
+            (
+                "FAIL",
+                "user-invoked skill must set policy.allow_implicit_invocation: false",
+            )
+        )
+    if not user_invoked and policy is False:
+        findings.append(
+            (
+                "FAIL",
+                "model-invoked skill must not disable implicit invocation in openai.yaml",
+            )
+        )
+
+    return findings
 
 
 def distribution_for(skill_md: Path) -> tuple[str, str]:
@@ -108,6 +218,11 @@ def audit_one(skill_md: Path) -> dict:
         description = frontmatter.get("description", "")
     except ValueError:
         pass
+
+    user_invoked = frontmatter.get("disable-model-invocation", "").lower() == "true"
+    findings.extend(
+        audit_openai_metadata(skill_dir, name, user_invoked=user_invoked)
+    )
 
     if description:
         if not re.search(r"\b(use when|when |before |after |for )\b", description, re.I):

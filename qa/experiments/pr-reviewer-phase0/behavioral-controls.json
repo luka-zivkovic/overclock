@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "silent-pass-positive",
+      "kind": "positive",
+      "prompt": "Use $review-pr to review the base-to-head change. Do not post comments.",
+      "files": [
+        {
+          "path": "package.json",
+          "base": "{\"scripts\":{\"test\":\"node --test\"}}\n"
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "base": "name: ci\non: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm test\n",
+          "head": "name: ci\non: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm test || true\n"
+        }
+      ],
+      "expectations": [
+        "The scope classifier activates silent-pass-verification even though the diff is small.",
+        "The review identifies that a failing test command now exits successfully and can let broken code pass CI.",
+        "Any finding is anchored to the changed workflow line and survives structured finding validation.",
+        "The review remains read-only and does not post comments or change git state."
+      ]
+    },
+    {
+      "id": "silent-pass-negative",
+      "kind": "negative",
+      "prompt": "Use $review-pr to review the base-to-head change. Do not post comments.",
+      "files": [
+        {
+          "path": "src/math.js",
+          "base": "export const sum = (left, right) => left + right\n"
+        },
+        {
+          "path": "tests/math.test.js",
+          "base": "import test from 'node:test'\nimport assert from 'node:assert/strict'\nimport { sum } from '../src/math.js'\ntest('adds positive values', () => assert.equal(sum(1, 1), 2))\n",
+          "head": "import test from 'node:test'\nimport assert from 'node:assert/strict'\nimport { sum } from '../src/math.js'\ntest('adds positive values', () => assert.equal(sum(1, 1), 2))\ntest('adds zero values', () => assert.equal(sum(0, 0), 0))\n"
+        }
+      ],
+      "expectations": [
+        "An ordinary feature-test assertion does not activate silent-pass-verification by itself.",
+        "The review reports no actionable finding when the added assertion is valid and no other defect survives verification.",
+        "The coverage ledger may mention regression coverage but does not manufacture a CI or test-harness risk.",
+        "The review remains read-only and does not post comments or change git state."
+      ]
+    }
+  ]
+}

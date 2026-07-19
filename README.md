@@ -173,6 +173,8 @@ immediate per-case progress. See [`qa/trigger-battery/README.md`](qa/trigger-bat
 
 ## Development
 
+- [`AGENTS.md`](AGENTS.md) is the cross-harness maintainer contract for skill, publication, evidence,
+  and validation invariants.
 - [`docs/strategy.md`](docs/strategy.md) records durable build/no-build decisions.
 - [`docs/brainstorm/SHORTLIST.md`](docs/brainstorm/SHORTLIST.md) is evidence accrual, not a roadmap.
 - [`qa/evals/`](qa/evals/) contains full behavioral suites.

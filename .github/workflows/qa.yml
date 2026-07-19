@@ -50,10 +50,12 @@ jobs:
             echo "no hook changes"
           fi
 
-      - name: Audit report (non-blocking)
+      - name: Audit skill distributions
         run: |
-          python3 tools/audit_skills.py plugins --out audit.md || true
+          status=0
+          python3 tools/audit_skills.py plugins --out audit.md --fail-on fail || status=$?
           { echo '## Skill audit'; cat audit.md 2>/dev/null || echo '(audit produced no report)'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
 
       - name: Official plugin validation
         run: |

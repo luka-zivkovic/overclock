@@ -1,8 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "repository": "n8n-io/n8n",
   "selected_at": "2026-07-12",
-  "selection": "Merged, non-backport PRs spanning core, editor, source-control, AI-node, and credential security behavior; includes one large stress case and four cases with substantive inline review history.",
+  "selection": "Merged, non-backport PRs spanning core, editor, source-control, AI-node, and credential security behavior; includes one large stress case and four cases with substantive inline review history. risk_lens is judge-only metadata and is never supplied to reviewer arms.",
   "cases": [
     {
       "id": "frozen-error-prototype",
