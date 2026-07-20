@@ -31,7 +31,11 @@ Run when the user asks to stop, checkpoint, or save state.
 4. **Write the new HANDOFF.md** from `templates/handoff.md` (read the template now; it is fill-in-ready). Fill every section from the actual conversation:
    - **Current goal** — what we are ultimately trying to achieve, one or two sentences.
    - **Plan** — each step with status (done / in-progress / todo). Mid-task save: mark the in-progress step and note exactly where in it work stopped.
-   - **Decisions** — each with its rationale. A decision without its why gets re-litigated next session.
+   - **Decisions** — each with its rationale and a provenance label: `[user-directed]` (the
+     user stated the choice), `[user-approved]` (proposed in-session, examined and accepted by
+     the user), or `[agent-proposed]` (not yet examined by the user). A decision without its
+     why gets re-litigated next session. Never label the agent's own unexamined proposal as
+     user-directed or user-approved.
    - **Failed approaches** — what was tried, why it failed, and what ruled it out. This is the highest-value section: it is the only thing preventing the next session from burning time on the same dead ends.
    - **Open questions** — unresolved unknowns, including anything awaiting the user.
    - **Next steps** — concrete first actions for the next session, specific enough to start cold.
@@ -86,5 +90,10 @@ This skill fires when the user asks; it cannot fire merely because a handoff exi
 - **Never fabricate prior state.** No handoff means cold start, said in those words.
 - **Failed approaches are first-class.** Capture why each failed — "tried X, didn't work" without the cause invites a retry.
 - **Warn on drift, don't obey a stale plan.** Anchors exist precisely so the resume flow can distrust the file when the repo moved on.
+- **User-settled decisions stay settled.** After resume, a `[user-directed]` or `[user-approved]`
+  decision is augmented, never re-asked: do not reopen it or propose the alternative it already
+  rejected. Contradict it only when new material evidence emerged since the save — present that
+  evidence once, plainly, and let the user re-decide. `[agent-proposed]` and unlabeled decisions
+  remain open to ordinary revision (older handoffs without labels stay valid).
 - **Writes confined to `.ai/memory/`; no secrets; no auto-commit.** These keep the skill safe to ship in real repositories.
 - **Concurrent sessions** are last-writer-wins on HANDOFF.md; the archive preserves the loser. Mention the limitation if the user hits it; do not build locking.

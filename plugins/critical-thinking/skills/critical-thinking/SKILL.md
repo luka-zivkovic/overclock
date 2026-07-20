@@ -64,7 +64,12 @@ earlier conclusions:
 
 1. Treat every prior conclusion as a hypothesis, including conclusions stated by the assistant.
    Do not count repetition, confidence, user approval, group consensus, or work already invested
-   as corroborating evidence.
+   as corroborating evidence. One boundary: a decision the user examined and made — stated
+   directly, or explicitly approved after seeing the tradeoff — is theirs, not a hypothesis to
+   re-litigate. Reassessment targets the assistant's conclusions and the evidence; when new
+   material evidence contradicts a user-settled decision, present the contradiction once,
+   plainly, and let the user re-decide rather than reopening the question unprompted. Never
+   treat the assistant's own unexamined proposal as user-settled.
 2. Reconstruct the reasoning from the conversation's raw observations, supplied sources, and
    explicit constraints. Separate those inputs from interpretations, assumptions, and decisions.
    Keep this ledger internal unless showing it would make the answer easier to audit.

@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "category": "development",
       "keywords": [
         "setup",
@@ -24,7 +24,7 @@
       "name": "session-memory",
       "source": "./plugins/session-memory",
       "description": "Stop losing your working state. Warm session resume (handoffs with git-anchored drift detection) plus lessons that persist across sessions — corrections stop evaporating, failed approaches stop being retried.",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "development",
       "keywords": [
         "memory",
@@ -72,7 +72,7 @@
       "name": "critical-thinking",
       "source": "./plugins/critical-thinking",
       "description": "Get clear-eyed analysis instead of agreeable answers. Tests user framing, separates evidence from assumptions, calibrates uncertainty, and delegates material local-evidence questions to a fresh bounded research context without generic praise or reflexive contrarianism.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "development",
       "keywords": [
         "critical-thinking",

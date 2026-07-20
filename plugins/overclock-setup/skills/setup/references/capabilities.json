@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -20,7 +20,7 @@
     {
       "id": "session-memory",
       "display_name": "Session Memory",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "publication_status": "published",
       "provides": [
         "session-handoff",
@@ -80,7 +80,7 @@
     {
       "id": "critical-thinking",
       "display_name": "Critical Thinking",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "publication_status": "published",
       "provides": [
         "critical-thinking",
