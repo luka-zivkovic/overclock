@@ -27,8 +27,11 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       demand-gated per the eval panel.
 
 ## Tier 3 — new builds (BUILD verdicts; queue each behind its first PR-able slice)
-- [ ] solutions-loop skill (ce-compound-style, session-memory family; eval must gate on
-      retrieval) — status: pending
+- [x] solutions-loop skill — status: done, merged as PR #15 (2026-07-20): session-memory 1.1.0
+      `solutions` skill; retrieval-payoff eval included; SHORTLIST row marked BUILT
+- [~] pr-kit readiness review — status: in-progress (user request 2026-07-20): static review +
+      deterministic script smoke + the two committed behavioral controls; NOT a Phase-0
+      substitute — the 6-case blind gate still decides publication
 - [ ] grilling (elicitation primitive, anti-triggers vs critical-thinking) — status: pending
 - [ ] debugging-discipline (composes with test-discipline repro) — status: pending
 - [ ] project-vocabulary (domain glossary; boundary with lessons-learned declared both ways) — status: pending
