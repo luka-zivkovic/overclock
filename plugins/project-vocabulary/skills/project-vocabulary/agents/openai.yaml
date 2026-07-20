@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Vocabulary"
+  short_description: "Keep one ubiquitous language per project, written down"
+  default_prompt: "Use $project-vocabulary to pin down the domain terms in play here — challenge fuzzy usage against CONCEPTS.md and record what we settle."

@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -109,6 +109,23 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose for one-question-at-a-time requirements interviews with recommended answers and a confirm-before-build gate."
+    },
+    {
+      "id": "project-vocabulary",
+      "display_name": "Project Vocabulary",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "project-vocabulary"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [
+        "CONCEPTS.md"
+      ],
+      "minimum_host_version": null,
+      "selection": "Choose for a maintained domain glossary (CONCEPTS.md) with in-conversation term challenges on domain-carrying projects."
     },
     {
       "id": "discipline-gates",

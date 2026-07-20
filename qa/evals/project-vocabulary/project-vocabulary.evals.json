@@ -1,0 +1,90 @@
+{
+  "skill_name": "project-vocabulary",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Let's add account suspension: when an account is suspended, all its users lose access immediately and billing stops. Sketch the data model change for me.",
+      "expected_output": "The glossary is applied, not bypassed: CONCEPTS.md defines Cancellation as end-of-period (access continues) and defines Workspace as the billing boundary, while 'account' is not a defined term. Before sketching the model, the session challenges the fuzzy usage — which does 'account' mean here (Workspace?), and notes the stated immediate-loss semantics conflict with the glossary's Cancellation/Revocation distinction, asking one focused question (or stating the reasonable reading it will use). It does not silently build on the undefined term, and it does not rewrite the glossary wholesale.",
+      "files": [
+        {
+          "name": "CONCEPTS.md",
+          "description": "Glossary defining: Workspace (billing/permission boundary; formerly 'Team'), Cancellation (end-of-period, access continues; immediate loss is 'revocation'), and a Flagged Ambiguities entry for 'Member'. 'Account' is deliberately absent."
+        },
+        {
+          "name": "src/models/workspace.js",
+          "description": "Workspace model consistent with the glossary."
+        }
+      ],
+      "expectations": [
+        "CONCEPTS.md was read and its definitions were used: the response references the Workspace and/or Cancellation definitions when handling the request.",
+        "The undefined load-bearing term 'account' was challenged or pinned (mapped to Workspace or another concrete term) before/while sketching — not silently assumed without comment.",
+        "The conflict between 'lose access immediately' and the glossary's Cancellation-vs-revocation distinction was surfaced.",
+        "At most one focused clarifying question was asked (or a stated reasonable reading used) — no interview ceremony, no glossary rewrite.",
+        "Any glossary edit made was small and inline (e.g. recording 'Suspension' once settled), quoted back — not a wholesale restructure."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "OK so we've settled it: a 'Draft' is a report that has never been published — once published it can never return to Draft, it becomes a new Revision instead. That's final, add it to the glossary. Also we're about to build the whole revisions area next week, so set the vocabulary up properly.",
+      "expected_output": "Accretion + seeding: the settled Draft definition is recorded in CONCEPTS.md in the file's existing style (behavioral definition, no file paths), quoted back to the user. Because sustained work in the revisions area is coming, the core nouns of that area (Revision, and its relationship to Draft/published report) are proactively seeded with behavioral definitions — a small number of load-bearing nouns, not a speculative taxonomy. Edits are inline and minimal; the existing entries are untouched.",
+      "files": [
+        {
+          "name": "CONCEPTS.md",
+          "description": "Existing glossary with two unrelated entries (Workspace, Cancellation) and a Flagged Ambiguities tail — present so style-matching and minimal-edit behavior are observable."
+        },
+        {
+          "name": "src/reports/report.js",
+          "description": "Report model with a published_at field and a revisions association, giving the seeding pass real material."
+        }
+      ],
+      "expectations": [
+        "The Draft definition was added to CONCEPTS.md as a behavioral definition (never-published; publishing is one-way; post-publication changes become Revisions) without file paths or code identifiers.",
+        "The upcoming area was seeded: Revision (and its relation to Draft/published report) got a definition — proactive, but limited to a few load-bearing nouns.",
+        "Existing entries (Workspace, Cancellation) were left unmodified and the file's structure/style was matched.",
+        "The recorded definitions were quoted back to the user.",
+        "No writes occurred outside CONCEPTS.md and nothing was committed."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "No — we don't call them 'Teams' anymore, that's a Workspace. And while we're at it: always run the linter before you show me a diff.",
+      "expected_output": "The split correction routes each half to its owner: the terminology half updates CONCEPTS.md (Workspace entry gains/confirms the 'formerly Team' alias — or is created if absent) and is quoted back; the behavioral half ('always run the linter first') is explicitly routed to lessons-learned territory — recorded there if that skill is present, or named as a lessons-learned rule — but is NOT written into CONCEPTS.md, and this skill does not edit LESSONS.md itself as project-vocabulary (the lessons write, if it happens, follows the lessons-learned skill's own flow).",
+      "files": [
+        {
+          "name": "CONCEPTS.md",
+          "description": "Glossary containing a Workspace entry without the Team alias yet."
+        },
+        {
+          "name": ".ai/memory/LESSONS.md",
+          "description": "Valid v1 lessons file with one unrelated entry — present so the behavioral rule has a natural home distinct from the glossary."
+        }
+      ],
+      "expectations": [
+        "CONCEPTS.md's Workspace entry was updated with the retired 'Team' alias (small inline edit), quoted back.",
+        "The linter rule was NOT added to CONCEPTS.md — the glossary stayed a glossary.",
+        "The behavioral rule was routed to lessons territory: either recorded in LESSONS.md per the lessons-learned format or explicitly identified as a lessons-learned rule for that skill to record.",
+        "The two halves of the correction were visibly handled as separate concerns."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Rename the helper 'fmtBytes' to 'formatBytes' across this repo and fix the two call sites.",
+      "expected_output": "Negative control: a generic utility repo with no domain vocabulary and a mechanical rename request — no glossary ceremony of any kind. The rename is performed; CONCEPTS.md is not created; the words 'glossary' or 'vocabulary' do not drive the response.",
+      "files": [
+        {
+          "name": "src/format.js",
+          "description": "Small generic formatting utility library (bytes, dates) — no domain nouns anywhere."
+        },
+        {
+          "name": "src/report.js",
+          "description": "Two call sites of fmtBytes."
+        }
+      ],
+      "expectations": [
+        "The rename was performed at the definition and both call sites.",
+        "No CONCEPTS.md was created and no glossary/vocabulary ceremony appeared in the response.",
+        "The response is proportionate to a mechanical rename."
+      ]
+    }
+  ]
+}

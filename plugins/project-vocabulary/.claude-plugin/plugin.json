@@ -1,0 +1,18 @@
+{
+  "name": "project-vocabulary",
+  "displayName": "Project Vocabulary",
+  "description": "Keep one ubiquitous language per project, written down. Maintains a CONCEPTS.md glossary at the repository root — behavioral definitions that stand on their own (no file paths or config values), one term per concept with retired synonyms as aliases, a Flagged Ambiguities tail — and applies it in conversation: fuzzy or conflicting term usage gets challenged at the moment it matters. Terms enter by accretion and by seeding an area's core nouns before sustained work. Terminology corrections land here; behavior and workflow corrections stay with lessons-learned. Lazy file creation; non-domain repos and trivial work stay silent.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "glossary",
+    "ubiquitous-language",
+    "domain",
+    "terminology",
+    "concepts",
+    "ddd"
+  ]
+}

@@ -49,6 +49,7 @@ installs, removes, enables, disables, or edits anything.
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **grilling** | A one-question-at-a-time requirements interview before anything gets built | `/plugin install grilling@overclock` |
+| **project-vocabulary** | One ubiquitous language per project, written down and enforced in conversation | `/plugin install project-vocabulary@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
 | **debugging-discipline** | A tight red feedback loop before theorizing, for bugs that resist | `/plugin install debugging-discipline@overclock` |
 | **natural-writing** | Human-sounding long-form prose without canned AI tells | `/plugin install natural-writing@overclock` |
@@ -124,6 +125,22 @@ is: a symptom.
 It composes with discipline-gates rather than competing: an ordinary seamed bug gets its red test
 from test-discipline's repro contract, and trivial bugs whose cause is evident fast-path out with
 no ceremony.
+
+</details>
+
+<details>
+<summary><strong>project-vocabulary</strong> — one language per project</summary>
+
+`project-vocabulary` maintains a `CONCEPTS.md` glossary at the repository root — behavioral
+definitions that stand on their own, one term per concept with retired synonyms as aliases, and an
+honest Flagged Ambiguities tail — and applies it in conversation: when "account" is used three
+different ways, the fuzziness gets challenged at the moment it matters, not in a cleanup session.
+Terms enter by accretion (settled in conversation) and seeding (the core nouns of an area, defined
+before sustained work starts there).
+
+Terminology corrections land in the glossary; behavior and workflow corrections stay with
+lessons-learned. Non-domain repos, throwaway scripts, and trivial edits never trigger glossary
+ceremony.
 
 </details>
 
