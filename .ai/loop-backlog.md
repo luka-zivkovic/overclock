@@ -37,7 +37,7 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       risk). Verdict: ready for Phase-0; the 6-case blind gate still decides publication
 - [x] grilling — status: done, merged as PR #16 (2026-07-20): plugins/grilling 0.1.0; SHORTLIST row marked BUILT
 - [x] debugging-discipline — status: done, merged as PR #17 (2026-07-20): plugins/debugging-discipline 0.1.0; SHORTLIST row marked BUILT
-- [ ] project-vocabulary (domain glossary; boundary with lessons-learned declared both ways) — status: pending
+- [x] project-vocabulary — status: done, merged as PR #18 (2026-07-20): plugins/project-vocabulary 0.1.0; SHORTLIST row marked BUILT. LOOP STOPPED: non-parked queue empty. Known follow-up: paid live-eval runs (qa/run_evals.sh + trigger batteries) for the five new skills. Pending user pick: pr-kit Phase-0.
 - [ ] wayfinder / to-tickets / codebase-design+survey / tdd / ce-dogfood — status: parked until
       concrete demand (panel condition)
 
