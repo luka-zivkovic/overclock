@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -108,6 +108,21 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose for pre-edit test discipline and git-history checks before risky code changes."
+    },
+    {
+      "id": "pr-feedback",
+      "display_name": "PR Feedback",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "resolve-pr-feedback"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose for working through reviewer feedback on GitHub PRs: centrally judged fixes and drafted replies with approval-gated posting."
     }
   ]
 }
