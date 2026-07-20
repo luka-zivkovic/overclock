@@ -3,6 +3,32 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## project-vocabulary
+
+### 0.1.0 — 2026-07-20
+- New plugin. `project-vocabulary`: maintain the project's ubiquitous
+  language in a repo-root CONCEPTS.md glossary and apply it in conversation,
+  merged from the two best published takes (mattpocock domain-modeling + the
+  compound-engineering concepts-vocabulary rules) under the external-audit
+  BUILD verdict (external-eval-2026-07-19-1945.md; the ADR half dropped per
+  the verdict). File craft: definitions stand on their own (no file paths or
+  current config values — state the behavior, not the number), one term per
+  concept with retired synonyms as aliases, a Flagged Ambiguities tail,
+  inline updates, lazy creation. Terms enter by accretion (settled in
+  conversation) and seeding (core nouns of an area before sustained work).
+  In conversation: fuzzy usage is challenged when it matters, overloaded
+  nouns are pinned before building on them, new definitions get stress-
+  tested with an edge case, and glossary-vs-code mismatches are surfaced
+  honestly.
+- Boundary declared from both sides per the eval panel: terminology
+  corrections ("we call that a Workspace") land in the glossary; behavior
+  and workflow corrections stay with lessons-learned; a correction carrying
+  both splits. This skill never writes LESSONS.md or .ai/memory/.
+- Four behavioral evals (glossary-applied term challenge, accretion +
+  seeding, split-correction routing with both files present, non-domain
+  negative control) and a routing battery whose negatives are dominated by
+  lessons-learned collision prompts.
+
 ## debugging-discipline
 
 ### 0.1.0 — 2026-07-20
@@ -71,6 +97,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.10 — 2026-07-20
+- Publish `project-vocabulary` in the bundled capability catalog so setup
+  can recommend it.
 
 ### 0.1.9 — 2026-07-20
 - Publish `debugging-discipline` in the bundled capability catalog so setup

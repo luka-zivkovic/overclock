@@ -1,0 +1,31 @@
+{
+  "skill": "project-vocabulary",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "note": "Routing battery for project-vocabulary. FIRED means the Skill tool selected project-vocabulary. Negatives are dominated by lessons-learned collision prompts (behavior/workflow corrections) — the seam the external eval required declared from both sides.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Routing fixture\nSaaS app with Workspaces and subscriptions.\n",
+    "CONCEPTS.md": "# Concepts\n\n## Workspace\nThe billing and permission boundary. Every resource belongs to exactly one Workspace.\nAliases: formerly \"Team\".\n\n## Cancellation\nEnding a subscription at end of the paid period; access continues until then.\n",
+    "src/models/workspace.js": "exports.Workspace = class Workspace {};\n"
+  },
+  "should_trigger": [
+    "No, that's not a Team — we renamed those to Workspaces months ago. Keep the terminology straight.",
+    "Add 'Grace Period' to the project glossary: the 14 days after a failed payment before cancellation.",
+    "People keep using 'account' to mean three different things in this codebase — pin down our terms.",
+    "We just settled what a 'Draft' means — record it in CONCEPTS.md.",
+    "Review the glossary — I think some of these definitions drifted from how we actually talk."
+  ],
+  "should_not": [
+    "No, stop using npm here — this repo uses pnpm. Remember that.",
+    "Always run the linter before showing me a diff — add that to your lessons.",
+    "That approach failed because the API paginates at 100; note it so we don't retry it.",
+    "Rename the fmtBytes helper to formatBytes and fix the call sites.",
+    "What were we working on last session?",
+    "Capture this fix in the solutions ledger — symptoms and all.",
+    "Write the API reference docs for the /workspaces endpoint."
+  ]
+}

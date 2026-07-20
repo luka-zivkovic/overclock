@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "category": "development",
       "keywords": [
         "setup",
@@ -96,6 +96,20 @@
         "interview",
         "decisions",
         "shared-understanding"
+      ]
+    },
+    {
+      "name": "project-vocabulary",
+      "source": "./plugins/project-vocabulary",
+      "description": "Keep one ubiquitous language per project, written down. Maintains a CONCEPTS.md glossary at the repository root — behavioral definitions that stand on their own (no file paths or config values), one term per concept with retired synonyms as aliases, a Flagged Ambiguities tail — and applies it in conversation: fuzzy or conflicting term usage gets challenged at the moment it matters. Terminology corrections land here; behavior and workflow corrections stay with lessons-learned. Lazy file creation; trivial work and non-domain repos stay silent.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "glossary",
+        "ubiquitous-language",
+        "domain",
+        "terminology",
+        "concepts"
       ]
     },
     {
