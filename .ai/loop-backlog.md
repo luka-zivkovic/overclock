@@ -6,11 +6,10 @@ findings, merge when clean, mark the item `done` with the PR number. Verdict evi
 docs/brainstorm/external-eval-2026-07-19-1945.md.
 
 ## Iteration 0 — clear the deck
-- [ ] PR A: ship pending infra (Codex agent metadata + version bumps, qa hardening, pr-kit
-      Phase-0 candidate, AGENTS.md/CLAUDE.md, strategy/SHORTLIST updates, external-audit docs,
-      workflow args-fix, this backlog) — status: in-progress
-- [ ] PR B: pr-feedback plugin v0.1.0 + evals + trigger battery + publication sync
-      (marketplace/capabilities/CHANGELOG/README entries, overclock-setup 0.1.3) — status: pending
+- [x] PR A: ship pending infra — status: done, merged as PR #8 (2026-07-20)
+- [x] PR B: pr-feedback plugin v0.1.0 — status: done, merged as PR #10 (2026-07-20; original
+      stacked PR #9 was auto-closed by GitHub when #8's base branch was deleted — lesson: don't
+      delete a stacked PR's base branch on merge, or retarget the child first)
 
 ## Tier 1 — small lifts (verdicts in hand)
 - [ ] Ponytail safety floor: never-simplify-away-safety guidance lift (SHORTLIST: unexecuted
