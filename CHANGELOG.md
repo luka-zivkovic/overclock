@@ -24,6 +24,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## overclock-setup
 
+### 0.1.5 — 2026-07-20
+- Catalog sync for `natural-writing` 1.0.3.
+
 ### 0.1.4 — 2026-07-20
 - Catalog sync for `discipline-gates` 0.1.4.
 
@@ -110,6 +113,16 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   paths, select reruns by declared case ID, and raise the manual workflow timeout.
 
 ## natural-writing
+
+### 1.0.3 — 2026-07-20
+- Add a grounding rule to the drafting guidance, lifted from the
+  writing-structure evaluation (external-eval-2026-07-19-1945.md, INSPIRE):
+  a concept the reader can't be assumed to know must be introduced — or be a
+  stated prerequisite — before later prose leans on it; ground in place at
+  first use rather than bolting on a glossary, preserving meaning and voice.
+- Add a behavioral eval case (id 6) where a technical draft's only real
+  defect is grounding order (a term explained after use, another never
+  defined), so the revision must fix structure without adding style tells.
 
 ### 1.0.2 — 2026-07-17
 - Add Codex skill-picker metadata and a ready-to-use `$natural-writing` prompt.
