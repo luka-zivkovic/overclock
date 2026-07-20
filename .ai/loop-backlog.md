@@ -29,9 +29,12 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
 ## Tier 3 — new builds (BUILD verdicts; queue each behind its first PR-able slice)
 - [x] solutions-loop skill — status: done, merged as PR #15 (2026-07-20): session-memory 1.1.0
       `solutions` skill; retrieval-payoff eval included; SHORTLIST row marked BUILT
-- [~] pr-kit readiness review — status: in-progress (user request 2026-07-20): static review +
-      deterministic script smoke + the two committed behavioral controls; NOT a Phase-0
-      substitute — the 6-case blind gate still decides publication
+- [x] pr-kit readiness review — status: done (2026-07-20): static review = no blockers (1
+      Important: all-or-nothing profile staleness mechanically threatens the lift gate; 2 minor);
+      deterministic smoke green (scope classifier correct on both controls, validator round-trip
+      + clear errors); BOTH behavioral controls PASS 4/4 expectations (positive: P1 silent-pass
+      finding, validated + anchored; negative: clean 'no actionable findings', no manufactured
+      risk). Verdict: ready for Phase-0; the 6-case blind gate still decides publication
 - [ ] grilling (elicitation primitive, anti-triggers vs critical-thinking) — status: pending
 - [ ] debugging-discipline (composes with test-discipline repro) — status: pending
 - [ ] project-vocabulary (domain glossary; boundary with lessons-learned declared both ways) — status: pending
