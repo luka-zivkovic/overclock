@@ -78,8 +78,15 @@ evidence. An agent never labels its own unexamined proposal as settled.
 **Testing skills as static artifacts.** They assert shell-safety, frontmatter validity, cross-skill
 naming invariants, and *doc-claim accuracy* (cited paths/links must exist in the tree) in ordinary
 unit tests over the markdown. Overclock's `tools/` + `qa/` already do most of this
-(validate_skill, audit_skills, shared-files, version-bump); the one mechanism worth considering is
-a **doc-claims check** — verify that file paths cited inside SKILL.md/references actually exist.
+(validate_skill, audit_skills, shared-files, version-bump); the doc-claims check shipped 2026-07-20
+as `tools/check_doc_claims.py` (CI-wired).
+
+**Sweep record (2026-07-20).** All 10 shipped SKILL.md bodies were audited against the failure-mode
+checklist above under a conservative bar: zero behavior-changing findings. The kit's heavy `Do
+not…` phrasing is almost entirely the legitimate negation exception (security boundaries,
+trigger-discipline disambiguation, and skills whose job is naming unwanted behavior). Deliberate
+leading words exist in git-archaeologist ("Chesterton's fence") and test-discipline (red/green
+polarity); the other eight lack one — a candidate polish for future skill revisions, not a defect.
 
 ## Micro-lift candidates (follow-ups, each a shipping change)
 

@@ -61,6 +61,7 @@ Run the checks relevant to the change, then the full local suite before handoff:
 for d in plugins/*/skills/*/; do python3 tools/validate_skill.py "$d"; done
 python3 tools/audit_skills.py plugins --fail-on fail
 python3 tools/check_shared_files.py
+python3 tools/check_doc_claims.py
 python3 tools/check_setup_catalog.py
 python3 -m unittest discover -s qa -p 'test_*.py'
 python3 tools/check_version_bump.py --base origin/master
