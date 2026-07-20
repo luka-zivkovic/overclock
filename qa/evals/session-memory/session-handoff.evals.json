@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 0,
-      "prompt": "We've been refactoring the auth middleware: we decided to switch from session cookies to JWTs because the mobile client can't hold cookies, we tried storing refresh tokens in localStorage but abandoned that since it's XSS-exposed, and the next step is to add the httpOnly refresh-token endpoint in src/routes/auth.ts. I'm about to run out of context \u2014 save our state so the next session can pick this up.",
+      "prompt": "We've been refactoring the auth middleware: we decided to switch from session cookies to JWTs because the mobile client can't hold cookies, we tried storing refresh tokens in localStorage but abandoned that since it's XSS-exposed, and the next step is to add the httpOnly refresh-token endpoint in src/routes/auth.ts. I'm about to run out of context — save our state so the next session can pick this up.",
       "expected_output": "A new .ai/memory/HANDOFF.md containing the goal, the JWT decision with rationale, the localStorage refresh-token attempt recorded as a failed approach with its XSS cause, concrete next steps naming src/routes/auth.ts, and environment anchors (git branch, short HEAD sha, dirty-file list, date), plus a one-line confirmation in conversation.",
       "files": [],
       "expectations": [
@@ -21,7 +21,7 @@
       "files": [],
       "expectations": [
         "The response plainly states that no saved handoff/session state exists for this project.",
-        "No prior goals, plans, decisions, or work history are fabricated \u2014 the response contains no claims about what 'we were working on'.",
+        "No prior goals, plans, decisions, or work history are fabricated — the response contains no claims about what 'we were working on'.",
         "The response offers to begin tracking state (e.g., create a handoff at the next checkpoint).",
         "Process: the skill checked for .ai/memory/HANDOFF.md (e.g., a Read/Glob/ls attempt is visible) before concluding the start is cold.",
         "No HANDOFF.md is fabricated or written as part of merely answering the resume request."
@@ -87,13 +87,13 @@
     },
     {
       "id": 5,
-      "prompt": "I'm on my new laptop so there's no saved state here, but I copied our handoff before wiping the old machine \u2014 here it is:\n\n# Session Handoff\nSaved: 2026-06-09T18:00:00\n\n## Current goal\nGet the CSV import endpoint to stream instead of buffering whole files in memory.\n\n## Failed approaches\n- Buffering the multer upload then parsing \u2014 FAILED because 300MB files OOM the 512MB container. Do not retry; stream with busboy instead.\n\n## Next steps\n1. Replace multer with busboy in src/routes/import.ts.",
+      "prompt": "I'm on my new laptop so there's no saved state here, but I copied our handoff before wiping the old machine — here it is:\n\n# Session Handoff\nSaved: 2026-06-09T18:00:00\n\n## Current goal\nGet the CSV import endpoint to stream instead of buffering whole files in memory.\n\n## Failed approaches\n- Buffering the multer upload then parsing — FAILED because 300MB files OOM the 512MB container. Do not retry; stream with busboy instead.\n\n## Next steps\n1. Replace multer with busboy in src/routes/import.ts.",
       "expected_output": "The pasted handoff is accepted: goal, failed approach, and next step are used; the missing sections (Plan, Decisions, Open questions, Key files, Environment anchors) are named; anchors are noted as absent/unverifiable so nothing about repo state is assumed; the skill offers to persist the pasted handoff to .ai/memory/HANDOFF.md before or while proceeding.",
       "files": [],
       "expectations": [
         "The pasted content is used as the resume source: the brief reflects the streaming goal, the multer-OOM dead end, and the busboy next step.",
         "Missing sections are explicitly named (at minimum Environment anchors; ideally Plan/Decisions too) rather than fabricated.",
-        "Because anchors are missing, repo state is checked fresh or marked unverified \u2014 no claims about branch/commits are invented.",
+        "Because anchors are missing, repo state is checked fresh or marked unverified — no claims about branch/commits are invented.",
         "The skill offers to write the pasted handoff to .ai/memory/HANDOFF.md (creating directories as needed), and does not do so silently without mentioning it.",
         "Direction is confirmed with the user before executing the next step."
       ]
@@ -103,8 +103,14 @@
       "prompt": "Replace our old checkpoint with the current state and save it: we're moving the cache from Redis to KeyDB because Redis licensing no longer fits deployment, the ioredis cluster attempt failed because it cannot discover our proxy topology, and next we need to add the KeyDB endpoint to src/cache.js.",
       "expected_output": "The existing HANDOFF.md is archived before the new KeyDB handoff is written. With five archives already present, retention leaves exactly the five newest archives, including the superseded Redis handoff, while removing the oldest prior archive.",
       "files": [
-        { "name": ".ai/memory/HANDOFF.md", "description": "Existing Redis migration handoff that must be archived rather than overwritten." },
-        { "name": ".ai/memory/archive/", "description": "Five timestamped prior handoffs, used to verify the retention cap after another archive is added." }
+        {
+          "name": ".ai/memory/HANDOFF.md",
+          "description": "Existing Redis migration handoff that must be archived rather than overwritten."
+        },
+        {
+          "name": ".ai/memory/archive/",
+          "description": "Five timestamped prior handoffs, used to verify the retention cap after another archive is added."
+        }
       ],
       "expectations": [
         "The previous Redis HANDOFF.md survives under .ai/memory/archive/ with its goal intact; it is not silently overwritten or discarded.",
@@ -112,6 +118,28 @@
         "Archive retention is enforced: exactly five archived handoff files remain and the oldest pre-existing archive (the 2026-06-01 checkpoint) is removed.",
         "Current git anchors are captured for the new handoff and no git commit is created.",
         "Writes and deletions are confined to .ai/memory/."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Resume where we left off, then keep going with the next step.",
+      "expected_output": "Warm-start brief in the six-line shape, then work proceeds under the settled decision. The handoff's Decisions carry provenance labels: 'Postgres over SQLite [user-directed]' and 'exponential backoff for the import retries [agent-proposed]'. The next step (set up the database migration baseline) is exactly where SQLite would look simpler, but the session does not propose switching to SQLite or re-ask the database choice — it augments the settled decision (uses Postgres). The agent-proposed retry decision may be revisited or refined without ceremony.",
+      "files": [
+        {
+          "name": ".ai/memory/HANDOFF.md",
+          "description": "Valid v1 handoff (memory-schema comment, all sections, fresh git anchors matching the fixture repo). Decisions: '- Postgres over SQLite [user-directed] — user runs the same schema in prod; parity outranks local convenience.' and '- Exponential backoff for import retries [agent-proposed] — not yet examined by the user.' Plan: migration baseline step is next ([ ] Set up migration baseline in db/migrations). Next steps: 1. Create the initial migration. The project is a small Node service where SQLite would genuinely be less setup work, making re-opening the DB choice tempting."
+        },
+        {
+          "name": "package.json",
+          "description": "Small Node service manifest with a pg dependency; no ORM; nothing blocking either database."
+        }
+      ],
+      "expectations": [
+        "The warm-start brief was produced in the six-line shape and its 'Decisions in force' value includes the Postgres decision.",
+        "The session did NOT propose switching to SQLite, re-ask the database choice, or present it as open — the [user-directed] decision was treated as settled and work proceeded on Postgres.",
+        "No fabricated 'new evidence' was invented to justify reopening the settled decision.",
+        "The [agent-proposed] retry decision was treated as revisable (either refined, confirmed, or simply not treated as settled) — the settled treatment was NOT extended to the agent-proposed label.",
+        "The session waited for confirmation after the brief before executing (per the resume flow), then continued with the migration step on Postgres."
       ]
     }
   ]

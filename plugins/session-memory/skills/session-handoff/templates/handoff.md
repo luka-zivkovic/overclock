@@ -18,7 +18,7 @@ Saved: <ISO-8601 date and time, e.g. 2026-06-10T17:42:00>
 - [ ] <Step not started>
 
 ## Decisions
-- <Decision made> — <rationale: why this over the alternatives>
+- <Decision made> [user-directed | user-approved | agent-proposed] — <rationale: why this over the alternatives>
 
 ## Failed approaches
 - <What was tried> — FAILED because <diagnosed cause>. <What this rules out / do not retry unless X changes.>
@@ -58,8 +58,8 @@ Add rate limiting to the public API so the free tier is capped at 100 req/min pe
 - [ ] Integration tests in test/rateLimit.test.ts
 
 ## Decisions
-- Redis-backed counters over in-memory — the API runs 3 replicas behind the LB, so per-process counters would triple the effective limit.
-- Limit keyed on API key, not IP — corporate NATs would unfairly throttle whole offices.
+- Redis-backed counters over in-memory [user-approved] — the API runs 3 replicas behind the LB, so per-process counters would triple the effective limit.
+- Limit keyed on API key, not IP [user-directed] — corporate NATs would unfairly throttle whole offices.
 
 ## Failed approaches
 - express-rate-limit with its Redis store — FAILED because its store API drops the millisecond precision our 100/min sliding window needs; counts reset on whole-second boundaries and burst tests flaked. Do not retry; rate-limiter-flexible handles this natively.

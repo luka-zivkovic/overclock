@@ -24,6 +24,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## overclock-setup
 
+### 0.1.6 — 2026-07-20
+- Catalog sync for `session-memory` 1.0.5 and `critical-thinking` 0.1.2.
+
 ### 0.1.5 — 2026-07-20
 - Catalog sync for `natural-writing` 1.0.3.
 
@@ -64,6 +67,17 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   hook refusal, and requests to bypass report-only mode.
 
 ## critical-thinking
+
+### 0.1.2 — 2026-07-20
+- Reassessment now distinguishes the assistant's own conclusions (hypotheses
+  to re-derive) from decisions the user examined and made (settled): a
+  user-settled decision is not re-litigated unprompted; new material evidence
+  against it is presented once, plainly, for the user to re-decide. The
+  assistant's own unexamined proposal is never treated as user-settled.
+  Lifted from the compound-engineering settled-decisions evaluation
+  (external-eval-2026-07-19-1945.md, INSPIRE). Adds eval case 11 (revise an
+  assistant conclusion on new profiling evidence without reopening the
+  user's settled infrastructure choice).
 
 ### 0.1.1 — 2026-07-12
 - Publish the plugin in the Overclock marketplace.
@@ -229,6 +243,18 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   `templates/lessons.md` skeleton is kept byte-identical (CI-enforced).
 
 ## session-memory
+
+### 1.0.5 — 2026-07-20
+- session-handoff: Decisions entries now carry a provenance label —
+  `[user-directed]`, `[user-approved]`, or `[agent-proposed]` — and the
+  resume flow treats user-settled decisions as settled: augment, never
+  re-ask, contradict only on new material evidence presented once. Unlabeled
+  decisions in older handoffs stay valid and remain open to revision. The
+  agent's own unexamined proposal is never labeled user-settled. Lifted from
+  the compound-engineering settled-decisions evaluation
+  (external-eval-2026-07-19-1945.md, INSPIRE). Adds eval case 7 (resume
+  under a `[user-directed]` database choice where the tempting simpler
+  alternative must not be re-proposed).
 
 ### 1.0.4 — 2026-07-17
 - Add Codex skill-picker metadata and ready-to-use prompts for `session-handoff`
