@@ -1,0 +1,94 @@
+{
+  "skill_name": "debugging-discipline",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Our queue worker test fails maybe one run in five — 'expected 3 jobs processed, got 2'. It's been flaky for weeks and nobody can pin it down. Debug this properly.",
+      "expected_output": "The loop comes first: before any causal story, the session builds a tight red-capable loop (e.g. running the flaky test N times in a loop, forcing scheduling/seed where possible) and pastes the command with its observed failure rate. Only then: the failure is minimized where possible, assumptions audited (e.g. 'jobs complete in submission order' marked assumed vs verified), and 3-5 ranked falsifiable hypotheses are SHOWN before code changes, each with the observation that would refute it. Probes use removable tagged logs. No speculative fix (like adding a sleep) is applied before the loop exists.",
+      "files": [
+        {
+          "name": "src/queue/worker.js",
+          "description": "Worker that processes jobs concurrently with a completion counter incremented in an async callback — a genuine race: the counter read can happen before the last callback fires under some interleavings."
+        },
+        {
+          "name": "test/worker.test.js",
+          "description": "Test enqueuing 3 jobs and asserting 3 processed after a Promise.all that misses one completion path — the intermittent failure the prompt describes."
+        },
+        {
+          "name": "package.json",
+          "description": "Node manifest with a test script (node --test)."
+        }
+      ],
+      "expectations": [
+        "A reproduction loop command (repeated test runs or equivalent) was constructed and RUN, with its output/failure rate shown, BEFORE any causal theory or fix was proposed.",
+        "3-5 ranked hypotheses were presented before testing them, each falsifiable (naming what observation would refute it).",
+        "Assumptions were audited or the failure was minimized (at least one of: explicit verified-vs-assumed marking, or a reduced scenario that still fails).",
+        "No sleep/timeout was added as a first-line 'fix' before the loop and hypothesis work.",
+        "Any temporary instrumentation used a greppable tag and was removed (or flagged for removal) before the final fix."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Bug report: submitting the signup form with a plus-addressed email like a+b@example.com returns 'invalid email'. That address is valid — fix it.",
+      "expected_output": "Composition control: this is an ordinary seamed bug with a stated symptom and a working test runner — the red artifact follows test-discipline's repro contract: a test asserting the CORRECT behavior (plus-addressed email accepted) is written and confirmed red for the stated reason BEFORE the validator regex is fixed, then goes green. The session does NOT invent a rival diagnostic-loop ceremony (no N-run flake loops, no hypothesis ranking theater) for a deterministic one-cause bug, and does not skip the red test either.",
+      "files": [
+        {
+          "name": "src/validate.js",
+          "description": "Email validator whose regex rejects '+' in the local part — the single evident cause."
+        },
+        {
+          "name": "test/validate.test.js",
+          "description": "Existing green tests for the validator, showing the runner and conventions (node --test)."
+        },
+        {
+          "name": "package.json",
+          "description": "Node manifest with test script."
+        }
+      ],
+      "expectations": [
+        "A failing test asserting the correct behavior (plus-addressed email valid) was written and shown red BEFORE the fix — the red artifact follows the repro contract rather than being skipped.",
+        "No parallel diagnostic ceremony was staged for this deterministic bug: no repeated-run flake loop, no multi-hypothesis ranking ritual.",
+        "The regex fix landed after the red test, and the test went green.",
+        "The existing test suite still passes."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Intermittently our nightly report totals come out wrong — sometimes revenue is short by a few rows. I suspect the DB connection is dropping. Here's the code; get to the actual cause, we've already 'fixed' this twice and it came back.",
+      "expected_output": "Symptom-vs-cause discipline: the session builds a loop first (replaying the aggregation on captured input or repeated runs), states a PREDICTION for the connection-drop hypothesis (what would be observed if true — e.g. connection errors in logs), and when the evidence refutes it (no connection errors; rows are dropped when created_at is exactly on the batch boundary), treats the user's suspicion as falsified and follows the boundary-condition cause: the pagination/batching uses a strict '>' comparison that skips boundary rows. A retry-wrapper 'fix' (which would mask the symptom) is not offered as the solution; the fix addresses the boundary comparison, verified by the loop going green/consistent.",
+      "files": [
+        {
+          "name": "src/reports/nightly.js",
+          "description": "Batch aggregation paging through rows with WHERE created_at > $lastSeen — strict inequality drops rows sharing the boundary timestamp; no connection handling defects present."
+        },
+        {
+          "name": "data/sample-rows.json",
+          "description": "Captured input including several rows with identical created_at timestamps straddling a batch boundary — replaying it reproduces the short total deterministically."
+        }
+      ],
+      "expectations": [
+        "A reproduction loop was built from the captured input (replay) or repeated runs BEFORE committing to any cause.",
+        "The connection-drop hypothesis was treated as falsifiable: a prediction was stated and checked, and the absence of supporting evidence was used to reject it rather than 'fixing' connections anyway.",
+        "The actual boundary-condition cause (strict > skipping equal timestamps) was identified and fixed.",
+        "No symptom-masking fix (retry wrapper, tolerance fudge) was presented as the solution.",
+        "The loop was rerun to show consistent/correct totals after the fix."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Getting 'ReferenceError: totalCuont is not defined' at src/cart.js line 42 when checking out — can you fix it?",
+      "expected_output": "Negative control (trivial fast-path): the error names the exact line and the cause is an evident typo (totalCuont vs totalCount). The fix is applied directly — no loop construction, no hypothesis ranking, no diagnostic ceremony. At most an ordinary test run to confirm.",
+      "files": [
+        {
+          "name": "src/cart.js",
+          "description": "Cart module where line 42 references totalCuont while the variable defined above is totalCount."
+        }
+      ],
+      "expectations": [
+        "The typo was fixed directly (totalCuont -> totalCount).",
+        "No feedback-loop construction, hypothesis ranking, assumption audit, or other diagnostic ceremony appeared.",
+        "The response is proportionate to a one-line fix."
+      ]
+    }
+  ]
+}

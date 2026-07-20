@@ -1,0 +1,32 @@
+{
+  "skill": "debugging-discipline",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "note": "Routing battery for debugging-discipline. FIRED means the Skill tool selected debugging-discipline. Negatives are dominated by test-discipline collision prompts (ordinary seamed bugs with stated symptoms) — the seam the external eval required.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Routing fixture\nSmall Node service with tests.\n",
+    "package.json": "{\"name\":\"svc\",\"scripts\":{\"test\":\"node --test\"}}\n",
+    "src/api.js": "exports.handler = async req => ({ ok: true, id: req.id });\n",
+    "test/api.test.js": "const test = require('node:test');\ntest('handler ok', () => {});\n"
+  },
+  "should_trigger": [
+    "This test fails about one time in ten and nobody can reproduce it reliably — debug it properly.",
+    "The p95 latency doubled since last week's deploy and I can't see why. Get to the root cause.",
+    "It only breaks in staging, never locally. Help me hunt this down systematically.",
+    "We've 'fixed' this crash twice and it keeps coming back — I want the actual cause this time.",
+    "There's no test setup in this repo and the import job corrupts data occasionally. Build me a way to pin it down."
+  ],
+  "should_not": [
+    "Submitting an empty form returns a 500 — fix it.",
+    "The date formatter returns 'Invalid Date' for ISO strings with milliseconds; fix that bug.",
+    "Write a unit test for the parseConfig function.",
+    "ReferenceError: totalCuont is not defined at cart.js:42 — fix the typo.",
+    "Stress-test my conclusion that the queue can't scale.",
+    "Explain what this ECONNRESET error means.",
+    "Add retry logic to the fetch helper as a new feature."
+  ]
+}

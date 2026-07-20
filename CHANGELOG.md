@@ -3,6 +3,32 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## debugging-discipline
+
+### 0.1.0 — 2026-07-20
+- New plugin. `debugging-discipline`: systematic diagnosis for bugs that
+  resist the ordinary red-test path, merged from the two best published
+  takes (mattpocock diagnosing-bugs + EveryInc ce-debug) under the
+  external-audit BUILD verdict (external-eval-2026-07-19-1945.md). The hard
+  gate: a tight, red-capable feedback loop must exist before any causal
+  theory — with a ranked ladder of loop constructions (flaky reruns with
+  raised reproduction rate, curl/CLI harnesses, diff and replay loops,
+  bisection, perf measurement). Then: minimize the failure, audit
+  assumptions (verified vs assumed), show 3-5 ranked falsifiable hypotheses
+  before testing them, and state predictions before probes — a fix that
+  works while its prediction fails is a symptom, not the cause. Tagged
+  removable debug probes; escalation to a design-level look when surviving
+  hypotheses span subsystems.
+- Composition per the eval panel's condition: seamed bugs with stated
+  symptoms get their red artifact from discipline-gates/test-discipline's
+  repro contract — this skill never restates that gate; it owns the no-seam
+  loop constructions and the hypothesis epistemics. Trivial bugs whose cause
+  is evident fast-path out with zero ceremony.
+- Four behavioral evals (flaky-race loop-first, seamed-bug composition
+  control, symptom-vs-cause prediction discipline, trivial-typo negative
+  control) and a routing battery whose negatives are dominated by
+  test-discipline collision prompts.
+
 ## grilling
 
 ### 0.1.0 — 2026-07-20
@@ -45,6 +71,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.9 — 2026-07-20
+- Publish `debugging-discipline` in the bundled capability catalog so setup
+  can recommend it.
 
 ### 0.1.8 — 2026-07-20
 - Publish `grilling` in the bundled capability catalog so setup can

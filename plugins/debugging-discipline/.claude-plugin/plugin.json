@@ -1,0 +1,19 @@
+{
+  "name": "debugging-discipline",
+  "displayName": "Debugging Discipline",
+  "description": "Systematic diagnosis for bugs that resist the ordinary red-test path. Builds a tight, red-capable feedback loop before any theorizing (flaky reruns, curl harnesses, diff/replay loops, bisection, perf measurement), minimizes the failure, then tests 3-5 ranked falsifiable hypotheses with stated predictions — a fix that works while its prediction fails is a symptom, not the cause. Composes with discipline-gates: seamed bugs get their red test from test-discipline's repro contract; this skill owns the no-seam loop constructions and the hypothesis epistemics. Trivial bugs fast-path out silently.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "debugging",
+    "diagnosis",
+    "feedback-loop",
+    "flaky-tests",
+    "root-cause",
+    "hypotheses",
+    "bisect"
+  ]
+}

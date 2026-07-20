@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -125,6 +125,21 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose for pre-edit test discipline and git-history checks before risky code changes."
+    },
+    {
+      "id": "debugging-discipline",
+      "display_name": "Debugging Discipline",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "debugging-discipline"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose for loop-first diagnosis of flaky, perf, integration-only, and repeat-offender bugs; composes with discipline-gates' repro gate."
     },
     {
       "id": "pr-feedback",

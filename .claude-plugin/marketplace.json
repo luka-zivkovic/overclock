@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "category": "development",
       "keywords": [
         "setup",
@@ -127,6 +127,21 @@
         "mutation-testing",
         "git-history",
         "discipline"
+      ]
+    },
+    {
+      "name": "debugging-discipline",
+      "source": "./plugins/debugging-discipline",
+      "description": "Systematic diagnosis for bugs that resist the ordinary red-test path. Builds a tight, red-capable feedback loop before any theorizing (flaky reruns, curl harnesses, replay, bisection, perf measurement), minimizes the failure, then tests 3-5 ranked falsifiable hypotheses with stated predictions — a fix that works while its prediction fails is a symptom, not the cause. Seamed bugs get their red test from discipline-gates' repro contract; trivial bugs fast-path out silently.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "debugging",
+        "diagnosis",
+        "feedback-loop",
+        "flaky-tests",
+        "root-cause",
+        "bisect"
       ]
     }
   ]
