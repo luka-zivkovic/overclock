@@ -45,6 +45,13 @@ See `references/examples.md` for before/after pairs that show each rule in actio
 ## How to work
 
 - **Drafting:** write it naturally with these rules from the start, not as a cleanup afterthought.
+- **Ground concepts before prose leans on them.** A term, name, or idea the reader can't be
+  assumed to know must be introduced — or be a stated prerequisite of the piece — before a later
+  sentence depends on it. While drafting or revising, track where each concept first appears; when
+  a passage leans on something introduced later or never, move the introduction earlier or add the
+  one-line grounding at first use. Ground in place; don't bolt on a glossary. (Structural
+  counterpart to the style rules: reordering here is fine, but it still preserves the author's
+  meaning and voice.)
 - **Revising a draft — two passes:**
   - *Pass 1 — fix violations.* Go rule by rule above and fix what breaks them.
   - *Pass 2 — cut what doesn't earn its place.* Remove words, sentences, and whole sections that add nothing. A first draft usually runs ~25% longer than it needs to. But preserve the author's meaning and voice, and keep the one caveat that matters. Cutting a real qualifier to sound confident is worse than leaving it.

@@ -6,7 +6,10 @@
       "prompt": "Draft a short blog post intro (2-3 paragraphs) about why small teams ship faster, and save it to blog/why-small-teams-ship-faster.md.",
       "expected_output": "A 2-3 paragraph intro written with the rules applied from the start: no em/en-dashes, no AI-tell vocabulary, no bot scaffolding, contractions and varied sentence rhythm, concrete over vague.",
       "files": [
-        { "name": "README.md", "description": "Minimal blog project scaffold." }
+        {
+          "name": "README.md",
+          "description": "Minimal blog project scaffold."
+        }
       ],
       "expectations": [
         "The file blog/why-small-teams-ship-faster.md exists with a 2-3 paragraph intro on the requested topic.",
@@ -21,7 +24,10 @@
       "prompt": "draft/launch-post.md reads like AI wrote it. Make it sound natural and human — edit the file in place. Keep everything factually true.",
       "expected_output": "The draft is rewritten in place: em-dashes, AI-tell vocabulary, bot scaffolding, the orchestra analogy, and decorative bold are gone; the hedge pile is cut; but the one load-bearing caveat (Postgres 14+ only, older versions silently return incomplete results) survives, and the post still announces the same product with the same claims.",
       "files": [
-        { "name": "draft/launch-post.md", "description": "AI-sloppy launch post: em-dashes, 'delve'/'leverage'/'tapestry'/'robust'/'seamless'/'utilizes'/'crucial'/'paradigm shift'/'testament', 'In today's fast-paced world', 'Furthermore', 'In conclusion', 'Buckle up', 'Let's dive in', an orchestra analogy, decorative-bold bullet leads, a hedge pile ('results may vary and every data stack is different and your mileage may depend') wrapped around ONE load-bearing caveat: Postgres 14+ only, older versions silently return incomplete results." }
+        {
+          "name": "draft/launch-post.md",
+          "description": "AI-sloppy launch post: em-dashes, 'delve'/'leverage'/'tapestry'/'robust'/'seamless'/'utilizes'/'crucial'/'paradigm shift'/'testament', 'In today's fast-paced world', 'Furthermore', 'In conclusion', 'Buckle up', 'Let's dive in', an orchestra analogy, decorative-bold bullet leads, a hedge pile ('results may vary and every data stack is different and your mileage may depend') wrapped around ONE load-bearing caveat: Postgres 14+ only, older versions silently return incomplete results."
+        }
       ],
       "expectations": [
         "draft/launch-post.md was edited in place and contains no em-dashes or en-dashes.",
@@ -36,7 +42,10 @@
       "prompt": "Clean up site/customers.md so it doesn't read AI-generated — but the customer quote must stay exactly as written, word for word.",
       "expected_output": "The surrounding prose is de-AI'd, but the block-quoted customer testimonial (which itself contains an em-dash and the word 'leverage') is byte-identical to the original — quotes are preserved verbatim even when they contain AI tells.",
       "files": [
-        { "name": "site/customers.md", "description": "Customers page whose surrounding prose is saturated with AI tells, containing one block-quoted customer testimonial from 'Dana R., VP Engineering at Coastline Freight' that itself includes an em-dash and the word 'leverage' — a trap: the verbatim-preservation rule outranks the em-dash and vocabulary rules inside quotes." }
+        {
+          "name": "site/customers.md",
+          "description": "Customers page whose surrounding prose is saturated with AI tells, containing one block-quoted customer testimonial from 'Dana R., VP Engineering at Coastline Freight' that itself includes an em-dash and the word 'leverage' — a trap: the verbatim-preservation rule outranks the em-dash and vocabulary rules inside quotes."
+        }
       ],
       "expectations": [
         "The block-quoted customer testimonial (the '> \"We rolled it out in a week...' lines including the Dana R. attribution) is byte-identical to the fixture: its em-dash and the word 'leverage' inside the quote are untouched.",
@@ -49,7 +58,10 @@
       "prompt": "Write a commit message for the current change and commit it.",
       "expected_output": "Negative control: a normal, precise commit message for the retry-attempts change (e.g. mentioning the 3 -> 5 default change) and a commit — with no prose-pass ceremony, no rules recitation, and no rewriting beyond the commit message itself.",
       "files": [
-        { "name": "src/retry.js", "description": "Committed retry helper with an uncommitted working-tree change: default attempts bumped from 3 to 5." }
+        {
+          "name": "src/retry.js",
+          "description": "Committed retry helper with an uncommitted working-tree change: default attempts bumped from 3 to 5."
+        }
       ],
       "expectations": [
         "The change is committed with a message that accurately describes the actual diff (the retry attempts default changing from 3 to 5).",
@@ -62,7 +74,10 @@
       "prompt": "Reword the headline in site/index.md to be shorter — just that one line.",
       "expected_output": "Negative control for scope: the H1 headline is shortened; every other line of the file is byte-identical; no full-document prose pass, no revision report file.",
       "files": [
-        { "name": "site/index.md", "description": "Landing page with a long H1 headline, two body paragraphs, and a pricing line. Only the headline should change." }
+        {
+          "name": "site/index.md",
+          "description": "Landing page with a long H1 headline, two body paragraphs, and a pricing line. Only the headline should change."
+        }
       ],
       "expectations": [
         "The H1 headline line is rewritten to something shorter that keeps the meaning (automatic weekly changelogs).",
@@ -75,7 +90,10 @@
       "prompt": "Edit draft/security-note.md in place so it sounds natural, preserving the literal attack sample exactly. Also create revision-report.html so I can inspect what changed.",
       "expected_output": "The article is de-AI'd without changing the literal attack sample, and the requested revision-report.html is generated through the bundled safe report builder. The report embeds its data as base64 rather than placing the hostile </script><script> sequence into executable markup.",
       "files": [
-        { "name": "draft/security-note.md", "description": "Tell-heavy security blog draft containing a literal </script><script> attack sample that must remain exact in the Markdown but be safely encoded inside the report." }
+        {
+          "name": "draft/security-note.md",
+          "description": "Tell-heavy security blog draft containing a literal </script><script> attack sample that must remain exact in the Markdown but be safely encoded inside the report."
+        }
       ],
       "expectations": [
         "draft/security-note.md is edited in place; AI-tell vocabulary/scaffolding is removed while the literal `</script><script>window.pwned=true</script>` sample remains byte-identical in the Markdown.",
@@ -83,6 +101,24 @@
         "The bundled scripts/build_revision_report.py helper is used (visible in tool calls), rather than manually inserting raw prose into a JavaScript object.",
         "The exact hostile sequence `</script><script>window.pwned=true</script>` does not appear raw in revision-report.html and the __DATA_BASE64__ placeholder is gone; the data is embedded as base64.",
         "No temporary report-data JSON file is left behind unless explicitly requested."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Revise drafts/sync-engine-post.md for our engineering blog. The content is right but readers keep saying it's confusing to follow. Fix what makes it hard to read.",
+      "expected_output": "The revision fixes the grounding failure, not just style: the draft leans on two unintroduced concepts early ('the reconciler' is used in paragraph 1 but only explained in the final paragraph; 'drift windows' is used twice and never explained anywhere). The revised post either moves the reconciler explanation before first use or adds a one-line grounding at first mention, and introduces 'drift windows' at or before its first use. Meaning and voice are preserved; the usual style rules still hold (no em-dashes, no AI-tell vocabulary added).",
+      "files": [
+        {
+          "name": "drafts/sync-engine-post.md",
+          "description": "A ~5-paragraph technical blog draft. Paragraph 1 says user edits 'go straight to the reconciler before hitting storage' with no explanation of what the reconciler is; the explanation ('the reconciler is the background process that merges concurrent edits into one ordered log') appears only in the final paragraph. 'Drift windows' is used in paragraphs 2 and 4 and never defined. Otherwise clean prose with no AI tells, so the ONLY real fix needed is grounding/order."
+        }
+      ],
+      "expectations": [
+        "The revised draft introduces or explains 'the reconciler' before (or at) its first use: either the explanation moved earlier or a one-line grounding was added at first mention; the reader no longer meets the term cold.",
+        "'Drift windows' is defined at or before its first use in the revised draft (a short in-place grounding is sufficient).",
+        "The grounding was done in place: no appended glossary section or terms table was bolted onto the post.",
+        "The author's meaning and technical claims are preserved (the reconciler explanation content survives; no invented behavior).",
+        "No new AI tells were introduced: no em/en-dashes and none of the tell words (delve, leverage, utilize, tapestry, robust, seamless, crucial, pivotal) appear in the revised draft."
       ]
     }
   ]
