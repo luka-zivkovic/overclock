@@ -5,6 +5,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## overclock-setup
 
+### 0.1.2 — 2026-07-17
+- Synchronize the bundled capability catalog with the Codex metadata releases for
+  `session-memory`, `learning-loop`, `natural-writing`, and `discipline-gates`.
+
 ### 0.1.1 — 2026-07-12
 - Publish `critical-thinking` and `discipline-gates` in the bundled capability
   catalog so setup can recommend exact installation commands for both packages.
@@ -81,6 +85,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## natural-writing
 
+### 1.0.2 — 2026-07-17
+- Add Codex skill-picker metadata and a ready-to-use `$natural-writing` prompt.
+
 ### 1.0.1 — 2026-07-09
 - Preserve original metaphors that carry the author's meaning or voice while still
   removing canned decorative analogies.
@@ -102,6 +109,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   byte-identical-quote traps and two negative controls): 5/5 green.
 
 ## discipline-gates
+
+### 0.1.3 — 2026-07-17
+- Add Codex skill-picker metadata and ready-to-use prompts for `test-discipline`
+  and `git-archaeologist`.
 
 ### 0.1.2 — 2026-07-12
 - Publish the plugin in the Overclock marketplace.
@@ -146,6 +157,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## learning-loop
 
+### 1.0.2 — 2026-07-17
+- Add Codex skill-picker metadata and a ready-to-use `$lessons-learned` prompt.
+
 ### 1.0.1 — 2026-07-09
 - Align secret-bearing explicit record requests with the redaction contract: the
   skill now still routes, records only the redacted rule, and never persists the
@@ -165,6 +179,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   `templates/lessons.md` skeleton is kept byte-identical (CI-enforced).
 
 ## session-memory
+
+### 1.0.4 — 2026-07-17
+- Add Codex skill-picker metadata and ready-to-use prompts for `session-handoff`
+  and `lessons-learned`.
 
 ### 1.0.3 — 2026-07-09
 - lessons-learned: align the routing description with the existing secret-redaction

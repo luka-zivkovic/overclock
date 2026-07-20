@@ -25,6 +25,14 @@
 - **Count:** 1
 - **Last reinforced:** 2026-07-03
 
+## Workflow args can arrive stringified — coerce and fail loudly instead of silently falling back
+- **When:** invoking any `.claude/workflows/*.js` that takes candidates/config via `args` (skill-eval-external, skill-brainstorm, skill-rejudge), or authoring a new workflow with an `args` fallback
+- **Wrong:** trusting `Array.isArray(args)` alone with a silent `DEFAULT_CANDIDATES` fallback — the harness can deliver `args` as a JSON-encoded STRING, so the check fails and the workflow silently evaluates the wrong (default) candidate set, burning the full agent budget
+- **Right:** in the script, coerce `typeof args === 'string' ? JSON.parse(args) : args` before the array check, and `log()` which candidate source was chosen so a fallback is visible in the first progress line; when launching, check the first log line names the expected candidate count before letting the run proceed
+- **Evidence:** 2026-07-19 external-eval run of 14 mattpocock/compound-engineering candidates: args arrived stringified, script fell back to the 6 inlined ponytail-era defaults, spent 30 agents / ~680k tokens re-judging already-judged skills, and appended 6 duplicate SHORTLIST rows (reverted). Fixed by coercion + explicit source log in skill-eval-external.js.
+- **Count:** 1
+- **Last reinforced:** 2026-07-19
+
 ## Give history/artifact-oracle skills at least one pinned real-repo eval case
 - **When:** designing an eval suite for a skill whose mechanism operates on real-world artifacts — git history (git-archaeologist), PRs/issues, advisories — rather than on files the fixture fabricates
 - **Wrong:** synthetic-only fixtures. They cannot produce layered real history (a blame tip buried under lint/style commits) and never tempt the model with real background knowledge, so fabrication failure modes stay invisible: all 4 synthetic git-archaeologist cases passed while the skill could still assert remembered CVEs as fact.

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR Kit validated review candidates",
+  "type": "object",
+  "required": ["findings", "coverage"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "priority",
+          "title",
+          "file",
+          "line",
+          "side",
+          "changed_line",
+          "failure_path",
+          "impact",
+          "evidence",
+          "introduced_by_diff",
+          "confidence",
+          "suggested_comment"
+        ],
+        "properties": {
+          "priority": { "enum": ["P0", "P1", "P2"] },
+          "title": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "minLength": 1 },
+          "line": { "type": "integer", "minimum": 1 },
+          "side": { "enum": ["LEFT", "RIGHT"] },
+          "changed_line": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact source text at file/line on the selected diff side."
+          },
+          "failure_path": { "type": "string", "minLength": 1 },
+          "impact": { "type": "string", "minLength": 1 },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "introduced_by_diff": { "const": true },
+          "confidence": { "enum": ["high", "medium"] },
+          "suggested_comment": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "activated_lenses",
+        "inspected_surfaces",
+        "blind_spots",
+        "testing_gaps"
+      ],
+      "properties": {
+        "activated_lenses": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "inspected_surfaces": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "blind_spots": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "testing_gaps": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

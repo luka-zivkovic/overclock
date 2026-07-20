@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lessons Learned"
+  short_description: "Persist corrections and diagnosed failures"
+  default_prompt: "Use $lessons-learned to record this correction or diagnosed failure as a durable, redacted project lesson."

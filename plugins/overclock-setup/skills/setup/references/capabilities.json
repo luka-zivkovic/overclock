@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -20,7 +20,7 @@
     {
       "id": "session-memory",
       "display_name": "Session Memory",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "publication_status": "published",
       "provides": [
         "session-handoff",
@@ -43,7 +43,7 @@
     {
       "id": "learning-loop",
       "display_name": "Learning Loop",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "publication_status": "published",
       "provides": [
         "lessons-learned"
@@ -64,7 +64,7 @@
     {
       "id": "natural-writing",
       "display_name": "Natural Writing",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "publication_status": "published",
       "provides": [
         "natural-prose-writing",
@@ -96,7 +96,7 @@
     {
       "id": "discipline-gates",
       "display_name": "Discipline Gates",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "publication_status": "published",
       "provides": [
         "test-discipline",

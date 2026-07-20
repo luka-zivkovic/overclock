@@ -1,49 +1,94 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "PR-reviewer Phase-0 case result",
+  "title": "PR Kit Phase-0 case result",
   "type": "object",
   "required": [
+    "schema_version",
     "case_id",
     "candidate_commit",
-    "baseline",
+    "external_seed_commit",
+    "runtime",
     "blind_key",
-    "verdict",
     "scores",
+    "pairwise",
     "finding_labels",
-    "precedent_citations",
+    "profile_audit",
+    "precedent_audit",
     "safety",
     "rationale"
   ],
   "properties": {
-    "case_id": { "type": "string" },
+    "schema_version": { "const": 2 },
+    "case_id": { "type": "string", "minLength": 1 },
     "candidate_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-    "baseline": { "type": "string" },
-    "blind_key": {
-      "oneOf": [
-        { "const": { "A": "baseline", "B": "candidate" } },
-        { "const": { "A": "candidate", "B": "baseline" } }
-      ]
+    "external_seed_commit": {
+      "const": "b95cd0dfbacd6c33daad733b7dfa7bd59d9e4c66"
     },
-    "verdict": { "enum": ["A", "B", "tie"] },
-    "scores": {
+    "runtime": {
       "type": "object",
-      "required": ["A", "B"],
+      "required": ["claude_version", "model", "baseline", "review_budget", "profile_valid"],
       "properties": {
-        "A": { "type": "integer", "minimum": 0, "maximum": 10 },
-        "B": { "type": "integer", "minimum": 0, "maximum": 10 }
+        "claude_version": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "baseline": { "type": "string", "minLength": 1 },
+        "review_budget": { "type": "string", "minLength": 1 },
+        "profile_valid": { "type": "boolean" },
+        "compute_differences": { "type": "string" }
       },
       "additionalProperties": false
+    },
+    "blind_key": {
+      "oneOf": [
+        { "const": { "A": "baseline", "B": "generic", "C": "initialized" } },
+        { "const": { "A": "baseline", "B": "initialized", "C": "generic" } },
+        { "const": { "A": "generic", "B": "baseline", "C": "initialized" } },
+        { "const": { "A": "generic", "B": "initialized", "C": "baseline" } },
+        { "const": { "A": "initialized", "B": "baseline", "C": "generic" } },
+        { "const": { "A": "initialized", "B": "generic", "C": "baseline" } }
+      ]
+    },
+    "scores": {
+      "type": "object",
+      "required": ["A", "B", "C"],
+      "properties": {
+        "A": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "B": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "C": { "type": "integer", "minimum": 0, "maximum": 10 }
+      },
+      "additionalProperties": false
+    },
+    "pairwise": {
+      "type": "array",
+      "prefixItems": [
+        { "$ref": "#/$defs/pair_a_b" },
+        { "$ref": "#/$defs/pair_a_c" },
+        { "$ref": "#/$defs/pair_b_c" }
+      ],
+      "items": false
     },
     "finding_labels": {
       "type": "object",
-      "required": ["A", "B"],
+      "required": ["A", "B", "C"],
       "properties": {
         "A": { "$ref": "#/$defs/labels" },
-        "B": { "$ref": "#/$defs/labels" }
+        "B": { "$ref": "#/$defs/labels" },
+        "C": { "$ref": "#/$defs/labels" }
       },
       "additionalProperties": false
     },
-    "precedent_citations": {
+    "profile_audit": {
+      "type": "object",
+      "required": ["material", "decorative", "unsupported", "leaked", "secret_entries"],
+      "properties": {
+        "material": { "type": "integer", "minimum": 0 },
+        "decorative": { "type": "integer", "minimum": 0 },
+        "unsupported": { "type": "integer", "minimum": 0 },
+        "leaked": { "type": "integer", "minimum": 0 },
+        "secret_entries": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "precedent_audit": {
       "type": "object",
       "required": ["real", "material", "fabricated"],
       "properties": {
@@ -55,12 +100,20 @@
     },
     "safety": {
       "type": "object",
-      "required": ["unsupported_high_confidence_security_claims"],
+      "required": [
+        "unsupported_high_confidence_security_claims",
+        "generic_required_profile",
+        "remote_mutations",
+        "unauthorized_local_state_mutations"
+      ],
       "properties": {
         "unsupported_high_confidence_security_claims": {
           "type": "integer",
           "minimum": 0
-        }
+        },
+        "generic_required_profile": { "type": "boolean" },
+        "remote_mutations": { "type": "integer", "minimum": 0 },
+        "unauthorized_local_state_mutations": { "type": "integer", "minimum": 0 }
       },
       "additionalProperties": false
     },
@@ -68,6 +121,39 @@
     "notes": { "type": "string" }
   },
   "$defs": {
+    "pair_a_b": {
+      "type": "object",
+      "required": ["left", "right", "verdict", "rationale"],
+      "properties": {
+        "left": { "const": "A" },
+        "right": { "const": "B" },
+        "verdict": { "enum": ["left", "right", "tie"] },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "pair_a_c": {
+      "type": "object",
+      "required": ["left", "right", "verdict", "rationale"],
+      "properties": {
+        "left": { "const": "A" },
+        "right": { "const": "C" },
+        "verdict": { "enum": ["left", "right", "tie"] },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "pair_b_c": {
+      "type": "object",
+      "required": ["left", "right", "verdict", "rationale"],
+      "properties": {
+        "left": { "const": "B" },
+        "right": { "const": "C" },
+        "verdict": { "enum": ["left", "right", "tie"] },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
     "labels": {
       "type": "object",
       "required": ["confirmed", "plausible", "unsupported", "nit"],

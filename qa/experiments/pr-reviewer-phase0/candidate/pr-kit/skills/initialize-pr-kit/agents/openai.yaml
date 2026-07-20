@@ -1,0 +1,6 @@
+interface:
+  display_name: "Initialize PR Kit"
+  short_description: "Create source-grounded repository review context"
+  default_prompt: "Use $initialize-pr-kit to create a source-grounded PR review profile for this repository."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Handoff"
+  short_description: "Save and resume git-anchored working state"
+  default_prompt: "Use $session-handoff to save this session’s working state or resume safely from an existing handoff."

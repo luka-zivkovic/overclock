@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "development",
       "keywords": [
         "setup",
@@ -24,7 +24,7 @@
       "name": "session-memory",
       "source": "./plugins/session-memory",
       "description": "Stop losing your working state. Warm session resume (handoffs with git-anchored drift detection) plus lessons that persist across sessions — corrections stop evaporating, failed approaches stop being retried.",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "development",
       "keywords": [
         "memory",
@@ -40,7 +40,7 @@
       "name": "learning-loop",
       "source": "./plugins/learning-loop",
       "description": "A self-improvement loop for your agent. Corrections (\"no, use pnpm, not npm\") and diagnosed failures become durable, evidence-counted lessons in .ai/memory/LESSONS.md, deduplicated by meaning and surfaced in later sessions so the same mistakes stop recurring. Standalone lessons-only alternative to session-memory; do not install both because both route the same lesson workflow and ship a lesson SessionStart hook.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "development",
       "keywords": [
         "lessons",
@@ -56,7 +56,7 @@
       "name": "natural-writing",
       "source": "./plugins/natural-writing",
       "description": "Make AI drafts read like a human wrote them. A prose writing/editing skill for blog posts, articles, and essays that strips the tells which mark text as AI-generated (em-dashes, words like 'delve'/'leverage', uniform sentence rhythm, bot scaffolding) so you can use AI without rewriting everything by hand. Preserves quotes verbatim and stays silent on code, commit messages, and one-line edits.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "writing",
       "keywords": [
         "writing",
@@ -88,7 +88,7 @@
       "name": "discipline-gates",
       "source": "./plugins/discipline-gates",
       "description": "Pre-action engineering gates backed by real evidence: reproduce bugs before fixing, characterize untested behavior before refactoring, prove new tests can fail with safe mutation restore, and recover defensive-code intent from git history before weakening it.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "category": "development",
       "keywords": [
         "testing",

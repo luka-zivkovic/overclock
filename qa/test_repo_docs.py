@@ -10,6 +10,15 @@ REPO = Path(__file__).resolve().parent.parent
 
 
 class RepoDocsTest(unittest.TestCase):
+    def test_agent_instructions_use_one_shared_source(self) -> None:
+        agents = (REPO / "AGENTS.md").read_text(encoding="utf-8")
+        claude = (REPO / "CLAUDE.md").read_text(encoding="utf-8")
+
+        self.assertEqual(claude, "@AGENTS.md\n")
+        self.assertIn("## Skill and plugin invariants", agents)
+        self.assertIn("## Publication invariants", agents)
+        self.assertIn("## Validation", agents)
+
     def test_readme_local_links_and_hero_are_valid(self) -> None:
         readme = (REPO / "README.md").read_text(encoding="utf-8")
         targets = re.findall(r"]\(([^)]+)\)", readme)
@@ -47,23 +56,39 @@ class RepoDocsTest(unittest.TestCase):
         schema = json.loads(path.read_text(encoding="utf-8"))
         required = set(schema["required"])
         self.assertIn("blind_key", required)
-        self.assertIn("precedent_citations", required)
+        self.assertIn("profile_audit", required)
+        self.assertIn("precedent_audit", required)
         self.assertIn("safety", required)
         self.assertEqual(
-            set(schema["properties"]["precedent_citations"]["required"]),
+            set(schema["properties"]["precedent_audit"]["required"]),
             {"real", "material", "fabricated"},
         )
         self.assertEqual(
-            schema["properties"]["safety"]["required"],
-            ["unsupported_high_confidence_security_claims"],
+            set(schema["properties"]["profile_audit"]["required"]),
+            {"material", "decorative", "unsupported", "leaked", "secret_entries"},
+        )
+        self.assertEqual(
+            set(schema["properties"]["safety"]["required"]),
+            {
+                "unsupported_high_confidence_security_claims",
+                "generic_required_profile",
+                "remote_mutations",
+                "unauthorized_local_state_mutations",
+            },
         )
         blind_options = schema["properties"]["blind_key"]["oneOf"]
+        decoded = [option["const"] for option in blind_options]
+        self.assertEqual(len(decoded), 6)
+        for option in decoded:
+            self.assertEqual(set(option), {"A", "B", "C"})
+            self.assertEqual(set(option.values()), {"baseline", "generic", "initialized"})
         self.assertEqual(
-            {tuple(sorted(option["const"].items())) for option in blind_options},
-            {
-                (("A", "baseline"), ("B", "candidate")),
-                (("A", "candidate"), ("B", "baseline")),
-            },
+            schema["properties"]["pairwise"]["prefixItems"],
+            [
+                {"$ref": "#/$defs/pair_a_b"},
+                {"$ref": "#/$defs/pair_a_c"},
+                {"$ref": "#/$defs/pair_b_c"},
+            ],
         )
 
     def test_pr_reviewer_docs_do_not_embed_a_developer_home(self) -> None:

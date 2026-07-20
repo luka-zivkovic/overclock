@@ -108,8 +108,15 @@ const DEFAULT_CANDIDATES = [
   { name: 'karpathy-guidelines', source: 'https://github.com/multica-ai/andrej-karpathy-skills', pitch: 'Behavioral guidelines to reduce common LLM coding mistakes: think-before-coding (surface assumptions), simplicity-first, surgical changes (touch only what is needed), goal-driven execution (define verifiable success criteria, loop until verified).', fullDescription: "Four behavioral guidelines derived from Karpathy's observations on LLM coding pitfalls. Biases toward caution over speed; says 'for trivial tasks, use judgment'. Overlaps conceptually with ponytail (simplicity) and with plan/verify workflows (goal-driven execution, write-a-failing-test-first)." },
   { name: 'what-did-i-get-done', source: 'https://github.com/cursor/plugins/blob/3347cbab/cursor-team-kit/skills/what-did-i-get-done/SKILL.md', pitch: 'Generate a concise, high-signal work summary from git commits in a time range, filtered to the current user excluding merges, with the resolved date range and optional 2-5 bullets.', fullDescription: "Converts time references to dates, runs git log filtered by current user excluding merges over that range, distills substantial (non-cosmetic) changes into a status update. Output: brief status-report summary + actual date range + optional bullets. Functional descriptions, doesn't infer reasoning." },
 ]
-const candidates = Array.isArray(args) && args.length ? args : DEFAULT_CANDIDATES
-log(`Evaluating ${candidates.length} published skills against Overclock's surface`)
+// args may arrive as a JSON-encoded string depending on the harness — coerce before use.
+let candidateArgs = args
+if (typeof candidateArgs === 'string') {
+  try { candidateArgs = JSON.parse(candidateArgs) } catch { candidateArgs = null }
+}
+const candidates = Array.isArray(candidateArgs) && candidateArgs.length ? candidateArgs : DEFAULT_CANDIDATES
+log(candidates === DEFAULT_CANDIDATES
+  ? `No usable args — falling back to the ${candidates.length} inlined DEFAULT_CANDIDATES`
+  : `Evaluating ${candidates.length} published skills from args against Overclock's surface`)
 
 const evaluated = await pipeline(
   candidates,

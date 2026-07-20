@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review PR"
+  short_description: "Adversarial, evidence-first pull-request review"
+  default_prompt: "Use $review-pr to inspect this pull request and draft review comments without editing, committing, pushing, or posting anything."
+policy:
+  allow_implicit_invocation: false

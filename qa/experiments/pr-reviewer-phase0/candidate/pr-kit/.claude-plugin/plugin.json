@@ -1,0 +1,17 @@
+{
+  "name": "pr-kit",
+  "displayName": "PR Kit (Phase 0 Candidate)",
+  "description": "Experimental pull-request review kit: a repository-agnostic adversarial reviewer plus an explicit initializer that creates a source-grounded repository profile.",
+  "version": "0.1.0-phase0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "pull-request",
+    "code-review",
+    "security",
+    "edge-cases",
+    "repository-context"
+  ]
+}
