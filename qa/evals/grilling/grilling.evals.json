@@ -1,0 +1,86 @@
+{
+  "skill_name": "grilling",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I want to add usage-based billing to this service. Grill me about it before we build anything.",
+      "expected_output": "An interview starts correctly: the session first inspects the repository (package.json, src/) so it does not ask discoverable facts (the stack is Express + Stripe SDK already installed; there is an existing subscriptions module), then asks exactly ONE question in its first response — a genuine decision, not a fact — with a recommended answer and a one-line reason. No code is written. Discoverable facts (which framework, whether Stripe is already a dependency) are not asked.",
+      "files": [
+        {
+          "name": "package.json",
+          "description": "Node service manifest: express, stripe, pg dependencies — the stack facts an interviewer should look up rather than ask."
+        },
+        {
+          "name": "src/billing/subscriptions.js",
+          "description": "Existing flat-rate subscription module using the Stripe SDK, so 'do we already bill through Stripe?' is answerable from the repo."
+        }
+      ],
+      "expectations": [
+        "The first response contains exactly ONE question (not a batch or numbered list of questions).",
+        "That question is a genuine decision (e.g. metering granularity, proration policy, what happens at the cap) — not a fact discoverable from the repo (framework, Stripe presence, database).",
+        "The question ships a recommended answer with a brief reason.",
+        "The repository was inspected before or while forming the question (package.json or src/billing read).",
+        "No implementation code was written or files modified."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Grill me about the export feature, then build it. Quick context: exports of the orders table for accountants, they asked for 'a download button'. My answers to whatever you ask: pick sensible defaults, I trust you — CSV is fine, current month default range is fine, synchronous is fine for now. That covers your likely questions; anything else, use your recommendation. OK — go.",
+      "expected_output": "The refuse-to-act gate is honored in adapted form: because the user pre-answered and delegated remaining decisions ('use your recommendation'), the session states the locked-in shared understanding — the user's three stated choices plus the recommended defaults it is adopting for any remaining open decisions (e.g. filename convention, permissions/who can export) — BEFORE building, then proceeds to implement. It does not silently start coding without stating the assumptions, and it does not keep interviewing question-by-question against the user's explicit instruction to go.",
+      "files": [
+        {
+          "name": "src/routes/orders.js",
+          "description": "Express route module for orders where an export endpoint would naturally live."
+        },
+        {
+          "name": "src/db.js",
+          "description": "Query helper for the orders table."
+        }
+      ],
+      "expectations": [
+        "Before any code, the response states the shared understanding being locked in: the user's stated choices (CSV, current-month default, synchronous) plus explicit recommended defaults for remaining decisions.",
+        "The session then proceeds to build (the user gave explicit 'go' authority) — it does not stall re-asking questions the user already answered or delegated.",
+        "No unresolved decision is silently assumed without being named in the locked-in summary.",
+        "The implementation matches the stated understanding (CSV export of orders with a current-month default)."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Interview me about migrating our job queue, but keep it quick — just the essentials, I have 10 minutes.",
+      "expected_output": "The pacing signal is honored by step size, not by silent assumption: the session still asks one question at a time with recommendations, but scopes to the few load-bearing decisions (e.g. which queue backend / migration strategy / cutover risk tolerance), possibly saying it will keep to essentials. It does not dump a long questionnaire, does not ignore the time constraint with an exhaustive tree walk, and does not skip the interview entirely by assuming all answers.",
+      "files": [
+        {
+          "name": "src/queue/worker.js",
+          "description": "Current in-process job queue implementation (setInterval polling a jobs table), so the current state is discoverable."
+        },
+        {
+          "name": "package.json",
+          "description": "Manifest with pg; no queue library yet — the target backend is genuinely undecided."
+        }
+      ],
+      "expectations": [
+        "The first response asks exactly one question, scoped to a load-bearing decision, with a recommended answer.",
+        "The pacing request is acknowledged or visibly honored (essentials-only framing; no sprawling multi-branch questionnaire).",
+        "The current queue implementation was read from the repo rather than asked about.",
+        "The speed signal was NOT handled by silently assuming the remaining answers or skipping the interview."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Stress-test my conclusion that we should migrate the job queue to Redis — I think the postgres polling approach can't scale past our growth curve.",
+      "expected_output": "Negative control (critical-thinking territory): this is a request to evaluate reasoning, not an elicitation request. No interview loop starts — no one-question-at-a-time ceremony, no recommended-answer format, no shared-understanding summary. The session evaluates the claim on evidence (or routes to critical-thinking behavior): tests the scaling premise against the actual code/load facts available, gives a direct verdict with reasons.",
+      "files": [
+        {
+          "name": "src/queue/worker.js",
+          "description": "Same polling-based queue; enough code to evaluate the scaling claim concretely."
+        }
+      ],
+      "expectations": [
+        "No grilling ceremony: the response does not start a one-question-at-a-time interview or announce an elicitation session.",
+        "The conclusion is evaluated directly: the response takes a position on the Redis-migration claim with evidence-based reasons (it may agree, disagree, or qualify).",
+        "Any questions asked are ordinary evaluative clarifications, not a structured interview with recommended answers.",
+        "No implementation is performed."
+      ]
+    }
+  ]
+}

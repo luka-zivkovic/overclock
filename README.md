@@ -48,6 +48,7 @@ installs, removes, enables, disables, or edits anything.
 | **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
+| **grilling** | A one-question-at-a-time requirements interview before anything gets built | `/plugin install grilling@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
 | **natural-writing** | Human-sounding long-form prose without canned AI tells | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments on a GitHub PR judged, fixed, and answered — with approval before anything posts | `/plugin install pr-feedback@overclock` |
@@ -77,6 +78,20 @@ contracts rather than a technical sandbox, so ambiguous containment is reported 
 Skill routing is not a reliable always-on tone setting. For a permanent preference, also add a direct
 user instruction such as: `Do not praise my questions or agree for social reasons; evaluate claims
 on evidence.`
+
+</details>
+
+<details>
+<summary><strong>grilling</strong> — understand the work before building it</summary>
+
+`grilling` interviews you about a piece of work one question at a time, each question shipping a
+recommended answer so a "yes" keeps things moving. Facts the repository can answer are looked up,
+never asked; only genuine decisions reach you, in dependency order. Nothing gets built until you
+confirm the summarized shared understanding — and "just build it" locks in the recommended
+defaults, stated explicitly rather than assumed silently.
+
+It is elicitation only: requests to critique, stress-test, or judge reasoning belong to
+critical-thinking, and a task with a single ambiguity gets one ordinary question, not an interview.
 
 </details>
 
