@@ -11,7 +11,10 @@ Scope: every ``*.md`` under ``plugins/*/skills/<skill>/``. A citation is any
 segment; it must resolve inside that skill's directory. Skipped: URLs,
 ``<placeholder>`` text, wildcard paths, and bare directory mentions. A
 ``${VAR}``-prefixed path (e.g. ``"${CLAUDE_SKILL_DIR}/scripts/x.py"``) is
-still checked — the segment after the variable names a real bundled file.
+still checked — the segment after the variable names a real bundled file. To
+mention such a path in prose WITHOUT asserting it exists (an example output
+name, a cross-skill mention), use a wildcard (``references/*.md``) or an
+angle-bracket placeholder (``<scripts/example.py>``).
 
 Inspired by compound-engineering's validate-doc-claims (see
 docs/skill-authoring-notes.md).
@@ -25,7 +28,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 
 CITATION = re.compile(
-    r"(?<![\w/.<-])((?:references|templates|scripts|assets)/[A-Za-z0-9_.-]+"
+    r"(?:(?<=\}/)|(?<![\w/.<-]))((?:references|templates|scripts|assets)/[A-Za-z0-9_.-]+"
     r"(?:/[A-Za-z0-9_.-]+)*\.[A-Za-z0-9]+)"
 )
 

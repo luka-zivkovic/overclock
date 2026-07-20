@@ -43,6 +43,17 @@ class CheckDocClaimsTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("OK", result.stdout)
 
+    def test_var_prefixed_missing_script_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill = make_skill(root, "p1", "s1")
+            (skill / "SKILL.md").write_text(
+                'Run `python3 "${CLAUDE_SKILL_DIR}/scripts/renamed.py" x`.\n'
+            )
+            result = run_checker(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("scripts/renamed.py", result.stderr)
+
     def test_missing_citation_fails_with_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
