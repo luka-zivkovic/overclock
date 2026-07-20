@@ -2,7 +2,7 @@
   "name": "overclock-setup",
   "displayName": "Overclock Setup",
   "description": "A manual, report-only setup advisor for Overclock. It inventories installed plugins and instruction-file metadata, asks only decision-changing questions, enforces package conflicts such as session-memory versus learning-loop, and returns exact proposed install commands and minimal CLAUDE.md diffs without executing or writing anything.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": {
     "name": "Luka Zivkovic"
   },
