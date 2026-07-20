@@ -35,7 +35,7 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       + clear errors); BOTH behavioral controls PASS 4/4 expectations (positive: P1 silent-pass
       finding, validated + anchored; negative: clean 'no actionable findings', no manufactured
       risk). Verdict: ready for Phase-0; the 6-case blind gate still decides publication
-- [ ] grilling (elicitation primitive, anti-triggers vs critical-thinking) — status: pending
+- [x] grilling — status: done, merged as PR #16 (2026-07-20): plugins/grilling 0.1.0; SHORTLIST row marked BUILT
 - [ ] debugging-discipline (composes with test-discipline repro) — status: pending
 - [ ] project-vocabulary (domain glossary; boundary with lessons-learned declared both ways) — status: pending
 - [ ] wayfinder / to-tickets / codebase-design+survey / tdd / ce-dogfood — status: parked until
