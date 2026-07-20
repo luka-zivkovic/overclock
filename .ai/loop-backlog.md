@@ -20,10 +20,11 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       done, merged as PR #13 (2026-07-20). Tier 1 complete.
 
 ## Tier 2 — audit existing 8 skills against docs/skill-authoring-notes.md
-- [ ] Sweep all shipped SKILL.md/references for no-op lines, negation phrasing, non-checkable
-      completion criteria, missing leading words; fix per-plugin with bumps — status: pending
-- [ ] tools/check_doc_claims.py: paths cited in SKILL.md/references must exist (CE-inspired);
-      wire into CI — status: pending
+- [x] Sweep all shipped SKILL.md bodies against the failure-mode checklist — status: done in
+      PR #14 (2026-07-20): zero behavior-changing findings; record in skill-authoring-notes.md
+- [x] tools/check_doc_claims.py + CI wiring + tests — status: done, merged as PR #14
+      (2026-07-20). Tier 2 complete. LOOP STOPPED here by design: everything below is
+      demand-gated per the eval panel.
 
 ## Tier 3 — new builds (BUILD verdicts; queue each behind its first PR-able slice)
 - [ ] solutions-loop skill (ce-compound-style, session-memory family; eval must gate on
