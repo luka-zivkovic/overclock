@@ -15,7 +15,7 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
 - [x] Ponytail safety floor — status: done, merged as PR #11 (2026-07-20): git-archaeologist
       0.1.4 names simplify-framed removals in its trigger surface + battery controls; SHORTLIST
       row closed
-- [ ] natural-writing 1.0.3: grounding rule from writing-beats (+1 eval case) — status: pending
+- [x] natural-writing 1.0.3: grounding rule — status: done, merged as PR #12 (2026-07-20)
 - [ ] session-memory + critical-thinking: settled-decisions provenance labels in HANDOFF
       Decisions + resume brief (+ eval cases, bumps, shared-files entry if duplicated) — status: pending
 
