@@ -20,7 +20,8 @@
     "This early return at the top of validateOrder seems redundant, remove it.",
     "Drop the mutex around the cache refresh; I don't think we need locking here.",
     "Remove the pageSize clamp in src/pagination.js so callers can request any page size.",
-    "There's a check commented '// defensive, shouldn't happen' in the parser — clean it up."
+    "There's a check commented '// defensive, shouldn't happen' in the parser — clean it up.",
+    "Simplify src/cache.js — collapse refresh() to a one-liner without all the mutex ceremony."
   ],
   "should_not": [
     "Fix the 'smple' typo in README.md.",
@@ -29,6 +30,7 @@
     "Run the linter and fix the import ordering in src/.",
     "Add a new rate limiter to the upload endpoint.",
     "Delete the helper function I added ten minutes ago; it's still uncommitted.",
-    "Rewrite this ordinary early-return branch as an if/else without changing its behavior."
+    "Rewrite this ordinary early-return branch as an if/else without changing its behavior.",
+    "Simplify src/pagination.js by extracting a helper — keep the clamp behavior exactly identical."
   ]
 }

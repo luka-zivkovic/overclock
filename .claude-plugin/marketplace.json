@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "category": "development",
       "keywords": [
         "setup",
@@ -103,7 +103,7 @@
       "name": "discipline-gates",
       "source": "./plugins/discipline-gates",
       "description": "Pre-action engineering gates backed by real evidence: reproduce bugs before fixing, characterize untested behavior before refactoring, prove new tests can fail with safe mutation restore, and recover defensive-code intent from git history before weakening it.",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "category": "development",
       "keywords": [
         "testing",

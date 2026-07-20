@@ -86,8 +86,10 @@ a **doc-claims check** — verify that file paths cited inside SKILL.md/referenc
 Small mechanisms worth lifting into existing skills if their parent candidates don't get adopted
 whole (verdicts in the external-eval log):
 
-- *Never simplify away a safety check* — floor already noted from the ponytail eval; CE states it
-  too, plus "honor deliberate duplication pinned by a settled decision."
+- *Never simplify away a safety check* — **executed 2026-07-20**: owned by
+  discipline-gates/git-archaeologist 0.1.4 (simplify-framed trigger surface) and pr-feedback's
+  rubric. CE's extra nuance ("honor deliberate duplication pinned by a settled decision") rides
+  with the settled-decisions lift below.
 - *Silent-pass verification trigger* — a CI/merge-gate change gets adversarial review regardless of
   diff size, "its risk isn't blast radius, it's fidelity — it can go green while the real thing is
   red."
