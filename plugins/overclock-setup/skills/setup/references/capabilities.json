@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -20,11 +20,12 @@
     {
       "id": "session-memory",
       "display_name": "Session Memory",
-      "version": "1.0.5",
+      "version": "1.1.0",
       "publication_status": "published",
       "provides": [
         "session-handoff",
-        "lessons-learned"
+        "lessons-learned",
+        "solutions"
       ],
       "depends_on": [],
       "conflicts_with": [
@@ -35,10 +36,11 @@
       ],
       "persistent_files": [
         ".ai/memory/HANDOFF.md",
-        ".ai/memory/LESSONS.md"
+        ".ai/memory/LESSONS.md",
+        ".ai/memory/SOLUTIONS.md"
       ],
       "minimum_host_version": null,
-      "selection": "Choose for session handoff plus durable lessons. Do not combine with learning-loop."
+      "selection": "Choose for session handoff, durable lessons, and a verified-solutions ledger. Do not combine with learning-loop."
     },
     {
       "id": "learning-loop",

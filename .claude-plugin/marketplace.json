@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "category": "development",
       "keywords": [
         "setup",
@@ -23,8 +23,8 @@
     {
       "name": "session-memory",
       "source": "./plugins/session-memory",
-      "description": "Stop losing your working state. Warm session resume (handoffs with git-anchored drift detection) plus lessons that persist across sessions — corrections stop evaporating, failed approaches stop being retried.",
-      "version": "1.0.5",
+      "description": "Stop losing your working state. Warm session resume (handoffs with git-anchored drift detection), lessons that persist across sessions, and a solutions ledger of verified fixes — corrections stop evaporating, failed approaches stop being retried, and solved problems stop being re-diagnosed.",
+      "version": "1.1.0",
       "category": "development",
       "keywords": [
         "memory",

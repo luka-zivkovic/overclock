@@ -2,7 +2,7 @@
   "name": "session-memory",
   "displayName": "Session Memory",
   "description": "Warm session resume + lessons that persist across sessions. Two cooperating skills (session-handoff, lessons-learned) over a shared, human-readable memory contract in .ai/memory/ — tool-agnostic markdown any agent can read — with a bundled SessionStart hook that surfaces parked state automatically.",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "author": {
     "name": "Luka Zivkovic"
   },

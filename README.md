@@ -45,7 +45,7 @@ installs, removes, enables, disables, or edits anything.
 | Plugin | Choose it when you want… | Install |
 |---|---|---|
 | **overclock-setup** | A safe, explicit recommendation for the rest of the toolkit | `/plugin install overclock-setup@overclock` |
-| **session-memory** | Session handoffs **and** durable lessons | `/plugin install session-memory@overclock` |
+| **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
@@ -117,6 +117,10 @@ contexts instead of stalling the run. GitHub (including Enterprise) only.
 - **lessons-learned** records corrections and diagnosed failures in `.ai/memory/LESSONS.md`,
   deduplicates them by meaning, and counts repeated evidence. At three reinforcements it proposes a
   project instruction, but edits only after explicit approval.
+- **solutions** captures each verified fix to a nontrivial problem in `.ai/memory/SOLUTIONS.md` —
+  symptoms as the retrieval key, what didn't work as a first-class field — and reuses it when the
+  same symptoms return, after verifying the stored fix still matches the current code. Corrections
+  of agent behavior stay in lessons; solved project problems live here.
 
 The storage is plain, diffable Markdown under `.ai/memory/`. It is deliberately provider-neutral:
 other agents can read and write the same contract. Secrets are omitted or redacted, and the skills

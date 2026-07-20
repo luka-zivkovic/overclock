@@ -1,6 +1,6 @@
 # Memory Storage Contract
 
-Shared persistence contract for the session-handoff and lessons-learned skills. Both skills ship a byte-identical copy of this file. Read it before any read or write under `.ai/memory/` — file locations, formats, caps, and safety rules come from here, never from improvisation. If the two copies ever disagree, treat that as a bug: the skills must stay format-compatible.
+Shared persistence contract for the session-handoff, lessons-learned, and solutions skills. Each skill ships a byte-identical copy of this file. Read it before any read or write under `.ai/memory/` — file locations, formats, caps, and safety rules come from here, never from improvisation. If the copies ever disagree, treat that as a bug: the skills must stay format-compatible.
 
 ## Location
 
@@ -11,7 +11,8 @@ All persistent state lives in `.ai/memory/` at the **target project root**. The 
 ├── HANDOFF.md          # single current handoff (latest wins) — owned by session-handoff
 ├── archive/            # superseded handoffs, timestamped — retention cap: last 5
 │   └── HANDOFF-2026-06-10T14-30-00.md
-└── LESSONS.md          # accumulated lessons — owned by lessons-learned, read by both skills at resume
+├── LESSONS.md          # accumulated lessons — owned by lessons-learned, surfaced at resume
+└── SOLUTIONS.md        # verified problem solutions — owned by solutions, surfaced at resume
 ```
 
 Create directories as needed (`mkdir -p .ai/memory/archive`). Never assume they exist; never fail because they don't.
@@ -22,9 +23,10 @@ Create directories as needed (`mkdir -p .ai/memory/archive`). Never assume they 
 |---|---|---|
 | `HANDOFF.md` | session-handoff only | session-handoff |
 | `archive/HANDOFF-*.md` | session-handoff only | session-handoff (on request) |
-| `LESSONS.md` | lessons-learned only | both — session-handoff surfaces relevant entries at resume |
+| `LESSONS.md` | lessons-learned only | all — session-handoff surfaces relevant entries at resume |
+| `SOLUTIONS.md` | solutions only | all — session-handoff surfaces matching entries at resume |
 
-Cross-skill rule: session-handoff reads `LESSONS.md` but never writes it; lessons-learned never touches `HANDOFF.md`. This keeps each file's history attributable to one skill.
+Cross-skill rule: each file is written by exactly one skill; the others read it. session-handoff reads `LESSONS.md` and `SOLUTIONS.md` but never writes them; lessons-learned and solutions never touch `HANDOFF.md` or each other's file. This keeps each file's history attributable to one skill.
 
 Precedence rule: when a `LESSONS.md` entry contradicts a Decision recorded in `HANDOFF.md`, the lesson wins — lessons are durable and evidence-counted, handoff decisions are session-scoped. Surface the conflict (e.g. as a drift item in the warm-start brief) rather than silently picking either side.
 
@@ -79,6 +81,33 @@ Size cap: **~150 lines.** If a handoff would exceed it, compress prose (the plan
 One `##` section per lesson. Stable field order within an entry. Updating an existing lesson means editing its `Count` and `Last reinforced` lines in place — do not append a duplicate section and do not reorder entries (reordering churns git diffs).
 
 Size cap: **~200 lines.** When an addition would exceed it, curate: prune or merge the lowest-count, oldest entries first. Never refuse to write a new lesson because the file is full, and never silently discard a high-count lesson.
+
+## SOLUTIONS.md format (v1)
+
+```markdown
+<!-- memory-schema: v1 -->
+# Solutions
+
+## <short problem-shaped title>
+- **Symptoms:** <observable failure — exact error text or wrong behavior>
+- **Context:** <module, stack, and situation where this applies>
+- **What didn't work:** <attempted fixes that failed, each with why when diagnosed>
+- **Solution:** <what actually fixed it, concretely>
+- **Why it works:** <the root cause the fix addresses>
+- **Verified:** <how the fix was confirmed — the test run, the observed behavior>
+- **Date:** <ISO-8601 date of capture or last update>
+```
+
+One `##` section per solution. Stable field order. Updating an existing entry (same root
+cause, same fix) means editing it in place — refresh `Date`, enrich `Symptoms`/`What didn't
+work`; do not append a duplicate section and do not reorder entries.
+
+Size cap: **~250 lines.** When an addition would exceed it, curate: merge overlapping entries
+and retire entries whose Context no longer exists. Never silently drop a recent entry.
+
+Staleness rule: a solution describes the codebase as of its `Date`. Current source always
+outranks a stored solution — verify the cited context still exists before applying one, and
+route mismatches to the solutions skill's suggestion-first refresh flow.
 
 ## Archive and retention
 
