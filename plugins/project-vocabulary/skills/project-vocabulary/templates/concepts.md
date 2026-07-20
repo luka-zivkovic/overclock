@@ -33,6 +33,6 @@ Ending a subscription at the end of the paid period. Access continues until then
 loss of access is "revocation", which only compliance actions trigger.
 
 ## Flagged ambiguities
-- "Member" — sometimes a User in a Workspace, sometimes a row in project_members. Undefined
-  until the permissions rework settles it.
+- "Member" — sometimes a User in a Workspace, sometimes a per-project membership record.
+  Undefined until the permissions rework settles it.
 ```

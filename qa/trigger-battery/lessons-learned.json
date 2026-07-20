@@ -15,6 +15,7 @@
   "should_not": [
     "Actually, change the /export endpoint to return JSON instead of XML.",
     "Use port 4000 just for this one test run.",
-    "Commit the current changes with a sensible message."
+    "Commit the current changes with a sensible message.",
+    "No — we don't call them 'Teams' anymore, that's a Workspace. Keep the terminology straight."
   ]
 }
