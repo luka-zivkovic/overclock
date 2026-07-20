@@ -22,19 +22,6 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   needs-human, prompt-injection resistance, two negative controls) and a
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
-## discipline-gates
-
-### 0.1.4 — 2026-07-20
-- git-archaeologist: name simplification-framed removals explicitly in the
-  trigger surface — a "simplify", "clean up", "reduce ceremony", or
-  "make this a one-liner" request whose execution would strip a defensive
-  construct fires the gate the same as an explicit delete request, while
-  behavior-preserving simplifications that keep every guard intact stay
-  silent. Adds a positive and a negative routing control to the trigger
-  battery. Executes the ponytail INSPIRE lift (never simplify away a safety
-  check) recorded in docs/brainstorm/SHORTLIST.md; behavioral coverage
-  already exists in eval case 2 (simplify-framed retry removal).
-
 ## overclock-setup
 
 ### 0.1.4 — 2026-07-20
@@ -148,6 +135,17 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   byte-identical-quote traps and two negative controls): 5/5 green.
 
 ## discipline-gates
+
+### 0.1.4 — 2026-07-20
+- git-archaeologist: name simplification-framed removals explicitly in the
+  trigger surface — a "simplify", "clean up", "reduce ceremony", or
+  "make this a one-liner" request whose execution would strip a defensive
+  construct fires the gate the same as an explicit delete request, while
+  behavior-preserving simplifications that keep every guard intact stay
+  silent. Adds a positive and a negative routing control to the trigger
+  battery. Executes the ponytail INSPIRE lift (never simplify away a safety
+  check) recorded in docs/brainstorm/SHORTLIST.md; behavioral coverage
+  already exists in eval case 2 (simplify-framed retry removal).
 
 ### 0.1.3 — 2026-07-17
 - Add Codex skill-picker metadata and ready-to-use prompts for `test-discipline`
