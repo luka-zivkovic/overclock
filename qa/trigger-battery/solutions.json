@@ -1,0 +1,31 @@
+{
+  "skill": "solutions",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "note": "Routing battery for solutions. FIRED means the Skill tool selected solutions. Fixture carries an existing SOLUTIONS.md so retrieval prompts have something to match.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Routing fixture\nSmall data service.\n",
+    ".ai/memory/SOLUTIONS.md": "<!-- memory-schema: v1 -->\n# Solutions\n\n## CSV import crashes with MemoryError on large files\n- **Symptoms:** MemoryError importing files over ~2GB\n- **Context:** src/import/loader.py\n- **What didn't work:** raising container memory — FAILED, biggest files still crash\n- **Solution:** chunked reads (chunksize=50000) with incremental aggregation\n- **Why it works:** peak memory bounded by chunk size, not file size\n- **Verified:** test_import_large.py green on 3.1GB fixture\n- **Date:** 2026-07-01\n",
+    "src/import/loader.py": "import pandas as pd\n\ndef load(path):\n    return pd.concat(chunk.groupby('k').sum() for chunk in pd.read_csv(path, chunksize=50000))\n"
+  },
+  "should_trigger": [
+    "That finally fixed it — the deadlock is gone after switching to a single connection pool. Took us all afternoon; capture this solution so we don't relive it.",
+    "It's working now. Save this fix for next time — symptoms, what we tried, the whole story.",
+    "The exporter is throwing MemoryError on big files — have we solved something like this before?",
+    "Before I start debugging this OOM crash, check the solutions file for a match.",
+    "Clean up the solutions ledger — some of those entries are probably stale after the refactor."
+  ],
+  "should_not": [
+    "Fixed the 'Wellcome' typo in the banner. Done.",
+    "No, stop using npm here — this repo uses pnpm. Remember that.",
+    "That approach failed because the API paginates at 100 — note that as a lesson.",
+    "Let's stop here for today, save our session state.",
+    "The feature is finished and the tests pass — ship it.",
+    "Actually, return JSON instead of XML from that endpoint.",
+    "What were we working on last session?"
+  ]
+}

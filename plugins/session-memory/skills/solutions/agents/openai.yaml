@@ -1,0 +1,4 @@
+interface:
+  display_name: "Solutions"
+  short_description: "Capture verified fixes and reuse them on repeat problems"
+  default_prompt: "Use $solutions to capture this verified fix — symptoms, dead ends, solution, and why it works — so a future session can reuse it."

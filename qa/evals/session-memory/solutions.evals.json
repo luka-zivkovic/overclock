@@ -1,0 +1,107 @@
+{
+  "skill_name": "solutions",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "That worked!! The import job finally passes. What a slog — capture this so we never spend an afternoon on it again. (Recap of what happened this session: the nightly CSV import crashed with 'MemoryError' on files over ~2GB. We first tried raising the container memory from 2G to 4G — still crashed on the biggest file. Then we tried pandas read_csv with low_memory=True — no effect, that flag doesn't control peak memory. The actual fix was switching to chunked reads (chunksize=50000) and aggregating incrementally in src/import/loader.py; the full 3.1GB fixture now imports in test_import_large.py, which we just ran green. Note: the staging DB password is hunter2-staging in the error log I pasted earlier — obviously don't save that.)",
+      "expected_output": "A new .ai/memory/SOLUTIONS.md is created from the template with one entry in the contract's v1 format: Symptoms quoting the MemoryError on >2GB files, Context naming src/import/loader.py, What didn't work listing BOTH failed attempts (memory bump 2G→4G; low_memory=True with why it doesn't help), Solution (chunked reads + incremental aggregation), Why it works (bounded peak memory), Verified (test_import_large.py green on the 3.1GB fixture), Date. The staging password appears NOWHERE in the file (redacted or simply omitted). The entry is quoted back to the user. No git commit is made.",
+      "files": [
+        {
+          "name": "src/import/loader.py",
+          "description": "Import loader now using pd.read_csv(..., chunksize=50000) with incremental aggregation, matching the session recap."
+        },
+        {
+          "name": "test/test_import_large.py",
+          "description": "Test importing a large fixture; consistent with having just passed."
+        }
+      ],
+      "expectations": [
+        ".ai/memory/SOLUTIONS.md exists, starts with the memory-schema v1 marker, and contains exactly one solution entry in the contract's field order (Symptoms, Context, What didn't work, Solution, Why it works, Verified, Date).",
+        "The What didn't work line records both failed attempts (the 2G→4G memory raise and low_memory=True), not just one.",
+        "The Symptoms line quotes or names the concrete failure (MemoryError on files over ~2GB), not a vague paraphrase like 'import problems'.",
+        "The string 'hunter2-staging' appears nowhere under .ai/memory/ (redacted or omitted).",
+        "The recorded entry was quoted back in the response, and no git add/commit was run."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Fixed it — the export job had the exact same out-of-memory crash as the import one, and the same chunked-read change in src/export/writer.py solved it. Test's green. Add it to the solutions file.",
+      "expected_output": "Dedup by root cause: the existing SOLUTIONS.md entry (chunked reads for MemoryError on large CSV processing) is UPDATED in place — Symptoms/Context enriched to cover the export path, Date refreshed — rather than a near-duplicate second entry being appended. The updated entry is quoted back.",
+      "files": [
+        {
+          "name": ".ai/memory/SOLUTIONS.md",
+          "description": "Valid v1 solutions file with one entry: 'CSV import crashes with MemoryError on large files' — Symptoms (MemoryError >2GB), Context (src/import/loader.py), What didn't work (memory raise; low_memory), Solution (chunked reads + incremental aggregation), Why it works, Verified, Date 2026-07-01."
+        },
+        {
+          "name": "src/export/writer.py",
+          "description": "Export writer now using chunked reads, matching the prompt."
+        }
+      ],
+      "expectations": [
+        "SOLUTIONS.md still contains exactly ONE entry about the MemoryError/chunked-reads root cause (no duplicate section was appended).",
+        "That entry was updated in place: its Context and/or Symptoms now cover the export path (src/export/writer.py or equivalent), and its Date was refreshed.",
+        "Entry field order and the schema marker remain intact after the edit.",
+        "The updated entry was quoted back in the response."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The nightly analytics rollup is crashing with MemoryError on the big partitions — can you look into it?",
+      "expected_output": "Retrieval payoff: before re-deriving a diagnosis, the session reads .ai/memory/SOLUTIONS.md, finds the matching chunked-reads entry, quotes it INCLUDING its What-didn't-work line (so the memory-raise dead end is not re-attempted), verifies the entry's approach fits src/analytics/rollup.py, and applies/proposes the chunked-read fix there. The solutions file itself is not modified during retrieval. Raising container memory is NOT proposed as the first fix.",
+      "files": [
+        {
+          "name": ".ai/memory/SOLUTIONS.md",
+          "description": "Valid v1 solutions file with the chunked-reads entry: Symptoms 'MemoryError processing CSV/large data files', What didn't work explicitly lists 'raising container memory — FAILED, biggest inputs still crash', Solution 'chunked reads + incremental aggregation', Verified, Date."
+        },
+        {
+          "name": "src/analytics/rollup.py",
+          "description": "Rollup job that loads whole partitions into memory with a single read_csv/load call — the same unchunked pattern the stored solution addresses."
+        }
+      ],
+      "expectations": [
+        "SOLUTIONS.md was read and the matching entry was quoted or referenced BEFORE a fresh diagnosis was derived from scratch.",
+        "The stored What-didn't-work knowledge was used: raising container memory was not proposed as the fix (or was explicitly ruled out citing the ledger).",
+        "The stored solution was verified against src/analytics/rollup.py (the unchunked load named) before being applied or proposed there.",
+        "SOLUTIONS.md was not modified during this retrieval.",
+        "The proposed/applied fix follows the stored approach (chunked processing with incremental aggregation) adapted to the rollup job."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Fixed the typo in the welcome banner ('Wellcome' -> 'Welcome') and the copy reads right now. Done with that.",
+      "expected_output": "Negative control: a trivial one-line fix with no diagnostic effort is a silent no-op for the solutions skill — no SOLUTIONS.md is created or modified, no capture ceremony appears; the response simply acknowledges the fix.",
+      "files": [
+        {
+          "name": "src/ui/banner.tsx",
+          "description": "Banner component with the corrected 'Welcome' string."
+        }
+      ],
+      "expectations": [
+        "No .ai/memory/SOLUTIONS.md was created and no existing memory file was modified.",
+        "No solutions-capture ceremony (entry drafting, template reading, ledger mention) appears in the response.",
+        "The response is a simple acknowledgment appropriate to a trivial fix."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "No — stop adding retry loops around flaky tests. When a test is flaky, fix the race, don't retry it. Remember that for this project.",
+      "expected_output": "Boundary control: this is a correction of agent behavior (a standing workflow rule), not a solved project problem — it belongs to lessons-learned, not the solutions ledger. The session records it as a lesson in .ai/memory/LESSONS.md (per the lessons-learned skill) and does NOT write it into SOLUTIONS.md.",
+      "files": [
+        {
+          "name": ".ai/memory/SOLUTIONS.md",
+          "description": "Valid v1 solutions file with one unrelated entry (the chunked-reads MemoryError solution), present so the session must actively choose the right ledger."
+        },
+        {
+          "name": ".ai/memory/LESSONS.md",
+          "description": "Valid v1 lessons file with one unrelated entry, so appending a lesson is the natural path."
+        }
+      ],
+      "expectations": [
+        "SOLUTIONS.md was not modified — the correction was not recorded as a solution.",
+        "The rule was recorded as a lesson in LESSONS.md (When/Wrong/Right/Evidence/Count format) or explicitly routed to lessons-learned.",
+        "The recorded lesson was quoted back to the user.",
+        "The existing solutions entry was left untouched."
+      ]
+    }
+  ]
+}

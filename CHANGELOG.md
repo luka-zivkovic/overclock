@@ -24,6 +24,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## overclock-setup
 
+### 0.1.7 — 2026-07-20
+- Catalog sync for `session-memory` 1.1.0 (new `solutions` capability and
+  `.ai/memory/SOLUTIONS.md` persistent file).
+
 ### 0.1.6 — 2026-07-20
 - Catalog sync for `session-memory` 1.0.5 and `critical-thinking` 0.1.2.
 
@@ -243,6 +247,30 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   `templates/lessons.md` skeleton is kept byte-identical (CI-enforced).
 
 ## session-memory
+
+### 1.1.0 — 2026-07-20
+- New `solutions` skill: capture a verified solution to a nontrivial problem
+  in `.ai/memory/SOLUTIONS.md` — symptoms as the retrieval key, what didn't
+  work as a first-class field, the fix, why it works, and how it was
+  verified. Dedup is by root cause (update in place, never duplicate);
+  retrieval verifies a stored solution against current source before
+  applying it; a suggestion-first refresh flow proposes
+  Keep/Update/Merge/Retire per entry and applies only what the user
+  approves. Explicit boundary with lessons-learned: solved project problems
+  here, corrections of agent behavior there; a dead end hit while solving
+  lives inside the solution's What-didn't-work line. Adapted from EveryInc's
+  compound-engineering ce-compound/ce-compound-refresh
+  (external-eval-2026-07-19-1945.md, BUILD-IN-OVERCLOCK).
+- Memory contract v1 extended with the SOLUTIONS.md format (three
+  byte-identical copies, CI-guarded), ownership row, and a staleness rule:
+  current source always outranks a stored solution.
+- session-handoff resume now also surfaces matching SOLUTIONS.md entries
+  (read-only) in the warm-start brief.
+- Five behavioral evals gate the loop's payoff, not just capture: creation
+  with secret redaction, root-cause dedup, a retrieval case where the stored
+  What-didn't-work must prevent re-proposing a known dead end, a trivial-fix
+  silent no-op, and a lessons-vs-solutions boundary control. Plus a routing
+  trigger battery.
 
 ### 1.0.5 — 2026-07-20
 - session-handoff: Decisions entries now carry a provenance label —
