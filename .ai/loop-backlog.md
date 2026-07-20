@@ -12,8 +12,9 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       delete a stacked PR's base branch on merge, or retarget the child first)
 
 ## Tier 1 — small lifts (verdicts in hand)
-- [ ] Ponytail safety floor: never-simplify-away-safety guidance lift (SHORTLIST: unexecuted
-      since 2026-06-22) — status: pending
+- [x] Ponytail safety floor — status: done, merged as PR #11 (2026-07-20): git-archaeologist
+      0.1.4 names simplify-framed removals in its trigger surface + battery controls; SHORTLIST
+      row closed
 - [ ] natural-writing 1.0.3: grounding rule from writing-beats (+1 eval case) — status: pending
 - [ ] session-memory + critical-thinking: settled-decisions provenance labels in HANDOFF
       Decisions + resume brief (+ eval cases, bumps, shared-files entry if duplicated) — status: pending
