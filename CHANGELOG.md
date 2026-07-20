@@ -3,6 +3,28 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## grilling
+
+### 0.1.0 — 2026-07-20
+- New plugin. `grilling`: requirements elicitation as a discipline, rebuilt
+  from mattpocock/skills' grilling primitive under the external-audit BUILD
+  verdict (external-eval-2026-07-19-1945.md). One question per turn, each
+  with a recommended answer; facts the repository can answer are looked up,
+  never asked (the facts-vs-decisions split); questions walk the decision
+  tree in dependency order; no question cap — depth steers by natural
+  language. A refuse-to-act gate summarizes the shared understanding and
+  waits for confirmation before anything is built; "just build it" locks in
+  the recommended defaults, stated explicitly. Confirmed choices align with
+  session-handoff's [user-directed]/[user-approved] provenance labels.
+- Trigger seam per the eval panel: elicitation-only triggers with explicit
+  anti-triggers routing critique/stress-test/verdict requests to
+  critical-thinking (the collision that failed ADOPT-AS-IS), plus
+  ask-one-ordinary-question right-sizing for single-ambiguity tasks.
+- Four behavioral evals (facts-not-asked elicitation, delegated-answers gate
+  handling, natural-language pacing, critique-request negative control) and
+  a routing battery whose negatives are dominated by critical-thinking
+  collision prompts.
+
 ## pr-feedback
 
 ### 0.1.0 — 2026-07-19
@@ -23,6 +45,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.8 — 2026-07-20
+- Publish `grilling` in the bundled capability catalog so setup can
+  recommend it.
 
 ### 0.1.7 — 2026-07-20
 - Catalog sync for `session-memory` 1.1.0 (new `solutions` capability and

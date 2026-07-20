@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -94,6 +94,21 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose for evidence-based critique, calibrated decisions, and bounded independent research without agreeable filler."
+    },
+    {
+      "id": "grilling",
+      "display_name": "Grilling",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "grilling"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose for one-question-at-a-time requirements interviews with recommended answers and a confirm-before-build gate."
     },
     {
       "id": "discipline-gates",

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grilling"
+  short_description: "Interview the user one decision at a time until aligned"
+  default_prompt: "Use $grilling to interview me one question at a time — each with a recommended answer — until we reach a confirmed shared understanding of this work."

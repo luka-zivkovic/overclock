@@ -1,0 +1,31 @@
+{
+  "skill": "grilling",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "note": "Routing battery for grilling. FIRED means the Skill tool selected grilling. The should_not set is dominated by critical-thinking collision controls — the trigger seam the external eval flagged as the reason ADOPT-AS-IS failed.",
+  "fixture_git": true,
+  "fixture_files": {
+    "README.md": "# Routing fixture\nSmall Node service.\n",
+    "package.json": "{\"name\":\"svc\",\"dependencies\":{\"express\":\"^4\",\"pg\":\"^8\"}}\n",
+    "src/api.js": "exports.handler = async req => ({ ok: true });\n"
+  },
+  "should_trigger": [
+    "Grill me about the notifications feature before we build it.",
+    "Interview me about this migration — ask me questions until we're aligned.",
+    "Walk me through the open decisions one by one; I'll answer as we go.",
+    "Help me pin down what I actually want here before you write any code — question me properly.",
+    "Before we start: ask me one question at a time about the admin dashboard until you understand it."
+  ],
+  "should_not": [
+    "Stress-test my thinking on this architecture — where is it weak?",
+    "Sanity-check my conclusion that we should switch to Redis.",
+    "Am I right that the polling approach can't scale?",
+    "Give me your verdict on this plan.",
+    "Critique this design doc.",
+    "Add pagination to the /orders endpoint — page size 50.",
+    "Brainstorm some ideas for the onboarding flow."
+  ]
+}
