@@ -50,6 +50,7 @@ installs, removes, enables, disables, or edits anything.
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **grilling** | A one-question-at-a-time requirements interview before anything gets built | `/plugin install grilling@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
+| **debugging-discipline** | A tight red feedback loop before theorizing, for bugs that resist | `/plugin install debugging-discipline@overclock` |
 | **natural-writing** | Human-sounding long-form prose without canned AI tells | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments on a GitHub PR judged, fixed, and answered — with approval before anything posts | `/plugin install pr-feedback@overclock` |
 
@@ -106,6 +107,23 @@ critical-thinking, and a task with a single ambiguity gets one ordinary question
 
 Both are pre-action gates. Trivial edits, new features, generated files, behavior-preserving
 rewrites, and already-covered code have explicit silent no-op paths.
+
+</details>
+
+<details>
+<summary><strong>debugging-discipline</strong> — the loop comes before the theory</summary>
+
+For bugs that resist the ordinary red-test path — flaky and intermittent failures, performance
+regressions, staging-only breakage, repeat offenders that survived earlier "fixes".
+`debugging-discipline` refuses to theorize until a tight, red-capable feedback loop exists (flaky
+reruns with a raised reproduction rate, curl harnesses, replay of captured input, bisection, perf
+measurement), then minimizes the failure, audits assumptions, and tests 3-5 ranked falsifiable
+hypotheses with stated predictions. A fix that works while its prediction fails is called what it
+is: a symptom.
+
+It composes with discipline-gates rather than competing: an ordinary seamed bug gets its red test
+from test-discipline's repro contract, and trivial bugs whose cause is evident fast-path out with
+no ceremony.
 
 </details>
 
