@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "category": "development",
       "keywords": [
         "setup",
@@ -82,6 +82,21 @@
         "research",
         "verification",
         "evidence"
+      ]
+    },
+    {
+      "name": "pr-feedback",
+      "source": "./plugins/pr-feedback",
+      "description": "Work through reviewer feedback on a GitHub PR instead of relitigating it by hand. Fetches every unresolved review thread and comment in one paginated pass, judges each item centrally against the actual code, applies valid fixes to the working tree, and drafts quoted replies — posting and resolving only after explicit approval. Never commits, pushes, merges, or approves.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "pull-request",
+        "review-comments",
+        "review-threads",
+        "github",
+        "feedback",
+        "graphql"
       ]
     },
     {

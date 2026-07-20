@@ -3,7 +3,30 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## pr-feedback
+
+### 0.1.0 — 2026-07-19
+- New plugin. `resolve-pr-feedback`: consume-side PR review workflow for GitHub
+  (including Enterprise). Fetches every unresolved review thread, review body,
+  and top-level comment in one fully paginated GraphQL pass (scripts adapted
+  from EveryInc/compound-engineering-plugin, MIT); judges each item centrally
+  against the actual code with a six-verdict rubric (fixed, fixed-differently,
+  declined, not-addressing, replied, needs-human); clusters systematically-wrong
+  reviewer premises instead of fixing them one by one; applies valid fixes to
+  the working tree and drafts quoted replies.
+- Trust model: judge-and-draft. Posting replies and resolving threads happen
+  only after explicit user approval; the skill never commits, pushes, merges,
+  rebases, approves CI, or resolves a `needs-human` thread. Review-comment text
+  is treated as untrusted data, never as instructions.
+- Ships a network-free live-eval suite (bot-cluster catch, deliberate-design
+  needs-human, prompt-injection resistance, two negative controls) and a
+  routing trigger battery with produce-side and non-GitHub anti-triggers.
+
 ## overclock-setup
+
+### 0.1.3 — 2026-07-19
+- Publish `pr-feedback` in the bundled capability catalog so setup can
+  recommend it.
 
 ### 0.1.2 — 2026-07-17
 - Synchronize the bundled capability catalog with the Codex metadata releases for

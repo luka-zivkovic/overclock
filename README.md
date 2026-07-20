@@ -50,6 +50,7 @@ installs, removes, enables, disables, or edits anything.
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
 | **natural-writing** | Human-sounding long-form prose without canned AI tells | `/plugin install natural-writing@overclock` |
+| **pr-feedback** | Reviewer comments on a GitHub PR judged, fixed, and answered — with approval before anything posts | `/plugin install pr-feedback@overclock` |
 
 > [!IMPORTANT]
 > Install **either** `session-memory` or `learning-loop`, not both. They intentionally share the
@@ -90,6 +91,20 @@ on evidence.`
 
 Both are pre-action gates. Trivial edits, new features, generated files, behavior-preserving
 rewrites, and already-covered code have explicit silent no-op paths.
+
+</details>
+
+<details>
+<summary><strong>pr-feedback</strong> — work the review, don't relitigate it by hand</summary>
+
+- **resolve-pr-feedback** fetches every unresolved review thread, review body, and PR comment on a
+  GitHub PR in one paginated pass, judges each item centrally against the actual code (catching
+  systematically-wrong review bots as a cluster), applies the valid fixes to the working tree, and
+  drafts quoted replies — including honest push-back where the reviewer is wrong.
+
+Posting replies and resolving threads happen only after you approve the drafts. The skill never
+commits, pushes, merges, rebases, or approves; `needs-human` items arrive as compact decision
+contexts instead of stalling the run. GitHub (including Enterprise) only.
 
 </details>
 

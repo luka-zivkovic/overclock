@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resolve PR Feedback"
+  short_description: "Judge, fix, and answer PR review threads centrally"
+  default_prompt: "Use $resolve-pr-feedback to work through the unresolved review feedback on this pull request and draft replies for my approval before anything is posted."

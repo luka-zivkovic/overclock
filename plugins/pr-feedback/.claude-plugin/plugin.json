@@ -1,0 +1,19 @@
+{
+  "name": "pr-feedback",
+  "displayName": "PR Feedback",
+  "description": "Consume-side PR review workflow. resolve-pr-feedback: fetch every unresolved review thread and comment on a GitHub PR in one paginated pass, judge each item centrally against the actual code (fixed / fixed-differently / declined / not-addressing / replied / needs-human), apply valid fixes to the working tree, and draft quoted replies — posting and resolving only after explicit user approval. Never commits, pushes, merges, or approves.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "pull-request",
+    "review-comments",
+    "review-threads",
+    "github",
+    "feedback",
+    "code-review",
+    "graphql"
+  ]
+}
