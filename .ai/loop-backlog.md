@@ -16,8 +16,8 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       0.1.4 names simplify-framed removals in its trigger surface + battery controls; SHORTLIST
       row closed
 - [x] natural-writing 1.0.3: grounding rule — status: done, merged as PR #12 (2026-07-20)
-- [ ] session-memory + critical-thinking: settled-decisions provenance labels in HANDOFF
-      Decisions + resume brief (+ eval cases, bumps, shared-files entry if duplicated) — status: pending
+- [x] session-memory 1.0.5 + critical-thinking 0.1.2: settled-decisions provenance — status:
+      done, merged as PR #13 (2026-07-20). Tier 1 complete.
 
 ## Tier 2 — audit existing 8 skills against docs/skill-authoring-notes.md
 - [ ] Sweep all shipped SKILL.md/references for no-op lines, negation phrasing, non-checkable
