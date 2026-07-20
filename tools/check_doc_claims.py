@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Fail if a skill's markdown cites a bundled file that does not exist.
+
+SKILL.md and reference docs point at bundled material (`references/x.md`,
+`templates/x.md`, `scripts/x.py`, `assets/x.html`). A pointer to a file that
+was renamed or never shipped fails silently at runtime — the model just never
+loads the material. This check makes a dangling pointer a CI failure.
+
+Scope: every ``*.md`` under ``plugins/*/skills/<skill>/``. A citation is any
+``references/…``, ``templates/…``, ``scripts/…``, or ``assets/…`` path
+segment; it must resolve inside that skill's directory. Skipped: URLs,
+``<placeholder>`` text, wildcard paths, and bare directory mentions. A
+``${VAR}``-prefixed path (e.g. ``"${CLAUDE_SKILL_DIR}/scripts/x.py"``) is
+still checked — the segment after the variable names a real bundled file.
+
+Inspired by compound-engineering's validate-doc-claims (see
+docs/skill-authoring-notes.md).
+"""
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+
+CITATION = re.compile(
+    r"(?<![\w/.<-])((?:references|templates|scripts|assets)/[A-Za-z0-9_.-]+"
+    r"(?:/[A-Za-z0-9_.-]+)*\.[A-Za-z0-9]+)"
+)
+
+
+def cited_paths(text: str) -> set[str]:
+    found = set()
+    for match in CITATION.finditer(text):
+        path = match.group(1)
+        # A wildcard or placeholder is documentation, not a citation.
+        if "*" in path or "<" in path or ">" in path:
+            continue
+        found.add(path)
+    return found
+
+
+def check_skill(skill_dir: Path, display_base: Path) -> list[str]:
+    failures = []
+    for md in sorted(skill_dir.rglob("*.md")):
+        text = md.read_text(encoding="utf-8")
+        for cited in sorted(cited_paths(text)):
+            if not (skill_dir / cited).is_file():
+                rel_md = md.relative_to(display_base)
+                failures.append(f"{rel_md}: cites missing file {cited}")
+    return failures
+
+
+def main(argv: list[str]) -> int:
+    root = Path(argv[1]).resolve() if len(argv) > 1 else REPO / "plugins"
+    skill_dirs = sorted(p for p in root.glob("*/skills/*") if p.is_dir())
+    if not skill_dirs:
+        print(f"ERROR: no skill directories under {root}", file=sys.stderr)
+        return 1
+    failures = []
+    for skill_dir in skill_dirs:
+        failures.extend(check_skill(skill_dir, root))
+    if failures:
+        for failure in failures:
+            print(f"ERROR: {failure}", file=sys.stderr)
+        return 1
+    print(f"OK: doc claims resolve in {len(skill_dirs)} skill dir(s)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

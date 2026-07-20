@@ -26,6 +26,9 @@ jobs:
       - name: Shared files byte-identical
         run: python3 tools/check_shared_files.py
 
+      - name: Skill doc claims resolve
+        run: python3 tools/check_doc_claims.py
+
       - name: Setup catalog matches publication state
         run: python3 tools/check_setup_catalog.py
 
