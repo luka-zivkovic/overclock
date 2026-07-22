@@ -52,8 +52,11 @@ def main() -> int:
         return 0
 
     changed = git("diff", "--name-only", merge_base, "HEAD").splitlines()
-    # Also include uncommitted changes so the check works locally pre-commit.
+    # Also include uncommitted changes so the check works locally pre-commit
+    # (staged changes included — a `git mv` stages deletions that would
+    # otherwise be invisible until CI).
     changed += git("diff", "--name-only").splitlines()
+    changed += git("diff", "--name-only", "--cached").splitlines()
     changed += git("ls-files", "--others", "--exclude-standard").splitlines()
 
     touched_plugins = sorted(
@@ -70,10 +73,22 @@ def main() -> int:
     base_entries = {e["name"]: e for e in base_marketplace.get("plugins", [])}
 
     failures = 0
+    removed_plugins = set()
     for name in touched_plugins:
         manifest_path = f"plugins/{name}/.claude-plugin/plugin.json"
         manifest_file = REPO / manifest_path
         if not manifest_file.exists():
+            if not (REPO / "plugins" / name).exists():
+                # Whole plugin directory gone: a removal or rename. That ships
+                # cleanly only when the marketplace entry is gone too — a
+                # dangling entry would advertise a plugin with no source.
+                if name in entries:
+                    print(f"ERROR: {name}: plugin directory removed but "
+                          "marketplace.json still lists it", file=sys.stderr)
+                    failures += 1
+                else:
+                    removed_plugins.add(name)
+                continue
             print(f"ERROR: {manifest_path} missing for changed plugin {name!r}", file=sys.stderr)
             failures += 1
             continue
@@ -107,7 +122,10 @@ def main() -> int:
     if failures:
         return 1
     for name in touched_plugins:
-        print(f"OK: {name} changed and version bumped consistently")
+        if name in removed_plugins:
+            print(f"OK: {name} removed (plugin directory and marketplace entry both gone)")
+        else:
+            print(f"OK: {name} changed and version bumped consistently")
     return 0
 
 
