@@ -42,5 +42,10 @@ docs/brainstorm/external-eval-2026-07-19-1945.md.
       concrete demand (panel condition)
 
 ## Out of loop scope
-- pr-kit Phase-0 execution (dedicated session; behavioral controls first)
+- pr-kit Phase-0: STARTED and PILOTED 2026-07-22 (user go-ahead). Step 1 per-claim staleness +
+  step 2 pre-flight/re-pin merged as PR #20. Pilot (2/6 cases, blind-judged): baseline beat
+  generic 2/2; initialized lost to generic 2/2 -> lift gate formally failed, generic gate needs
+  4/4. Recorded in qa/experiments/pr-reviewer-phase0/results/pilot-2026-07-22.md. pr-kit stays
+  unpublished per the pre-registered gate; revisit lever = anchoring cost on low-severity
+  findings.
 - mp `prototype` ADOPT-AS-IS (user installs upstream; no repo change)
