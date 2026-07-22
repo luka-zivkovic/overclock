@@ -48,7 +48,7 @@ installs, removes, enables, disables, or edits anything.
 | **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
-| **grilling** | A one-question-at-a-time requirements interview before anything gets built | `/plugin install grilling@overclock` |
+| **groundwork** | A one-question-at-a-time requirements interview before anything gets built | `/plugin install groundwork@overclock` |
 | **project-vocabulary** | One ubiquitous language per project, written down and enforced in conversation | `/plugin install project-vocabulary@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
 | **debugging-discipline** | A tight red feedback loop before theorizing, for bugs that resist | `/plugin install debugging-discipline@overclock` |
@@ -84,9 +84,9 @@ on evidence.`
 </details>
 
 <details>
-<summary><strong>grilling</strong> — understand the work before building it</summary>
+<summary><strong>groundwork</strong> — understand the work before building it</summary>
 
-`grilling` interviews you about a piece of work one question at a time, each question shipping a
+`groundwork` interviews you about a piece of work one question at a time, each question shipping a
 recommended answer so a "yes" keeps things moving. Facts the repository can answer are looked up,
 never asked; only genuine decisions reach you, in dependency order. Nothing gets built until you
 confirm the summarized shared understanding — and "just build it" locks in the recommended

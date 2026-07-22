@@ -1,12 +1,12 @@
 ---
-name: grilling
+name: groundwork
 description: "Interview the user about a piece of work, one question at a time, until a shared understanding is reached — then stop, summarize, and wait for confirmation before anything is built. Every question ships a recommended answer; facts the environment can answer are looked up, never asked. Use ONLY for explicit elicitation requests: 'grill me about this', 'interview me', 'ask me questions until we're aligned', 'walk me through the decisions one by one', 'help me pin down what I actually want before we build'. Do NOT use to critique, evaluate, stress-test, or give a verdict on reasoning or a plan (that is critical-thinking territory), for routine implementation after decisions are already made, when one ordinary clarifying question would do (just ask it), for open-ended brainstorming, or merely because a task looks ambiguous — an ambiguous task gets a normal clarifying question, not an interview."
 ---
 
-# Grilling
+# Groundwork
 
 Interview relentlessly, one question at a time, until the work is genuinely understood — and
-only then build. The output of a grilling session is a confirmed shared understanding, not
+only then build. The output of a groundwork session is a confirmed shared understanding, not
 code.
 
 The failure this prevents: an agent fills ambiguity with assumptions, builds the wrong thing

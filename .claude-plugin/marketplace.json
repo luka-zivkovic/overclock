@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "category": "development",
       "keywords": [
         "setup",
@@ -85,8 +85,8 @@
       ]
     },
     {
-      "name": "grilling",
-      "source": "./plugins/grilling",
+      "name": "groundwork",
+      "source": "./plugins/groundwork",
       "description": "Requirements elicitation as a discipline. Interviews you about a piece of work one question at a time — every question ships a recommended answer, facts the repository can answer are looked up instead of asked, and nothing gets built until you confirm the summarized shared understanding. Depth is steered in natural language, never by a question cap. Elicitation only: critique and verdicts stay with critical-thinking.",
       "version": "0.1.0",
       "category": "development",
@@ -95,7 +95,8 @@
         "requirements",
         "interview",
         "decisions",
-        "shared-understanding"
+        "shared-understanding",
+        "groundwork"
       ]
     },
     {

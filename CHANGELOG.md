@@ -55,10 +55,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   control) and a routing battery whose negatives are dominated by
   test-discipline collision prompts.
 
-## grilling
+## groundwork
 
-### 0.1.0 — 2026-07-20
-- New plugin. `grilling`: requirements elicitation as a discipline, rebuilt
+### 0.1.0 — 2026-07-20 (renamed from `grilling` the same day, pre-adoption)
+- Renamed `grilling` → `groundwork` on maintainer preference before any
+  external adoption; skill behavior unchanged. "Grill me about this" remains
+  a routing trigger phrase.
+- New plugin (originally shipped as `grilling`): requirements elicitation as a discipline, rebuilt
   from mattpocock/skills' grilling primitive under the external-audit BUILD
   verdict (external-eval-2026-07-19-1945.md). One question per turn, each
   with a recommended answer; facts the repository can answer are looked up,
@@ -97,6 +100,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.11 — 2026-07-20
+- Catalog rename: `grilling` → `groundwork`.
 
 ### 0.1.10 — 2026-07-20
 - Publish `project-vocabulary` in the bundled capability catalog so setup
