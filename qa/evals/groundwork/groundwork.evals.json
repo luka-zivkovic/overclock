@@ -76,7 +76,7 @@
         }
       ],
       "expectations": [
-        "No grilling ceremony: the response does not start a one-question-at-a-time interview or announce an elicitation session.",
+        "No interview ceremony: the response does not start a one-question-at-a-time interview or announce an elicitation session.",
         "The conclusion is evaluated directly: the response takes a position on the Redis-migration claim with evidence-based reasons (it may agree, disagree, or qualify).",
         "Any questions asked are ordinary evaluative clarifications, not a structured interview with recommended answers.",
         "No implementation is performed."
