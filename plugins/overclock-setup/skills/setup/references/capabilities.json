@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -96,12 +96,12 @@
       "selection": "Choose for evidence-based critique, calibrated decisions, and bounded independent research without agreeable filler."
     },
     {
-      "id": "grilling",
-      "display_name": "Grilling",
+      "id": "groundwork",
+      "display_name": "Groundwork",
       "version": "0.1.0",
       "publication_status": "published",
       "provides": [
-        "grilling"
+        "groundwork"
       ],
       "depends_on": [],
       "conflicts_with": [],

@@ -1,11 +1,11 @@
 {
-  "skill": "grilling",
+  "skill": "groundwork",
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
     "specificity": 0.9
   },
-  "note": "Routing battery for grilling. FIRED means the Skill tool selected grilling. The should_not set is dominated by critical-thinking collision controls — the trigger seam the external eval flagged as the reason ADOPT-AS-IS failed.",
+  "note": "Routing battery for groundwork. FIRED means the Skill tool selected groundwork. The should_not set is dominated by critical-thinking collision controls — the trigger seam the external eval flagged as the reason ADOPT-AS-IS failed.",
   "fixture_git": true,
   "fixture_files": {
     "README.md": "# Routing fixture\nSmall Node service.\n",
