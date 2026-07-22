@@ -9,7 +9,7 @@
       "number": 33897,
       "title": "fix(core): Construct execution errors correctly when Error.prototype is frozen",
       "url": "https://github.com/n8n-io/n8n/pull/33897",
-      "base_sha": "150ffe2f57e1465085bd2a454ba217cc179266d8",
+      "base_sha": "2059108fbbfecd36362fdce9377167f45f80f363",
       "head_sha": "410c39020c2176d84a21450a834c29cc822c1aeb",
       "merge_sha": "fffa4233b358b479e8ea4a244b398924f2271ae4",
       "changed_files": 4,
@@ -17,7 +17,12 @@
       "deletions": 4,
       "inline_comments": 0,
       "submitted_reviews": 2,
-      "risk_lens": ["runtime semantics", "error construction", "regression tests"]
+      "risk_lens": [
+        "runtime semantics",
+        "error construction",
+        "regression tests"
+      ],
+      "base_sha_original_pin": "150ffe2f57e1465085bd2a454ba217cc179266d8"
     },
     {
       "id": "durable-job-provisioning",
@@ -32,14 +37,19 @@
       "deletions": 12,
       "inline_comments": 1,
       "submitted_reviews": 2,
-      "risk_lens": ["transactions", "idempotency", "observability", "large-PR stress"]
+      "risk_lens": [
+        "transactions",
+        "idempotency",
+        "observability",
+        "large-PR stress"
+      ]
     },
     {
       "id": "credential-model-selection",
       "number": 33820,
       "title": "fix(editor): Preserve valid model selection when switching credentials",
       "url": "https://github.com/n8n-io/n8n/pull/33820",
-      "base_sha": "715cdcb8014e79787bacad6157c63f23ec2f48f4",
+      "base_sha": "dc05720609e7fe51509aca4a3affe563afaa6408",
       "head_sha": "608cd26a0db4dffed119cab2821978de5a6fa9ee",
       "merge_sha": "126b3da50522536d4f561030be3b00c9c416b824",
       "changed_files": 4,
@@ -47,14 +57,19 @@
       "deletions": 72,
       "inline_comments": 8,
       "submitted_reviews": 8,
-      "risk_lens": ["async UI state", "credential changes", "fallback behavior"]
+      "risk_lens": [
+        "async UI state",
+        "credential changes",
+        "fallback behavior"
+      ],
+      "base_sha_original_pin": "715cdcb8014e79787bacad6157c63f23ec2f48f4"
     },
     {
       "id": "data-table-identity-reconcile",
       "number": 33867,
       "title": "fix(core): Reconcile data table name collisions on source control pull",
       "url": "https://github.com/n8n-io/n8n/pull/33867",
-      "base_sha": "b5fe23bedde403e3068a7148b82c7ceb17598cd5",
+      "base_sha": "6660c45c7dc987699e5b728cae995741a807bd83",
       "head_sha": "ea55a006010325cd8d0df61eda7fad4e52a04604",
       "merge_sha": "328e07cd12d9403886dfb29c8117c199571d8e1e",
       "changed_files": 13,
@@ -62,7 +77,12 @@
       "deletions": 299,
       "inline_comments": 10,
       "submitted_reviews": 11,
-      "risk_lens": ["data preservation", "identity migration", "source-control reconciliation"]
+      "risk_lens": [
+        "data preservation",
+        "identity migration",
+        "source-control reconciliation"
+      ],
+      "base_sha_original_pin": "b5fe23bedde403e3068a7148b82c7ceb17598cd5"
     },
     {
       "id": "agent-guardrails-input",
@@ -77,14 +97,18 @@
       "deletions": 5,
       "inline_comments": 9,
       "submitted_reviews": 6,
-      "risk_lens": ["UI/runtime contract", "graph ancestry", "backward compatibility"]
+      "risk_lens": [
+        "UI/runtime contract",
+        "graph ancestry",
+        "backward compatibility"
+      ]
     },
     {
       "id": "rundeck-ssl-validation",
       "number": 33960,
       "title": "fix: Rundeck node supports configurable SSL validation",
       "url": "https://github.com/n8n-io/n8n/pull/33960",
-      "base_sha": "a27931a79f335de5c43afc68fe3709dabbbe7021",
+      "base_sha": "9cb1cd622061146cf4813255a03874f4d3ce94a9",
       "head_sha": "87a2571567fd7f876db70c287b8a9da424aac13a",
       "merge_sha": "1950037f72871ae99301781881e3f9aa93e8cad4",
       "changed_files": 4,
@@ -92,7 +116,12 @@
       "deletions": 2,
       "inline_comments": 0,
       "submitted_reviews": 2,
-      "risk_lens": ["TLS defaults", "credential compatibility", "node versioning"]
+      "risk_lens": [
+        "TLS defaults",
+        "credential compatibility",
+        "node versioning"
+      ],
+      "base_sha_original_pin": "a27931a79f335de5c43afc68fe3709dabbbe7021"
     }
   ]
 }
