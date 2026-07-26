@@ -8,8 +8,8 @@
     {
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
-      "description": "Choose and configure Overclock plugins without guesswork. A manual, report-only setup advisor that inventories current plugin and instruction state, asks only decision-changing questions, blocks incompatible combinations, and returns exact proposed commands and minimal CLAUDE.md diffs without executing or writing anything.",
-      "version": "0.1.11",
+      "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
+      "version": "0.1.13",
       "category": "development",
       "keywords": [
         "setup",
@@ -23,8 +23,8 @@
     {
       "name": "session-memory",
       "source": "./plugins/session-memory",
-      "description": "Stop losing your working state. Warm session resume (handoffs with git-anchored drift detection), lessons that persist across sessions, and a solutions ledger of verified fixes — corrections stop evaporating, failed approaches stop being retried, and solved problems stop being re-diagnosed.",
-      "version": "1.1.0",
+      "description": "Stop losing working state. Warm resume with verified full-SHA drift anchors, durable workflow lessons, and a ledger of verified fixes share a confined, atomic memory helper. The startup hook reports parked state without injecting repository-controlled prose; writes never auto-commit.",
+      "version": "1.1.1",
       "category": "development",
       "keywords": [
         "memory",
@@ -39,8 +39,8 @@
     {
       "name": "learning-loop",
       "source": "./plugins/learning-loop",
-      "description": "A self-improvement loop for your agent. Corrections (\"no, use pnpm, not npm\") and diagnosed failures become durable, evidence-counted lessons in .ai/memory/LESSONS.md, deduplicated by meaning and surfaced in later sessions so the same mistakes stop recurring. Standalone lessons-only alternative to session-memory; do not install both because both route the same lesson workflow and ship a lesson SessionStart hook.",
-      "version": "1.0.2",
+      "description": "A self-improvement loop for your agent. Corrections to agent behavior and standing workflow rules become durable, evidence-counted lessons in .ai/memory/LESSONS.md through a confined atomic helper. Its startup hook reports ledger availability without injecting file-controlled text. Standalone alternative to session-memory; do not install both.",
+      "version": "1.0.3",
       "category": "development",
       "keywords": [
         "lessons",
@@ -55,8 +55,8 @@
     {
       "name": "natural-writing",
       "source": "./plugins/natural-writing",
-      "description": "Make AI drafts read like a human wrote them. A prose writing/editing skill for blog posts, articles, and essays that strips the tells which mark text as AI-generated (em-dashes, words like 'delve'/'leverage', uniform sentence rhythm, bot scaffolding) so you can use AI without rewriting everything by hand. Preserves quotes verbatim and stays silent on code, commit messages, and one-line edits.",
-      "version": "1.0.3",
+      "description": "Draft and revise multi-paragraph prose in the author's established voice. With no supplied voice, uses a plainspoken fallback house style while preserving factual claims, uncertainty, caveats, quotations, and deliberate punctuation. Optional visual revision reports are reconstruction-verified and explicit opt-in.",
+      "version": "1.0.4",
       "category": "writing",
       "keywords": [
         "writing",
@@ -71,8 +71,8 @@
     {
       "name": "critical-thinking",
       "source": "./plugins/critical-thinking",
-      "description": "Get clear-eyed analysis instead of agreeable answers. Tests user framing, separates evidence from assumptions, calibrates uncertainty, and delegates material local-evidence questions to a fresh bounded research context without generic praise or reflexive contrarianism.",
-      "version": "0.1.2",
+      "description": "Get clear-eyed analysis instead of agreeable answers. Tests framing and settled decisions against evidence, alternatives, and risk; delegates material local-fact questions to a host-isolated read-only context with exact roots, hard source budgets, provenance, and prompt-injection defenses, or fails closed when isolation is unavailable.",
+      "version": "0.1.4",
       "category": "development",
       "keywords": [
         "critical-thinking",
@@ -87,8 +87,8 @@
     {
       "name": "groundwork",
       "source": "./plugins/groundwork",
-      "description": "Requirements elicitation as a discipline. Interviews you about a piece of work one question at a time — every question ships a recommended answer, facts the repository can answer are looked up instead of asked, and nothing gets built until you confirm the summarized shared understanding. Depth is steered in natural language, never by a question cap. Elicitation only: critique and verdicts stay with critical-thinking.",
-      "version": "0.1.0",
+      "description": "Requirements elicitation as a discipline. Asks one material decision at a time, distinguishes facts from uncertain evidence, labels decision provenance, and refuses to hide high-impact choices inside delegated defaults. Produces a confirmed decision brief and stops; implementation and planning remain separate.",
+      "version": "0.1.1",
       "category": "development",
       "keywords": [
         "elicitation",
@@ -102,8 +102,8 @@
     {
       "name": "project-vocabulary",
       "source": "./plugins/project-vocabulary",
-      "description": "Keep one ubiquitous language per project, written down. Maintains a CONCEPTS.md glossary at the repository root — behavioral definitions that stand on their own (no file paths or config values), one term per concept with retired synonyms as aliases, a Flagged Ambiguities tail — and applies it in conversation: fuzzy or conflicting term usage gets challenged at the moment it matters. Terminology corrections land here; behavior and workflow corrections stay with lessons-learned. Lazy file creation; trivial work and non-domain repos stay silent.",
-      "version": "0.1.0",
+      "description": "Keep one ubiquitous domain language per project. Applies CONCEPTS.md in conversation, proposes exact changes when routing fires implicitly, and writes only on an explicit add/update request or approval. A confined atomic helper protects the root glossary; workflow corrections stay with lessons-learned.",
+      "version": "0.1.2",
       "category": "development",
       "keywords": [
         "glossary",
@@ -116,8 +116,8 @@
     {
       "name": "pr-feedback",
       "source": "./plugins/pr-feedback",
-      "description": "Work through reviewer feedback on a GitHub PR instead of relitigating it by hand. Fetches every unresolved review thread and comment in one paginated pass, judges each item centrally against the actual code, applies valid fixes to the working tree, and drafts quoted replies — posting and resolving only after explicit approval. Never commits, pushes, merges, or approves.",
-      "version": "0.1.0",
+      "description": "Work through GitHub PR feedback in two explicit stages. The resolver fetches and centrally judges comments, applies authorized local fixes, and drafts replies but cannot mutate GitHub. A manual-only publisher can post an exact digest-locked plan after complete host, PR, head, source, and action preflight. Never commits, pushes, merges, rebases, or approves.",
+      "version": "0.2.1",
       "category": "development",
       "keywords": [
         "pull-request",
@@ -125,14 +125,16 @@
         "review-threads",
         "github",
         "feedback",
-        "graphql"
+        "graphql",
+        "approval",
+        "digest"
       ]
     },
     {
       "name": "discipline-gates",
       "source": "./plugins/discipline-gates",
-      "description": "Pre-action engineering gates backed by real evidence: reproduce bugs before fixing, characterize untested behavior before refactoring, prove new tests can fail with safe mutation restore, and recover defensive-code intent from git history before weakening it.",
-      "version": "0.1.4",
+      "description": "Pre-action engineering gates backed by real evidence: leave red or characterization artifacts uncommitted before edits, mutation-check selected behavior through an integrity-checked transactional restore, and recover defensive-code intent from untrusted history plus current-state proof before weakening it.",
+      "version": "0.1.5",
       "category": "development",
       "keywords": [
         "testing",
@@ -147,8 +149,8 @@
     {
       "name": "debugging-discipline",
       "source": "./plugins/debugging-discipline",
-      "description": "Systematic diagnosis for bugs that resist the ordinary red-test path. Builds a tight, red-capable feedback loop before any theorizing (flaky reruns, curl harnesses, replay, bisection, perf measurement), minimizes the failure, then tests 3-5 ranked falsifiable hypotheses with stated predictions — a fix that works while its prediction fails is a symptom, not the cause. Seamed bugs get their red test from discipline-gates' repro contract; trivial bugs fast-path out silently.",
-      "version": "0.1.0",
+      "description": "Systematic diagnosis for bugs that resist the ordinary red-test path. Establishes the safest useful observation loop, fails soft when reproduction is unavailable, minimizes the failure, and tests 1-5 credible hypotheses with predictions and proportionate noisy-evidence rules. Diagnosis is read-only unless implementation is also authorized.",
+      "version": "0.1.1",
       "category": "development",
       "keywords": [
         "debugging",

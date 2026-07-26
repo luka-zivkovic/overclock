@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
-# Generates eval fixture projects under $EVAL_FIXTURE_DIR (default /tmp/overclock-eval-fixtures).
-# Deterministic: safe to re-run; wipes and rebuilds the fixture root entirely.
+# Generates eval fixture projects under a fresh $EVAL_FIXTURE_DIR.
+# The caller must provide an empty directory; this script never wipes a supplied path.
 set -euo pipefail
 cd "$(dirname "$0")/.."          # qa/
 # Fixtures MUST live outside any git repository: the skills walk up to the
 # nearest .git to find the project root, so a non-git fixture inside this
 # checkout would resolve to the checkout itself and write memory there.
-ROOT="${EVAL_FIXTURE_DIR:-/tmp/overclock-eval-fixtures}"
-if [ -e "$ROOT" ]; then
-  if [ -f "$ROOT/.overclock-eval-fixture-root" ]; then
-    rm -rf "$ROOT"
-  elif ! rmdir "$ROOT" 2>/dev/null; then
-    echo "refusing to wipe unmarked non-empty fixture root: $ROOT" >&2
-    exit 1
-  fi
+REPO="$(dirname "$(pwd)")"
+if [ -n "${EVAL_FIXTURE_DIR:-}" ]; then
+  ROOT_INPUT="$EVAL_FIXTURE_DIR"
+else
+  ROOT_INPUT=$(mktemp -d "${TMPDIR:-/tmp}/overclock-eval-fixtures.XXXXXX")
 fi
-mkdir -p "$ROOT"
+ROOT=$(python3 fixtures/validate_root.py "$ROOT_INPUT" "$REPO")
+chmod 700 "$ROOT"
 touch "$ROOT/.overclock-eval-fixture-root"
 
 export GIT_AUTHOR_NAME=fixture GIT_AUTHOR_EMAIL=fixture@example.com
@@ -307,7 +305,7 @@ EOF
 mkdir -p "$LL/eval-2/scripts"
 cat > "$LL/eval-2/scripts/deploy.sh" <<'EOF'
 #!/usr/bin/env bash
-curl -fsS -H "Authorization: Bearer ${DEPLOY_KEY:-}" https://deploy.example.com/api/release
+curl -fsS -H "Authorization: Bearer ${DEPLOY_KEY:-}" https://deploy.example.invalid/api/release
 EOF
 
 # eval-3: negative control — requirement change; unrelated lesson must stay untouched
@@ -573,14 +571,28 @@ if [ -d "$CACHE" ] && ! git -C "$CACHE" rev-parse --git-dir >/dev/null 2>&1; the
   echo "discarding incomplete node-semver fixture cache" >&2
   rm -rf "$CACHE"
 fi
-if [ ! -d "$CACHE/.git" ]; then
-  git clone -q "$SEMVER_URL" "$CACHE" \
-    || { echo "fixture eval-4 needs one-time network access to clone node-semver" >&2; exit 1; }
+if [ "${EVAL_FIXTURE_SKIP_REMOTE:-0}" -eq 1 ]; then
+  mkdir -p "$GA/eval-4"
+  cat > "$GA/eval-4/semver.js" <<'EOF'
+const MAX_LENGTH = 256
+function parse(version) {
+  if (version.length > MAX_LENGTH) throw new TypeError("version is longer than 256 characters")
+  return version
+}
+module.exports = parse
+EOF
+  ( cd "$GA/eval-4" && git init -q -b pinned && git add -A \
+    && git commit -qm "offline fixture placeholder for parity checks" )
+else
+  if [ ! -d "$CACHE/.git" ]; then
+    git clone -q "$SEMVER_URL" "$CACHE" \
+      || { echo "fixture eval-4 needs one-time network access to clone node-semver" >&2; exit 1; }
+  fi
+  git -C "$CACHE" cat-file -e "$SEMVER_SHA" 2>/dev/null || git -C "$CACHE" fetch -q origin
+  git clone -q --no-hardlinks "$CACHE" "$GA/eval-4"
+  ( cd "$GA/eval-4" && git checkout -qb pinned "$SEMVER_SHA" \
+    && git remote set-url origin "$SEMVER_URL" )
 fi
-git -C "$CACHE" cat-file -e "$SEMVER_SHA" 2>/dev/null || git -C "$CACHE" fetch -q origin
-git clone -q --no-hardlinks "$CACHE" "$GA/eval-4"
-( cd "$GA/eval-4" && git checkout -qb pinned "$SEMVER_SHA" \
-  && git remote set-url origin "$SEMVER_URL" )
 
 # ---------- natural-writing ----------
 NW="$ROOT/natural-writing"
@@ -1016,5 +1028,7 @@ EOF
 for number in 0 1 2 3 4 5 6 7 8 9 10; do
   ( cd "$OS/eval-$number" && git init -q -b main && git add -A && git commit -qm "setup fixture $number" )
 done
+
+python3 fixtures/additional.py "$ROOT"
 
 echo "fixtures ready under $ROOT"

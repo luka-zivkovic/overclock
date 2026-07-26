@@ -5,8 +5,8 @@ Use them as a calibration reference when drafting or revising.
 
 **Source:** curated and de-conflicted from the [`mine-writing-rules`](https://github.com/shreyashankar/mine-writing-rules)
 corpus (880 rules distilled from 63 style guides). We keep the clarity, concision, and plain-diction
-rules and **reject** the corpus rules that endorse em-dashes — those conflict with rule 1 (no dashes).
-This is a fixed snapshot, not a runtime dependency.
+rules. This is a fixed snapshot, not a runtime dependency. The pairs illustrate the fallback house
+style, not universal laws; a project style guide or recognizable authorial choice may differ.
 
 ## Plain words over showy ones (rules 2, 5)
 
@@ -19,18 +19,20 @@ This is a fixed snapshot, not a runtime dependency.
 ## Kill AI-tell vocabulary and buzzwords (rule 2)
 
 - ✗ We leveraged a novel paradigm to synergize cross-functional knowledge transfer and facilitate deliverables.
-- ✓ We combined methods from two fields so the teams could share resources and finish the work.
+- ✓ We used a new approach so the teams could share knowledge and finish the work.
 
-- ✗ We leverage synergistic paradigms to deliver holistic solutions that fuel a massive boost.
+- ✗ We leverage our robust data platform and synergize it with your workflow tools to deliver a
+  massive boost in reporting speed.
 - ✓ We combine our data platform with your workflow tools to cut reporting time.
 
 ## Cut filler, hedges, and intensifiers (rules 3, 7)
 
 - ✗ However, it is important to note that, in many cases, the results that we obtained were, surprisingly, significant.
-- ✓ The results were significant.
+- ✓ The results were significant in many cases.
 
 - ✗ This is an extremely important and highly significant finding with very broad implications.
-- ✓ This finding overturns the standard account and changes how researchers design surveys.
+- ✓ This is an important finding with broad implications. [Name the supported implications when
+  the source supplies them.]
 
 - ✗ It is important to note that you should make sure to save your work before exiting.
 - ✓ Save your work before exiting.
@@ -41,7 +43,8 @@ This is a fixed snapshot, not a runtime dependency.
 ## Lead with the claim, hedge after (rule 7)
 
 - ✗ While the evidence is mixed and context-dependent, there may be some reason to think that, in certain situations, early feedback could plausibly improve outcomes.
-- ✓ Early feedback improves outcomes. Here is the evidence, and here is when it applies less.
+- ✓ Early feedback may improve outcomes in some settings. The evidence is mixed, and the next
+  section explains where the effect weakens.
 
 - ✗ You can add a product description to help customers.
 - ✓ Add a product description to help customers.
@@ -57,18 +60,21 @@ This is a fixed snapshot, not a runtime dependency.
 ## Concrete over vague (rule 6)
 
 - ✗ Ongoing socioeconomic challenges create adverse outcomes for vulnerable populations.
-- ✓ Poverty leaves families unable to afford food, housing, or doctors.
+- ✓ Economic hardship harms vulnerable people. [Name the supported harms when the source supplies
+  them.]
 
 - ✗ The unemployment situation is a function of the wage structure in the current time frame.
-- ✓ Unemployment rises when wages fall too slowly.
+- ✓ Current wage structures affect unemployment.
 
 - ✗ We will follow up soon. Please contact our office.
-- ✓ We will follow up by March 15. Please call our office at 555-0100.
+- ✓ We will follow up soon. Contact our office if you need an update. [Add a date and contact
+  method when they are known.]
 
 ## Active voice — name who did it (rule 10)
 
 - ✗ Mistakes were made and a decision was taken to discontinue the program.
-- ✓ The team made mistakes, and the minister decided to cancel the program.
+- ✓ Mistakes occurred, and the program was discontinued. The source does not identify who made
+  either decision.
 
 - ✗ The data were analyzed, the results were recorded, and the conclusions were drawn by the research team.
 - ✓ The research team analyzed the data, recorded the results, and drew the conclusions.
@@ -84,4 +90,3 @@ This is a fixed snapshot, not a runtime dependency.
 - ✓ First set up the project, then install the dependencies, then run the build.
 
 - ✓ (bold as a real header is fine) **Live feedback loop.** Poll the file and react as events arrive.
-

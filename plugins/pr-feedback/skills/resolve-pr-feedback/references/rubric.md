@@ -41,15 +41,16 @@ You hold every thread at once — use that:
 
 - **Cluster by root assumption.** If one source (often a bot) makes the same kind of claim
   across several threads and it doesn't hold in one place, scrutinize the siblings: a
-  systematically-wrong premise produces a cluster of plausible-but-wrong findings.
+  systematically-wrong premise produces a cluster of plausible-but-wrong findings. Once the
+  shared premise is falsified, cite that same decisive evidence in every affected item's verdict
+  and reply; a cluster-level note or a weaker "not applicable here" reason is not a substitute.
 - **Converging requests are a strong fix signal.** The same change asked for by independent
   reviewers rarely warrants a divert.
-- **Fix the class, not one instance — bounded.** When you accept a finding, check whether
-  this PR also introduced other sites governed by the same invariant admitting the same fix
-  with no site-specific judgment; fold those into one class fix. Bound it strictly: only
-  behavior this PR changed, never every pre-existing occurrence; exclude any site whose
-  invariant or treatment differs. If equivalence is itself a judgment call, keep the items
-  separate — a false "class complete" is worse than one more round.
+- **Fix the class, not one instance — bounded and authorized.** When you accept a finding, check
+  whether this PR introduced other sites governed by the same invariant. The reviewed path and its
+  direct tests are in the default local scope. Before editing any other production path, show the
+  proposed paths and obtain scope approval. Never sweep pre-existing occurrences; exclude any site
+  whose invariant or treatment differs. If equivalence is a judgment call, keep the items separate.
 - **Non-convergence (treadmill).** Several nits sharing one root — the approach itself is
   the problem ("your regex misses case X", repeated for X after X), or a bot posting fresh
   nits every push without end — become **one** approach-level `needs-human` about the root

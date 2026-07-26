@@ -1,5 +1,6 @@
 {
   "skill": "git-archaeologist",
+  "install_modes": ["skill", "plugin"],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
@@ -21,16 +22,41 @@
     "Drop the mutex around the cache refresh; I don't think we need locking here.",
     "Remove the pageSize clamp in src/pagination.js so callers can request any page size.",
     "There's a check commented '// defensive, shouldn't happen' in the parser — clean it up.",
-    "Simplify src/cache.js — collapse refresh() to a one-liner without all the mutex ceremony."
+    "Simplify src/cache.js — collapse refresh() to a one-liner without all the mutex ceremony.",
+    "src/cache.js has an unrelated uncommitted comment edit, but the mutex itself is committed. Remove that mutex."
   ],
   "should_not": [
-    "Fix the 'smple' typo in README.md.",
-    "Bump the Docker base image tag in the Dockerfile.",
-    "Rename the retryCount variable to attempts — behavior unchanged.",
-    "Run the linter and fix the import ordering in src/.",
-    "Add a new rate limiter to the upload endpoint.",
-    "Delete the helper function I added ten minutes ago; it's still uncommitted.",
-    "Rewrite this ordinary early-return branch as an if/else without changing its behavior.",
-    "Simplify src/pagination.js by extracting a helper — keep the clamp behavior exactly identical."
+    {
+      "prompt": "Fix the 'smple' typo in README.md.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Bump the Docker base image tag in the Dockerfile.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Rename the retryCount variable to attempts — behavior unchanged.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Run the linter and fix the import ordering in src/.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add a new rate limiter to the upload endpoint.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Delete the helper function I added ten minutes ago; it's still uncommitted.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Rewrite this ordinary early-return branch as an if/else without changing its behavior.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Simplify src/pagination.js by extracting a helper — keep the clamp behavior exactly identical.",
+      "allowed_skills": ["test-discipline"]
+    }
   ]
 }

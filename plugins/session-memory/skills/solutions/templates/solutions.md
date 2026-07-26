@@ -17,7 +17,7 @@ matches on that line.
 - **What didn't work:** <attempted fixes that failed, each with why when diagnosed>
 - **Solution:** <what actually fixed it, concretely>
 - **Why it works:** <the root cause the fix addresses>
-- **Verified:** <how the fix was confirmed — the test run, the observed behavior>
+- **Verified:** <[agent-observed] or [user-reported] plus the test or observed behavior>
 - **Date:** <ISO-8601 date>
 ```
 
@@ -33,6 +33,6 @@ matches on that line.
 - **What didn't work:** in-memory dedup Set — FAILED, three replicas behind the LB each keep their own set; raising the handler timeout — FAILED, retries come from provider-side 5s cap, not our latency.
 - **Solution:** unique index on `orders.external_id` plus `ON CONFLICT DO NOTHING`, returning 200 for the duplicate delivery.
 - **Why it works:** dedup moves to the one shared layer (the database); retries become idempotent no-ops regardless of which replica handles them.
-- **Verified:** test/webhooks/dedup.test.ts fires the same payload 3x concurrently and asserts one row; ran red before the index, green after.
+- **Verified:** [agent-observed] test/webhooks/dedup.test.ts fires the same payload 3x concurrently and asserts one row; ran red before the index, green after.
 - **Date:** 2026-07-20
 ```

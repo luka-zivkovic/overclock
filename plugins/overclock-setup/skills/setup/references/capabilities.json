@@ -5,10 +5,13 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
+      ],
+      "skill_names": [
+        "setup"
       ],
       "depends_on": [],
       "conflicts_with": [],
@@ -20,9 +23,14 @@
     {
       "id": "session-memory",
       "display_name": "Session Memory",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "publication_status": "published",
       "provides": [
+        "session-handoff",
+        "lessons-learned",
+        "solutions"
+      ],
+      "skill_names": [
         "session-handoff",
         "lessons-learned",
         "solutions"
@@ -45,9 +53,12 @@
     {
       "id": "learning-loop",
       "display_name": "Learning Loop",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "publication_status": "published",
       "provides": [
+        "lessons-learned"
+      ],
+      "skill_names": [
         "lessons-learned"
       ],
       "depends_on": [],
@@ -66,25 +77,32 @@
     {
       "id": "natural-writing",
       "display_name": "Natural Writing",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "publication_status": "published",
       "provides": [
         "natural-prose-writing",
         "natural-prose-editing"
+      ],
+      "skill_names": [
+        "natural-writing"
       ],
       "depends_on": [],
       "conflicts_with": [],
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Choose for drafting or revising multi-paragraph prose without common AI tells."
+      "selection": "Choose for voice-preserving multi-paragraph prose with a plainspoken fallback house style."
     },
     {
       "id": "critical-thinking",
       "display_name": "Critical Thinking",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "publication_status": "published",
       "provides": [
+        "critical-thinking",
+        "independent-research"
+      ],
+      "skill_names": [
         "critical-thinking",
         "independent-research"
       ],
@@ -98,9 +116,12 @@
     {
       "id": "groundwork",
       "display_name": "Groundwork",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "publication_status": "published",
       "provides": [
+        "groundwork"
+      ],
+      "skill_names": [
         "groundwork"
       ],
       "depends_on": [],
@@ -108,14 +129,17 @@
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Choose for one-question-at-a-time requirements interviews with recommended answers and a confirm-before-build gate."
+      "selection": "Choose for one-question-at-a-time requirements interviews that end at a provenance-labelled confirmed decision brief."
     },
     {
       "id": "project-vocabulary",
       "display_name": "Project Vocabulary",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "publication_status": "published",
       "provides": [
+        "project-vocabulary"
+      ],
+      "skill_names": [
         "project-vocabulary"
       ],
       "depends_on": [],
@@ -125,16 +149,20 @@
         "CONCEPTS.md"
       ],
       "minimum_host_version": null,
-      "selection": "Choose for a maintained domain glossary (CONCEPTS.md) with in-conversation term challenges on domain-carrying projects."
+      "selection": "Choose for a maintained domain glossary whose implicit suggestions require explicit approval before writes."
     },
     {
       "id": "discipline-gates",
       "display_name": "Discipline Gates",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "publication_status": "published",
       "provides": [
         "test-discipline",
         "git-archaeology"
+      ],
+      "skill_names": [
+        "test-discipline",
+        "git-archaeologist"
       ],
       "depends_on": [],
       "conflicts_with": [],
@@ -146,9 +174,12 @@
     {
       "id": "debugging-discipline",
       "display_name": "Debugging Discipline",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "publication_status": "published",
       "provides": [
+        "debugging-discipline"
+      ],
+      "skill_names": [
         "debugging-discipline"
       ],
       "depends_on": [],
@@ -156,22 +187,27 @@
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Choose for loop-first diagnosis of flaky, perf, integration-only, and repeat-offender bugs; composes with discipline-gates' repro gate."
+      "selection": "Choose for authority-aware, safe loop-first diagnosis of flaky, performance, integration-only, and repeat-offender bugs."
     },
     {
       "id": "pr-feedback",
       "display_name": "PR Feedback",
-      "version": "0.1.0",
+      "version": "0.2.1",
       "publication_status": "published",
       "provides": [
-        "resolve-pr-feedback"
+        "resolve-pr-feedback",
+        "publish-pr-feedback"
+      ],
+      "skill_names": [
+        "resolve-pr-feedback",
+        "publish-pr-feedback"
       ],
       "depends_on": [],
       "conflicts_with": [],
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Choose for working through reviewer feedback on GitHub PRs: centrally judged fixes and drafted replies with approval-gated posting."
+      "selection": "Choose for local-only review-feedback resolution plus a separate manual, digest-locked GitHub publication step."
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "name": "critical-thinking",
   "displayName": "Critical Thinking",
-  "description": "Get clear-eyed analysis instead of agreeable answers. Critical-thinking tests the user's framing and delegates material local-evidence uncertainty to Claude Code's fresh, read-only Explore context with source budgets, provenance checks, and prompt-injection defenses. Together they separate evidence from assumptions, surface contradictions and alternatives, calibrate confidence, and respond directly without praise or reflexive contrarianism.",
-  "version": "0.1.2",
+  "description": "Get clear-eyed analysis instead of agreeable answers. Critical-thinking tests framing, assumptions, alternatives, and settled decisions; independent-research verifies material local facts in a genuinely host-isolated read-only context with exact roots, hard artifact and byte budgets, provenance, and prompt-injection defenses, or reports an isolation gap.",
+  "version": "0.1.4",
   "author": {
     "name": "Luka Zivkovic"
   },

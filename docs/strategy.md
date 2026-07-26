@@ -30,6 +30,10 @@ so it ships to no user and needs no version bump.
      genuinely load-bearing discipline — keep it strict.)
    - **No collision.** It must not fight another skill *already in this kit* for the same trigger.
      Non-redundancy is scoped to **your installed kit**, not the whole ecosystem.
+   - **Standalone first.** Every skill directory must execute correctly when installed by itself.
+     Group packaging may improve routing or compose workflows, but sibling descriptions, hooks,
+     scripts, and references are never implicit dependencies. Test target-only, owning-plugin, and
+     intended-stack modes separately.
 
 3. **Grounding is research, not a gate.** Check what already exists — built-ins, official plugins,
    published skills, the base model's own ability — to build the skill **better** and avoid pointless
@@ -70,6 +74,11 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   initialized pr-kit arms. Generic must beat baseline independently; initialized context must then
   show material source-valid lift over generic. The skill-shaped candidate lives under the
   experiment directory and is intentionally unpublished until both gates pass.
+- **Pilot result (2026-07-22): FAILED.** The initialized arm accumulated two losses, so its lift
+  gate was mathematically failed before the remaining cases; the generic arm also had not earned
+  publication. `pr-kit` remains unpublished. The next legitimate step is to diagnose those losses,
+  revise the experimental candidate if warranted, and rerun the same committed gates. The scaffold
+  is not a roadmap or publication authorization.
 - **Mechanics hardening (2026-07-17):** grounding against EveryInc's compound-engineering plugin
   added delta-aware profile-input digests, deterministic risk-scope signals, exact changed-line
   finding validation, a silent-pass verification lens, and positive/negative behavioral controls.

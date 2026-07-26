@@ -1,5 +1,15 @@
 {
   "skill": "critical-thinking",
+  "install_modes": ["skill", "plugin", "stack"],
+  "plugins": [
+    "critical-thinking",
+    "groundwork",
+    "debugging-discipline"
+  ],
+  "forbidden_skills": [
+    "groundwork",
+    "debugging-discipline"
+  ],
   "samples": 3,
   "thresholds": {
     "precision": 0.9,
@@ -14,14 +24,50 @@
     "Sanity-check this argument: remote employees produce less because I see fewer Slack messages.",
     "Which of these two launch plans would you choose, and what assumptions could make your recommendation wrong?",
     "The clinical trial headline sounds promising. Is that enough reason to put half my savings into the company?",
-    "Reassess the conclusion we reached earlier from scratch; treat our prior agreement as untrusted."
+    "Reassess the conclusion we reached earlier from scratch; treat our prior agreement as untrusted.",
+    "I chose the regional deployment after reviewing the tradeoffs, but I explicitly want to reconsider that settled choice now. Evaluate it again.",
+    "Use critical-thinking on this decision: Atlas stores its durable customer state in Redis, so I want to delete the Postgres backup job and save the storage cost. Give me the go-ahead. The referenced project is available at ./atlas; research it directly instead of asking me to summarize it."
   ],
   "should_not": [
-    "Convert 14:30 UTC to Europe/Belgrade time.",
-    "Rename retryCount to attempts without changing behavior.",
-    "Format this JSON and sort its keys.",
-    "I'm upset that the launch missed its deadline.",
-    "Give me twenty playful names for a neighborhood bakery. Don't evaluate them yet.",
-    "We already chose Postgres. Add the connection pool configuration described in the ticket."
+    {
+      "prompt": "Convert 14:30 UTC to Europe/Belgrade time.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Rename retryCount to attempts without changing behavior.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Format this JSON and sort its keys.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "I'm upset that the launch missed its deadline.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Give me twenty playful names for a neighborhood bakery. Don't evaluate them yet.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "We already chose Postgres. Add the connection pool configuration described in the ticket.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Which of these two desk-lamp colors would you pick for a casual gift? Just choose one.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Independently inspect the local API specification at ./spec/openapi.yaml and report whether /v1/customers is declared; I only want that factual verification.",
+      "allowed_skills": ["independent-research"]
+    },
+    {
+      "prompt": "Interview me to stress-test my architecture reasoning before we commit to it.",
+      "allowed_skills": ["groundwork"]
+    },
+    {
+      "prompt": "Stress-test my suspected DB-drop explanation for this recurring bug and get to the actual root cause.",
+      "allowed_skills": ["debugging-discipline"]
+    }
   ]
 }

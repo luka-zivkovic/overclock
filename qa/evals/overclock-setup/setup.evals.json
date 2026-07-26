@@ -1,5 +1,7 @@
 {
   "skill_name": "setup",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
   "evals": [
     {
       "id": 0,

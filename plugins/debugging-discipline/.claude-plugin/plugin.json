@@ -1,8 +1,8 @@
 {
   "name": "debugging-discipline",
   "displayName": "Debugging Discipline",
-  "description": "Systematic diagnosis for bugs that resist the ordinary red-test path. Builds a tight, red-capable feedback loop before any theorizing (flaky reruns, curl harnesses, diff/replay loops, bisection, perf measurement), minimizes the failure, then tests 3-5 ranked falsifiable hypotheses with stated predictions — a fix that works while its prediction fails is a symptom, not the cause. Composes with discipline-gates: seamed bugs get their red test from test-discipline's repro contract; this skill owns the no-seam loop constructions and the hypothesis epistemics. Trivial bugs fast-path out silently.",
-  "version": "0.1.0",
+  "description": "Systematic diagnosis for bugs that resist the ordinary red-test path. Establishes the safest useful observation loop, fails soft when reproduction is unsafe, minimizes the failure, and tests 1-5 credible hypotheses with predictions. Diagnosis is read-only by default; fixes require explicit implementation authority.",
+  "version": "0.1.1",
   "author": {
     "name": "Luka Zivkovic"
   },

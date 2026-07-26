@@ -1,21 +1,11 @@
-# Right-sizing — the one triage question
+# Test Discipline Right-sizing
 
-Shared triage rule for the discipline-gates plugin. Duplicated byte-identical into each
-skill's `references/`; `tools/shared-files.txt` guards the copies against drift.
+Answer one question:
 
-Answer ONE binary question before engaging any gate:
+> Is the next authorized action a bug fix with an observable symptom, an inadequately covered
+> refactor of existing behavior, a test-only request for named existing behavior, or an explicitly
+> requested mutation check of a fresh green test?
 
-> Does a structural trigger apply — AND is observable behavior or defensive intent at stake?
-
-- A **structural trigger** is a concrete action class named in the skill: about to fix a
-  reported bug with a stated symptom; about to edit code with no behavioral test coverage; a
-  new test just went green; about to delete or weaken a guard / invalid-state early return /
-  retry / protective sleep / lock / clamp. Never a vibe ("this code looks risky / surprising").
-- If the answer is no, or the change matches `anti-triggers.md` → **silent no-op**. Do the
-  requested work without mentioning the gate.
-- If yes → engage exactly the one matching mode. The structural check IS the right-size gate;
-  there is no extra ceremony to scale up or down.
-
-One hard safety contract rides above everything: test-discipline's validate mode restores
-mutated production code unconditionally — on failure, on surprise, on interruption — before
-any reporting or further work. A gate that leaves the tree mutated is worse than no gate.
+If no, or if `anti-triggers.md` applies, stay silent. If yes, select exactly one mode from the
+skill's routing table. The concrete action class is the right-size gate; never engage merely because
+an edit feels risky.

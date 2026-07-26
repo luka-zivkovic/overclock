@@ -5,18 +5,28 @@
 
 set -e
 
-if [ $# -lt 1 ]; then
-    echo "Usage: get-pr-comments PR_NUMBER [OWNER/REPO]"
-    echo "Example: get-pr-comments 123"
-    echo "Example: get-pr-comments 123 acme/widgets"
+if [ $# -lt 1 ] || [ $# -gt 3 ]; then
+    echo "Usage: get-pr-comments PR_NUMBER [OWNER/REPO] [HOST]"
+    echo "Example: get-pr-comments 123 acme/widgets github.com"
     exit 1
 fi
 
 PR_NUMBER=$1
+case "$PR_NUMBER" in
+    ''|*[!0-9]*)
+        echo "Error: PR_NUMBER must be a positive integer." >&2
+        exit 1
+        ;;
+esac
 
 if [ -n "$2" ]; then
-    OWNER=$(echo "$2" | cut -d/ -f1)
-    REPO=$(echo "$2" | cut -d/ -f2)
+    case "$2" in
+        */*) OWNER=${2%%/*}; REPO=${2#*/} ;;
+        *)
+            echo "Error: repository must be OWNER/REPO." >&2
+            exit 1
+            ;;
+    esac
 else
     # `|| true` is load-bearing: under `set -e`, a failed command substitution
     # in an assignment aborts the script immediately. Run outside a git repo,
@@ -26,13 +36,34 @@ else
     OWNER=$(gh repo view --json owner -q .owner.login 2>/dev/null || true)
     REPO=$(gh repo view --json name -q .name 2>/dev/null || true)
 fi
-
-if [ -z "$OWNER" ] || [ -z "$REPO" ]; then
-    echo "Error: could not resolve owner/repo. Run get-pr-comments from inside the target git repository, or pass OWNER/REPO as the second argument (e.g., get-pr-comments $PR_NUMBER acme/widgets)." >&2
-    exit 1
+HOST=${3:-}
+if [ -z "$HOST" ]; then
+    REPO_URL=$(gh repo view --json url -q .url 2>/dev/null || true)
+    HOST=$(printf '%s\n' "$REPO_URL" | sed -E 's#^https?://([^/]+)/.*#\1#')
 fi
 
-# Output is a JSON object with three keys:
+if [ -z "$OWNER" ] || [ -z "$REPO" ]; then
+    echo "Error: could not resolve owner/repo. Run inside the target repository or pass OWNER/REPO." >&2
+    exit 1
+fi
+case "$OWNER$REPO" in
+    *[!A-Za-z0-9_.-]*)
+        echo "Error: owner/repo contains unsupported characters." >&2
+        exit 1
+        ;;
+esac
+case "$HOST" in
+    ''|*[!A-Za-z0-9.-]*)
+        echo "Error: could not resolve a valid GitHub host; pass it explicitly." >&2
+        exit 1
+        ;;
+esac
+
+gh_graphql() {
+    gh api --hostname "$HOST" graphql "$@"
+}
+
+# Output is a JSON object with repository identity, coverage, and three feedback arrays:
 #   review_threads   - unresolved inline review threads, edge-wrapped as
 #                      [{ node: { id, isResolved, isOutdated, path, line, ...,
 #                                 comments: { nodes: [...] } } }]
@@ -47,9 +78,9 @@ fi
 # response. Combining them into one query (as this script previously did)
 # silently dropped everything past page 1 on long-lived PRs and made the
 # skill report "0 of 0 resolved" while real findings sat unanswered.
-# Per-thread inline `comments` are fetched up to 100 per thread without
-# follow-up pagination; threads that exceed 100 comments are rare and out of
-# scope for this fix.
+# Per-thread inline `comments` are fetched up to 100 per thread. The output
+# exposes commentsTruncated and coverage.inline_comments_per_thread so callers
+# cannot mistake that bound for complete pagination.
 #
 # Content, identity, and surface are evidence for the resolver, not deterministic
 # exclusions. CI/status bots can carry actionable setup or posting failures, and
@@ -57,7 +88,7 @@ fi
 # limited to structural loop-prevention facts: blank bodies and messages known
 # to come from the PR author. If the PR author is unavailable, fail open.
 
-threads_pages=$(gh api graphql --paginate --slurp \
+threads_pages=$(gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -77,11 +108,13 @@ query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
           comments(first: 100) {
             nodes {
               id
+              databaseId
               author { login }
               body
               createdAt
               url
             }
+            pageInfo { hasNextPage endCursor }
           }
         }
         pageInfo { hasNextPage endCursor }
@@ -90,7 +123,7 @@ query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
   }
 }')
 
-comments_pages=$(gh api graphql --paginate --slurp \
+comments_pages=$(gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Comments($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -99,8 +132,11 @@ query Comments($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
       comments(first: 100, after: $endCursor) {
         nodes {
           id
+          databaseId
           author { login }
           body
+          createdAt
+          url
         }
         pageInfo { hasNextPage endCursor }
       }
@@ -108,7 +144,7 @@ query Comments($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
   }
 }')
 
-reviews_pages=$(gh api graphql --paginate --slurp \
+reviews_pages=$(gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Reviews($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -120,6 +156,8 @@ query Reviews($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
           author { login }
           body
           state
+          createdAt
+          url
         }
         pageInfo { hasNextPage endCursor }
       }
@@ -135,14 +173,32 @@ query Reviews($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
 jq -n \
   --argjson threads "$threads_pages" \
   --argjson comments "$comments_pages" \
-  --argjson reviews "$reviews_pages" '
+  --argjson reviews "$reviews_pages" \
+  --arg host "$HOST" \
+  --arg owner "$OWNER" \
+  --arg repo "$REPO" \
+  --argjson pr "$PR_NUMBER" '
   ($threads[0].data.repository.pullRequest.author) as $author |
   [$threads[].data.repository.pullRequest.reviewThreads.nodes[]] as $all_threads |
   [$comments[].data.repository.pullRequest.comments.nodes[]] as $all_comments |
   [$reviews[].data.repository.pullRequest.reviews.nodes[]] as $all_reviews |
   [$all_threads[] | select(.isResolved == false)] as $unresolved |
   {
-    review_threads: [$unresolved[] | { node: . }],
+    repository: {
+      host: $host,
+      owner: $owner,
+      name: $repo,
+      pull_request_number: $pr
+    },
+    coverage: {
+      top_level_connections: "fully paginated",
+      inline_comments_per_thread: 100,
+      truncated_thread_count: ([$unresolved[]
+        | select(.comments.pageInfo.hasNextPage == true)] | length)
+    },
+    review_threads: [$unresolved[]
+      | . + {commentsTruncated: (.comments.pageInfo.hasNextPage // false)}
+      | { node: . }],
     pr_comments: [$all_comments[]
       | select(($author.login == null) or (.author.login != $author.login))
       | select((.body // "") | test("^\\s*$") | not)],

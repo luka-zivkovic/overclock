@@ -1,4 +1,4 @@
 interface:
   display_name: "Git Archaeologist"
   short_description: "Recover defensive-code intent from history"
-  default_prompt: "Use $git-archaeologist to recover the history and intent behind this defensive construct before I weaken or remove it."
+  default_prompt: "Use $git-archaeologist to recover this defensive construct's untrusted history and verify current safeguards before I weaken or remove it."

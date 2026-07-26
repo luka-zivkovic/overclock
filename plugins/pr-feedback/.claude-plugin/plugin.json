@@ -1,8 +1,8 @@
 {
   "name": "pr-feedback",
   "displayName": "PR Feedback",
-  "description": "Consume-side PR review workflow. resolve-pr-feedback: fetch every unresolved review thread and comment on a GitHub PR in one paginated pass, judge each item centrally against the actual code (fixed / fixed-differently / declined / not-addressing / replied / needs-human), apply valid fixes to the working tree, and draft quoted replies — posting and resolving only after explicit user approval. Never commits, pushes, merges, or approves.",
-  "version": "0.1.0",
+  "description": "Two-stage GitHub PR feedback workflow. resolve-pr-feedback fetches and centrally judges review feedback, applies authorized local fixes, and drafts replies without remote mutation. The manual-only publish-pr-feedback skill can post an exact digest-locked plan after full host, PR, head, source, and action preflight. Neither skill commits, pushes, merges, rebases, or approves.",
+  "version": "0.2.1",
   "author": {
     "name": "Luka Zivkovic"
   },

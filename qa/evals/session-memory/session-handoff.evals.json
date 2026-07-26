@@ -1,16 +1,24 @@
 {
   "skill_name": "session-handoff",
+  "invocation": "explicit",
+  "install_modes": ["skill", "plugin"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
   "evals": [
     {
       "id": 0,
       "prompt": "We've been refactoring the auth middleware: we decided to switch from session cookies to JWTs because the mobile client can't hold cookies, we tried storing refresh tokens in localStorage but abandoned that since it's XSS-exposed, and the next step is to add the httpOnly refresh-token endpoint in src/routes/auth.ts. I'm about to run out of context — save our state so the next session can pick this up.",
-      "expected_output": "A new .ai/memory/HANDOFF.md containing the goal, the JWT decision with rationale, the localStorage refresh-token attempt recorded as a failed approach with its XSS cause, concrete next steps naming src/routes/auth.ts, and environment anchors (git branch, short HEAD sha, dirty-file list, date), plus a one-line confirmation in conversation.",
+      "expected_output": "A new .ai/memory/HANDOFF.md containing the goal, the JWT decision with rationale, the localStorage refresh-token attempt recorded as a failed approach with its XSS cause, concrete next steps naming src/routes/auth.ts, and environment anchors (git branch, full HEAD object ID, dirty-file list, timezone-qualified timestamp), plus a one-line confirmation in conversation.",
       "files": [],
       "expectations": [
         "A file is written at .ai/memory/HANDOFF.md (directories created if needed) and nothing outside .ai/memory/ is written or deleted.",
         "HANDOFF.md starts with the <!-- memory-schema: v1 --> marker and contains the contract's section order: Current goal, Plan, Decisions, Failed approaches, Open questions, Next steps, Key files, Environment anchors.",
         "The Failed approaches section records the localStorage refresh-token attempt with its diagnosed cause (XSS exposure), not just 'tried and failed'.",
-        "The Environment anchors section contains a git branch name and a short HEAD sha obtained by running git commands during the session (process: git branch/rev-parse/status were actually executed).",
+        "The Environment anchors section contains a git branch name, complete 40- or 64-hex-character HEAD object ID, and timezone-qualified timestamp obtained during the session (process: git branch/rev-parse/status were actually executed).",
+        "Process: references/memory-contract.md and references/handoff-schema.md are consulted, the helper read reports CURRENT-SHA256: absent, and the complete handoff is written through bundled memory_io.py with --expected-current-sha256 absent; no direct mkdir/mv/editor write is used under .ai/memory/.",
         "No git commit is made and no secrets/tokens appear in the written file."
       ]
     },
@@ -39,7 +47,7 @@
       ],
       "expectations": [
         "Process: current git state is checked (branch/sha) and compared against the handoff's Environment anchors.",
-        "The saved sha is unreachable in this fixture: the brief explicitly states that history was rewritten (or the saved commit no longer exists) and does NOT misread it as 'no commits since the handoff'; drift is quantified from what is observable (branch change, dated log).",
+        "The saved seven-character SHA is a legacy unverified anchor and is never interpolated into a command. The brief does NOT misread it as 'no commits since the handoff'; drift is quantified only from safe observable evidence (branch change and, if the saved date validates, dated log).",
         "All Plan step statuses are treated as unverified or re-verified against the actual code, not trusted from checkboxes.",
         "The brief still surfaces the saved goal, failed approaches, and next steps from HANDOFF.md instead of re-deriving them from scratch.",
         "The entire user-facing response is exactly six nonblank labeled lines in this order: Goal, Plan status, Decisions in force, Do-not-retry, Drift & lessons, Proposed next step ending in confirmation. There is no preamble, code fence, extra section, or afterword.",
@@ -116,6 +124,7 @@
         "The previous Redis HANDOFF.md survives under .ai/memory/archive/ with its goal intact; it is not silently overwritten or discarded.",
         "The new current HANDOFF.md records the KeyDB goal, the licensing rationale, the failed ioredis cluster attempt with its proxy-topology cause, and the next step naming src/cache.js.",
         "Archive retention is enforced: exactly five archived handoff files remain and the oldest pre-existing archive (the 2026-06-01 checkpoint) is removed.",
+        "The existing handoff is first read through memory_io.py and its exact CURRENT-SHA256 token is carried into write handoff via --expected-current-sha256; stale content is never force-written.",
         "Current git anchors are captured for the new handoff and no git commit is created.",
         "Writes and deletions are confined to .ai/memory/."
       ]

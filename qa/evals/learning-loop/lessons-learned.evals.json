@@ -1,3 +1,5 @@
 {
+  "invocation": "explicit",
+  "install_modes": ["skill", "plugin"],
   "extends": "../session-memory/lessons-learned.evals.json"
 }

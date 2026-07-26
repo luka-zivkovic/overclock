@@ -7,7 +7,7 @@ Fill-in-ready skeleton for `.ai/memory/HANDOFF.md`. Copy the skeleton, replace e
 ```markdown
 <!-- memory-schema: v1 -->
 # Session Handoff
-Saved: <ISO-8601 date and time, e.g. 2026-06-10T17:42:00>
+Saved: <ISO-8601 date and time with timezone, e.g. 2026-06-10T17:42:00Z>
 
 ## Current goal
 <One or two sentences: what we are ultimately trying to achieve and why.>
@@ -35,9 +35,9 @@ Saved: <ISO-8601 date and time, e.g. 2026-06-10T17:42:00>
 
 ## Environment anchors
 - Branch: <git branch --show-current>
-- HEAD: <git rev-parse --short HEAD>
+- HEAD: <complete output of git rev-parse HEAD: 40 or 64 hexadecimal characters>
 - Dirty files: <git status --porcelain output, or "clean">
-- Date: <save date>
+- Date: <same timezone-qualified timestamp as Saved>
 <!-- Non-git project: replace Branch/HEAD/Dirty with "Not a git repo" and list key-file mtimes instead. -->
 ```
 
@@ -46,7 +46,7 @@ Saved: <ISO-8601 date and time, e.g. 2026-06-10T17:42:00>
 ```markdown
 <!-- memory-schema: v1 -->
 # Session Handoff
-Saved: 2026-06-10T17:42:00
+Saved: 2026-06-10T17:42:00Z
 
 ## Current goal
 Add rate limiting to the public API so the free tier is capped at 100 req/min per key, without breaking the existing enterprise bypass header.
@@ -78,7 +78,7 @@ Add rate limiting to the public API so the free tier is capped at 100 req/min pe
 
 ## Environment anchors
 - Branch: feat/rate-limiting
-- HEAD: 8c41f2a
+- HEAD: 8c41f2a4d4f96c8bf75db0e2d398de2f2165865c
 - Dirty files: M src/app.ts, ?? src/middleware/rateLimit.ts
-- Date: 2026-06-10
+- Date: 2026-06-10T17:42:00Z
 ```

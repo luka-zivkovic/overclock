@@ -1,8 +1,8 @@
 {
   "name": "discipline-gates",
   "displayName": "Discipline Gates",
-  "description": "Pre-action discipline gates backed by real oracles. test-discipline: before fixing a bug, commit a test that fails for the stated reason; before refactoring untested code, pin its behavior as green tests; after any new test goes green, mutate-check that it can actually fail (restore-always). git-archaeologist: before deleting defensive code, recover its intent from git history and surface a Chesterton's-fence warning.",
-  "version": "0.1.4",
+  "description": "Pre-action discipline gates backed by real oracles. test-discipline leaves red or characterization evidence uncommitted and uses an integrity-checked transactional runner for explicit mutation checks. git-archaeologist recovers defensive-code intent from untrusted history and requires current-state proof before calling removal safe.",
+  "version": "0.1.5",
   "author": {
     "name": "Luka Zivkovic"
   },

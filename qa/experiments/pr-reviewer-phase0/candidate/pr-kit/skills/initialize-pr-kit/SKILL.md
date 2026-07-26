@@ -3,7 +3,7 @@ name: initialize-pr-kit
 description: "Explicitly initialize or refresh repository-specific PR review knowledge for pr-kit. Use only when the user invokes this one-time initializer and authorizes creation of .ai/pr-kit/REPOSITORY.md. Inventory architecture, ownership, invariants, trust boundaries, failure modes, verification commands, conventions, and verified historical precedents from inspectable repository sources. Write only that profile, never copy secrets, never modify project instructions or settings, never auto-commit, and never make the profile a substitute for current code."
 argument-hint: "[optional focus areas or refresh request]"
 disable-model-invocation: true
-allowed-tools: 'Bash(git *) Bash(gh *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/inventory.py" *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/profile_inputs.py" *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/write_profile.py" *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/validate_profile.py" *) Read Grep Glob'
+allowed-tools: 'Bash(git *) Bash(gh *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/inventory.py" *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/profile_inputs.py" *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/write_profile.py" *) Read Grep Glob'
 disallowed-tools: Write Edit NotebookEdit WebFetch WebSearch
 ---
 
@@ -96,18 +96,10 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/write_profile.py" "${CLAUDE_PROJECT_DIR}" <
 PR_KIT_PROFILE
 ```
 
-The writer validates before replacement, refuses linked/hard-linked targets and parents, and
-preserves a valid existing profile when the replacement is invalid. Do not use Write/Edit or any
-other mechanism. Then independently validate the installed artifact:
-
-```text
-python3 "${CLAUDE_SKILL_DIR}/scripts/validate_profile.py" \
-  "${CLAUDE_PROJECT_DIR}/.ai/pr-kit/REPOSITORY.md" \
-  --project-root "${CLAUDE_PROJECT_DIR}"
-```
-
-If validation fails, restore the previous profile byte-for-byte when one existed; otherwise remove
-the invalid new artifact. Never leave a partial profile.
+The writer performs both schema and source-grounding validation before the atomic replacement,
+refuses linked/hard-linked targets and parents, and preserves the existing profile when validation
+or replacement fails. Its success message is the validation result; do not perform a second,
+non-transactional validation step or use Write/Edit as a substitute. Never leave a partial profile.
 
 ## Report completion
 

@@ -14,16 +14,25 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import os
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_skill import parse_frontmatter, validate as structural_validate  # noqa: E402
-
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(REPO / "qa"))
+from eval_contract import fixture_errors, resolve_suite, validate_suite  # noqa: E402
+from validate_skill import parse_frontmatter, validate as structural_validate  # noqa: E402
+from trigger_battery import (  # noqa: E402
+    validate_battery_install_modes,
+    validate_battery_prompt_contracts,
+)
+
 SKIP_DIRS = {
     ".git", ".impeccable", ".venv", "_work", "__pycache__", "build", "dist",
     "node_modules", "venv",
@@ -36,6 +45,8 @@ OBJECTIVE_CUES = re.compile(
     re.I,
 )
 OPENAI_INTERFACE_FIELDS = ("display_name", "short_description", "default_prompt")
+_FIXTURE_TEMP: tempfile.TemporaryDirectory[str] | None = None
+_FIXTURE_FAILURE: str | None = None
 
 
 def estimate_tokens(text: str) -> int:
@@ -179,26 +190,88 @@ def distribution_for(skill_md: Path) -> tuple[str, str]:
 
 
 def resolve_eval(path: Path) -> Path:
-    """Resolve a small `extends` chain and verify the final suite has eval cases."""
-    current = path.resolve()
-    seen: set[Path] = set()
-    while True:
-        if current in seen:
-            raise ValueError(f"cyclic eval extends chain at {current}")
-        seen.add(current)
-        try:
-            data = json.loads(current.read_text(encoding="utf-8"))
-        except FileNotFoundError as exc:
-            raise ValueError(f"extended eval suite is missing: {current}") from exc
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"invalid eval JSON in {current}: {exc}") from exc
-        parent = data.get("extends")
-        if parent:
-            current = (current.parent / parent).resolve()
+    """Resolve an eval suite through the shared, root-confined contract."""
+    return resolve_suite(path, REPO / "qa" / "evals")
+
+
+def materialized_fixture_root() -> Path:
+    """Build the deterministic offline fixture tree once for this audit process."""
+    global _FIXTURE_TEMP, _FIXTURE_FAILURE
+    if _FIXTURE_TEMP is None and _FIXTURE_FAILURE is None:
+        _FIXTURE_TEMP = tempfile.TemporaryDirectory(
+            prefix="overclock-audit-fixtures."
+        )
+        atexit.register(_FIXTURE_TEMP.cleanup)
+        root = Path(_FIXTURE_TEMP.name) / "fixtures"
+        env = dict(os.environ)
+        env["EVAL_FIXTURE_DIR"] = str(root)
+        env["EVAL_FIXTURE_SKIP_REMOTE"] = "1"
+        completed = subprocess.run(
+            ["bash", str(REPO / "qa" / "fixtures" / "setup.sh")],
+            cwd=REPO,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode != 0:
+            _FIXTURE_FAILURE = (
+                completed.stderr.strip()
+                or completed.stdout.strip()
+                or f"fixture generator exited {completed.returncode}"
+            )
+    if _FIXTURE_FAILURE is not None:
+        raise ValueError(f"fixture generation failed: {_FIXTURE_FAILURE}")
+    assert _FIXTURE_TEMP is not None
+    return Path(_FIXTURE_TEMP.name) / "fixtures"
+
+
+def routing_battery_for(plugin: str, skill: str) -> Path | None:
+    root = REPO / "qa" / "trigger-battery"
+    for path in (root / f"{plugin}-{skill}.json", root / f"{skill}.json"):
+        if not path.is_file():
             continue
-        if not isinstance(data.get("evals"), list) or not data["evals"]:
-            raise ValueError(f"eval suite has no cases: {current}")
-        return current
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return path
+        if data.get("skill") != skill:
+            continue
+        declared_plugin = data.get("plugin")
+        if declared_plugin is None:
+            matches = list((REPO / "plugins").glob(f"*/skills/{skill}/SKILL.md"))
+            if len(matches) != 1:
+                continue
+        elif declared_plugin != plugin:
+            continue
+        return path
+    return None
+
+
+def audit_routing_battery_contract(
+    battery: dict,
+    skill_dir: Path,
+) -> list[tuple[str, str]]:
+    """Mechanically validate one routing battery's matrix and row contracts."""
+    findings: list[tuple[str, str]] = []
+    findings.extend(
+        ("FAIL", f"routing battery install matrix: {message}")
+        for message in validate_battery_install_modes(battery, skill_dir)
+    )
+    findings.extend(
+        ("FAIL", f"routing battery prompt contract: {message}")
+        for message in validate_battery_prompt_contracts(battery)
+    )
+    thresholds = battery.get("thresholds")
+    if not isinstance(thresholds, dict) or not thresholds:
+        findings.append(
+            ("FAIL", "routing battery must declare quality thresholds")
+        )
+    samples = battery.get("samples", 3)
+    if not isinstance(samples, int) or samples < 3:
+        findings.append(
+            ("FAIL", "routing battery must use at least three samples")
+        )
+    return findings
 
 
 def audit_one(skill_md: Path) -> dict:
@@ -254,6 +327,35 @@ def audit_one(skill_md: Path) -> dict:
     if eval_path.is_file():
         try:
             resolved_eval = resolve_eval(eval_path)
+            schema_errors = validate_suite(eval_path, REPO / "qa" / "evals")
+            findings.extend(("FAIL", message) for message in schema_errors)
+            resolved_data = json.loads(resolved_eval.read_text(encoding="utf-8"))
+            if resolved_data.get("skill_name") != folder_name:
+                findings.append(
+                    (
+                        "FAIL",
+                        "eval skill_name "
+                        f"{resolved_data.get('skill_name')!r} does not match "
+                        f"distribution {folder_name!r}",
+                    )
+                )
+            if not user_invoked and not isinstance(
+                resolved_data.get("value_gate"), dict
+            ):
+                findings.append(
+                    (
+                        "FAIL",
+                        "model-invoked skill eval suite must declare a paired "
+                        "no-skill value_gate",
+                    )
+                )
+            generated_root = materialized_fixture_root()
+            findings.extend(
+                ("FAIL", message)
+                for message in fixture_errors(
+                    generated_root, eval_path, REPO / "qa" / "evals"
+                )
+            )
             eval_status = str(eval_path.relative_to(REPO))
             if resolved_eval != eval_path.resolve():
                 eval_status += f" -> {resolved_eval.relative_to(REPO)}"
@@ -268,6 +370,22 @@ def audit_one(skill_md: Path) -> dict:
         else:
             eval_status = "missing"
             findings.append(("WARN", "no live eval suite found for this skill"))
+
+    if not user_invoked and plugin not in {"(external)", "(standalone)"}:
+        battery_path = routing_battery_for(plugin, folder_name)
+        if battery_path is None:
+            findings.append(("FAIL", "model-invoked skill has no routing battery"))
+        else:
+            try:
+                battery = json.loads(battery_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                findings.append(
+                    ("FAIL", f"invalid routing battery JSON: {exc}")
+                )
+            else:
+                findings.extend(
+                    audit_routing_battery_contract(battery, skill_dir)
+                )
 
     tier = "objective" if OBJECTIVE_CUES.search(body) else "rubric"
     grade = (

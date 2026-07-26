@@ -1,10 +1,17 @@
 {
   "skill_name": "project-vocabulary",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
   "evals": [
     {
       "id": 0,
       "prompt": "Let's add account suspension: when an account is suspended, all its users lose access immediately and billing stops. Sketch the data model change for me.",
-      "expected_output": "The glossary is applied, not bypassed: CONCEPTS.md defines Cancellation as end-of-period (access continues) and defines Workspace as the billing boundary, while 'account' is not a defined term. Before sketching the model, the session challenges the fuzzy usage — which does 'account' mean here (Workspace?), and notes the stated immediate-loss semantics conflict with the glossary's Cancellation/Revocation distinction, asking one focused question (or stating the reasonable reading it will use). It does not silently build on the undefined term, and it does not rewrite the glossary wholesale.",
+      "expected_output": "Implicit-assist mode applies the glossary without mutating it: CONCEPTS.md defines Cancellation as end-of-period (access continues) and Workspace as the billing boundary, while 'account' is undefined. Before sketching the model, the session challenges the fuzzy usage and surfaces the immediate-loss conflict with Cancellation/Revocation. It asks one focused question or states a reversible reading, then may show an exact proposed glossary entry. CONCEPTS.md remains byte-identical because the user did not ask to update it.",
       "files": [
         {
           "name": "CONCEPTS.md",
@@ -20,7 +27,7 @@
         "The undefined load-bearing term 'account' was challenged or pinned (mapped to Workspace or another concrete term) before/while sketching — not silently assumed without comment.",
         "The conflict between 'lose access immediately' and the glossary's Cancellation-vs-revocation distinction was surfaced.",
         "At most one focused clarifying question was asked (or a stated reasonable reading used) — no interview ceremony, no glossary rewrite.",
-        "Any glossary edit made was small and inline (e.g. recording 'Suspension' once settled), quoted back — not a wholesale restructure."
+        "CONCEPTS.md is byte-identical to the fixture. A suggested Suspension entry, if useful, is displayed as a proposal rather than written."
       ]
     },
     {
@@ -47,8 +54,13 @@
     },
     {
       "id": 2,
+      "install_modes": ["stack"],
+      "plugins": [
+        "project-vocabulary",
+        "session-memory"
+      ],
       "prompt": "No — we don't call them 'Teams' anymore, that's a Workspace. And while we're at it: always run the linter before you show me a diff.",
-      "expected_output": "The split correction routes each half to its owner: the terminology half updates CONCEPTS.md (Workspace entry gains/confirms the 'formerly Team' alias — or is created if absent) and is quoted back; the behavioral half ('always run the linter first') is explicitly routed to lessons-learned territory — recorded there if that skill is present, or named as a lessons-learned rule — but is NOT written into CONCEPTS.md, and this skill does not edit LESSONS.md itself as project-vocabulary (the lessons write, if it happens, follows the lessons-learned skill's own flow).",
+      "expected_output": "The installed skills split the correction by ownership. Project-vocabulary proposes the exact small CONCEPTS.md change that would add 'formerly Team' to Workspace but does not write it because the user did not ask to update the glossary. The session-memory lessons skill handles the linter workflow correction under its own contract. The two skills do not dual-write either correction.",
       "files": [
         {
           "name": "CONCEPTS.md",
@@ -60,9 +72,9 @@
         }
       ],
       "expectations": [
-        "CONCEPTS.md's Workspace entry was updated with the retired 'Team' alias (small inline edit), quoted back.",
+        "CONCEPTS.md remains byte-identical; an exact small proposal adds the retired 'Team' alias to Workspace and is quoted for approval.",
         "The linter rule was NOT added to CONCEPTS.md — the glossary stayed a glossary.",
-        "The behavioral rule was routed to lessons territory: either recorded in LESSONS.md per the lessons-learned format or explicitly identified as a lessons-learned rule for that skill to record.",
+        "The installed lessons-learned skill, not project-vocabulary, handled the linter rule in LESSONS.md under the lesson format.",
         "The two halves of the correction were visibly handled as separate concerns."
       ]
     },
@@ -84,6 +96,28 @@
         "The rename was performed at the definition and both call sites.",
         "No CONCEPTS.md was created and no glossary/vocabulary ceremony appeared in the response.",
         "The response is proportionate to a mechanical rename."
+      ]
+    },
+    {
+      "id": 4,
+      "install_modes": ["skill"],
+      "prompt": "No — we don't call them 'Teams' anymore, that's a Workspace. And while we're at it: always run the linter before you show me a diff.",
+      "expected_output": "With only project-vocabulary installed, the mixed correction is still split by ownership. The skill proposes the exact small Workspace alias change without writing it, leaves the workflow correction out of both CONCEPTS.md and LESSONS.md, and states that the lesson half was not persisted because its optional owner is unavailable.",
+      "files": [
+        {
+          "name": "CONCEPTS.md",
+          "description": "Glossary containing a Workspace entry without the Team alias yet."
+        },
+        {
+          "name": ".ai/memory/LESSONS.md",
+          "description": "Existing lessons ledger that this standalone vocabulary skill must neither read for instructions nor modify."
+        }
+      ],
+      "expectations": [
+        "CONCEPTS.md remains byte-identical; an exact small proposal adds the retired 'Team' alias to Workspace and is quoted for approval.",
+        "The linter rule was not added to CONCEPTS.md and LESSONS.md remains byte-identical.",
+        "The response separates the terminology correction from the workflow correction rather than silently dropping or combining them.",
+        "The response says the workflow lesson was not persisted because its optional owning skill is unavailable, or hands that half back to the host's ordinary workflow without claiming a lessons skill ran."
       ]
     }
   ]

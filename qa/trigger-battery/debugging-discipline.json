@@ -1,11 +1,20 @@
 {
   "skill": "debugging-discipline",
+  "install_modes": ["skill", "stack"],
+  "plugins": [
+    "debugging-discipline",
+    "discipline-gates",
+    "critical-thinking"
+  ],
+  "forbidden_skills": [
+    "critical-thinking"
+  ],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
     "specificity": 0.9
   },
-  "note": "Routing battery for debugging-discipline. FIRED means the Skill tool selected debugging-discipline. Negatives are dominated by test-discipline collision prompts (ordinary seamed bugs with stated symptoms) — the seam the external eval required.",
+  "note": "Routing battery for debugging-discipline installed with test-discipline and critical-thinking. Positives require debugging-discipline without a competing critical-thinking route; negatives exercise ordinary seamed bugs and pure argument evaluation.",
   "fixture_git": true,
   "fixture_files": {
     "README.md": "# Routing fixture\nSmall Node service with tests.\n",
@@ -18,15 +27,39 @@
     "The p95 latency doubled since last week's deploy and I can't see why. Get to the root cause.",
     "It only breaks in staging, never locally. Help me hunt this down systematically.",
     "We've 'fixed' this crash twice and it keeps coming back — I want the actual cause this time.",
-    "There's no test setup in this repo and the import job corrupts data occasionally. Build me a way to pin it down."
+    "There's no test setup in this repo and the import job corrupts data occasionally. Build me a way to pin it down.",
+    "Diagnose why production checkout occasionally double-charges, but do not send live requests or patch anything.",
+    "This rare batch failure takes hours and cannot be reproduced safely. Investigate systematically and tell me what evidence is missing.",
+    "Stress-test my suspected DB-drop explanation for this recurring bug and get to the actual root cause."
   ],
   "should_not": [
-    "Submitting an empty form returns a 500 — fix it.",
-    "The date formatter returns 'Invalid Date' for ISO strings with milliseconds; fix that bug.",
-    "Write a unit test for the parseConfig function.",
-    "ReferenceError: totalCuont is not defined at cart.js:42 — fix the typo.",
-    "Stress-test my conclusion that the queue can't scale.",
-    "Explain what this ECONNRESET error means.",
-    "Add retry logic to the fetch helper as a new feature."
+    {
+      "prompt": "Submitting an empty form returns a 500 — fix it.",
+      "allowed_skills": ["test-discipline"]
+    },
+    {
+      "prompt": "The date formatter returns 'Invalid Date' for ISO strings with milliseconds; fix that bug.",
+      "allowed_skills": ["test-discipline"]
+    },
+    {
+      "prompt": "Write a unit test for the parseConfig function.",
+      "allowed_skills": ["test-discipline"]
+    },
+    {
+      "prompt": "ReferenceError: totalCuont is not defined at cart.js:42 — fix the typo.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Stress-test my conclusion that the queue can't scale.",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Explain what this ECONNRESET error means.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add retry logic to the fetch helper as a new feature.",
+      "allowed_skills": []
+    }
   ]
 }

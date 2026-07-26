@@ -1,5 +1,6 @@
 {
   "skill": "test-discipline",
+  "install_modes": ["skill", "plugin"],
   "thresholds": {
     "precision": 0.8,
     "recall": 0.9,
@@ -26,15 +27,41 @@
     "Refactor src/legacy/pricing.js into smaller functions — there are no tests for it.",
     "Clean up formatDuration in src/duration.js; behavior must stay identical. Nothing tests it today.",
     "I just added tests/rounding.test.js and it passes — are we good?",
-    "Write a unit test for computeDiscount."
+    "Write a unit test for computeDiscount.",
+    "This new slugify feature is done and its test passes. Explicitly mutation-check whether the test detects broken lowercase behavior; do not change the feature."
   ],
   "should_not": [
-    "Fix the 'smple' typo in README.md.",
-    "Bump lodash to 4.17.21 in package.json.",
-    "Rename getUserByID to getUserById everywhere — no behavior change.",
-    "Reformat src/discount.js to match the project style without changing behavior.",
-    "Add a CSV export feature to the reports page.",
-    "Regenerate pnpm-lock.yaml and commit it.",
-    "Refactor src/tax.js — it has a full behavioral test suite in tests/tax.test.js."
+    {
+      "prompt": "Fix the 'smple' typo in README.md.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Bump lodash to 4.17.21 in package.json.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Rename getUserByID to getUserById everywhere — no behavior change.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Reformat src/discount.js to match the project style without changing behavior.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add a CSV export feature to the reports page.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Regenerate pnpm-lock.yaml and commit it.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Refactor src/tax.js — it has a full behavioral test suite in tests/tax.test.js.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Diagnose why parseAmount sometimes rounds incorrectly, but do not edit code or tests.",
+      "allowed_skills": []
+    }
   ]
 }
