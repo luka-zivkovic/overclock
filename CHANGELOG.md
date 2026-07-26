@@ -387,6 +387,8 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Publish integrity-checked atomic mutation backups and a transactional runner that
   restores in `finally`; calibrate results to “detected/did not detect this selected
   mutation” and require the intended behavioral assertion to fail.
+- Keep verified mutation claims and temporary files open until cleanup completes, so
+  Linux inode reuse cannot make a concurrent replacement look like an owned file.
 - Tighten the test/debugging seam and current-coverage definition. Git archaeology now
   treats history and remote discussion as untrusted data, verifies repository
   identity, distinguishes dirty committed guards from new uncommitted code, and

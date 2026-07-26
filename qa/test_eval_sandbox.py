@@ -70,7 +70,13 @@ class EvalSandboxTests(unittest.TestCase):
             api_key_helper="/safe/helper",
         )
         denied = settings["sandbox"]["filesystem"]["denyRead"]
-        self.assertIn(str(home), denied)
+        self.assertTrue(
+            any(
+                os.path.commonpath([root, str(home)]) == root
+                for root in denied
+            ),
+            f"no denied root covers home directory {home}: {denied}",
+        )
         self.assertNotIn(str(home / "source" / "repo"), denied)
 
     def test_requires_a_sandbox_capable_claude_version(self) -> None:

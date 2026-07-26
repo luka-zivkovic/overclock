@@ -19,6 +19,7 @@ from mutation_backup import (
     claim_target,
     current_sha256,
     inode_identity,
+    open_sha256_at,
     open_parent,
     publish_no_replace,
     regular_single_link,
@@ -89,6 +90,7 @@ def atomic_replace(
     temporary_identity: tuple[int, int] | None = None
     original_claim: str | None = None
     original_claim_identity: tuple[int, int] | None = None
+    original_claim_fd: int | None = None
     try:
         temporary_fd = os.open(
             temporary_name,
@@ -103,14 +105,12 @@ def atomic_replace(
         write_all(temporary_fd, payload)
         os.fchmod(temporary_fd, mode)
         os.fsync(temporary_fd)
-        os.close(temporary_fd)
-        temporary_fd = None
 
         original_claim = claim_target(parent_fd, name, label="mutorigin")
         original_claim_identity = inode_identity(
             os.stat(original_claim, dir_fd=parent_fd, follow_symlinks=False)
         )
-        claimed_digest, hashed_claim_identity = sha256_at(
+        claimed_digest, hashed_claim_identity, original_claim_fd = open_sha256_at(
             parent_fd,
             original_claim,
             label="claimed original mutation target",
@@ -184,9 +184,9 @@ def atomic_replace(
         ):
             raise RuntimeError("original mutation claim changed during cleanup; it was preserved")
         original_claim = None
+        os.close(original_claim_fd)
+        original_claim_fd = None
     except Exception:
-        if temporary_fd is not None:
-            os.close(temporary_fd)
         if (
             original_claim is not None
             and original_claim_identity is not None
@@ -210,6 +210,10 @@ def atomic_replace(
                 pass
         raise
     finally:
+        if original_claim_fd is not None:
+            os.close(original_claim_fd)
+        if temporary_fd is not None:
+            os.close(temporary_fd)
         os.close(parent_fd)
 
 

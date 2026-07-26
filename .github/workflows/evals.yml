@@ -85,6 +85,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install sandbox dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes bubblewrap socat
+
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 

@@ -147,8 +147,13 @@ def inode_identity(details: os.stat_result) -> InodeIdentity:
     return details.st_dev, details.st_ino
 
 
-def sha256_at(parent_fd: int, name: str, *, label: str) -> tuple[str, InodeIdentity]:
-    """Hash a no-follow adjacent file and return its stable device/inode identity."""
+def open_sha256_at(
+    parent_fd: int,
+    name: str,
+    *,
+    label: str,
+) -> tuple[str, InodeIdentity, int]:
+    """Hash an adjacent file and return an fd that pins its verified inode."""
     source_fd: int | None = None
     sink: BinaryIO | None = None
     try:
@@ -182,12 +187,25 @@ def sha256_at(parent_fd: int, name: str, *, label: str) -> tuple[str, InodeIdent
         )
         if identity_before != identity_after or copied != opened.st_size:
             raise RuntimeError(f"{label} changed while being hashed")
-        return digest, inode_identity(opened)
+        result = digest, inode_identity(opened), source_fd
+        source_fd = None
+        return result
     finally:
         if sink is not None:
             sink.close()
         if source_fd is not None:
             os.close(source_fd)
+
+
+def sha256_at(parent_fd: int, name: str, *, label: str) -> tuple[str, InodeIdentity]:
+    """Hash a no-follow adjacent file and return its stable device/inode identity."""
+    digest, identity, source_fd = open_sha256_at(
+        parent_fd,
+        name,
+        label=label,
+    )
+    os.close(source_fd)
+    return digest, identity
 
 
 def claim_target(parent_fd: int, name: str, *, label: str) -> str:
@@ -469,8 +487,6 @@ def backup(path: Path, *, root: Path) -> Path:
         write_all(temporary_fd, len(encoded).to_bytes(LENGTH_BYTES, "big"))
         write_all(temporary_fd, MAGIC)
         os.fsync(temporary_fd)
-        os.close(temporary_fd)
-        temporary_fd = None
 
         os.link(
             temporary_name,
@@ -489,8 +505,6 @@ def backup(path: Path, *, root: Path) -> Path:
             raise RuntimeError("temporary mutation backup changed during cleanup")
         temporary_identity = None
     except Exception:
-        if temporary_fd is not None:
-            os.close(temporary_fd)
         if temporary_identity is not None:
             try:
                 unlink_if_identity(
@@ -513,6 +527,8 @@ def backup(path: Path, *, root: Path) -> Path:
                 pass
         raise
     finally:
+        if temporary_fd is not None:
+            os.close(temporary_fd)
         if source_fd is not None:
             os.close(source_fd)
         os.close(parent_fd)
@@ -556,6 +572,7 @@ def restore(path: Path, *, root: Path, expected_current_sha256: str) -> Path:
     temporary_identity: InodeIdentity | None = None
     current_claim: str | None = None
     current_claim_identity: InodeIdentity | None = None
+    current_claim_fd: int | None = None
     try:
         backup_fd = open_backup(parent_fd, backup_name)
         backup_identity = inode_identity(os.fstat(backup_fd))
@@ -579,14 +596,12 @@ def restore(path: Path, *, root: Path, expected_current_sha256: str) -> Path:
             raise ValueError("mutation backup payload failed integrity verification")
         os.fchmod(temporary_fd, int(metadata["mode"]))
         os.fsync(temporary_fd)
-        os.close(temporary_fd)
-        temporary_fd = None
 
         current_claim = claim_target(parent_fd, name, label="mutcurrent")
         current_claim_identity = inode_identity(
             os.stat(current_claim, dir_fd=parent_fd, follow_symlinks=False)
         )
-        claimed_digest, hashed_claim_identity = sha256_at(
+        claimed_digest, hashed_claim_identity, current_claim_fd = open_sha256_at(
             parent_fd,
             current_claim,
             label="claimed mutation target",
@@ -661,6 +676,8 @@ def restore(path: Path, *, root: Path, expected_current_sha256: str) -> Path:
         ):
             raise RuntimeError("mutation recovery claim changed during cleanup; it was preserved")
         current_claim = None
+        os.close(current_claim_fd)
+        current_claim_fd = None
         if not unlink_if_identity(
             parent_fd,
             backup_name,
@@ -669,8 +686,6 @@ def restore(path: Path, *, root: Path, expected_current_sha256: str) -> Path:
         ):
             raise RuntimeError("mutation backup changed during cleanup; it was preserved")
     except Exception:
-        if temporary_fd is not None:
-            os.close(temporary_fd)
         if (
             current_claim is not None
             and current_claim_identity is not None
@@ -694,6 +709,10 @@ def restore(path: Path, *, root: Path, expected_current_sha256: str) -> Path:
                 pass
         raise
     finally:
+        if current_claim_fd is not None:
+            os.close(current_claim_fd)
+        if temporary_fd is not None:
+            os.close(temporary_fd)
         if backup_fd is not None:
             os.close(backup_fd)
         os.close(parent_fd)
