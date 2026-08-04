@@ -3,6 +3,23 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## agent-bridge
+
+### 0.1.0 — 2026-08-04
+- New plugin. `$agent-bridge` lets the current harness use an installed Claude,
+  Codex, or Gemini CLI as a bounded leaf collaborator while retaining parent-task
+  ownership. Consultation is read-only; implementation delegation requires the
+  user's existing write authority, an exact clean base, allowed paths, acceptance
+  criteria, and an explicit `--allow-write` runtime gate.
+- Run delegated implementation only in a private temporary local clone. Return a
+  provider-attributed result, changed paths, an ASCII Git binary patch, and SHA-256
+  integrity anchors; refuse out-of-scope changes and never auto-commit, push,
+  publish, or let two agents write the active checkout concurrently.
+- Add digest-locked inspect/apply operations that revalidate repository identity,
+  base SHA, clean state, patch integrity, path scope, and `git apply --check` before
+  changing the active working tree. Provider failures, same-harness recursion,
+  timeouts, and unavailable CLIs fail closed without fallback.
+
 ## project-vocabulary
 
 ### 0.1.2 — 2026-07-26
@@ -171,6 +188,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.14 — 2026-08-04
+- Publish Agent Bridge in the bundled capability catalog for bounded cross-harness
+  consultation and isolated implementation delegation.
 
 ### 0.1.13 — 2026-07-26
 - Synchronize the bundled catalog for critical-thinking 0.1.4, pr-feedback 0.2.1,

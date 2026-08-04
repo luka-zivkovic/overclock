@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -208,6 +208,25 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose for local-only review-feedback resolution plus a separate manual, digest-locked GitHub publication step."
+    },
+    {
+      "id": "agent-bridge",
+      "display_name": "Agent Bridge",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "cross-agent-consultation",
+        "isolated-agent-delegation"
+      ],
+      "skill_names": [
+        "agent-bridge"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose when Claude, Codex, or Gemini should consult or delegate a bounded task to a different installed harness while the parent retains ownership."
     }
   ]
 }

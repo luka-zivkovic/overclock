@@ -9,6 +9,7 @@ on:
         description: Which skill distribution or plugin group to evaluate
         type: choice
         options:
+          - agent-bridge/agent-bridge
           - critical-thinking/critical-thinking
           - critical-thinking/independent-research
           - debugging-discipline/debugging-discipline
@@ -146,6 +147,7 @@ jobs:
           case "$TARGET" in
             all)
               run_suite \
+                agent-bridge/agent-bridge \
                 critical-thinking/critical-thinking \
                 critical-thinking/independent-research \
                 debugging-discipline/debugging-discipline \
@@ -209,6 +211,7 @@ jobs:
           case "$TARGET" in
             all)
               run_batteries \
+                agent-bridge \
                 critical-thinking \
                 debugging-discipline \
                 git-archaeologist \
@@ -235,6 +238,7 @@ jobs:
             session-memory)
               run_batteries lessons-learned session-handoff solutions
               ;;
+            agent-bridge/agent-bridge) run_batteries agent-bridge ;;
             critical-thinking/critical-thinking) run_batteries critical-thinking ;;
             critical-thinking/independent-research) run_batteries independent-research ;;
             debugging-discipline/debugging-discipline) run_batteries debugging-discipline ;;

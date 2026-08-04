@@ -50,6 +50,28 @@ so it ships to no user and needs no version bump.
 
 Append-only. Each candidate carries a verdict and the evidence behind it.
 
+### agent-bridge — BUILD, v0.1 shipped (2026-08-04)
+- **Demand:** direct maintainer request for one harness to consult or delegate a
+  bounded implementation subtask to another provider while the original harness
+  remains responsible for the overall task.
+- **Grounding:** OpenAI's `codex-plugin-cc` confirms the local-auth/runtime pattern:
+  a thin model-facing layer delegates through a deterministic companion, with
+  readiness checks, provider-native sandbox selection, resumable/background jobs,
+  and explicit result handling. Agent Bridge generalizes the useful core across
+  Claude, Codex, and Gemini without copying the review gate or Codex-only app-server
+  broker into v0.1.
+- **Product shape:** one independently installable `agent-bridge` skill with two
+  explicit modes. `consult` is read-only. `delegate` requires implementation
+  authority, a clean exact base, non-empty path scope and acceptance criteria, and
+  runs only in an isolated local clone. A digest-locked patch is separately inspected
+  and applied by the parent; no background jobs, resume, auto-commit, push, publish,
+  or in-place child writes in v0.1.
+- **Trust model:** current-conversation authorization is required before sharing
+  scoped repository context with another provider. Provider output is untrusted
+  advice or an untrusted candidate patch; the parent verifies and owns integration.
+- **Next:** validate real Claude↔Codex use on bounded tasks before adding persistent
+  threads, background jobs, dirty-worktree snapshots, or full handoff.
+
 ### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a
   persona + precedent-PR + embeddings stack; plus an earlier pass). That *is* the

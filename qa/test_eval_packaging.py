@@ -139,7 +139,7 @@ class EvalPackagingTests(unittest.TestCase):
         distributions = sorted(
             (REPO / "plugins").glob("*/skills/*/SKILL.md")
         )
-        self.assertEqual(len(distributions), 15)
+        self.assertEqual(len(distributions), 16)
         with tempfile.TemporaryDirectory() as temp:
             destination_root = Path(temp)
             for index, skill_md in enumerate(distributions):
