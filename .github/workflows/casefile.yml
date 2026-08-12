@@ -1,0 +1,25 @@
+name: casefile
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install casefile
+        run: npm install -g github:luka-zivkovic/casefile
+      - name: Scan marketplace
+        run: casefile scan . --json --out casefile-report.json --fail-on warning --no-store
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casefile-report
+          path: casefile-report.json
