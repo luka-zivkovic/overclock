@@ -34,6 +34,10 @@ module, not that it observes behavior. Prefer a mutation that keeps the code run
   `finally`. Restoration is a compare-before-replace operation: it proceeds only while the target
   still matches the captured mutant SHA-256. If anything changed the file during the trial, the
   current file and backup are both preserved and the wrapper reports a recovery conflict.
+- Wrapper exit codes: `0` — mutated run exited nonzero and the clean rerun passed; `1` — the
+  trial refused or errored; `2` — the clean rerun failed after restore; `3` — the trial
+  completed and the mutation survived. Gate on `3` as well as nonzero when scripting: a
+  surviving mutant exits `3`, not `0`.
 - The adjacent `<file>.mutbak` is an atomic integrity container: it stores the original bytes plus
   size, SHA-256, path, and mode metadata. Both helpers refuse a pre-existing backup, symlink,
   hard-linked file, special file, linked parent, or out-of-project target.

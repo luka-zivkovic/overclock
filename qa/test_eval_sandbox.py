@@ -43,6 +43,9 @@ class EvalSandboxTests(unittest.TestCase):
             self.assertIn(str(runtime), sandbox["filesystem"]["allowWrite"])
             self.assertIn("WebFetch", settings["permissions"]["deny"])
             self.assertIn("Bash(gh *)", settings["permissions"]["deny"])
+            self.assertEqual(settings["env"]["PYTHONHASHSEED"], "0")
+            self.assertIn("/dev/urandom", sandbox["filesystem"]["allowRead"])
+            self.assertIn("/dev/random", sandbox["filesystem"]["allowRead"])
             self.assertFalse(
                 any(
                     rule.startswith(("Glob(", "Grep("))

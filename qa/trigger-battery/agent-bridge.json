@@ -25,7 +25,7 @@
     "Implement the queue fix, but delegate only src/queue and test/queue to Gemini in an isolated workspace. I authorize Gemini to receive those files and the task. Inspect its patch and run the tests yourself before accepting it.",
     "Ask Codex to independently diagnose why this parser rejects valid Unicode, without letting it edit anything. You may share src/parser.ts and its tests with Codex.",
     "Have Gemini implement the bounded retry helper while you handle the API integration. Gemini may see and change only src/retry.ts and test/retry.test.ts; you must review its work before applying it.",
-    "We are still blocked on the allocator bug after reproducing it and tracing the ownership paths. Earlier in this conversation I authorized you to share the allocator module with another installed coding provider. Use that cross-provider help now, read-only.",
+    "We are still blocked on the allocator bug after reproducing it and tracing the ownership paths. I authorize sharing the allocator module with another installed coding provider — use that cross-provider help now, read-only.",
     "Use agent-bridge to get one Codex critique of this migration plan. I authorize sending only plan.md, and I do not want a vote from every model."
   ],
   "should_not": [
@@ -50,7 +50,7 @@
       "allowed_skills": []
     },
     {
-      "prompt": "Compare Claude, Codex, and Gemini pricing and context-window sizes.",
+      "prompt": "From your own knowledge, without running any commands or tools, compare Claude, Codex, and Gemini pricing and context-window sizes.",
       "allowed_skills": []
     },
     {

@@ -54,6 +54,7 @@ installs, removes, enables, disables, or edits anything.
 | **debugging-discipline** | Safe, authority-aware diagnosis for bugs that resist ordinary tests | `/plugin install debugging-discipline@overclock` |
 | **natural-writing** | Voice-preserving long-form prose with a plainspoken fallback style | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
+| **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 
 > [!IMPORTANT]
 > Install **either** `session-memory` or `learning-loop`, not both. They intentionally share the
@@ -170,6 +171,26 @@ lessons-learned. Non-domain repos and trivial work stay silent.
 The resolver never posts, reacts, resolves, commits, stages, pushes, merges, rebases, or approves.
 `needs-human` items arrive as compact decision contexts instead of stalling the run. GitHub,
 including Enterprise, only.
+
+</details>
+
+<details>
+<summary><strong>agent-bridge</strong> — a bounded leaf collaborator, not a co-owner</summary>
+
+`agent-bridge` lets one installed harness use another (Claude, Codex, or Gemini) as a leaf worker
+while the calling agent keeps ownership of the task, verification, and integration. `consult` runs
+the child under its provider's own sandbox for read-only analysis and reports `workspace_changed`
+if the active tree moved during the run; `delegate` requires implementation authority, a clean exact
+base, and concrete path scope, then runs the child only inside an isolated local clone.
+
+The bridge never falls back to a different provider and never auto-commits. A delegated run returns a
+digest-locked patch whose target paths are derived from the patch itself and checked against the
+allowlist at both build and apply time; symbolic-link patches are refused, the clone's git
+configuration is reset before the bridge inspects it so a leaf cannot execute commands in the parent
+process, and only an allowlisted, provider-scoped environment is forwarded to the child so unrelated
+secrets never leave the parent. Current-conversation authorization to share scoped context with an
+external provider, and inspection of every hunk before applying, remain the parent agent's
+obligations — the bridge enforces isolation and scope, not consent.
 
 </details>
 

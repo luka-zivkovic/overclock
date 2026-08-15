@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Run one exact-replacement mutation trial and restore in a finally block."""
+"""Run one exact-replacement mutation trial and restore in a finally block.
+
+Exit codes: 0 = mutated run exited nonzero and the clean rerun passed; 1 = trial
+refused or errored; 2 = clean rerun failed after restore; 3 = trial completed and
+the mutation survived (target test stayed green with the mutant installed).
+"""
 
 from __future__ import annotations
 
@@ -12,6 +17,7 @@ import signal
 import stat
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from mutation_backup import (
@@ -83,6 +89,7 @@ def atomic_replace(
     mode: int,
     expected_original_sha256: str,
     expected_mutant_sha256: str,
+    on_publish: Callable[[], None] | None = None,
 ) -> None:
     parent_fd, name = open_parent(root, relative)
     temporary_name = f".{name}.muttrial.tmp.{os.getpid()}.{secrets.token_hex(8)}"
@@ -133,6 +140,10 @@ def atomic_replace(
                 "the changed target was preserved"
             )
 
+        if on_publish is not None:
+            # Fires before the link so the caller treats the mutant as possibly
+            # installed on every failure path from here on.
+            on_publish()
         try:
             publish_no_replace(parent_fd, temporary_name, name)
         except FileExistsError as exc:
@@ -245,6 +256,11 @@ def run_trial(
     backup(path, root=root)
     mutated_result: subprocess.CompletedProcess[bytes] | None = None
     mutant_installed = False
+
+    def mark_mutant_installed() -> None:
+        nonlocal mutant_installed
+        mutant_installed = True
+
     try:
         metadata = verify_backup(path, root=root)
         if metadata["sha256"] != original_digest:
@@ -256,8 +272,8 @@ def run_trial(
             mode=mode,
             expected_original_sha256=original_digest,
             expected_mutant_sha256=mutated_digest,
+            on_publish=mark_mutant_installed,
         )
-        mutant_installed = True
         if hashlib.sha256(read_target(root, relative)[0]).hexdigest() != mutated_digest:
             raise RuntimeError("installed mutant digest does not match the selected mutation")
         mutated_result = subprocess.run(test_command, cwd=root, check=False)
@@ -312,7 +328,9 @@ def main(argv: list[str]) -> int:
     finally:
         signal.signal(signal.SIGTERM, previous_term)
     print(json.dumps(result, sort_keys=True))
-    return 0 if result["restored_test_exit"] == 0 else 2
+    if result["restored_test_exit"] != 0:
+        return 2
+    return 3 if result["mutation_outcome"] == "survived" else 0
 
 
 if __name__ == "__main__":

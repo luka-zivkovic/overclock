@@ -170,6 +170,9 @@ def _version_environment(home: Path) -> dict[str, str]:
     }
 
 
+_CACHED_CREDENTIAL: str | None = None
+
+
 @contextmanager
 def live_eval_runtime() -> Iterator[LiveEvalRuntime]:
     """Preflight Claude/auth and yield private resources for all battery cases."""
@@ -191,16 +194,23 @@ def live_eval_runtime() -> Iterator[LiveEvalRuntime]:
         raise RuntimeError("could not verify the Claude Code version")
     require_supported_version(version.stdout)
 
+    global _CACHED_CREDENTIAL
     credential = os.environ.pop("ANTHROPIC_API_KEY", "")
     auth_token = os.environ.pop("ANTHROPIC_AUTH_TOKEN", "")
     if not credential:
         credential = auth_token
     auth_token = ""
     if not credential:
+        # A multi-mode battery enters this context once per install mode; the
+        # first entry scrubs the environment, so later entries reuse the
+        # already-ingested credential instead of failing mid-battery.
+        credential = _CACHED_CREDENTIAL or ""
+    if not credential:
         raise RuntimeError(
             "live routing batteries require ANTHROPIC_API_KEY or "
             "ANTHROPIC_AUTH_TOKEN; host OAuth/keychain credentials are isolated"
         )
+    _CACHED_CREDENTIAL = credential
 
     with (
         tempfile.TemporaryDirectory(prefix="overclock-trigger-auth.") as auth_temp,
@@ -728,7 +738,15 @@ def run_streaming_command(
     stdout = "".join(output)
     if not stopped_early and process.returncode != 0:
         error = stdout[-500:].strip()
-        raise RuntimeError(f"claude exited {process.returncode}: {error}")
+        # Persist the full child stream: the 500-char tail rarely shows which
+        # tool call blew up a failing probe session.
+        debug_dir = QA / "_work" / "trigger-battery"
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        debug_path = debug_dir / f"failed-probe-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{os.getpid()}.jsonl"
+        debug_path.write_text(stdout, encoding="utf-8")
+        raise RuntimeError(
+            f"claude exited {process.returncode} (full stream: {debug_path}): {error}"
+        )
     elapsed_ms = round((time.monotonic() - started) * 1000)
     metadata = result_metadata(stdout)
     evidence = routing_evidence(stdout)
@@ -981,14 +999,30 @@ def score(
                         inherited_forbidden if kind == "should" else []
                     ),
                 )
-                result = run_prompt(
-                    skill_dir, skill, description, prompt, model, detector, battery,
-                    runtime,
-                    timeout_seconds=timeout_seconds, route_only=route_only,
-                    install_mode=install_mode,
-                    allowed_skills=allowed_skills,
-                    forbidden_skills=forbidden_skills,
-                )
+                # One bounded retry per probe: a single child runtime failure
+                # must not discard every completed probe in the battery. A
+                # second failure still aborts fail-closed, naming the entry.
+                for attempt in (1, 2):
+                    try:
+                        result = run_prompt(
+                            skill_dir, skill, description, prompt, model,
+                            detector, battery,
+                            runtime,
+                            timeout_seconds=timeout_seconds,
+                            route_only=route_only,
+                            install_mode=install_mode,
+                            allowed_skills=allowed_skills,
+                            forbidden_skills=forbidden_skills,
+                        )
+                        break
+                    except RuntimeError as exc:
+                        if attempt == 2:
+                            raise RuntimeError(
+                                "probe failed twice "
+                                f"(sample {sample}/{samples}, install mode "
+                                f"{install_mode or 'default'}, {kind}): "
+                                f"{prompt[:80]!r}: {exc}"
+                            ) from exc
                 row = {"sample": sample, "kind": kind, "prompt": prompt, **result}
                 rows.append(row)
                 if progress:

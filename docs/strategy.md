@@ -50,7 +50,7 @@ so it ships to no user and needs no version bump.
 
 Append-only. Each candidate carries a verdict and the evidence behind it.
 
-### agent-bridge — BUILD, v0.1 shipped (2026-08-04)
+### agent-bridge — BUILD, v0.1 published; cross-provider validation pending (2026-08-04)
 - **Demand:** direct maintainer request for one harness to consult or delegate a
   bounded implementation subtask to another provider while the original harness
   remains responsible for the overall task.
@@ -69,8 +69,18 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
 - **Trust model:** current-conversation authorization is required before sharing
   scoped repository context with another provider. Provider output is untrusted
   advice or an untrusted candidate patch; the parent verifies and owns integration.
-- **Next:** validate real Claude↔Codex use on bounded tasks before adding persistent
-  threads, background jobs, dirty-worktree snapshots, or full handoff.
+- **Next:** the shipped code paths (isolation, git-environment hardening, patch-derived
+  scope enforcement, environment allowlist, consult integrity snapshot) are covered by
+  deterministic tests. Real Claude→Codex use was validated 2026-08-08 against codex-cli
+  0.144.2 on a scratch repository using local CLI auth: consult returned a correct answer
+  with the active tree verified unchanged, and delegate produced a digest-locked
+  single-file patch in the uid-scoped isolated clone that passed inspect and apply with
+  scope enforced from the patch itself. Live behavioral evals pass 5/5 on Sonnet, and the
+  routing battery passes both install modes against the sibling stack (skill 47/48, stack
+  47/48; precision 94.7%, recall 100%, specificity 96.7% — all above the 90/80/90 gate).
+  Claude→Gemini remains unvalidated (CLI not installed); record one real bounded Gemini run
+  before treating that provider as supported. Only after that, consider persistent threads,
+  background jobs, dirty-worktree snapshots, or full handoff.
 
 ### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a

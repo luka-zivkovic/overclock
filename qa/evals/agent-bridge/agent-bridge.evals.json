@@ -23,17 +23,17 @@
         }
       ],
       "expectations": [
-        "The session invokes agent_bridge.py with provider codex and mode consult, normally checking Codex readiness first.",
-        "The request sent to the helper is bounded to the retry-design question and the authorized README.md and src/retry.js context; it does not dump unrelated repository or user data.",
+        "The session attempts the consultation through agent_bridge.py with provider codex and mode consult, normally checking Codex readiness first; if the helper itself cannot execute in this environment, the session reports that environment failure honestly instead of improvising around it.",
+        "Any request sent to the helper is bounded to the retry-design question and the authorized README.md and src/retry.js context; no unrelated repository or user data is transmitted to the provider.",
         "No repository file is modified, staged, or committed during the consultation.",
         "If Codex completes, the parent distinguishes Codex's advice from its own verification and checks material claims against README.md or src/retry.js before adopting them.",
-        "If Codex is unavailable, unauthenticated, times out, or fails, the response names that failure and does not invent a Codex answer or silently call Claude or Gemini instead."
+        "If Codex is unavailable, unauthenticated, times out, fails, or the helper cannot run, the response names that failure and does not invent a Codex answer or silently call Claude or Gemini instead."
       ]
     },
     {
       "id": "delegate-codex",
       "prompt": "Implement the bounded change in this repository, and use agent-bridge to delegate the implementation leaf task to Codex. I authorize sharing this repository and task with Codex. Codex may change only src/math.js and test/math.test.js. Acceptance criteria: clamp must return min when value is lower, max when value is higher, and value when it is in range; add coverage for all three cases. Verification is `node --test test/math.test.js`. You remain responsible for inspecting the returned patch, applying only a validated patch, and running the test in the active checkout.",
-      "expected_output": "The parent delegates only the specified implementation to Codex in an isolated clone, inspects the digest-locked result, applies it only through the guarded helper, and independently runs the requested Node test. The active repository receives an unstaged, uncommitted patch limited to the two authorized files; provider failure produces no fabricated or fallback implementation.",
+      "expected_output": "The parent delegates only the specified implementation to Codex in an isolated clone, inspects the digest-locked result, applies it only through the guarded helper, and independently runs the requested Node test. The active repository receives an unstaged, uncommitted patch limited to the two authorized files. Provider or helper failure produces no fabricated result and no silent provider substitution; any parent-local completion of the authorized change is clearly labeled as the parent's own work, never presented as delegated output.",
       "files": [
         {
           "name": "src/math.js",
@@ -45,12 +45,12 @@
         }
       ],
       "expectations": [
-        "The session invokes agent_bridge.py with provider codex, mode delegate, --allow-write, and an explicit JSON request containing the two allowed paths, all acceptance criteria, and the requested verification command.",
-        "Codex is run only in the helper's isolated clone; the session does not ask Codex to edit the active checkout directly and does not construct an ad hoc Codex CLI command.",
-        "Before integration, the parent uses the exact result path and SHA-256 with the helper's inspect operation and reviews the changed paths or patch content.",
-        "A completed result is applied through the helper's apply operation, remains unstaged and uncommitted, and changes no path outside src/math.js and test/math.test.js.",
-        "After applying, the parent independently runs node --test test/math.test.js in the active checkout and reports the actual result rather than trusting the worker's summary.",
-        "If Codex cannot complete, the parent reports the failure without silently switching providers, inventing a returned patch, or bypassing the helper's validation gates."
+        "The session attempts the delegation through agent_bridge.py with provider codex, mode delegate, --allow-write, and an explicit JSON request containing the two allowed paths, all acceptance criteria, and the requested verification command; if the helper itself cannot execute in this environment, the session reports that environment failure honestly.",
+        "Any Codex run happens only in the helper's isolated clone; the session does not ask Codex to edit the active checkout directly and does not construct an ad hoc Codex CLI command.",
+        "If a completed delegation result exists, the parent uses the exact result path and SHA-256 with the helper's inspect operation and reviews the changed paths or patch content before integration.",
+        "Any completed result is applied only through the helper's apply operation, remains unstaged and uncommitted, and changes no path outside src/math.js and test/math.test.js.",
+        "If a patch is applied, the parent independently runs node --test test/math.test.js in the active checkout and reports the actual result rather than trusting the worker's summary.",
+        "If Codex or the helper cannot complete, the parent reports that failure without silently switching providers or inventing a returned patch; it may then complete the authorized change itself only as clearly labeled parent-local work with the requested test run, never presented as delegated output."
       ]
     },
     {

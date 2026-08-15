@@ -1,6 +1,6 @@
 ---
 name: agent-bridge
-description: "Use another installed coding harness as a bounded leaf collaborator while the current agent remains responsible for the user's task. Use when the user explicitly asks Claude, Codex, or Gemini to consult or delegate to a different harness, or after substantive work is genuinely blocked and the user has already authorized cross-provider help in this conversation. Consult for read-only analysis; delegate only when the user's request already authorizes implementation, with exact allowed paths and acceptance checks. Do not use for routine work the current agent can finish directly, to collect extra votes, without current authorization to share the scoped context externally, for same-harness recursion, or to let two agents write the active checkout concurrently."
+description: "Use a DIFFERENT installed coding provider (Codex or Gemini when you are Claude; any provider other than the one now running) as a bounded leaf collaborator while the current agent keeps ownership of the user's task. The trigger is that the user names such a different provider as the actor — Codex, Gemini, 'another installed coding provider', 'cross-provider help', or agent-bridge itself. When a request names a different provider, this skill owns it even if the verb is review, critique, diagnose, second opinion, or implement: 'use Codex as a second reviewer for this diff', 'ask Codex to diagnose why this parser fails', 'get Gemini's independent critique', 'implement the fix but delegate these paths to Gemini in an isolated workspace', 'use that cross-provider help now'. Route here for those over sibling review, critique, debugging, or interview skills, which handle the same verbs only when the current agent does the work itself with no different provider named. Also use when work is blocked and the user authorized cross-provider help in this conversation. This skill is the only sanctioned path to another provider: never construct ad hoc codex, gemini, or claude CLI commands for consultation or delegation. Consult for read-only analysis; delegate only when the user's request already authorizes implementation, with exact allowed paths and acceptance checks. Do not use for routine work the current agent can finish directly, for review/critique/diagnosis the current agent should do itself when no different provider is named, to collect extra votes, or without current authorization to share scoped context externally. Do NOT use for same-harness requests — asking the current harness to spawn, call, or delegate to another session of itself (for example Claude Code asked to open another Claude Code session) is not cross-provider; decline it directly without this skill. Do not use to let two agents write the active checkout concurrently."
 ---
 
 # Agent Bridge
@@ -18,9 +18,13 @@ verification after applying it.
 ## Preserve authority and external-sharing boundaries
 
 - Require current-conversation authorization to send the scoped task or repository content to
-  another provider. Installing this skill is not blanket consent for silent external calls.
+  another provider. Installing this skill is not blanket consent for silent external calls. The
+  bridge cannot enforce this; it forwards only an allowlisted, provider-scoped environment to the
+  child, so unrelated secrets stay in the parent, but the consent decision is yours.
 - Use `consult` unless the user already asked to implement, fix, or modify the project. Diagnosis,
-  review, research, and planning alone remain read-only.
+  review, research, and planning alone stay read-only under the provider's own sandbox; the bridge
+  reports `workspace_changed` if the active tree moved during a consultation, but does not itself
+  prevent a provider from writing.
 - Delegate only a bounded outcome with explicit allowed paths. The worker may edit only its isolated
   temporary clone; it must not commit, push, publish, invoke another agent, or touch the active
   checkout.
@@ -144,6 +148,6 @@ worked, what was accepted or rejected, files applied, parent-side verification, 
 
 Stop without improvising when the helper reports `unavailable`, `same_harness`, `recursive_call`,
 `dirty_repository`, `provider_failed`, `timed_out`, `scope_violation`, `stale_base`, or
-`invalid_result`. Also stop on `unsafe_provider_configuration` or `result_too_large`; never answer
-on behalf of a provider that did not run and never manually apply an unvalidated patch after the
-helper refuses it.
+`invalid_result`. Also stop on `unsafe_provider_configuration`, `workspace_changed`,
+`workspace_tampered`, or `result_too_large`; never answer on behalf of a provider that did not run
+and never manually apply an unvalidated patch after the helper refuses it.

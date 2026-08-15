@@ -315,14 +315,30 @@ class TriggerBatteryTest(unittest.TestCase):
             self.assertFalse(auth_root.exists())
             self.assertFalse(tool_root.exists())
 
-        with (
-            patch("trigger_battery.shutil.which", return_value="/opt/claude"),
-            patch("trigger_battery.subprocess.run", return_value=version),
-            patch.dict(os.environ, {}, clear=True),
-            self.assertRaisesRegex(RuntimeError, "ANTHROPIC_API_KEY"),
-        ):
-            with live_eval_runtime():
-                self.fail("missing explicit auth should fail before yielding")
+        import trigger_battery
+
+        # A prior successful entry caches the credential for multi-mode
+        # batteries; a fresh process (cache empty) must still demand env auth.
+        with patch.object(trigger_battery, "_CACHED_CREDENTIAL", None):
+            with (
+                patch("trigger_battery.shutil.which", return_value="/opt/claude"),
+                patch("trigger_battery.subprocess.run", return_value=version),
+                patch.dict(os.environ, {}, clear=True),
+                self.assertRaisesRegex(RuntimeError, "ANTHROPIC_API_KEY"),
+            ):
+                with live_eval_runtime():
+                    self.fail("missing explicit auth should fail before yielding")
+
+        # Within one process, a second runtime entry (the next install mode)
+        # reuses the ingested credential after the environment was scrubbed.
+        with patch.object(trigger_battery, "_CACHED_CREDENTIAL", "sk-cached"):
+            with (
+                patch("trigger_battery.shutil.which", return_value="/opt/claude"),
+                patch("trigger_battery.subprocess.run", return_value=version),
+                patch.dict(os.environ, {}, clear=True),
+            ):
+                with live_eval_runtime() as runtime:
+                    self.assertEqual(read_key(runtime.key_file), "sk-cached")
 
     def test_run_prompt_uses_private_settings_and_disposable_plugins(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -577,6 +593,142 @@ class TriggerBatteryTest(unittest.TestCase):
                 (["allowed-sibling"], ["wrong-sibling"]),
             ],
         )
+
+    def test_probe_retries_once_then_aborts_naming_the_entry(self) -> None:
+        battery = {
+            "should_trigger": ["use target", "second probe"],
+            "should_not": [],
+        }
+        good_row = {
+            "fired": True,
+            "selected_skills": ["target"],
+            "allowed_skills": None,
+            "forbidden_skills": [],
+            "forbidden_selected": [],
+            "outside_allowed": [],
+            "ownership_violations": [],
+            "stopped_early": False,
+            "duration_ms": 1,
+            "total_cost_usd": 0.0,
+            "num_turns": 1,
+            "install_mode": "skill",
+        }
+
+        def run_score() -> dict:
+            return score(
+                Path("/repo/plugins/demo/skills/target"),
+                "target",
+                "description",
+                battery,
+                "model",
+                object(),  # type: ignore[arg-type]
+                install_mode="skill",
+            )
+
+        with patch(
+            "trigger_battery.run_prompt",
+            side_effect=[
+                RuntimeError("claude exited 1: boom"),
+                dict(good_row),
+                dict(good_row),
+            ],
+        ) as flaky:
+            result = run_score()
+        self.assertEqual(flaky.call_count, 3)
+        self.assertEqual(result["correct"], 2)
+        self.assertEqual(result["total"], 2)
+
+        with patch(
+            "trigger_battery.run_prompt",
+            side_effect=RuntimeError("claude exited 1: boom"),
+        ) as failing:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r"probe failed twice \(sample 1/1, install mode skill, "
+                r"should\): 'use target': claude exited 1: boom",
+            ):
+                run_score()
+        self.assertEqual(failing.call_count, 2)
+
+    def test_agent_bridge_probe_prompts_are_verbatim_and_bounded(self) -> None:
+        """Every constructed routing probe is the battery text itself, never inflated.
+
+        Regression guard for a live agent-bridge run that died with the API's
+        "Prompt is too long" mid-battery: drive the harness's own score() ->
+        run_prompt() -> build_claude_command() path for every entry in both
+        declared install modes and pin the exact `-p` argument each child
+        would receive.
+        """
+        battery_path = REPO / "qa/trigger-battery/agent-bridge.json"
+        battery = json.loads(battery_path.read_text(encoding="utf-8"))
+        skill = battery["skill"]
+        skill_dir = REPO / "plugins" / battery["plugin"] / "skills" / skill
+        description = current_description(skill_dir)
+        inherited = battery.get("forbidden_skills", [])
+        expected = [
+            prompt_contract(spec, inherited_forbidden=inherited)[0]
+            for spec in battery["should_trigger"]
+        ] + [prompt_contract(spec)[0] for spec in battery["should_not"]]
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "auth").mkdir(mode=0o700)
+            (root / "tools").mkdir(mode=0o700)
+            write_private_api_key(root / "auth/api-key", "sk-test")
+            (root / "tools/read_eval_api_key.py").write_text(
+                "# test helper\n", encoding="utf-8"
+            )
+            runtime = LiveEvalRuntime(
+                claude_bin=Path("/opt/claude"),
+                auth_root=root / "auth",
+                key_file=root / "auth/api-key",
+                tool_root=root / "tools",
+            )
+            for install_mode in battery["install_modes"]:
+                sent: list[str] = []
+
+                def capture_launch(
+                    command: list[str],
+                    cwd: Path,
+                    skill: str,
+                    stop_on_skill: bool,
+                    timeout_seconds: float,
+                    env: dict[str, str] | None = None,
+                ) -> dict:
+                    sent.append(command[command.index("-p") + 1])
+                    return {
+                        "stdout": "",
+                        "fired": False,
+                        "selected_skills": [],
+                        "stopped_early": False,
+                        "duration_ms": 1,
+                        "total_cost_usd": 0.0,
+                        "num_turns": 1,
+                    }
+
+                with patch(
+                    "trigger_battery.run_streaming_command",
+                    side_effect=capture_launch,
+                ):
+                    score(
+                        skill_dir,
+                        skill,
+                        description,
+                        battery,
+                        "test-model",
+                        runtime,
+                        samples=1,
+                        timeout_seconds=1,
+                        route_only=True,
+                        install_mode=install_mode,
+                    )
+                self.assertEqual(sent, expected, install_mode)
+                for index, prompt in enumerate(sent):
+                    self.assertLess(
+                        len(prompt),
+                        50_000,
+                        f"{install_mode} entry {index}: over-long probe prompt",
+                    )
 
 
 if __name__ == "__main__":

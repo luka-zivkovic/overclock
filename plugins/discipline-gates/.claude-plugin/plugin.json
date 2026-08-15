@@ -2,7 +2,7 @@
   "name": "discipline-gates",
   "displayName": "Discipline Gates",
   "description": "Pre-action discipline gates backed by real oracles. test-discipline leaves red or characterization evidence uncommitted and uses an integrity-checked transactional runner for explicit mutation checks. git-archaeologist recovers defensive-code intent from untrusted history and requires current-state proof before calling removal safe.",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": {
     "name": "Luka Zivkovic"
   },

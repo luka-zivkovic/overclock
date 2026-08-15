@@ -5,6 +5,32 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## agent-bridge
 
+### 0.1.1 — 2026-08-08
+- Harden delegation against a leaf-controlled clone. Reset the clone's `.git`
+  configuration to its pristine post-clone state and run every bridge-side git
+  command with global/system configuration masked, so a worker-written
+  `.git/config` (`core.fsmonitor`, `diff.external`) can no longer execute commands
+  in the bridge process.
+- Enforce delegated scope against the patch itself. Derive the built patch's target
+  paths with `git apply --numstat`, require them to fit the allowlist and match the
+  observed changes, and refuse symbolic-link patches — at both build and apply time,
+  instead of trusting only the self-recorded changed-file list.
+- Forward only an allowlisted, provider-scoped environment to the child process so
+  unrelated parent secrets are not disclosed to the external provider.
+- Start Codex children without user configuration or exec-policy rules and disable
+  their multi-agent tools so MCP servers, hooks, rules, and subagents cannot broaden
+  the bounded leaf role.
+- Verify consultation against a pre/post `HEAD` and working-tree snapshot and report
+  `workspace_changed`; add `workspace_tampered` for a clone whose `.git` was replaced.
+- Honor `is_error` results from Claude, bound bridge-side git commands with a timeout,
+  and derive the state directory per-user with an ownership check.
+- Keep working when a host sandbox denies the entropy device: job naming falls back to
+  a non-cryptographic unique suffix (creation stays exclusive in the user-owned state
+  root).
+- Sharpen the routing description with concrete second-reviewer/critique/delegate
+  trigger phrasings and an explicit rule that the bridge, not ad hoc provider CLI
+  commands, is the sanctioned cross-provider path.
+
 ### 0.1.0 — 2026-08-04
 - New plugin. `$agent-bridge` lets the current harness use an installed Claude,
   Codex, or Gemini CLI as a bounded leaf collaborator while retaining parent-task
@@ -188,6 +214,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.15 — 2026-08-08
+- Update the bundled capability catalog to the hardened Agent Bridge (0.1.1) and the
+  mutation-restore fix in discipline-gates (0.1.6).
 
 ### 0.1.14 — 2026-08-04
 - Publish Agent Bridge in the bundled capability catalog for bounded cross-harness
@@ -401,6 +431,14 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   byte-identical-quote traps and two negative controls): 5/5 green.
 
 ## discipline-gates
+
+### 0.1.6 — 2026-08-08
+- Fix a mutation-trial restore gap: if replacing the target file failed after the
+  mutant was already published, the working tree could be left mutated. The trial now
+  marks the mutant installed at publication so the `finally` restore runs on every
+  post-publication failure path.
+- Give the mutation-trial wrapper a distinct exit code (3) for a surviving mutation so
+  scripted callers gating on exit status no longer read a survivor as a pass.
 
 ### 0.1.5 — 2026-07-23
 - Remove all automatic staging and commits from test-discipline. Red regressions and

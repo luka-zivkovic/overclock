@@ -240,6 +240,83 @@ class MutationTrialTests(unittest.TestCase):
             self.assertEqual(claims[0].read_bytes(), original)
             self.assertTrue((root / "value.txt.mutbak").exists())
 
+    def test_survived_mutation_exits_3_and_killed_mutation_exits_0(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "value.txt"
+            target.write_text("good\n", encoding="utf-8")
+            check = root / "check.py"
+            check.write_text(
+                "from pathlib import Path\n"
+                "raise SystemExit(0 if Path('value.txt').read_text() == 'good\\n' else 1)\n",
+                encoding="utf-8",
+            )
+
+            def run_trial_process(test_command: list[str]) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(
+                    [
+                        sys.executable,
+                        str(SCRIPT),
+                        "value.txt",
+                        "--root",
+                        str(root),
+                        "--old",
+                        "good",
+                        "--new",
+                        "bad",
+                        "--",
+                        *test_command,
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+            survived = run_trial_process([sys.executable, "-c", "raise SystemExit(0)"])
+            self.assertEqual(survived.returncode, 3, survived.stderr)
+            summary = json.loads(survived.stdout.strip().splitlines()[-1])
+            self.assertEqual(summary["mutation_outcome"], "survived")
+            self.assertEqual(summary["restored_test_exit"], 0)
+            self.assertEqual(target.read_text(encoding="utf-8"), "good\n")
+            self.assertFalse((root / "value.txt.mutbak").exists())
+
+            killed = run_trial_process([sys.executable, "check.py"])
+            self.assertEqual(killed.returncode, 0, killed.stderr)
+            summary = json.loads(killed.stdout.strip().splitlines()[-1])
+            self.assertEqual(summary["mutation_outcome"], "nonzero")
+            self.assertEqual(target.read_text(encoding="utf-8"), "good\n")
+            self.assertFalse((root / "value.txt.mutbak").exists())
+
+    def test_failed_replace_after_publication_still_restores_original(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "value.txt"
+            original = b"good\n"
+            target.write_bytes(original)
+            real_unlink = MODULE.unlink_if_identity
+
+            def fail_temporary_cleanup(parent_fd, name, expected_identity, *, label):
+                if label == "temporary mutant cleanup":
+                    raise RuntimeError("injected post-publication failure")
+                return real_unlink(parent_fd, name, expected_identity, label=label)
+
+            with mock.patch.object(
+                MODULE,
+                "unlink_if_identity",
+                side_effect=fail_temporary_cleanup,
+            ):
+                with self.assertRaisesRegex(RuntimeError, "injected post-publication failure"):
+                    MODULE.run_trial(
+                        target,
+                        root=root,
+                        old=b"good",
+                        new=b"bad",
+                        test_command=[sys.executable, "-c", "raise SystemExit(0)"],
+                    )
+
+            self.assertEqual(target.read_bytes(), original)
+            self.assertFalse((root / "value.txt.mutbak").exists())
+
     def test_original_claim_cleanup_preserves_concurrent_replacement(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

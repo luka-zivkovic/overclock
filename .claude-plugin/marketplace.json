@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "category": "development",
       "keywords": [
         "setup",
@@ -134,7 +134,7 @@
       "name": "agent-bridge",
       "source": "./plugins/agent-bridge",
       "description": "Use another installed coding harness as a bounded leaf collaborator. Consult read-only or delegate implementation into an isolated clean clone, then inspect and digest-validate the scoped patch before applying it to an unchanged active checkout. Never auto-commits, pushes, or silently substitutes providers.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "development",
       "keywords": [
         "delegation",
@@ -150,7 +150,7 @@
       "name": "discipline-gates",
       "source": "./plugins/discipline-gates",
       "description": "Pre-action engineering gates backed by real evidence: leave red or characterization artifacts uncommitted before edits, mutation-check selected behavior through an integrity-checked transactional restore, and recover defensive-code intent from untrusted history plus current-state proof before weakening it.",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "category": "development",
       "keywords": [
         "testing",

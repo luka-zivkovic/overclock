@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Run a bounded leaf task through Claude Code, Codex, or Gemini CLI.
 
-The bridge never invokes a shell. Consultation is read-only. Delegation happens in
-an isolated local clone and produces a digest-locked patch for separate validation
-and application to an unchanged clean repository.
+The bridge never invokes a shell. Consultation runs under the provider's own
+sandbox controls and is verified against a pre/post snapshot of the active
+repository. Delegation happens in an isolated local clone and produces a
+digest-locked patch whose target paths are validated against the delegated
+allowlist at both build and apply time.
 """
 
 from __future__ import annotations
@@ -18,6 +20,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping, Sequence
@@ -28,6 +31,7 @@ MODES = ("consult", "delegate")
 CHILD_MARKER = "OVERCLOCK_AGENT_BRIDGE_CHILD"
 STATE_ROOT_ENV = "AGENT_BRIDGE_STATE_DIR"
 DEFAULT_TIMEOUT_SECONDS = 900
+GIT_TIMEOUT_SECONDS = 600
 MAX_RESULT_BYTES = 2 * 1024 * 1024
 MAX_REQUEST_BYTES = 256 * 1024
 MAX_PATCH_BYTES = 50 * 1024 * 1024
@@ -88,12 +92,54 @@ def run_process(
     )
 
 
-def git(cwd: Path, *args: str, text: bool = True) -> subprocess.CompletedProcess[Any]:
-    result = run_process(["git", *args], cwd=cwd, text=text)
+def git(
+    cwd: Path,
+    *args: str,
+    text: bool = True,
+    env: Mapping[str, str] | None = None,
+) -> subprocess.CompletedProcess[Any]:
+    try:
+        result = run_process(
+            ["git", *args], cwd=cwd, env=env, timeout=GIT_TIMEOUT_SECONDS, text=text
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise BridgeError("invalid_repository", "git command timed out") from exc
     if result.returncode != 0:
         stderr = result.stderr if isinstance(result.stderr, str) else result.stderr.decode("utf-8", "replace")
         raise BridgeError("invalid_repository", diagnostic(stderr) or "git command failed")
     return result
+
+
+def hardened_git_env() -> dict[str, str]:
+    """Environment for git commands that run against the leaf-writable clone.
+
+    Masks global and system configuration and inherited git overrides so only
+    the bridge-restored local clone configuration can influence git behavior.
+    """
+    env = dict(os.environ)
+    env.update(
+        {
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "GIT_CONFIG_SYSTEM": os.devnull,
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_OPTIONAL_LOCKS": "0",
+            "GIT_PAGER": "cat",
+        }
+    )
+    for name in (
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "GIT_INDEX_FILE",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "GIT_EXTERNAL_DIFF",
+        "GIT_ASKPASS",
+        "GIT_SSH",
+        "GIT_SSH_COMMAND",
+    ):
+        env.pop(name, None)
+    return env
 
 
 def repository_root(cwd: Path) -> Path:
@@ -114,18 +160,44 @@ def porcelain(root: Path) -> str:
 
 def state_root() -> Path:
     configured = os.environ.get(STATE_ROOT_ENV)
-    root = Path(configured).expanduser() if configured else Path(tempfile.gettempdir()) / "overclock-agent-bridge"
+    if configured:
+        root = Path(configured).expanduser()
+    else:
+        uid = os.getuid() if hasattr(os, "getuid") else None
+        name = "overclock-agent-bridge" if uid is None else f"overclock-agent-bridge-{uid}"
+        root = Path(tempfile.gettempdir()) / name
+    if root.is_symlink():
+        raise BridgeError("invalid_request", f"state directory cannot be a symbolic link: {root}")
     root = root.resolve()
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    info = root.lstat()
+    if not stat.S_ISDIR(info.st_mode):
+        raise BridgeError("invalid_request", f"state directory is not a directory: {root}")
+    if hasattr(os, "getuid") and info.st_uid != os.getuid():
+        raise BridgeError(
+            "invalid_request", f"state directory is not owned by the current user: {root}"
+        )
     try:
         root.chmod(0o700)
-    except OSError:
-        pass
+    except OSError as exc:
+        raise BridgeError(
+            "invalid_request", f"cannot restrict state directory permissions: {root}"
+        ) from exc
     return root
 
 
+def job_suffix() -> str:
+    try:
+        return secrets.token_hex(4)
+    except (NotImplementedError, OSError):
+        # Sandboxes may deny the entropy device. Job-dir uniqueness does not
+        # need cryptographic randomness: creation below is exclusive inside a
+        # user-owned 0700 state root.
+        return f"{os.getpid():x}-{time.monotonic_ns() & 0xFFFFFFFF:08x}"
+
+
 def create_job_dir() -> Path:
-    job_id = f"bridge-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{secrets.token_hex(4)}"
+    job_id = f"bridge-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{job_suffix()}"
     directory = state_root() / job_id
     directory.mkdir(mode=0o700)
     return directory
@@ -353,7 +425,20 @@ def provider_command(provider: str, mode: str, cwd: Path, prompt: str) -> tuple[
     if provider == "codex":
         sandbox = "read-only" if mode == "consult" else "workspace-write"
         return (
-            [executable, "exec", "--ephemeral", "--sandbox", sandbox, "-C", str(cwd), "-"],
+            [
+                executable,
+                "exec",
+                "--ephemeral",
+                "--ignore-user-config",
+                "--ignore-rules",
+                "-c",
+                "agents.enabled=false",
+                "--sandbox",
+                sandbox,
+                "-C",
+                str(cwd),
+                "-",
+            ],
             prompt,
         )
     if provider == "claude":
@@ -427,6 +512,11 @@ def parse_provider_output(
     if not isinstance(parsed, dict):
         return "", None, f"{provider} returned a non-object JSON result"
     if provider == "claude":
+        if parsed.get("is_error"):
+            message = "claude reported an error result"
+            if isinstance(parsed.get("result"), str) and parsed["result"].strip():
+                message += f": {parsed['result'].strip()}"
+            return "", None, diagnostic(message)
         answer = parsed.get("result")
         session_id = parsed.get("session_id")
     else:
@@ -437,6 +527,55 @@ def parse_provider_output(
     return answer.strip(), session_id if isinstance(session_id, str) else None, None
 
 
+CHILD_ENV_NAMES = frozenset(
+    {
+        "PATH",
+        "HOME",
+        "USER",
+        "LOGNAME",
+        "SHELL",
+        "TERM",
+        "COLORTERM",
+        "LANG",
+        "LANGUAGE",
+        "TMPDIR",
+        "TZ",
+        "NO_COLOR",
+        "SSL_CERT_FILE",
+        "SSL_CERT_DIR",
+        "CURL_CA_BUNDLE",
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "NO_PROXY",
+        "http_proxy",
+        "https_proxy",
+        "no_proxy",
+    }
+)
+CHILD_ENV_PREFIXES = ("LC_", "XDG_")
+PROVIDER_ENV_PREFIXES = {
+    "claude": ("ANTHROPIC_", "CLAUDE_"),
+    "codex": ("OPENAI_", "CODEX_"),
+    "gemini": ("GEMINI_", "GOOGLE_"),
+}
+
+
+def child_environment(provider: str) -> dict[str, str]:
+    """Pass through only baseline variables plus the selected provider's own.
+
+    The parent environment may hold unrelated credentials; the leaf process and
+    its remote service must never receive them.
+    """
+    prefixes = CHILD_ENV_PREFIXES + PROVIDER_ENV_PREFIXES[provider]
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key in CHILD_ENV_NAMES or key.startswith(prefixes)
+    }
+    env[CHILD_MARKER] = "1"
+    return env
+
+
 def run_provider(
     provider: str,
     mode: str,
@@ -445,11 +584,7 @@ def run_provider(
     timeout_seconds: int,
 ) -> dict[str, Any]:
     argv, input_text = provider_command(provider, mode, cwd, prompt)
-    child_env = dict(os.environ)
-    child_env[CHILD_MARKER] = "1"
-    if provider == "gemini":
-        child_env.pop("BUILD_SANDBOX", None)
-        child_env.pop("SEATBELT_PROFILE", None)
+    child_env = child_environment(provider)
     try:
         result = run_process(
             argv,
@@ -493,14 +628,20 @@ def run_provider(
     }
 
 
-def clone_repository(root: Path, destination: Path, base_sha: str) -> None:
-    result = run_process(
-        ["git", "clone", "--quiet", "--no-hardlinks", str(root), str(destination)],
-        cwd=destination.parent,
-    )
+def clone_repository(root: Path, destination: Path, base_sha: str) -> bytes:
+    """Clone the pinned base into the job directory; return the pristine .git/config."""
+    try:
+        result = run_process(
+            ["git", "clone", "--quiet", "--no-hardlinks", str(root), str(destination)],
+            cwd=destination.parent,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise BridgeError("invalid_repository", "local clone timed out") from exc
     if result.returncode != 0:
         raise BridgeError("invalid_repository", diagnostic(result.stderr) or "local clone failed")
     git(destination, "checkout", "--quiet", "--detach", base_sha)
+    return (destination / ".git" / "config").read_bytes()
 
 
 def validate_provider_workspace(provider: str, root: Path) -> None:
@@ -530,12 +671,65 @@ def nul_paths(value: str) -> list[str]:
     return [item for item in value.split("\0") if item]
 
 
-def changed_paths(workspace: Path, base_sha: str) -> list[str]:
-    tracked = nul_paths(git(workspace, "diff", "--name-only", "-z", base_sha, "--").stdout)
-    untracked = nul_paths(
-        git(workspace, "ls-files", "--others", "--exclude-standard", "-z", "--").stdout
+def restore_clone_git_dir(workspace: Path, config_bytes: bytes) -> None:
+    """Reset leaf-writable git configuration before the bridge runs git in the clone.
+
+    A leaf worker can write the clone's .git/config; keys such as core.fsmonitor
+    or diff.external would then execute leaf-chosen commands in the unsandboxed
+    bridge process. Restore the pristine post-clone configuration first.
+    """
+    git_dir = workspace / ".git"
+    try:
+        info = git_dir.lstat()
+    except FileNotFoundError as exc:
+        raise BridgeError(
+            "workspace_tampered", "the delegated clone lost its .git directory"
+        ) from exc
+    if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+        raise BridgeError("workspace_tampered", "the delegated clone's .git is not a real directory")
+    config_path = git_dir / "config"
+    try:
+        config_path.unlink()
+    except FileNotFoundError:
+        pass
+    descriptor = os.open(config_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(descriptor, "wb") as handle:
+        handle.write(config_bytes)
+    attributes = git_dir / "info" / "attributes"
+    if attributes.is_symlink() or attributes.exists():
+        attributes.unlink()
+
+
+def workspace_changes(workspace: Path, base_sha: str) -> tuple[list[str], list[str]]:
+    env = hardened_git_env()
+    tracked = nul_paths(
+        git(
+            workspace,
+            "-c",
+            "core.fsmonitor=false",
+            "diff",
+            "--no-ext-diff",
+            "--name-only",
+            "-z",
+            base_sha,
+            "--",
+            env=env,
+        ).stdout
     )
-    return sorted(dict.fromkeys([*tracked, *untracked]))
+    untracked = nul_paths(
+        git(
+            workspace,
+            "-c",
+            "core.fsmonitor=false",
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "-z",
+            "--",
+            env=env,
+        ).stdout
+    )
+    return tracked, untracked
 
 
 def path_allowed(path: str, allowed_paths: Sequence[str]) -> bool:
@@ -549,13 +743,90 @@ def path_allowed(path: str, allowed_paths: Sequence[str]) -> bool:
 
 
 def build_patch(workspace: Path, base_sha: str, untracked_paths: Sequence[str]) -> bytes:
+    env = hardened_git_env()
     if untracked_paths:
-        git(workspace, "add", "-N", "--", *untracked_paths)
-    result = git(workspace, "diff", "--binary", "--full-index", base_sha, "--", text=False)
+        git(workspace, "-c", "core.fsmonitor=false", "add", "-N", "--", *untracked_paths, env=env)
+    result = git(
+        workspace,
+        "-c",
+        "core.fsmonitor=false",
+        "diff",
+        "--no-ext-diff",
+        "--binary",
+        "--full-index",
+        base_sha,
+        "--",
+        env=env,
+        text=False,
+    )
     patch = bytes(result.stdout)
     if len(patch) > MAX_PATCH_BYTES:
         raise BridgeError("result_too_large", "delegated patch exceeds 50 MiB")
     return patch
+
+
+SYMLINK_PATCH_MARKERS = (b"new file mode 120000", b"new mode 120000")
+
+
+def reject_symlink_patch(patch: bytes) -> None:
+    if any(marker in patch for marker in SYMLINK_PATCH_MARKERS):
+        raise BridgeError("invalid_result", "delegated patch introduces a symbolic link")
+
+
+def patch_target_paths(patch_path: Path, cwd: Path) -> list[str]:
+    """Derive the file paths a patch actually touches via git apply --numstat."""
+    if patch_path.stat().st_size == 0:
+        return []
+    try:
+        result = run_process(
+            ["git", "apply", "--numstat", "-z", str(patch_path)],
+            cwd=cwd,
+            env=hardened_git_env(),
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise BridgeError("invalid_result", "patch inspection timed out") from exc
+    if result.returncode != 0:
+        raise BridgeError("invalid_result", diagnostic(result.stderr) or "patch could not be parsed")
+    tokens = result.stdout.split("\0")
+    paths: list[str] = []
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if not token:
+            index += 1
+            continue
+        parts = token.split("\t")
+        if len(parts) != 3:
+            raise BridgeError("invalid_result", "delegated patch has an unparseable entry")
+        if parts[2]:
+            paths.append(parts[2])
+            index += 1
+        else:
+            if index + 2 >= len(tokens):
+                raise BridgeError("invalid_result", "delegated patch has an unparseable rename entry")
+            paths.extend([tokens[index + 1], tokens[index + 2]])
+            index += 3
+    return sorted(dict.fromkeys(paths))
+
+
+def patch_scope_problem(
+    patch: bytes,
+    patch_path: Path,
+    workspace: Path,
+    recorded_changes: Sequence[str],
+    allowed_paths: Sequence[str],
+) -> str | None:
+    """Validate the built patch against the allowlist and the observed changes."""
+    if any(marker in patch for marker in SYMLINK_PATCH_MARKERS):
+        return "delegated patch introduces a symbolic link"
+    derived = patch_target_paths(patch_path, workspace)
+    escaped = [path for path in derived if not path_allowed(path, allowed_paths)]
+    if escaped:
+        return "patch paths escape the delegated allowlist: " + ", ".join(escaped)
+    if derived != sorted(dict.fromkeys(recorded_changes)):
+        return "patch contents diverged from the observed workspace changes"
+    return None
 
 
 def persist_result(job_dir: Path, payload: dict[str, Any]) -> dict[str, Any]:
@@ -589,6 +860,8 @@ def execute_run(args: argparse.Namespace) -> dict[str, Any]:
     job_dir = create_job_dir()
     prompt = build_prompt(args.mode, request)
     workspace = root
+    clone_config = b""
+    consult_status = ""
     if args.mode == "delegate":
         dirty = porcelain(root)
         if dirty:
@@ -597,7 +870,9 @@ def execute_run(args: argparse.Namespace) -> dict[str, Any]:
                 "delegation requires a clean active repository; consult instead or finish the parent changes first",
             )
         workspace = job_dir / "workspace"
-        clone_repository(root, workspace, base_sha)
+        clone_config = clone_repository(root, workspace, base_sha)
+    else:
+        consult_status = porcelain(root)
     provider_result = run_provider(
         args.provider,
         args.mode,
@@ -622,17 +897,23 @@ def execute_run(args: argparse.Namespace) -> dict[str, Any]:
         "patch_path": None,
         "patch_sha256": None,
     }
+    if args.mode == "consult":
+        post_status = porcelain(root)
+        if head_sha(root) != base_sha or post_status != consult_status:
+            payload["status"] = "workspace_changed"
+            payload["workspace_delta"] = sorted(
+                set(post_status.splitlines()) ^ set(consult_status.splitlines())
+            )[:100]
     if args.mode == "delegate" and provider_result["status"] == "completed":
-        changes = changed_paths(workspace, base_sha)
+        restore_clone_git_dir(workspace, clone_config)
+        tracked, untracked = workspace_changes(workspace, base_sha)
+        changes = sorted(dict.fromkeys([*tracked, *untracked]))
         violations = [path for path in changes if not path_allowed(path, request["allowed_paths"])]
         payload["changed_files"] = changes
         if violations:
             payload["status"] = "scope_violation"
             payload["scope_violations"] = violations
         else:
-            untracked = nul_paths(
-                git(workspace, "ls-files", "--others", "--exclude-standard", "-z", "--").stdout
-            )
             patch = build_patch(workspace, base_sha, untracked)
             patch_path = job_dir / "result.patch"
             patch_path.write_bytes(patch)
@@ -640,8 +921,16 @@ def execute_run(args: argparse.Namespace) -> dict[str, Any]:
                 patch_path.chmod(0o600)
             except OSError:
                 pass
-            payload["patch_path"] = str(patch_path)
-            payload["patch_sha256"] = sha256_bytes(patch)
+            problem = patch_scope_problem(
+                patch, patch_path, workspace, changes, request["allowed_paths"]
+            )
+            if problem:
+                patch_path.unlink(missing_ok=True)
+                payload["status"] = "scope_violation"
+                payload["scope_violation_reason"] = problem
+            else:
+                payload["patch_path"] = str(patch_path)
+                payload["patch_sha256"] = sha256_bytes(patch)
     return persist_result(job_dir, payload)
 
 
@@ -709,7 +998,7 @@ def execute_apply(args: argparse.Namespace) -> dict[str, Any]:
     if result.get("mode") != "delegate" or result.get("status") != "completed":
         raise BridgeError("invalid_result", "only a completed delegation result can be applied")
     validate_recorded_scope(result)
-    patch_path, _ = load_patch(result, result_path)
+    patch_path, patch = load_patch(result, result_path)
     root = repository_root(Path(args.cwd))
     recorded_root = result.get("original_root")
     if not isinstance(recorded_root, str) or Path(recorded_root).resolve() != root:
@@ -717,10 +1006,33 @@ def execute_apply(args: argparse.Namespace) -> dict[str, Any]:
     base_sha = result.get("base_sha")
     if not isinstance(base_sha, str) or head_sha(root) != base_sha or porcelain(root):
         raise BridgeError("stale_base", "active repository is not clean at the delegated base SHA")
-    checked = run_process(["git", "apply", "--check", "--binary", str(patch_path)], cwd=root)
-    if checked.returncode != 0:
-        raise BridgeError("stale_base", diagnostic(checked.stderr) or "git apply --check failed")
-    applied = run_process(["git", "apply", "--binary", str(patch_path)], cwd=root)
+    reject_symlink_patch(patch)
+    allowed = [normalize_path(item) for item in result["request"]["allowed_paths"]]
+    derived = patch_target_paths(patch_path, root)
+    escaped = [path for path in derived if not path_allowed(path, allowed)]
+    if escaped:
+        raise BridgeError(
+            "invalid_result",
+            "patch paths escape the delegated allowlist: " + ", ".join(escaped),
+        )
+    recorded = result.get("changed_files")
+    if not isinstance(recorded, list) or derived != sorted(dict.fromkeys(recorded)):
+        raise BridgeError("invalid_result", "patch contents do not match the recorded changed files")
+    try:
+        checked = run_process(
+            ["git", "apply", "--check", "--binary", str(patch_path)],
+            cwd=root,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+        if checked.returncode != 0:
+            raise BridgeError("stale_base", diagnostic(checked.stderr) or "git apply --check failed")
+        applied = run_process(
+            ["git", "apply", "--binary", str(patch_path)],
+            cwd=root,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise BridgeError("invalid_result", "git apply timed out") from exc
     if applied.returncode != 0:
         raise BridgeError("invalid_result", diagnostic(applied.stderr) or "git apply failed")
     return {

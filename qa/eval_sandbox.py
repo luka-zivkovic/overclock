@@ -110,6 +110,11 @@ def build_settings(
     )
     return {
         "apiKeyHelper": api_key_helper,
+        # Blanket /dev denial makes CPython abort at startup on macOS
+        # (_Py_HashRandomization_Init reads the entropy device). Hash
+        # randomization is irrelevant inside a disposable eval, so pin the
+        # seed and re-allow only the entropy devices.
+        "env": {"PYTHONHASHSEED": "0"},
         "permissions": {"deny": deny_rules},
         "sandbox": {
             "enabled": True,
@@ -118,7 +123,7 @@ def build_settings(
             "allowUnsandboxedCommands": False,
             "excludedCommands": [],
             "filesystem": {
-                "allowRead": allowed,
+                "allowRead": [*allowed, "/dev/urandom", "/dev/random"],
                 "allowWrite": [_absolute(work), _absolute(runtime_root)],
                 "denyRead": sensitive,
                 "denyWrite": sensitive,
