@@ -520,6 +520,85 @@ class MemoryIOTests(unittest.TestCase):
             digest = hashlib.sha256(document("lessons")).hexdigest()
             self.assertIn(f"CURRENT-SHA256: {digest}\n", read_back.stdout)
 
+    def test_crashed_claim_is_recovered_before_the_next_write(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            original = document("handoff", "first")
+            write_current(root, "handoff", original)
+            memory_dir = root / ".ai" / "memory"
+            # Simulate a writer killed between claiming and republication.
+            stranded = memory_dir / ".HANDOFF.md.claim-99999-deadbeef"
+            (memory_dir / "HANDOFF.md").rename(stranded)
+            self.assertFalse((memory_dir / "HANDOFF.md").exists())
+            # A blind write against the apparently-absent file must first
+            # restore the stranded content, then refuse on the CAS mismatch.
+            with self.assertRaises(memory_io.MemorySafetyError):
+                memory_io.write_memory(
+                    root,
+                    "handoff",
+                    document("handoff", "second"),
+                    expected_current_sha256=memory_io.ABSENT_SHA256,
+                )
+            self.assertEqual((memory_dir / "HANDOFF.md").read_bytes(), original)
+            self.assertFalse(stranded.exists())
+            # A correctly CAS'd write now succeeds against the recovered file.
+            write_current(root, "handoff", document("handoff", "second"))
+            self.assertEqual(
+                (memory_dir / "HANDOFF.md").read_bytes(), document("handoff", "second")
+            )
+
+    def test_read_sentinels_carry_a_per_invocation_nonce(self) -> None:
+        import re
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_current(root, "lessons", document("lessons"))
+            script = SCRIPTS[0]
+            outputs = []
+            for _ in range(2):
+                read_back = subprocess.run(
+                    [sys.executable, str(script), "read", "lessons", "--root", str(root)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(read_back.returncode, 0, read_back.stderr)
+                outputs.append(read_back.stdout)
+            nonces = []
+            for output in outputs:
+                begin = re.search(r"<<<BEGIN UNTRUSTED LESSONS\.md ([0-9a-f]{16})>>>", output)
+                end = re.search(r"<<<END UNTRUSTED LESSONS\.md ([0-9a-f]{16})>>>", output)
+                self.assertIsNotNone(begin)
+                self.assertIsNotNone(end)
+                self.assertEqual(begin.group(1), end.group(1))
+                nonces.append(begin.group(1))
+            self.assertNotEqual(nonces[0], nonces[1])
+
+    def test_archive_prune_failure_after_save_is_a_warning_not_a_refusal(self) -> None:
+        import contextlib
+        import io
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_current(root, "handoff", document("handoff", "first"))
+            original_open_child_dir = memory_io._open_child_dir
+
+            def failing_reopen(parent_fd, name, *, create):
+                if name == "archive" and not create:
+                    raise memory_io.MemorySafetyError("simulated prune failure")
+                return original_open_child_dir(parent_fd, name, create=create)
+
+            stderr = io.StringIO()
+            with mock.patch.object(memory_io, "_open_child_dir", failing_reopen):
+                with contextlib.redirect_stderr(stderr):
+                    archived = write_current(root, "handoff", document("handoff", "second"))
+            self.assertIsNotNone(archived)
+            self.assertIn("archive pruning was skipped", stderr.getvalue())
+            self.assertEqual(
+                (root / ".ai" / "memory" / "HANDOFF.md").read_bytes(),
+                document("handoff", "second"),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

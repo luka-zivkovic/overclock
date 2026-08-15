@@ -11,6 +11,7 @@ import json
 import os
 import stat
 import sys
+import time
 import uuid
 from collections.abc import Callable
 from pathlib import Path
@@ -290,6 +291,51 @@ def _restore_claim_without_overwrite(parent_fd: int, claim_name: str) -> str | N
     return None
 
 
+_CLAIM_PREFIX = f".{TARGET_NAME}.claim-"
+_STALE_CLAIM_SECONDS = 60
+
+
+def _recover_stale_claims(root: Path) -> None:
+    """Restore CONCEPTS.md if a crashed apply left it stranded at a claim path.
+
+    A writer killed between claiming the target and installing the replacement
+    leaves CONCEPTS.md absent with its content at .CONCEPTS.md.claim-*. Only
+    claims older than _STALE_CLAIM_SECONDS are recovered: a live concurrent
+    apply holds its claim for milliseconds, so an old claim belongs to a dead
+    process. The no-replace rename guarantees a concurrent target is never
+    overwritten.
+    """
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    root_fd = os.open(root, flags)
+    try:
+        claims: list[tuple[int, str]] = []
+        now_ns = time.time_ns()
+        for entry in os.listdir(root_fd):
+            if not entry.startswith(_CLAIM_PREFIX):
+                continue
+            try:
+                details = os.stat(entry, dir_fd=root_fd, follow_symlinks=False)
+            except OSError:
+                continue
+            if not stat.S_ISREG(details.st_mode) or details.st_nlink != 1:
+                continue
+            if now_ns - details.st_mtime_ns < _STALE_CLAIM_SECONDS * 1_000_000_000:
+                continue
+            claims.append((details.st_mtime_ns, entry))
+        if not claims:
+            return
+        try:
+            os.stat(TARGET_NAME, dir_fd=root_fd, follow_symlinks=False)
+            return  # target exists; stale claims stay as recovery artifacts
+        except FileNotFoundError:
+            pass
+        _restore_claim_without_overwrite(root_fd, max(claims)[1])
+    except OSError:
+        pass
+    finally:
+        os.close(root_fd)
+
+
 def apply(
     root_path: Path,
     candidate_path: Path,
@@ -303,6 +349,7 @@ def apply(
     if candidate_relative == Path(TARGET_NAME):
         raise ValueError("candidate must not be CONCEPTS.md itself")
 
+    _recover_stale_claims(root)
     current, current_mode = target_state(root)
     candidate, _candidate_mode = read_regular(root, candidate_relative)
     assert candidate is not None

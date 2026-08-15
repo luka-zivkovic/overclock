@@ -63,6 +63,11 @@ gh_graphql() {
     gh api --hostname "$HOST" graphql "$@"
 }
 
+# Page sets are written to files and handed to jq via --slurpfile: passing them
+# as --argjson argv values overflows ARG_MAX (~1 MB on macOS) on large PRs.
+WORKDIR=$(mktemp -d)
+trap 'rm -rf "$WORKDIR"' EXIT
+
 # Output is a JSON object with repository identity, coverage, and three feedback arrays:
 #   review_threads   - unresolved inline review threads, edge-wrapped as
 #                      [{ node: { id, isResolved, isOutdated, path, line, ...,
@@ -88,7 +93,7 @@ gh_graphql() {
 # limited to structural loop-prevention facts: blank bodies and messages known
 # to come from the PR author. If the PR author is unavailable, fail open.
 
-threads_pages=$(gh_graphql --paginate --slurp \
+gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -121,9 +126,9 @@ query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
       }
     }
   }
-}')
+}' > "$WORKDIR/threads.json"
 
-comments_pages=$(gh_graphql --paginate --slurp \
+gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Comments($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -142,9 +147,9 @@ query Comments($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
       }
     }
   }
-}')
+}' > "$WORKDIR/comments.json"
 
-reviews_pages=$(gh_graphql --paginate --slurp \
+gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Reviews($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -163,7 +168,7 @@ query Reviews($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
       }
     }
   }
-}')
+}' > "$WORKDIR/reviews.json"
 
 # Resolution semantics: `isOutdated` means the diff hunk around the comment
 # has shifted since the thread was opened -- not that the reviewer concern
@@ -171,13 +176,16 @@ query Reviews($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
 # threads are still surfaced (with their isOutdated flag intact) so the
 # resolver can factor in that the referenced line may have moved.
 jq -n \
-  --argjson threads "$threads_pages" \
-  --argjson comments "$comments_pages" \
-  --argjson reviews "$reviews_pages" \
+  --slurpfile threads_file "$WORKDIR/threads.json" \
+  --slurpfile comments_file "$WORKDIR/comments.json" \
+  --slurpfile reviews_file "$WORKDIR/reviews.json" \
   --arg host "$HOST" \
   --arg owner "$OWNER" \
   --arg repo "$REPO" \
   --argjson pr "$PR_NUMBER" '
+  $threads_file[0] as $threads |
+  $comments_file[0] as $comments |
+  $reviews_file[0] as $reviews |
   ($threads[0].data.repository.pullRequest.author) as $author |
   [$threads[].data.repository.pullRequest.reviewThreads.nodes[]] as $all_threads |
   [$comments[].data.repository.pullRequest.comments.nodes[]] as $all_comments |

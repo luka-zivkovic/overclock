@@ -355,6 +355,50 @@ class MutationTrialTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), mutant)
             self.assertTrue(backup.exists())
 
+    def test_refusal_before_install_removes_its_own_backup(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "value.txt"
+            target.write_text("good\n", encoding="utf-8")
+            with mock.patch.object(
+                MODULE,
+                "verify_backup",
+                side_effect=RuntimeError("simulated pre-install refusal"),
+            ):
+                with self.assertRaises(RuntimeError):
+                    MODULE.run_trial(
+                        Path("value.txt"),
+                        root=root,
+                        old=b"good",
+                        new=b"bad",
+                        test_command=[sys.executable, "-c", "raise SystemExit(0)"],
+                    )
+            self.assertFalse((root / "value.txt.mutbak").exists())
+            self.assertEqual(target.read_text(encoding="utf-8"), "good\n")
+            # The same trial can now run again instead of failing on a stray backup.
+            result = MODULE.run_trial(
+                Path("value.txt"),
+                root=root,
+                old=b"good",
+                new=b"bad",
+                test_command=[sys.executable, "-c", "raise SystemExit(0)"],
+            )
+            self.assertEqual(result["mutation_outcome"], "survived")
+            self.assertEqual(target.read_text(encoding="utf-8"), "good\n")
+
+    def test_discard_leaves_foreign_backups_alone(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "value.txt"
+            target.write_text("good\n", encoding="utf-8")
+            MODULE.backup(Path("value.txt"), root=root)
+            wrong_digest = hashlib.sha256(b"something else\n").hexdigest()
+            MODULE.discard_unused_backup(root, Path("value.txt"), wrong_digest)
+            self.assertTrue((root / "value.txt.mutbak").exists())
+            right_digest = hashlib.sha256(b"good\n").hexdigest()
+            MODULE.discard_unused_backup(root, Path("value.txt"), right_digest)
+            self.assertFalse((root / "value.txt.mutbak").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

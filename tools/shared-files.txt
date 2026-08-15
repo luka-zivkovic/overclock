@@ -5,5 +5,6 @@ plugins/session-memory/skills/session-handoff/references/lessons-schema.md,plugi
 plugins/session-memory/skills/session-handoff/references/solutions-schema.md,plugins/session-memory/skills/solutions/references/solutions-schema.md
 plugins/session-memory/skills/session-handoff/scripts/memory_io.py,plugins/session-memory/skills/lessons-learned/scripts/memory_io.py,plugins/session-memory/skills/solutions/scripts/memory_io.py,plugins/learning-loop/skills/lessons-learned/scripts/memory_io.py
 plugins/session-memory/skills/lessons-learned/templates/lessons.md,plugins/learning-loop/skills/lessons-learned/templates/lessons.md
+plugins/session-memory/skills/lessons-learned/agents/openai.yaml,plugins/learning-loop/skills/lessons-learned/agents/openai.yaml
 qa/experiments/pr-reviewer-phase0/candidate/pr-kit/skills/initialize-pr-kit/scripts/profile_inputs.py,qa/experiments/pr-reviewer-phase0/candidate/pr-kit/skills/review-pr/scripts/profile_inputs.py
 plugins/pr-feedback/skills/resolve-pr-feedback/scripts/plan_contract.py,plugins/pr-feedback/skills/publish-pr-feedback/scripts/plan_contract.py

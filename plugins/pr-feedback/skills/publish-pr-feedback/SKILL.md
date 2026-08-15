@@ -30,8 +30,10 @@ $ARGUMENTS
   GitHub operations, so this helper supports serialized retries but cannot serialize concurrent
   processes or accounts. Stop if another publisher may still be active.
 
-Read `references/approval-plan.md` only when explaining the plan format to the user; do not read the
-plan with general file tools. The helper owns linked-file checks and schema validation.
+The plan format is documented in `references/approval-plan.md` for maintainers and for the sealing
+skill; this skill's tool policy intentionally has no file-read access, so explain the format from
+the helper's own error output instead of opening files. Do not read the plan with general file
+tools. The helper owns linked-file checks and schema validation.
 
 ## Seal mode
 

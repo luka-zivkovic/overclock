@@ -447,6 +447,36 @@ def _restore_claim_at(dir_fd: int, name: str, claim: str) -> None:
     os.fsync(dir_fd)
 
 
+def _recover_stale_claims(dir_fd: int, name: str) -> None:
+    """Restore the canonical file if a crashed writer left it at a claim path.
+
+    A writer that dies between claiming (rename to .{name}.claim-*) and
+    republication leaves the target name absent with its content stranded at
+    the claim. Callers hold the exclusive directory lock, so any claim seen
+    here belongs to a dead process, never a live concurrent writer.
+    """
+    prefix = f".{name}.claim-"
+    try:
+        entries = os.listdir(dir_fd)
+    except OSError:
+        return
+    claims: list[tuple[int, str]] = []
+    for entry in entries:
+        if not entry.startswith(prefix):
+            continue
+        try:
+            details = os.stat(entry, dir_fd=dir_fd, follow_symlinks=False)
+        except OSError:
+            continue
+        if stat.S_ISREG(details.st_mode) and details.st_nlink == 1:
+            claims.append((details.st_mtime_ns, entry))
+    if not claims or _regular_state(dir_fd, name) is not None:
+        return
+    newest = max(claims)[1]
+    os.rename(newest, name, src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
+    os.fsync(dir_fd)
+
+
 def _cas_publish_at(
     dir_fd: int,
     name: str,
@@ -456,6 +486,7 @@ def _cas_publish_at(
     archive_prior: Callable[[bytes, int], None] | None = None,
 ) -> None:
     expected = _validate_expected_sha256(expected_current_sha256)
+    _recover_stale_claims(dir_fd, name)
     initial = _read_at(dir_fd, name)
     initial_snapshot = _snapshot(initial)
     _require_expected(initial_snapshot, expected, name=name)
@@ -544,16 +575,24 @@ def write_memory(
                 archive_prior=archive_prior if kind == "handoff" else None,
             )
             if archived is not None:
-                archive_fd = _open_child_dir(memory_fd, "archive", create=False)
+                # The memory write already succeeded; a pruning failure must
+                # not be reported as a refusal of the whole operation.
                 try:
-                    candidates, now_unsafe = _archive_candidates(archive_fd)
-                    unsafe_archive = unsafe_archive or now_unsafe
-                    if not unsafe_archive:
-                        for _, old_name in candidates[5:]:
-                            os.unlink(old_name, dir_fd=archive_fd)
-                        os.fsync(archive_fd)
-                finally:
-                    os.close(archive_fd)
+                    archive_fd = _open_child_dir(memory_fd, "archive", create=False)
+                    try:
+                        candidates, now_unsafe = _archive_candidates(archive_fd)
+                        unsafe_archive = unsafe_archive or now_unsafe
+                        if not unsafe_archive:
+                            for _, old_name in candidates[5:]:
+                                os.unlink(old_name, dir_fd=archive_fd)
+                            os.fsync(archive_fd)
+                    finally:
+                        os.close(archive_fd)
+                except (MemorySafetyError, OSError) as exc:
+                    print(
+                        f"warning: saved, but archive pruning was skipped: {exc}",
+                        file=sys.stderr,
+                    )
         finally:
             fcntl.flock(memory_fd, fcntl.LOCK_UN)
     return archived
@@ -684,11 +723,14 @@ def _print_snapshot(snapshot: MemorySnapshot, name: str) -> int:
     print(f"CURRENT-SHA256: {snapshot.sha256}")
     if snapshot.data is None:
         return 3
-    print(f"<<<BEGIN UNTRUSTED {name}>>>")
+    # The nonce is unpredictable to the file's author, so untrusted memory
+    # content cannot embed a matching END sentinel to escape its envelope.
+    nonce = secrets.token_hex(8)
+    print(f"<<<BEGIN UNTRUSTED {name} {nonce}>>>")
     sys.stdout.flush()
     sys.stdout.buffer.write(snapshot.data)
     sys.stdout.buffer.flush()
-    print(f"<<<END UNTRUSTED {name}>>>")
+    print(f"<<<END UNTRUSTED {name} {nonce}>>>")
     return 0
 
 

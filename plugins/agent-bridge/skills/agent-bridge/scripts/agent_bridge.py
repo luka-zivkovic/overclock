@@ -16,10 +16,10 @@ import json
 import os
 import secrets
 import shutil
+import signal
 import stat
 import subprocess
 import sys
-import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
@@ -76,20 +76,44 @@ def run_process(
     cwd: Path,
     env: Mapping[str, str] | None = None,
     input_text: str | None = None,
+    input_bytes: bytes | None = None,
     timeout: int | None = None,
     text: bool = True,
+    new_session: bool = False,
 ) -> subprocess.CompletedProcess[Any]:
-    return subprocess.run(
+    if input_bytes is not None:
+        if text:
+            raise ValueError("input_bytes requires text=False")
+        stdin_payload: str | bytes | None = input_bytes
+    elif input_text is not None:
+        stdin_payload = input_text if text else input_text.encode("utf-8")
+    else:
+        stdin_payload = None
+    process = subprocess.Popen(
         list(argv),
         cwd=cwd,
         env=dict(env) if env is not None else None,
-        input=input_text if text else (input_text.encode("utf-8") if input_text else None),
-        capture_output=True,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=text,
-        timeout=timeout,
-        check=False,
+        start_new_session=new_session,
         shell=False,
     )
+    try:
+        stdout, stderr = process.communicate(stdin_payload, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        # A leaf provider may have spawned descendants; killing only the direct
+        # child would leave them running (in consult mode, inside the real repo).
+        if new_session and hasattr(os, "killpg"):
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except OSError:
+                pass
+        process.kill()
+        process.wait()
+        raise
+    return subprocess.CompletedProcess(list(argv), process.returncode, stdout, stderr)
 
 
 def git(
@@ -163,9 +187,12 @@ def state_root() -> Path:
     if configured:
         root = Path(configured).expanduser()
     else:
-        uid = os.getuid() if hasattr(os, "getuid") else None
-        name = "overclock-agent-bridge" if uid is None else f"overclock-agent-bridge-{uid}"
-        root = Path(tempfile.gettempdir()) / name
+        # Never the shared system temp directory: provider sandboxes such as
+        # codex workspace-write allow temp writes, which would let a leaf reach
+        # sibling job files (result.json, result.patch) outside its workspace.
+        cache_home = os.environ.get("XDG_CACHE_HOME")
+        cache = Path(cache_home).expanduser() if cache_home else Path.home() / ".cache"
+        root = cache / "overclock-agent-bridge"
     if root.is_symlink():
         raise BridgeError("invalid_request", f"state directory cannot be a symbolic link: {root}")
     root = root.resolve()
@@ -222,6 +249,24 @@ def ensure_regular_file(path: Path, *, within: Path, max_bytes: int | None = Non
     return resolved.read_bytes()
 
 
+def write_private_file(path: Path, data: bytes) -> None:
+    """Create a bridge-owned file without following anything a leaf left behind.
+
+    O_EXCL + O_NOFOLLOW means a leaf-planted symlink or pre-created file at this
+    name fails loudly instead of redirecting the unsandboxed bridge's write.
+    """
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    flags |= getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
+    try:
+        descriptor = os.open(path, flags, 0o600)
+    except FileExistsError as exc:
+        raise BridgeError(
+            "workspace_tampered", f"a file already occupies a bridge-owned path: {path}"
+        ) from exc
+    with os.fdopen(descriptor, "wb") as handle:
+        handle.write(data)
+
+
 def normalize_path(value: Any) -> str:
     if not isinstance(value, str) or not value.strip():
         raise BridgeError("invalid_request", "allowed_paths entries must be non-empty strings")
@@ -235,7 +280,9 @@ def normalize_path(value: Any) -> str:
         raise BridgeError("invalid_request", f"allowed path escapes the repository: {value}")
     normalized = PurePosixPath(*[part for part in parts if part != "."]).as_posix()
     normalized = normalized or "."
-    if normalized == ".git" or normalized.startswith(".git/"):
+    # Case-insensitive: on the default macOS filesystem ".GIT" is ".git".
+    lowered = normalized.lower()
+    if lowered == ".git" or lowered.startswith(".git/"):
         raise BridgeError("invalid_request", ".git cannot be delegated")
     return normalized
 
@@ -592,6 +639,7 @@ def run_provider(
             env=child_env,
             input_text=input_text,
             timeout=timeout_seconds,
+            new_session=True,
         )
     except subprocess.TimeoutExpired:
         return {
@@ -641,6 +689,10 @@ def clone_repository(root: Path, destination: Path, base_sha: str) -> bytes:
     if result.returncode != 0:
         raise BridgeError("invalid_repository", diagnostic(result.stderr) or "local clone failed")
     git(destination, "checkout", "--quiet", "--detach", base_sha)
+    # Sever the clone's link back to the real repository so "never pushes" is
+    # structural rather than resting on each provider sandbox blocking a
+    # local-path `git push origin`.
+    git(destination, "remote", "remove", "origin")
     return (destination / ".git" / "config").read_bytes()
 
 
@@ -733,8 +785,10 @@ def workspace_changes(workspace: Path, base_sha: str) -> tuple[list[str], list[s
 
 
 def path_allowed(path: str, allowed_paths: Sequence[str]) -> bool:
-    normalized = normalize_path(path)
-    if normalized == ".git" or normalized.startswith(".git/"):
+    try:
+        normalized = normalize_path(path)
+    except BridgeError:
+        # Unnormalizable or .git-reaching paths (any case) are never allowed.
         return False
     for allowed in allowed_paths:
         if allowed == "." or normalized == allowed or normalized.startswith(allowed.rstrip("/") + "/"):
@@ -765,30 +819,54 @@ def build_patch(workspace: Path, base_sha: str, untracked_paths: Sequence[str]) 
     return patch
 
 
-SYMLINK_PATCH_MARKERS = (b"new file mode 120000", b"new mode 120000")
+def patch_touches_symlink(patch: bytes) -> bool:
+    """True when any git file-mode header in the patch involves a symlink (120000).
+
+    Only header lines are examined, so patch content that merely mentions a mode
+    cannot false-positive, and retargeting an existing tracked symlink (which
+    carries only a bare `index <old>..<new> 120000` header, no new/old mode
+    lines) is caught as well as creating, converting, or deleting one.
+    """
+    for raw_line in patch.split(b"\n"):
+        line = raw_line.rstrip(b"\r")
+        if line.startswith(
+            (b"new file mode ", b"deleted file mode ", b"old mode ", b"new mode ")
+        ):
+            if line.endswith(b"120000"):
+                return True
+        elif line.startswith(b"index ") and line.endswith(b" 120000"):
+            return True
+    return False
 
 
 def reject_symlink_patch(patch: bytes) -> None:
-    if any(marker in patch for marker in SYMLINK_PATCH_MARKERS):
-        raise BridgeError("invalid_result", "delegated patch introduces a symbolic link")
+    if patch_touches_symlink(patch):
+        raise BridgeError("invalid_result", "delegated patch creates or modifies a symbolic link")
 
 
-def patch_target_paths(patch_path: Path, cwd: Path) -> list[str]:
-    """Derive the file paths a patch actually touches via git apply --numstat."""
-    if patch_path.stat().st_size == 0:
+def patch_target_paths(patch: bytes, cwd: Path) -> list[str]:
+    """Derive the file paths a patch actually touches via git apply --numstat.
+
+    The verified in-memory bytes are piped on stdin so the inspected patch is
+    exactly the digest-checked one, never a fresh read of a swappable file.
+    """
+    if not patch:
         return []
     try:
         result = run_process(
-            ["git", "apply", "--numstat", "-z", str(patch_path)],
+            ["git", "apply", "--numstat", "-z"],
             cwd=cwd,
             env=hardened_git_env(),
+            input_bytes=patch,
             timeout=GIT_TIMEOUT_SECONDS,
+            text=False,
         )
     except subprocess.TimeoutExpired as exc:
         raise BridgeError("invalid_result", "patch inspection timed out") from exc
     if result.returncode != 0:
-        raise BridgeError("invalid_result", diagnostic(result.stderr) or "patch could not be parsed")
-    tokens = result.stdout.split("\0")
+        stderr = result.stderr.decode("utf-8", "replace")
+        raise BridgeError("invalid_result", diagnostic(stderr) or "patch could not be parsed")
+    tokens = result.stdout.decode("utf-8", "replace").split("\0")
     paths: list[str] = []
     index = 0
     while index < len(tokens):
@@ -812,15 +890,14 @@ def patch_target_paths(patch_path: Path, cwd: Path) -> list[str]:
 
 def patch_scope_problem(
     patch: bytes,
-    patch_path: Path,
     workspace: Path,
     recorded_changes: Sequence[str],
     allowed_paths: Sequence[str],
 ) -> str | None:
     """Validate the built patch against the allowlist and the observed changes."""
-    if any(marker in patch for marker in SYMLINK_PATCH_MARKERS):
-        return "delegated patch introduces a symbolic link"
-    derived = patch_target_paths(patch_path, workspace)
+    if patch_touches_symlink(patch):
+        return "delegated patch creates or modifies a symbolic link"
+    derived = patch_target_paths(patch, workspace)
     escaped = [path for path in derived if not path_allowed(path, allowed_paths)]
     if escaped:
         return "patch paths escape the delegated allowlist: " + ", ".join(escaped)
@@ -832,11 +909,7 @@ def patch_scope_problem(
 def persist_result(job_dir: Path, payload: dict[str, Any]) -> dict[str, Any]:
     result_path = job_dir / "result.json"
     raw = json_bytes(payload)
-    result_path.write_bytes(raw)
-    try:
-        result_path.chmod(0o600)
-    except OSError:
-        pass
+    write_private_file(result_path, raw)
     return {
         **payload,
         "result_path": str(result_path),
@@ -915,20 +988,13 @@ def execute_run(args: argparse.Namespace) -> dict[str, Any]:
             payload["scope_violations"] = violations
         else:
             patch = build_patch(workspace, base_sha, untracked)
-            patch_path = job_dir / "result.patch"
-            patch_path.write_bytes(patch)
-            try:
-                patch_path.chmod(0o600)
-            except OSError:
-                pass
-            problem = patch_scope_problem(
-                patch, patch_path, workspace, changes, request["allowed_paths"]
-            )
+            problem = patch_scope_problem(patch, workspace, changes, request["allowed_paths"])
             if problem:
-                patch_path.unlink(missing_ok=True)
                 payload["status"] = "scope_violation"
                 payload["scope_violation_reason"] = problem
             else:
+                patch_path = job_dir / "result.patch"
+                write_private_file(patch_path, patch)
                 payload["patch_path"] = str(patch_path)
                 payload["patch_sha256"] = sha256_bytes(patch)
     return persist_result(job_dir, payload)
@@ -998,7 +1064,7 @@ def execute_apply(args: argparse.Namespace) -> dict[str, Any]:
     if result.get("mode") != "delegate" or result.get("status") != "completed":
         raise BridgeError("invalid_result", "only a completed delegation result can be applied")
     validate_recorded_scope(result)
-    patch_path, patch = load_patch(result, result_path)
+    _, patch = load_patch(result, result_path)
     root = repository_root(Path(args.cwd))
     recorded_root = result.get("original_root")
     if not isinstance(recorded_root, str) or Path(recorded_root).resolve() != root:
@@ -1008,7 +1074,7 @@ def execute_apply(args: argparse.Namespace) -> dict[str, Any]:
         raise BridgeError("stale_base", "active repository is not clean at the delegated base SHA")
     reject_symlink_patch(patch)
     allowed = [normalize_path(item) for item in result["request"]["allowed_paths"]]
-    derived = patch_target_paths(patch_path, root)
+    derived = patch_target_paths(patch, root)
     escaped = [path for path in derived if not path_allowed(path, allowed)]
     if escaped:
         raise BridgeError(
@@ -1018,23 +1084,42 @@ def execute_apply(args: argparse.Namespace) -> dict[str, Any]:
     recorded = result.get("changed_files")
     if not isinstance(recorded, list) or derived != sorted(dict.fromkeys(recorded)):
         raise BridgeError("invalid_result", "patch contents do not match the recorded changed files")
+    if not patch:
+        # A completed delegation that changed nothing; git apply rejects empty
+        # input, so report the outcome directly instead of a misleading error.
+        return {
+            "status": "no_changes",
+            "provider": result.get("provider"),
+            "base_sha": base_sha,
+            "changed_files": [],
+            "staged": False,
+            "committed": False,
+        }
+    # Both apply steps consume the digest-verified in-memory bytes via stdin so
+    # nothing between verification and application can substitute the patch.
     try:
         checked = run_process(
-            ["git", "apply", "--check", "--binary", str(patch_path)],
+            ["git", "apply", "--check", "--binary"],
             cwd=root,
+            input_bytes=patch,
             timeout=GIT_TIMEOUT_SECONDS,
+            text=False,
         )
         if checked.returncode != 0:
-            raise BridgeError("stale_base", diagnostic(checked.stderr) or "git apply --check failed")
+            stderr = checked.stderr.decode("utf-8", "replace")
+            raise BridgeError("stale_base", diagnostic(stderr) or "git apply --check failed")
         applied = run_process(
-            ["git", "apply", "--binary", str(patch_path)],
+            ["git", "apply", "--binary"],
             cwd=root,
+            input_bytes=patch,
             timeout=GIT_TIMEOUT_SECONDS,
+            text=False,
         )
     except subprocess.TimeoutExpired as exc:
         raise BridgeError("invalid_result", "git apply timed out") from exc
     if applied.returncode != 0:
-        raise BridgeError("invalid_result", diagnostic(applied.stderr) or "git apply failed")
+        stderr = applied.stderr.decode("utf-8", "replace")
+        raise BridgeError("invalid_result", diagnostic(stderr) or "git apply failed")
     return {
         "status": "applied",
         "provider": result.get("provider"),

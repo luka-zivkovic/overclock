@@ -5,7 +5,37 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## agent-bridge
 
-### 0.1.1 — 2026-08-08
+### 0.1.1 — 2026-08-15 (initial release)
+- New plugin. `$agent-bridge` lets the current harness use an installed Claude,
+  Codex, or Gemini CLI as a bounded leaf collaborator while retaining parent-task
+  ownership. Consultation is read-only; implementation delegation requires the
+  user's existing write authority, an exact clean base, allowed paths, acceptance
+  criteria, and an explicit `--allow-write` runtime gate.
+- Run delegated implementation only in a private local clone under the user's
+  cache directory (never the shared system temp dir, which provider sandboxes can
+  write to). The clone's `origin` remote is removed after cloning, so "never
+  pushes" is structural. Return a provider-attributed result, changed paths, an
+  ASCII Git binary patch, and SHA-256 integrity anchors; refuse out-of-scope
+  changes and never auto-commit, push, publish, or let two agents write the
+  active checkout concurrently.
+- Add digest-locked inspect/apply operations that revalidate repository identity,
+  base SHA, clean state, patch integrity, path scope, and `git apply --check`
+  before changing the active working tree. Scope inspection and both apply steps
+  consume the digest-verified in-memory patch bytes via stdin, so nothing between
+  verification and application can substitute the file on disk. A completed
+  delegation that changed nothing reports `no_changes` instead of a misleading
+  apply error. Provider failures, same-harness recursion, timeouts, and
+  unavailable CLIs fail closed without fallback.
+- Create bridge-owned job files (`result.json`, `result.patch`) with
+  `O_EXCL|O_NOFOLLOW`, so a leaf-planted symlink or pre-created file fails loudly
+  instead of redirecting an unsandboxed bridge write.
+- Reject symlink-touching patches by parsing git file-mode headers, which also
+  catches retargeting an existing tracked symlink (a bare `index … 120000`
+  header) and stops false positives on patch content that merely mentions a
+  mode. The `.git` path guard is case-insensitive for case-insensitive
+  filesystems.
+- On provider timeout, kill the leaf's entire process group so orphaned
+  descendants cannot keep running (in consult mode, inside the real repository).
 - Harden delegation against a leaf-controlled clone. Reset the clone's `.git`
   configuration to its pristine post-clone state and run every bridge-side git
   command with global/system configuration masked, so a worker-written
@@ -31,24 +61,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   trigger phrasings and an explicit rule that the bridge, not ad hoc provider CLI
   commands, is the sanctioned cross-provider path.
 
-### 0.1.0 — 2026-08-04
-- New plugin. `$agent-bridge` lets the current harness use an installed Claude,
-  Codex, or Gemini CLI as a bounded leaf collaborator while retaining parent-task
-  ownership. Consultation is read-only; implementation delegation requires the
-  user's existing write authority, an exact clean base, allowed paths, acceptance
-  criteria, and an explicit `--allow-write` runtime gate.
-- Run delegated implementation only in a private temporary local clone. Return a
-  provider-attributed result, changed paths, an ASCII Git binary patch, and SHA-256
-  integrity anchors; refuse out-of-scope changes and never auto-commit, push,
-  publish, or let two agents write the active checkout concurrently.
-- Add digest-locked inspect/apply operations that revalidate repository identity,
-  base SHA, clean state, patch integrity, path scope, and `git apply --check` before
-  changing the active working tree. Provider failures, same-harness recursion,
-  timeouts, and unavailable CLIs fail closed without fallback.
-
 ## project-vocabulary
 
 ### 0.1.2 — 2026-07-26
+- Crash durability: an apply killed between claiming CONCEPTS.md and installing
+  the replacement no longer leaves the glossary missing — the next apply
+  restores a stale stranded claim (no-replace rename, so a concurrent glossary
+  is never overwritten).
 - Make mixed terminology-and-workflow prompts an explicit positive routing case:
   project-vocabulary owns only the domain-language half while preserving its
   standalone no-write fallback for the optional workflow owner.
@@ -161,6 +180,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 ## pr-feedback
 
 ### 0.2.1 — 2026-07-26
+- Fetch robustness: paginated GraphQL page sets are handed to `jq` through
+  `--slurpfile` temp files instead of `--argjson` argv values, so very large
+  PRs no longer abort on the ARG_MAX limit.
 - Route prefetched GitHub review data, open-review-comment requests, and approved
   resolver-plan follow-ups explicitly to `resolve-pr-feedback`, while keeping all
   remote mutation reserved for manual `$publish-pr-feedback`.
@@ -433,6 +455,11 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 ## discipline-gates
 
 ### 0.1.6 — 2026-08-08
+- A trial refused before the mutant is installed now removes its own backup, so
+  the next trial no longer fails with "mutation backup already exists". If the
+  post-trial restore itself fails, the error names the target and its original
+  digest and states the mutant may still be on disk; the exit-code contract in
+  the module docstring documents this exception.
 - Fix a mutation-trial restore gap: if replacing the target file failed after the
   mutant was already published, the working tree could be left mutated. The trial now
   marks the mutant installed at publication so the `finally` restore runs on every
@@ -516,6 +543,11 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 ## learning-loop
 
 ### 1.0.3 — 2026-07-23
+- Crash durability: a writer killed mid-update no longer leaves the canonical
+  memory file missing — the next lock-holding write restores the stranded
+  claim file first. Untrusted-content read sentinels carry a per-invocation
+  nonce, and a failed archive prune after a successful save is a warning, not
+  a refusal.
 - Route all lesson reads, writes, and approved instruction promotion through a
   root-confined, no-follow, lock-protected atomic helper shared byte-for-byte with
   session-memory. Stable reads now expose an exact SHA-256 (or `absent`) and every
@@ -554,6 +586,12 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 ## session-memory
 
 ### 1.1.1 — 2026-07-23
+- Crash durability: a writer killed mid-update no longer leaves the canonical
+  memory file missing — the next lock-holding write restores the stranded
+  claim file first, and compare-and-swap then surfaces the recovered content.
+  Untrusted-content read sentinels carry a per-invocation nonce so memory text
+  cannot forge its own envelope boundary, and a failed archive prune after a
+  successful save is reported as a warning instead of a refusal.
 - Add one byte-identical safe memory helper to all three skills: no-follow directory
   traversal, linked/special-file refusal, bounded UTF-8 validation, lock-protected
   atomic replacement, archive-before-handoff replacement, and safe five-archive

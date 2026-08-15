@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO = Path(__file__).resolve().parent.parent
@@ -666,6 +667,144 @@ class AgentBridgeTests(unittest.TestCase):
         self.assertIn("shell=False", source)
         self.assertNotIn("shell=True", source)
         self.assertNotIn("os.system", source)
+
+    def test_delegate_clone_has_no_origin_remote(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = self.make_repo(root)
+            env = self.make_env(root, behavior="allowed-write")
+            payload = self.good_delegate_result(repo, env)
+            remotes = subprocess.run(
+                ["git", "-C", str(payload["workspace"]), "remote"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            self.assertEqual(remotes.stdout.strip(), "")
+
+    def test_apply_of_no_change_delegation_reports_no_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = self.make_repo(root)
+            # The default fake behavior writes nothing in the delegated clone.
+            env = self.make_env(root, behavior="consult")
+            delegated = self.run_bridge(
+                [
+                    "run",
+                    "--provider",
+                    "codex",
+                    "--mode",
+                    "delegate",
+                    "--cwd",
+                    str(repo),
+                    "--allow-write",
+                ],
+                cwd=repo,
+                env=env,
+                request=self.delegate_request(),
+            )
+            self.assertEqual(delegated.returncode, 0, delegated.stderr)
+            payload = json.loads(delegated.stdout)
+            self.assertEqual(payload["status"], "completed")
+            self.assertEqual(payload["changed_files"], [])
+            applied = self.run_bridge(
+                [
+                    "apply",
+                    "--cwd",
+                    str(repo),
+                    "--result",
+                    str(payload["result_path"]),
+                    "--sha256",
+                    str(payload["result_sha256"]),
+                ],
+                cwd=repo,
+                env=env,
+            )
+            self.assertEqual(applied.returncode, 0, applied.stderr)
+            self.assertEqual(json.loads(applied.stdout)["status"], "no_changes")
+
+
+def load_bridge_module():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("agent_bridge_under_test", BRIDGE)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class AgentBridgeUnitTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.bridge = load_bridge_module()
+
+    def test_symlink_mode_headers_are_detected_including_retargets(self) -> None:
+        retarget = (
+            b"diff --git a/docs/latest b/docs/latest\n"
+            b"index 1111111111111111111111111111111111111111.."
+            b"2222222222222222222222222222222222222222 120000\n"
+            b"--- a/docs/latest\n"
+            b"+++ b/docs/latest\n"
+            b"@@ -1 +1 @@\n-old-target\n\\ No newline at end of file\n"
+            b"+../../.git\n\\ No newline at end of file\n"
+        )
+        self.assertTrue(self.bridge.patch_touches_symlink(retarget))
+        new_symlink = b"diff --git a/x b/x\nnew file mode 120000\nindex 000..111\n"
+        self.assertTrue(self.bridge.patch_touches_symlink(new_symlink))
+        typechange = b"diff --git a/x b/x\nold mode 120000\nnew mode 100644\n"
+        self.assertTrue(self.bridge.patch_touches_symlink(typechange))
+
+    def test_patch_content_mentioning_modes_is_not_a_false_positive(self) -> None:
+        content = (
+            b"diff --git a/doc.md b/doc.md\n"
+            b"index 1111111111111111111111111111111111111111.."
+            b"2222222222222222222222222222222222222222 100644\n"
+            b"--- a/doc.md\n"
+            b"+++ b/doc.md\n"
+            b"@@ -1 +1,2 @@\n line\n"
+            b"+new file mode 120000 and new mode 120000 are git header markers\n"
+        )
+        self.assertFalse(self.bridge.patch_touches_symlink(content))
+
+    def test_git_path_guard_is_case_insensitive(self) -> None:
+        for candidate in (".git/config", ".GIT/config", ".Git/hooks/pre-commit"):
+            self.assertFalse(self.bridge.path_allowed(candidate, ["."]))
+        with self.assertRaises(self.bridge.BridgeError):
+            self.bridge.normalize_path(".GIT/config")
+
+    def test_write_private_file_refuses_symlink_and_existing_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            outside = root / "outside.txt"
+            outside.write_text("precious\n", encoding="utf-8")
+            planted = root / "result.patch"
+            planted.symlink_to(outside)
+            with self.assertRaises(self.bridge.BridgeError):
+                self.bridge.write_private_file(planted, b"payload")
+            self.assertEqual(outside.read_text(encoding="utf-8"), "precious\n")
+            existing = root / "result.json"
+            existing.write_text("already-here\n", encoding="utf-8")
+            with self.assertRaises(self.bridge.BridgeError):
+                self.bridge.write_private_file(existing, b"payload")
+            self.assertEqual(existing.read_text(encoding="utf-8"), "already-here\n")
+
+    def test_default_state_root_is_user_cache_not_shared_temp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            cache_home = Path(tmp) / "cache"
+            home = Path(tmp) / "home"
+            home.mkdir()
+            with mock.patch.dict(os.environ, {"XDG_CACHE_HOME": str(cache_home)}):
+                os.environ.pop("AGENT_BRIDGE_STATE_DIR", None)
+                root = self.bridge.state_root()
+            self.assertEqual(root, (cache_home / "overclock-agent-bridge").resolve())
+            with mock.patch.dict(os.environ, {"HOME": str(home)}):
+                os.environ.pop("AGENT_BRIDGE_STATE_DIR", None)
+                os.environ.pop("XDG_CACHE_HOME", None)
+                root = self.bridge.state_root()
+            self.assertEqual(root, (home / ".cache" / "overclock-agent-bridge").resolve())
+            source = BRIDGE.read_text(encoding="utf-8")
+            self.assertNotIn("tempfile.gettempdir", source)
 
 
 if __name__ == "__main__":

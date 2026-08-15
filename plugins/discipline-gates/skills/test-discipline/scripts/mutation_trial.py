@@ -4,6 +4,12 @@
 Exit codes: 0 = mutated run exited nonzero and the clean rerun passed; 1 = trial
 refused or errored; 2 = clean rerun failed after restore; 3 = trial completed and
 the mutation survived (target test stayed green with the mutant installed).
+
+Exit 1 normally means nothing was changed on disk (any backup created for the
+refused trial is removed). The one exception is a failed restore: if the exit-1
+message says the restore itself failed, the mutant may still be installed --
+verify the target file against the reported original digest before trusting the
+tree.
 """
 
 from __future__ import annotations
@@ -22,9 +28,11 @@ from pathlib import Path
 
 from mutation_backup import (
     backup,
+    backup_metadata,
     claim_target,
     current_sha256,
     inode_identity,
+    open_backup,
     open_sha256_at,
     open_parent,
     publish_no_replace,
@@ -228,6 +236,40 @@ def atomic_replace(
         os.close(parent_fd)
 
 
+def discard_unused_backup(root: Path, relative: Path, expected_sha256: str) -> None:
+    """Remove the trial's backup when the mutant was never installed.
+
+    Refusals before installation would otherwise strand a .mutbak that makes
+    the next trial fail with "mutation backup already exists". Only a backup
+    whose metadata matches this exact trial is removed; failure to clean up is
+    reported on stderr but never masks the original refusal.
+    """
+    parent_fd, name = open_parent(root, relative)
+    backup_fd: int | None = None
+    try:
+        backup_fd = open_backup(parent_fd, f"{name}.mutbak")
+        backup_identity = inode_identity(os.fstat(backup_fd))
+        metadata, _payload_size = backup_metadata(backup_fd)
+        if metadata["path"] != relative.as_posix() or metadata["sha256"] != expected_sha256:
+            return
+        unlink_if_identity(
+            parent_fd,
+            f"{name}.mutbak",
+            backup_identity,
+            label="unused mutation backup cleanup",
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(
+            f"warning: could not remove the unused mutation backup for "
+            f"{relative.as_posix()}: {exc}",
+            file=sys.stderr,
+        )
+    finally:
+        if backup_fd is not None:
+            os.close(backup_fd)
+        os.close(parent_fd)
+
+
 def run_trial(
     path: Path,
     *,
@@ -261,6 +303,7 @@ def run_trial(
         nonlocal mutant_installed
         mutant_installed = True
 
+    trial_error: BaseException | None = None
     try:
         metadata = verify_backup(path, root=root)
         if metadata["sha256"] != original_digest:
@@ -277,9 +320,24 @@ def run_trial(
         if hashlib.sha256(read_target(root, relative)[0]).hexdigest() != mutated_digest:
             raise RuntimeError("installed mutant digest does not match the selected mutation")
         mutated_result = subprocess.run(test_command, cwd=root, check=False)
+    except BaseException as exc:
+        trial_error = exc
+        raise
     finally:
         if mutant_installed:
-            restore(path, root=root, expected_current_sha256=mutated_digest)
+            try:
+                restore(path, root=root, expected_current_sha256=mutated_digest)
+            except Exception as restore_error:
+                message = (
+                    f"restore failed; the mutant may still be installed at "
+                    f"{relative.as_posix()} (original sha256 {original_digest}): "
+                    f"{restore_error}"
+                )
+                if trial_error is not None:
+                    message += f" [original trial error: {trial_error}]"
+                raise RuntimeError(message) from restore_error
+        elif trial_error is not None:
+            discard_unused_backup(root, relative, original_digest)
 
     restored, _restored_mode, _restored_identity = read_target(root, relative)
     if hashlib.sha256(restored).hexdigest() != original_digest:

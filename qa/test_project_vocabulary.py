@@ -343,6 +343,51 @@ class GlossaryFileTest(unittest.TestCase):
                 temporaries[0].read_text(encoding="utf-8"),
             )
 
+    def test_stale_crashed_claim_is_recovered_before_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            stranded_content = "# Concepts\n\n## A\nStranded prior text.\n"
+            stranded = root / ".CONCEPTS.md.claim-deadbeefdeadbeef"
+            stranded.write_text(stranded_content, encoding="utf-8")
+            # Age the claim past the staleness threshold so recovery treats it
+            # as a dead writer's leftovers, not a live claim.
+            old = 1_000_000_000
+            os.utime(stranded, (old, old))
+            candidate = root / ".CONCEPTS.md.proposed"
+            candidate.write_text("# Concepts\n\n## B\nNew text.\n", encoding="utf-8")
+            shown = glossary_file.proposal(root, candidate)
+            # The proposal was computed against an apparently-missing glossary;
+            # apply must first restore the stranded claim and then refuse the
+            # now-stale expected-current digest instead of overwriting.
+            with self.assertRaises(ValueError):
+                glossary_file.apply(
+                    root,
+                    candidate,
+                    expected_current=str(shown["current_sha256"]),
+                    expected_candidate=str(shown["candidate_sha256"]),
+                )
+            target = root / "CONCEPTS.md"
+            self.assertEqual(target.read_text(encoding="utf-8"), stranded_content)
+            self.assertFalse(stranded.exists())
+            # Re-proposing against the recovered glossary applies cleanly.
+            shown = glossary_file.proposal(root, candidate)
+            glossary_file.apply(
+                root,
+                candidate,
+                expected_current=str(shown["current_sha256"]),
+                expected_candidate=str(shown["candidate_sha256"]),
+            )
+            self.assertIn("New text", target.read_text(encoding="utf-8"))
+
+    def test_fresh_claims_are_not_recovered(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            live = root / ".CONCEPTS.md.claim-livewriter"
+            live.write_text("# Concepts\n\n## A\nLive claim.\n", encoding="utf-8")
+            glossary_file._recover_stale_claims(root)
+            self.assertTrue(live.exists())
+            self.assertFalse((root / "CONCEPTS.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
