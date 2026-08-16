@@ -16,7 +16,8 @@
   };
 
   The Diff tab renders `changes` in order: kept text is plain, deletions are red strikethrough,
-  rewrites show the old wording struck in red then the new wording in green. Hover any change for its reason.
+  and rewrites show the old wording struck in red then the new wording in green. Every changed
+  segment is followed by its visible reason.
 -->
 <html lang="en">
 <head>
@@ -30,24 +31,27 @@
   .tabs { display: flex; gap: .25rem; border-bottom: 1px solid #8884; margin-bottom: 1rem; }
   .tabs button { font: inherit; padding: .4rem .9rem; border: 0; background: none; cursor: pointer; border-bottom: 2px solid transparent; opacity: .65; }
   .tabs button.active { opacity: 1; border-bottom-color: currentColor; font-weight: 600; }
+  .tabs button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
   .pane { display: none; white-space: pre-wrap; }
   .pane.active { display: block; }
+  .pane[hidden] { display: none; }
   del { color: #c0392b; text-decoration: line-through; text-decoration-thickness: 1px; }
   ins { color: #1e8e3e; text-decoration: none; }
-  .chg { border-radius: 3px; cursor: help; }
+  .chg { border-radius: 3px; }
   .chg:hover { background: #ffd86b33; outline: 1px dotted #8888; }
+  .reason { display: inline-block; margin: 0 .25em; padding: 0 .35em; border-radius: 3px; color: CanvasText; background: #ffd86b33; font-size: .875em; }
 </style>
 </head>
 <body>
 <h1 id="title">Revision report</h1>
-<div class="tabs">
-  <button data-pane="original" class="active">Original</button>
-  <button data-pane="revised">Revised</button>
-  <button data-pane="diff">Diff</button>
+<div class="tabs" role="tablist" aria-label="Revision views">
+  <button id="tab-original" type="button" role="tab" aria-selected="true" aria-controls="original" tabindex="0" data-pane="original" class="active">Original</button>
+  <button id="tab-revised" type="button" role="tab" aria-selected="false" aria-controls="revised" tabindex="-1" data-pane="revised">Revised</button>
+  <button id="tab-diff" type="button" role="tab" aria-selected="false" aria-controls="diff" tabindex="-1" data-pane="diff">Diff</button>
 </div>
-<div id="original" class="pane active"></div>
-<div id="revised" class="pane"></div>
-<div id="diff" class="pane"></div>
+<div id="original" class="pane active" role="tabpanel" aria-labelledby="tab-original" tabindex="0"></div>
+<div id="revised" class="pane" role="tabpanel" aria-labelledby="tab-revised" tabindex="0" hidden></div>
+<div id="diff" class="pane" role="tabpanel" aria-labelledby="tab-diff" tabindex="0" hidden></div>
 
 <script>
 const DATA = JSON.parse(new TextDecoder().decode(
@@ -60,29 +64,60 @@ const DATA = JSON.parse(new TextDecoder().decode(
   document.getElementById("revised").textContent = DATA.revised || "";
 
   const diff = document.getElementById("diff");
+  function appendReason(container, text) {
+    const reason = document.createElement("span");
+    reason.className = "reason";
+    reason.textContent = `Reason: ${text}`;
+    container.appendChild(reason);
+  }
   for (const c of (DATA.changes || [])) {
     if (c.type === "keep") {
       diff.appendChild(document.createTextNode(c.text || ""));
     } else if (c.type === "delete") {
+      const group = document.createElement("span");
       const d = document.createElement("del");
-      d.className = "chg"; d.title = c.reason || "removed"; d.textContent = c.text || "";
-      diff.appendChild(d);
+      d.className = "chg"; d.textContent = c.text || "";
+      group.appendChild(d);
+      appendReason(group, c.reason || "removed");
+      diff.appendChild(group);
     } else if (c.type === "rewrite") {
-      const span = document.createElement("span");
-      span.className = "chg"; span.title = c.reason || "rewritten";
+      const group = document.createElement("span");
+      group.className = "chg";
       const d = document.createElement("del"); d.textContent = c.before || "";
       const i = document.createElement("ins"); i.textContent = c.after || "";
-      span.append(d, document.createTextNode(" "), i);
-      diff.appendChild(span);
+      group.append(d, document.createTextNode(" "), i);
+      appendReason(group, c.reason || "rewritten");
+      diff.appendChild(group);
     }
   }
 
-  document.querySelectorAll(".tabs button").forEach(btn => {
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  function activateTab(next, moveFocus) {
+    for (const tab of tabs) {
+      const selected = tab === next;
+      tab.classList.toggle("active", selected);
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      const panel = document.getElementById(tab.getAttribute("aria-controls"));
+      panel.classList.toggle("active", selected);
+      panel.hidden = !selected;
+    }
+    if (moveFocus) next.focus();
+  }
+
+  tabs.forEach((btn, index) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.pane).classList.add("active");
+      activateTab(btn, false);
+    });
+    btn.addEventListener("keydown", event => {
+      let nextIndex;
+      if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+      if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = tabs.length - 1;
+      if (nextIndex === undefined) return;
+      event.preventDefault();
+      activateTab(tabs[nextIndex], true);
     });
   });
 })();

@@ -20,7 +20,7 @@ from typing import Iterable, Mapping
 MAX_FILE_BYTES = 1_000_000
 MAX_DISCOVERED_FILES = 100
 MAX_SCANNED_SKILL_DIRS = 10_000
-MAX_SKILL_FRONTMATTER_BYTES = 8_192
+MAX_SKILL_FRONTMATTER_BYTES = 64 * 1_024
 COMMAND_TIMEOUT_SECONDS = 8
 
 
@@ -143,6 +143,38 @@ def read_regular_bytes(
         os.close(file_fd)
 
 
+def read_regular_prefix(
+    path: Path, *, authorized_root: Path, limit: int
+) -> tuple[os.stat_result, bytes]:
+    """Read at most limit bytes without rejecting a larger regular file."""
+    file_fd, details = open_regular_file(path, authorized_root=authorized_root)
+    try:
+        chunks: list[bytes] = []
+        remaining = limit
+        while remaining > 0:
+            chunk = os.read(file_fd, min(65_536, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        return details, b"".join(chunks)
+    finally:
+        os.close(file_fd)
+
+
+def effective_writable(path: Path) -> bool:
+    """Report effective write access at inventory time, not mode-bit presence."""
+    kwargs: dict[str, bool] = {}
+    if os.access in os.supports_effective_ids:
+        kwargs["effective_ids"] = True
+    if os.access in os.supports_follow_symlinks:
+        kwargs["follow_symlinks"] = False
+    try:
+        return os.access(path, os.W_OK, **kwargs)
+    except (NotImplementedError, OSError):
+        return False
+
+
 def run(command: list[str], *, cwd: Path, env: Mapping[str, str]) -> tuple[int, str]:
     try:
         completed = subprocess.run(
@@ -204,10 +236,10 @@ def path_metadata(
     }
     if stat.S_ISLNK(details.st_mode):
         item["kind"] = "symlink"
-        try:
-            item["link_target"] = safe_text(os.readlink(path))
-        except OSError:
-            item["link_target"] = "unreadable"
+        # A link target is repository-controlled metadata and can itself contain
+        # credentials or other sensitive values. Presence is enough for setup to
+        # refuse a proposed edit; never echo the target.
+        item["link_target_disclosed"] = False
         return item
     if not stat.S_ISREG(details.st_mode):
         item["kind"] = "other"
@@ -217,7 +249,8 @@ def path_metadata(
         {
             "kind": "file",
             "bytes": details.st_size,
-            "writable": bool(details.st_mode & (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)),
+            "writable": effective_writable(path),
+            "writable_basis": "effective access at inventory time",
         }
     )
     if details.st_size > MAX_FILE_BYTES:
@@ -281,7 +314,9 @@ def markdown_files_without_following_links(
     return found
 
 
-def instruction_inventory(start: Path, root: Path, config_dir: Path) -> list[dict]:
+def instruction_inventory(
+    start: Path, root: Path, config_dir: Path, *, include_user: bool = False
+) -> list[dict]:
     candidates: list[tuple[Path, str, str, Path]] = []
     for directory in parents_to_root(start, root):
         label = "project-root" if directory == root else "project-parent"
@@ -293,18 +328,14 @@ def instruction_inventory(start: Path, root: Path, config_dir: Path) -> list[dic
                 (directory / "AGENTS.md", label, "provider-neutral-instructions", root),
             ]
         )
-    candidates.extend(
-        [
-            (config_dir / "CLAUDE.md", "user", "claude-instructions", config_dir),
-            (config_dir / "settings.json", "user", "claude-settings", config_dir),
-            (root / ".claude" / "settings.json", "project", "claude-settings", root),
-            (root / ".claude" / "settings.local.json", "local", "claude-settings", root),
-        ]
-    )
-    for rules_root, scope in (
-        (config_dir / "rules", "user"),
-        (root / ".claude" / "rules", "project"),
-    ):
+    if include_user:
+        candidates.append(
+            (config_dir / "CLAUDE.md", "user", "claude-instructions", config_dir)
+        )
+    rule_roots = [(root / ".claude" / "rules", "project")]
+    if include_user:
+        rule_roots.append((config_dir / "rules", "user"))
+    for rules_root, scope in rule_roots:
         candidates.extend(
             (path, scope, "claude-rule", config_dir if scope == "user" else root)
             for path in markdown_files_without_following_links(
@@ -391,7 +422,7 @@ def declared_skill_name(skill_md: Path, *, authorized_root: Path) -> str | None:
     if not stat.S_ISREG(details.st_mode):
         return None
     try:
-        _, raw = read_regular_bytes(
+        _, raw = read_regular_prefix(
             skill_md,
             authorized_root=authorized_root,
             limit=MAX_SKILL_FRONTMATTER_BYTES,
@@ -409,7 +440,7 @@ def declared_skill_name(skill_md: Path, *, authorized_root: Path) -> str | None:
 
 
 def standalone_skills(
-    root: Path, config_dir: Path, package_ids: set[str]
+    root: Path, config_dir: Path, known_names: set[str]
 ) -> tuple[list[dict], list[str]]:
     result: list[dict] = []
     warnings: list[str] = []
@@ -456,7 +487,7 @@ def standalone_skills(
                 skill_md, authorized_root=authorized_root
             )
             names = {folder_name, declared_name}
-            if names & (package_ids | {"lessons-learned", "session-handoff"}):
+            if names & known_names:
                 result.append(
                     {
                         "name": safe_text(declared_name or folder_name),
@@ -482,13 +513,21 @@ def cli_plugin_inventory(root: Path, env: Mapping[str, str], package_ids: set[st
     list_code, list_output = run(
         [executable, "plugin", "list", "--json"], cwd=root, env=env
     )
+    version_match = (
+        re.fullmatch(
+            r"\s*(\d+\.\d+\.\d+)(?:\s+\(Claude Code\))?\s*",
+            version_output,
+        )
+        if version_code == 0
+        else None
+    )
     result: dict[str, object] = {
         "available": True,
-        "version": version_output if version_code == 0 else "unknown",
+        "version": version_match.group(1) if version_match else "unknown",
         "plugins": [],
     }
     if list_code != 0:
-        result["error"] = list_output or f"plugin list exited {list_code}"
+        result["error"] = f"claude plugin list exited {list_code}"
         return result
     try:
         rows = json.loads(list_output)
@@ -512,8 +551,17 @@ def cli_plugin_inventory(root: Path, env: Mapping[str, str], package_ids: set[st
         filtered.append(
             {
                 "id": safe_text(plugin_id),
-                "version": safe_text(row.get("version", "unknown"), 80),
-                "scope": safe_text(row.get("scope", "unknown"), 40),
+                "version": (
+                    str(row["version"])
+                    if isinstance(row.get("version"), str)
+                    and re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?", row["version"])
+                    else "unknown"
+                ),
+                "scope": (
+                    row["scope"]
+                    if row.get("scope") in {"user", "project", "local", "managed"}
+                    else "unknown"
+                ),
                 "enabled": bool(row.get("enabled", False)),
             }
         )
@@ -521,7 +569,12 @@ def cli_plugin_inventory(root: Path, env: Mapping[str, str], package_ids: set[st
     return result
 
 
-def collect_inventory(project_dir: Path, environ: Mapping[str, str] | None = None) -> dict:
+def collect_inventory(
+    project_dir: Path,
+    environ: Mapping[str, str] | None = None,
+    *,
+    include_user_instructions: bool = False,
+) -> dict:
     env = dict(os.environ if environ is None else environ)
     start = project_dir.expanduser().resolve()
     root = git_root(start, env) or start
@@ -531,7 +584,11 @@ def collect_inventory(project_dir: Path, environ: Mapping[str, str] | None = Non
 
     catalog = load_catalog()
     package_ids = {entry["id"] for entry in catalog["packages"]}
-    overlaps, overlap_warnings = standalone_skills(root, config_dir, package_ids)
+    standalone_names = set(package_ids)
+    for entry in catalog["packages"]:
+        standalone_names.update(entry.get("provides", []))
+        standalone_names.update(entry.get("skill_names", []))
+    overlaps, overlap_warnings = standalone_skills(root, config_dir, standalone_names)
     return {
         "inventory_schema": 1,
         "warning": (
@@ -546,10 +603,18 @@ def collect_inventory(project_dir: Path, environ: Mapping[str, str] | None = Non
         "host": cli_plugin_inventory(root, env, package_ids),
         "settings_overclock_state": settings_plugin_inventory(root, config_dir, package_ids),
         "standalone_overlaps": overlaps,
-        "instruction_files": instruction_inventory(start, root, config_dir),
+        "instruction_files": instruction_inventory(
+            start, root, config_dir, include_user=include_user_instructions
+        ),
         "catalog": catalog,
         "limitations": [
             "Managed settings are not inspected.",
+            (
+                "User-level instruction metadata was included by explicit request."
+                if include_user_instructions
+                else "User-level instructions and rules were not inspected; rerun with "
+                "--include-user-instructions only after explicit permission."
+            ),
             "Nested instruction files below the start directory load on demand and are not exhaustively scanned.",
             "File contents are intentionally omitted; inspect only a proposed project-local target before drafting a diff.",
             *overlap_warnings,
@@ -558,9 +623,16 @@ def collect_inventory(project_dir: Path, environ: Mapping[str, str] | None = Non
 
 
 def main(argv: list[str]) -> int:
-    project = Path(argv[1]) if len(argv) > 1 else Path.cwd()
+    include_user = "--include-user-instructions" in argv[1:]
+    positional = [value for value in argv[1:] if value != "--include-user-instructions"]
+    project = Path(positional[0]) if positional else Path.cwd()
+    if len(positional) > 1:
+        print(json.dumps({"inventory_schema": 1, "error": "too many arguments"}))
+        return 0
     try:
-        inventory = collect_inventory(project)
+        inventory = collect_inventory(
+            project, include_user_instructions=include_user
+        )
     except Exception as exc:  # keep skill invocation useful without leaking a traceback
         print(json.dumps({"inventory_schema": 1, "error": safe_text(exc)}))
         return 0

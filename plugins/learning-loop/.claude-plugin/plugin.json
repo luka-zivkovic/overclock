@@ -1,8 +1,8 @@
 {
   "name": "learning-loop",
   "displayName": "Learning Loop",
-  "description": "A self-improvement loop for your agent: corrections and diagnosed failures become durable, deduplicated, evidence-counted lessons in .ai/memory/LESSONS.md, then surface in later sessions so the same mistakes stop recurring. Standalone lessons-only alternative to session-memory, with a bundled SessionStart hook that surfaces the lesson count automatically. Do not install both packages because they route the same lesson workflow and both hook the lesson ledger.",
-  "version": "1.0.2",
+  "description": "A self-improvement loop for your agent: corrections to agent behavior and standing workflow rules become durable, deduplicated, evidence-counted lessons in .ai/memory/LESSONS.md. This standalone lessons-only alternative to session-memory uses a safe SessionStart hook that reports ledger availability without injecting file-controlled text. Do not install both packages.",
+  "version": "1.0.3",
   "author": {
     "name": "Luka Zivkovic"
   },

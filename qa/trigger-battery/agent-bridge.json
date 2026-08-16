@@ -1,0 +1,73 @@
+{
+  "skill": "agent-bridge",
+  "plugin": "agent-bridge",
+  "install_modes": ["skill", "stack"],
+  "plugins": [
+    "agent-bridge",
+    "critical-thinking",
+    "debugging-discipline",
+    "groundwork"
+  ],
+  "forbidden_skills": [
+    "critical-thinking",
+    "debugging-discipline",
+    "groundwork"
+  ],
+  "samples": 3,
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.8,
+    "specificity": 0.9
+  },
+  "note": "Routing battery for agent-bridge. It should fire for explicit, currently authorized cross-harness consultation or delegation, plus genuinely blocked work with prior current-conversation authorization; it must not fire for ordinary local work, same-harness recursion, built-in subagents, or generic model discussion.",
+  "should_trigger": [
+    "Use Codex as a read-only second reviewer for this authentication diff. I authorize sharing the diff with Codex; you still own the final review.",
+    "Implement the queue fix, but delegate only src/queue and test/queue to Gemini in an isolated workspace. I authorize Gemini to receive those files and the task. Inspect its patch and run the tests yourself before accepting it.",
+    "Ask Codex to independently diagnose why this parser rejects valid Unicode, without letting it edit anything. You may share src/parser.ts and its tests with Codex.",
+    "Have Gemini implement the bounded retry helper while you handle the API integration. Gemini may see and change only src/retry.ts and test/retry.test.ts; you must review its work before applying it.",
+    "We are still blocked on the allocator bug after reproducing it and tracing the ownership paths. I authorize sharing the allocator module with another installed coding provider — use that cross-provider help now, read-only.",
+    "Use agent-bridge to get one Codex critique of this migration plan. I authorize sending only plan.md, and I do not want a vote from every model."
+  ],
+  "should_not": [
+    {
+      "prompt": "Implement cursor pagination in this service and run the existing tests.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Stress-test my plan to replace Postgres with an event store before we commit to it.",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Diagnose this recurring connection-pool timeout and get to the actual root cause.",
+      "allowed_skills": ["debugging-discipline"]
+    },
+    {
+      "prompt": "Interview me to clarify the requirements for our new billing workflow.",
+      "allowed_skills": ["groundwork"]
+    },
+    {
+      "prompt": "Use a built-in subagent to explore the repository in parallel while you write the tests.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "From your own knowledge, without running any commands or tools, compare Claude, Codex, and Gemini pricing and context-window sizes.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Review this diff yourself and tell me whether the error handling is sound.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Ask Claude Code to open another Claude Code session and have it rename README.md.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "I installed Gemini CLI. Send it this repository sometime if you think another opinion would be useful.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Run the formatter and fix the two lint errors in src/config.ts.",
+      "allowed_skills": []
+    }
+  ]
+}

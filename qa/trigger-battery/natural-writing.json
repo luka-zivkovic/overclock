@@ -1,10 +1,17 @@
 {
   "skill": "natural-writing",
+  "install_modes": ["skill"],
   "note": "Routing battery for natural-writing. FIRED means the stream-json transcript contains a Skill tool call selecting natural-writing. should_trigger wants FIRED=true; should_not wants FIRED=false.",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
   "should_trigger": [
     "Draft a blog post intro about why small teams ship faster.",
     "Make this draft sound more natural and less like AI wrote it: <pastes 3 paragraphs>",
-    "Rewrite this newsletter section so it reads like a human and drop the em-dashes."
+    "Rewrite this newsletter section so it reads like a human and drop the em-dashes.",
+    "Polish the prose around this customer quote, but preserve the quoted words exactly."
   ],
   "should_not": [
     "Fix the null-pointer in the date formatter.",

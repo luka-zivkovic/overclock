@@ -1,5 +1,13 @@
 {
   "skill": "groundwork",
+  "install_modes": ["skill", "stack"],
+  "plugins": [
+    "groundwork",
+    "critical-thinking"
+  ],
+  "forbidden_skills": [
+    "critical-thinking"
+  ],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
@@ -17,15 +25,42 @@
     "Interview me about this migration — ask me questions until we're aligned.",
     "Walk me through the open decisions one by one; I'll answer as we go.",
     "Help me pin down what I actually want here before you write any code — question me properly.",
-    "Before we start: ask me one question at a time about the admin dashboard until you understand it."
+    "Before we start: ask me one question at a time about the admin dashboard until you understand it.",
+    "Interview me about medical-record export before we plan it; I may delegate routine defaults, but walk through the real decisions.",
+    "Grill me about the export workflow, then give me a decision brief for confirmation before a separate build step."
   ],
   "should_not": [
-    "Stress-test my thinking on this architecture — where is it weak?",
-    "Sanity-check my conclusion that we should switch to Redis.",
-    "Am I right that the polling approach can't scale?",
-    "Give me your verdict on this plan.",
-    "Critique this design doc.",
-    "Add pagination to the /orders endpoint — page size 50.",
-    "Brainstorm some ideas for the onboarding flow."
+    {
+      "prompt": "Stress-test my thinking on this architecture — where is it weak?",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Sanity-check my conclusion that we should switch to Redis.",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Am I right that the polling approach can't scale?",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Give me your verdict on this plan.",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Critique this design doc.",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Interview me to stress-test my architecture reasoning before we commit to it.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add pagination to the /orders endpoint — page size 50.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Brainstorm some ideas for the onboarding flow.",
+      "allowed_skills": []
+    }
   ]
 }

@@ -1,4 +1,4 @@
 interface:
   display_name: "Independent Research"
-  short_description: "Fresh read-only local research with provenance"
-  default_prompt: "Use $independent-research to verify this material uncertainty from authorized local evidence in a fresh read-only context with a bounded source search."
+  short_description: "Host-isolated local research with provenance"
+  default_prompt: "Use $independent-research only through a genuinely host-isolated read-only worker to verify this uncertainty from exact authorized roots with a bounded no-follow read."

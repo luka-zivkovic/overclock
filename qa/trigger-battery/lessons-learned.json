@@ -1,6 +1,13 @@
 {
   "skill": "lessons-learned",
+  "install_modes": ["skill", "plugin"],
   "plugin": "session-memory",
+  "forbidden_skills": ["session-handoff", "solutions"],
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
   "detector": {
     "type": "skill_or_contract",
     "path": ".ai/memory/LESSONS.md"
@@ -13,9 +20,21 @@
     "Remember that the deploy command uses DEPLOY_TOKEN; the current value is secret_123 and must not be stored."
   ],
   "should_not": [
-    "Actually, change the /export endpoint to return JSON instead of XML.",
-    "Use port 4000 just for this one test run.",
-    "Commit the current changes with a sensible message.",
-    "No — we don't call them 'Teams' anymore, that's a Workspace. Keep the terminology straight."
+    {
+      "prompt": "Actually, change the /export endpoint to return JSON instead of XML.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Use port 4000 just for this one test run.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Commit the current changes with a sensible message.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "No — we don't call them 'Teams' anymore, that's a Workspace. Keep the terminology straight.",
+      "allowed_skills": []
+    }
   ]
 }

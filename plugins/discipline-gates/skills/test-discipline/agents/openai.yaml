@@ -1,4 +1,4 @@
 interface:
   display_name: "Test Discipline"
   short_description: "Prove changes with red tests and mutation"
-  default_prompt: "Use $test-discipline to establish the right pre-edit test gate and prove any new green test can fail."
+  default_prompt: "Use $test-discipline to establish an uncommitted pre-edit test gate and transactionally check whether a new green test detects its claimed regression."

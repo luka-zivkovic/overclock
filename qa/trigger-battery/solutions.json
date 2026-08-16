@@ -1,5 +1,7 @@
 {
   "skill": "solutions",
+  "install_modes": ["skill", "plugin"],
+  "forbidden_skills": ["session-handoff", "lessons-learned"],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
@@ -20,12 +22,37 @@
     "Clean up the solutions ledger — some of those entries are probably stale after the refactor."
   ],
   "should_not": [
-    "Fixed the 'Wellcome' typo in the banner. Done.",
-    "No, stop using npm here — this repo uses pnpm. Remember that.",
-    "That approach failed because the API paginates at 100 — note that as a lesson.",
-    "Let's stop here for today, save our session state.",
-    "The feature is finished and the tests pass — ship it.",
-    "Actually, return JSON instead of XML from that endpoint.",
-    "What were we working on last session?"
+    {
+      "prompt": "Fixed the 'Wellcome' typo in the banner. Done.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "No, stop using npm here — this repo uses pnpm. Remember that.",
+      "allowed_skills": ["lessons-learned"]
+    },
+    {
+      "prompt": "That approach failed because the API paginates at 100 — note that as a lesson.",
+      "allowed_skills": ["lessons-learned"]
+    },
+    {
+      "prompt": "Let's stop here for today, save our session state.",
+      "allowed_skills": ["session-handoff"]
+    },
+    {
+      "prompt": "The feature is finished and the tests pass — ship it.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Actually, return JSON instead of XML from that endpoint.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "What were we working on last session?",
+      "allowed_skills": ["session-handoff"]
+    },
+    {
+      "prompt": "No — stop adding retry loops around flaky tests. When a test is flaky, fix the race, don't retry it. Remember that for this project.",
+      "allowed_skills": ["lessons-learned"]
+    }
   ]
 }

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Publish PR Feedback"
+  short_description: "Publish a digest-locked PR feedback plan"
+  default_prompt: "Use $publish-pr-feedback to verify and publish this exact sealed PR feedback plan without broadening its approved actions."
+policy:
+  allow_implicit_invocation: false

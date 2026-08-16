@@ -3,24 +3,35 @@
 # Adapted from EveryInc/compound-engineering-plugin (MIT), skills/ce-resolve-pr-feedback.
 # Pagination fix context: upstream issue EveryInc/compound-engineering-plugin#798.
 
-# Maps a PR review comment node ID to its parent thread.
-# Fetches all review threads (paginated) and their comments, then returns the
-# thread whose comments contain the target ID.
+# Maps a PR review comment node ID or discussion_r numeric database ID to its
+# parent thread. Fetches all review threads (paginated) and the first 100
+# comments in each thread.
 
 set -e
 
-if [ $# -lt 2 ]; then
-    echo "Usage: get-thread-for-comment PR_NUMBER COMMENT_NODE_ID [OWNER/REPO]"
-    echo "Example: get-thread-for-comment 378 PRRC_kwDOP_gZVc6ySv89"
+if [ $# -lt 2 ] || [ $# -gt 4 ]; then
+    echo "Usage: get-thread-for-comment PR_NUMBER COMMENT_ID [OWNER/REPO] [HOST]"
+    echo "Example: get-thread-for-comment 378 discussion_r99182 acme/widgets github.com"
     exit 1
 fi
 
 PR_NUMBER=$1
-COMMENT_NODE_ID=$2
+case "$PR_NUMBER" in
+    ''|*[!0-9]*)
+        echo "Error: PR_NUMBER must be a positive integer." >&2
+        exit 1
+        ;;
+esac
+COMMENT_ID=${2#discussion_r}
 
 if [ -n "$3" ]; then
-    OWNER=$(echo "$3" | cut -d/ -f1)
-    REPO=$(echo "$3" | cut -d/ -f2)
+    case "$3" in
+        */*) OWNER=${3%%/*}; REPO=${3#*/} ;;
+        *)
+            echo "Error: repository must be OWNER/REPO." >&2
+            exit 1
+            ;;
+    esac
 else
     # `|| true` is load-bearing: under `set -e`, a failed command substitution
     # in an assignment aborts the script immediately. Run outside a git repo,
@@ -30,17 +41,38 @@ else
     OWNER=$(gh repo view --json owner -q .owner.login 2>/dev/null || true)
     REPO=$(gh repo view --json name -q .name 2>/dev/null || true)
 fi
+HOST=${4:-}
+if [ -z "$HOST" ]; then
+    REPO_URL=$(gh repo view --json url -q .url 2>/dev/null || true)
+    HOST=$(printf '%s\n' "$REPO_URL" | sed -E 's#^https?://([^/]+)/.*#\1#')
+fi
 
 if [ -z "$OWNER" ] || [ -z "$REPO" ]; then
-    echo "Error: could not resolve owner/repo. Run get-thread-for-comment from inside the target git repository, or pass OWNER/REPO as the third argument (e.g., get-thread-for-comment $PR_NUMBER $COMMENT_NODE_ID acme/widgets)." >&2
+    echo "Error: could not resolve owner/repo. Run inside the target repository or pass OWNER/REPO." >&2
     exit 1
 fi
+case "$OWNER$REPO" in
+    *[!A-Za-z0-9_.-]*)
+        echo "Error: owner/repo contains unsupported characters." >&2
+        exit 1
+        ;;
+esac
+case "$HOST" in
+    ''|*[!A-Za-z0-9.-]*)
+        echo "Error: could not resolve a valid GitHub host; pass it explicitly." >&2
+        exit 1
+        ;;
+esac
+
+gh_graphql() {
+    gh api --hostname "$HOST" graphql "$@"
+}
 
 # Pagination (issue #798): paginate the reviewThreads connection so PRs with
 # more than one page of threads can still resolve a comment to its parent
 # thread. Per-thread comments are still capped at 100 -- threads exceeding
 # that depth are not paginated here.
-threads_pages=$(gh api graphql --paginate --slurp \
+threads_pages=$(gh_graphql --paginate --slurp \
   -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUMBER" \
   -f query='
 query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
@@ -59,11 +91,13 @@ query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
           comments(first: 100) {
             nodes {
               id
+              databaseId
               author { login }
               body
               createdAt
               url
             }
+            pageInfo { hasNextPage endCursor }
           }
         }
         pageInfo { hasNextPage endCursor }
@@ -72,8 +106,14 @@ query Threads($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
   }
 }')
 
-echo "$threads_pages" | jq -e --arg cid "$COMMENT_NODE_ID" '
+echo "$threads_pages" | jq -e --arg cid "$COMMENT_ID" '
   [.[].data.repository.pullRequest.reviewThreads.nodes[]
-   | select(.comments.nodes | map(.id) | index($cid))]
-  | if length == 0 then error("No thread found for comment \($cid)") else .[0] end
+   | select(.comments.nodes
+       | map((.id == $cid) or ((.databaseId | tostring) == $cid))
+       | any)
+   | . + {commentsTruncated: (.comments.pageInfo.hasNextPage // false)}]
+  | if length == 0
+    then error("No thread found in the first 100 comments for \($cid)")
+    else .[0]
+    end
 '

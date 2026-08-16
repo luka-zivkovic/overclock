@@ -34,6 +34,24 @@ def validate(data: object) -> dict:
                 raise ValueError(f"changes[{index}].{field} must be a string")
         if kind != "keep" and not isinstance(change.get("reason"), str):
             raise ValueError(f"changes[{index}].reason must be a string")
+    reconstructed_original = "".join(
+        change["text"]
+        if change["type"] in {"keep", "delete"}
+        else change["before"]
+        for change in changes
+    )
+    reconstructed_revised = "".join(
+        change["text"]
+        if change["type"] == "keep"
+        else change["after"]
+        if change["type"] == "rewrite"
+        else ""
+        for change in changes
+    )
+    if reconstructed_original != data["original"]:
+        raise ValueError("ordered changes do not reconstruct original exactly")
+    if reconstructed_revised != data["revised"]:
+        raise ValueError("ordered changes do not reconstruct revised exactly")
     return data
 
 
@@ -84,6 +102,9 @@ def read_project_text(path: Path, *, root: Path) -> str:
         if not stat.S_ISREG(details.st_mode):
             os.close(fd)
             raise ValueError(f"input is not a regular file: {path}")
+        if details.st_nlink != 1:
+            os.close(fd)
+            raise ValueError(f"input has {details.st_nlink} hard links: {path}")
         with os.fdopen(fd, "r", encoding="utf-8") as handle:
             return handle.read()
     finally:
@@ -118,6 +139,10 @@ def write_project_text(
             existing = None
         if existing is not None and not stat.S_ISREG(existing.st_mode):
             raise ValueError(f"refusing to replace linked or non-regular output: {path}")
+        if existing is not None and existing.st_nlink != 1:
+            raise ValueError(
+                f"refusing to replace output with {existing.st_nlink} hard links: {path}"
+            )
         temporary_name = f".{relative.name}.tmp-{uuid.uuid4().hex}"
         flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | nofollow
         fd = os.open(temporary_name, flags, 0o644, dir_fd=parent_fd)

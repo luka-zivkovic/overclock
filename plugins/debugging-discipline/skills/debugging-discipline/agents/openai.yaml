@@ -1,4 +1,4 @@
 interface:
   display_name: "Debugging Discipline"
-  short_description: "Build a tight red feedback loop before theorizing"
-  default_prompt: "Use $debugging-discipline to build a tight, red-capable feedback loop for this failure first, then test ranked falsifiable hypotheses against it."
+  short_description: "Safely diagnose resistant bugs with falsifiable loops"
+  default_prompt: "Use $debugging-discipline to establish the safest useful observation loop, test credible falsifiable hypotheses, and diagnose without editing unless I ask for a fix."

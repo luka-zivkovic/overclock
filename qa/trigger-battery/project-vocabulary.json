@@ -1,11 +1,12 @@
 {
   "skill": "project-vocabulary",
+  "install_modes": ["skill"],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
     "specificity": 0.9
   },
-  "note": "Routing battery for project-vocabulary. FIRED means the Skill tool selected project-vocabulary. Negatives are dominated by lessons-learned collision prompts (behavior/workflow corrections) — the seam the external eval required declared from both sides.",
+  "note": "Routing battery for project-vocabulary. FIRED means the Skill tool selected project-vocabulary. Triggering on an implicit correction authorizes read/challenge/propose only; it does not itself authorize a glossary write. Negatives are dominated by lessons-learned collision prompts.",
   "fixture_git": true,
   "fixture_files": {
     "README.md": "# Routing fixture\nSaaS app with Workspaces and subscriptions.\n",
@@ -17,7 +18,9 @@
     "Add 'Grace Period' to the project glossary: the 14 days after a failed payment before cancellation.",
     "People keep using 'account' to mean three different things in this codebase — pin down our terms.",
     "We just settled what a 'Draft' means — record it in CONCEPTS.md.",
-    "Review the glossary — I think some of these definitions drifted from how we actually talk."
+    "Review the glossary — I think some of these definitions drifted from how we actually talk.",
+    "In billing, Account means the invoiced company, but identity docs use Account for a login. Capture the bounded contexts.",
+    "No — we don't call them 'Teams' anymore, that's a Workspace. And while we're at it: always run the linter before you show me a diff."
   ],
   "should_not": [
     "No, stop using npm here — this repo uses pnpm. Remember that.",

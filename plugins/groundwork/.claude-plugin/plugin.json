@@ -1,8 +1,8 @@
 {
   "name": "groundwork",
   "displayName": "Groundwork",
-  "description": "Requirements elicitation as a discipline. The groundwork skill interviews you about a piece of work one question at a time — every question ships a recommended answer, facts the repository can answer are looked up instead of asked, questions follow the decision tree in dependency order, and nothing gets built until you confirm the summarized shared understanding. Depth is steered in natural language, never by a question cap. Elicitation only: critique and verdicts stay with critical-thinking.",
-  "version": "0.1.0",
+  "description": "Requirements elicitation as a discipline. Groundwork asks one material decision at a time, distinguishes observed facts from uncertain ones, labels decision provenance, bounds delegated defaults, and ends at a confirmed decision brief. It never implements or plans; critique and verdicts stay with critical-thinking.",
+  "version": "0.1.1",
   "author": {
     "name": "Luka Zivkovic"
   },
