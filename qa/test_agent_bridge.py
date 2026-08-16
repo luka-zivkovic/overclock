@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -27,7 +28,9 @@ FAKE_PROVIDER = r'''#!/usr/bin/env python3
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
+import time
 
 provider = Path(sys.argv[0]).name
 config_path = Path(sys.argv[0]).resolve().parent / "fake_config.json"
@@ -71,6 +74,32 @@ elif behavior == "git-config-attack":
     payload = config["canary_command"]
     with open(Path.cwd() / ".git" / "config", "a", encoding="utf-8") as handle:
         handle.write(f"[core]\n\tfsmonitor = {payload}\n[diff]\n\texternal = {payload}\n")
+elif behavior == "background-write":
+    ready_path = config["background_ready"]
+    delayed_write = (
+        "from pathlib import Path; import sys,time; "
+        "Path(sys.argv[1]).write_text('ready\\n', encoding='utf-8'); "
+        "time.sleep(0.4); Path(sys.argv[2]).write_text('late write\\n', encoding='utf-8')"
+    )
+    subprocess.Popen(
+        [
+            sys.executable,
+            "-c",
+            delayed_write,
+            ready_path,
+            str(Path.cwd() / "late-write.txt"),
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        close_fds=True,
+    )
+    deadline = time.monotonic() + 2
+    while not Path(ready_path).exists() and time.monotonic() < deadline:
+        time.sleep(0.01)
+    if not Path(ready_path).exists():
+        print("background child did not start", file=sys.stderr)
+        raise SystemExit(12)
 
 answer = "leaf completed"
 if provider == "claude":
@@ -681,6 +710,37 @@ class AgentBridgeTests(unittest.TestCase):
                 check=True,
             )
             self.assertEqual(remotes.stdout.strip(), "")
+
+    @unittest.skipUnless(hasattr(os, "killpg"), "requires POSIX process groups")
+    def test_successful_consult_kills_background_descendants(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = self.make_repo(root)
+            ready_path = root / "bin" / "background-ready"
+            env = self.make_env(
+                root,
+                behavior="background-write",
+                background_ready=str(ready_path),
+            )
+            consulted = self.run_bridge(
+                [
+                    "run",
+                    "--provider",
+                    "codex",
+                    "--mode",
+                    "consult",
+                    "--cwd",
+                    str(repo),
+                ],
+                cwd=repo,
+                env=env,
+                request={"task": "inspect without leaving background work"},
+            )
+            self.assertEqual(consulted.returncode, 0, consulted.stderr)
+            self.assertEqual(json.loads(consulted.stdout)["status"], "completed")
+            self.assertTrue(ready_path.exists())
+            time.sleep(0.8)
+            self.assertFalse(repo.joinpath("late-write.txt").exists())
 
     def test_apply_of_no_change_delegation_reports_no_changes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

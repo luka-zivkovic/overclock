@@ -45,12 +45,15 @@ write through.
 
 Only an allowlisted, provider-scoped environment is forwarded to the child process (baseline
 variables plus that provider's own credential prefixes); unrelated parent secrets are not passed
-down. Codex children additionally ignore user configuration and exec-policy rules and run with
-multi-agent tools disabled, so configured MCP servers, hooks, rules, and subagents do not broaden the
-leaf role. The isolated clone protects the active checkout and Git state. It does not prevent the
-external provider from receiving the scoped repository content you delegate, consuming usage, or
-contacting its own service. Current-conversation authorization for that disclosure remains a
-parent-agent obligation that the bridge cannot enforce.
+down. The provider runs as the leader of a dedicated process group; after success as well as timeout,
+the bridge kills that group before inspecting either repository so an ordinary background descendant
+cannot keep writing the consult checkout or race delegated-clone validation. Codex children
+additionally ignore user configuration and exec-policy rules and run with multi-agent tools disabled,
+so configured MCP servers, hooks, rules, and subagents do not broaden the leaf role. The isolated
+clone protects the active checkout and Git state. It does not prevent the external provider from
+receiving the scoped repository content you delegate, consuming usage, or contacting its own service.
+Current-conversation authorization for that disclosure remains a parent-agent obligation that the
+bridge cannot enforce.
 
 ## Result states
 
