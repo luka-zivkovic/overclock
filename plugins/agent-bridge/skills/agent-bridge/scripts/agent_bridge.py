@@ -29,6 +29,7 @@ from typing import Any, Mapping, Sequence
 PROVIDERS = ("claude", "codex", "gemini")
 MODES = ("consult", "delegate")
 CHILD_MARKER = "OVERCLOCK_AGENT_BRIDGE_CHILD"
+JOB_MARKER = "OVERCLOCK_AGENT_BRIDGE_JOB"
 STATE_ROOT_ENV = "AGENT_BRIDGE_STATE_DIR"
 DEFAULT_TIMEOUT_SECONDS = 900
 GIT_TIMEOUT_SECONDS = 600
@@ -37,6 +38,8 @@ MAX_REQUEST_BYTES = 256 * 1024
 MAX_PATCH_BYTES = 50 * 1024 * 1024
 MAX_PROVIDER_OUTPUT_CHARS = 128 * 1024
 MAX_DIAGNOSTIC_CHARS = 4000
+PROCESS_SWEEP_ATTEMPTS = 5
+PROCESS_SWEEP_DELAY_SECONDS = 0.05
 
 
 class BridgeError(RuntimeError):
@@ -230,6 +233,100 @@ def job_suffix() -> str:
         # need cryptographic randomness: creation below is exclusive inside a
         # user-owned 0700 state root.
         return f"{os.getpid():x}-{time.monotonic_ns() & 0xFFFFFFFF:08x}"
+
+
+def process_job_token() -> str:
+    """Return an unguessable marker for finding descendants that leave the group."""
+    try:
+        return secrets.token_hex(16)
+    except (NotImplementedError, OSError):
+        seed = f"{os.getpid()}:{time.monotonic_ns()}:{job_suffix()}".encode("ascii")
+        return sha256_bytes(seed)
+
+
+def marked_process_ids(marker: str) -> set[int]:
+    """Find same-user processes that still carry one exact leaf-job marker."""
+    current = os.getpid()
+    found: set[int] = set()
+    encoded = marker.encode("utf-8")
+    if sys.platform.startswith("linux") and Path("/proc").is_dir():
+        for entry in Path("/proc").iterdir():
+            if not entry.name.isdigit():
+                continue
+            pid = int(entry.name)
+            if pid == current:
+                continue
+            try:
+                environment = (entry / "environ").read_bytes().split(b"\0")
+            except OSError:
+                continue
+            if encoded in environment:
+                found.add(pid)
+        return found
+    if sys.platform == "darwin":
+        try:
+            result = subprocess.run(
+                [
+                    "/bin/ps",
+                    "eww",
+                    "-U",
+                    str(os.getuid()),
+                    "-o",
+                    "pid=,command=",
+                ],
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                timeout=10,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise BridgeError(
+                "process_cleanup_failed", "could not inspect detached provider processes"
+            ) from exc
+        if result.returncode != 0:
+            raise BridgeError(
+                "process_cleanup_failed", "could not inspect detached provider processes"
+            )
+        for raw_line in result.stdout.decode("utf-8", "replace").splitlines():
+            line = raw_line.strip()
+            if not line or marker not in line:
+                continue
+            fields = line.split(None, 1)
+            if fields and fields[0].isdigit():
+                pid = int(fields[0])
+                if pid != current:
+                    found.add(pid)
+        return found
+    return found
+
+
+def terminate_marked_descendants(job_token: str) -> None:
+    """Kill leaf descendants that detached from the provider's process group.
+
+    A unique inherited environment marker survives ordinary setsid/daemonization,
+    so a post-run sweep can still find those processes after their parent exits.
+    Deliberately clearing the environment remains inside the provider sandbox's
+    threat boundary rather than this portable best-effort lifecycle guard.
+    """
+    marker = f"{JOB_MARKER}={job_token}"
+    for _ in range(PROCESS_SWEEP_ATTEMPTS):
+        pids = marked_process_ids(marker)
+        if not pids:
+            return
+        for pid in pids:
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            except OSError as exc:
+                raise BridgeError(
+                    "process_cleanup_failed", "could not terminate a detached provider process"
+                ) from exc
+        time.sleep(PROCESS_SWEEP_DELAY_SECONDS)
+    if marked_process_ids(marker):
+        raise BridgeError(
+            "process_cleanup_failed", "detached provider processes remained after termination"
+        )
 
 
 def create_job_dir() -> Path:
@@ -642,16 +739,37 @@ def run_provider(
 ) -> dict[str, Any]:
     argv, input_text = provider_command(provider, mode, cwd, prompt)
     child_env = child_environment(provider)
+    job_token = process_job_token()
+    child_env[JOB_MARKER] = job_token
+    result: subprocess.CompletedProcess[Any] | None = None
+    timed_out = False
+    cleanup_error: BridgeError | None = None
     try:
-        result = run_process(
-            argv,
-            cwd=cwd,
-            env=child_env,
-            input_text=input_text,
-            timeout=timeout_seconds,
-            new_session=True,
-        )
-    except subprocess.TimeoutExpired:
+        try:
+            result = run_process(
+                argv,
+                cwd=cwd,
+                env=child_env,
+                input_text=input_text,
+                timeout=timeout_seconds,
+                new_session=True,
+            )
+        except subprocess.TimeoutExpired:
+            timed_out = True
+    finally:
+        try:
+            terminate_marked_descendants(job_token)
+        except BridgeError as exc:
+            cleanup_error = exc
+    if cleanup_error is not None:
+        return {
+            "status": cleanup_error.status,
+            "provider": provider,
+            "response": "",
+            "stderr": str(cleanup_error),
+            "session_id": None,
+        }
+    if timed_out:
         return {
             "status": "timed_out",
             "provider": provider,
@@ -659,6 +777,7 @@ def run_provider(
             "stderr": f"provider exceeded {timeout_seconds} seconds",
             "session_id": None,
         }
+    assert result is not None
     if result.returncode != 0:
         return {
             "status": "provider_failed",

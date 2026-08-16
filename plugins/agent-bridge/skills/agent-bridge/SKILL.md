@@ -148,6 +148,6 @@ worked, what was accepted or rejected, files applied, parent-side verification, 
 
 Stop without improvising when the helper reports `unavailable`, `same_harness`, `recursive_call`,
 `dirty_repository`, `provider_failed`, `timed_out`, `scope_violation`, `stale_base`, or
-`invalid_result`. Also stop on `unsafe_provider_configuration`, `workspace_changed`,
-`workspace_tampered`, or `result_too_large`; never answer on behalf of a provider that did not run
-and never manually apply an unvalidated patch after the helper refuses it.
+`invalid_result`. Also stop on `process_cleanup_failed`, `unsafe_provider_configuration`,
+`workspace_changed`, `workspace_tampered`, or `result_too_large`; never answer on behalf of a
+provider that did not run and never manually apply an unvalidated patch after the helper refuses it.

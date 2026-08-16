@@ -46,8 +46,10 @@ write through.
 Only an allowlisted, provider-scoped environment is forwarded to the child process (baseline
 variables plus that provider's own credential prefixes); unrelated parent secrets are not passed
 down. The provider runs as the leader of a dedicated process group; after success as well as timeout,
-the bridge kills that group before inspecting either repository so an ordinary background descendant
-cannot keep writing the consult checkout or race delegated-clone validation. Codex children
+the bridge kills that group and sweeps for same-user descendants carrying its unique per-run marker
+before inspecting either repository. This catches ordinary background workers and processes that
+create a new session; a process that deliberately clears inherited identity remains contained by the
+provider's native sandbox rather than this portable lifecycle guard. Codex children
 additionally ignore user configuration and exec-policy rules and run with multi-agent tools disabled,
 so configured MCP servers, hooks, rules, and subagents do not broaden the leaf role. The isolated
 clone protects the active checkout and Git state. It does not prevent the external provider from
@@ -64,6 +66,8 @@ bridge cannot enforce.
 - `dirty_repository`: delegation was requested from a non-clean active repository.
 - `provider_failed`: the selected CLI returned a non-zero exit or malformed result.
 - `timed_out`: the provider exceeded the configured timeout.
+- `process_cleanup_failed`: detached provider processes could not be inspected or terminated; no
+  result is trusted.
 - `unsafe_provider_configuration`: Gemini found repository-controlled startup configuration that
   Agent Bridge will not load automatically.
 - `workspace_changed`: a consultation moved the active `HEAD` or working tree; the answer is

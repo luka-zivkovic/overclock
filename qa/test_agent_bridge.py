@@ -74,7 +74,7 @@ elif behavior == "git-config-attack":
     payload = config["canary_command"]
     with open(Path.cwd() / ".git" / "config", "a", encoding="utf-8") as handle:
         handle.write(f"[core]\n\tfsmonitor = {payload}\n[diff]\n\texternal = {payload}\n")
-elif behavior == "background-write":
+elif behavior in {"background-write", "detached-background-write"}:
     ready_path = config["background_ready"]
     delayed_write = (
         "from pathlib import Path; import sys,time; "
@@ -93,6 +93,7 @@ elif behavior == "background-write":
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         close_fds=True,
+        start_new_session=behavior == "detached-background-write",
     )
     deadline = time.monotonic() + 2
     while not Path(ready_path).exists() and time.monotonic() < deadline:
@@ -735,6 +736,40 @@ class AgentBridgeTests(unittest.TestCase):
                 cwd=repo,
                 env=env,
                 request={"task": "inspect without leaving background work"},
+            )
+            self.assertEqual(consulted.returncode, 0, consulted.stderr)
+            self.assertEqual(json.loads(consulted.stdout)["status"], "completed")
+            self.assertTrue(ready_path.exists())
+            time.sleep(0.8)
+            self.assertFalse(repo.joinpath("late-write.txt").exists())
+
+    @unittest.skipUnless(
+        sys.platform.startswith("linux") or sys.platform == "darwin",
+        "requires supported detached-process inspection",
+    )
+    def test_successful_consult_kills_detached_session_descendants(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo = self.make_repo(root)
+            ready_path = root / "bin" / "detached-background-ready"
+            env = self.make_env(
+                root,
+                behavior="detached-background-write",
+                background_ready=str(ready_path),
+            )
+            consulted = self.run_bridge(
+                [
+                    "run",
+                    "--provider",
+                    "codex",
+                    "--mode",
+                    "consult",
+                    "--cwd",
+                    str(repo),
+                ],
+                cwd=repo,
+                env=env,
+                request={"task": "inspect without leaving detached work"},
             )
             self.assertEqual(consulted.returncode, 0, consulted.stderr)
             self.assertEqual(json.loads(consulted.stdout)["status"], "completed")

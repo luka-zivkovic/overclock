@@ -34,9 +34,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   header) and stops false positives on patch content that merely mentions a
   mode. The `.git` path guard is case-insensitive for case-insensitive
   filesystems.
-- After provider success or timeout, kill the leaf's entire process group before
-  repository inspection so orphaned descendants cannot keep running (in consult
-  mode, inside the real repository) or race delegated-clone validation.
+- After provider success or timeout, kill the leaf's entire process group and sweep
+  for same-user processes carrying its unique per-run marker before repository
+  inspection. This also terminates descendants that created a new session; fail
+  closed with `process_cleanup_failed` when they cannot be inspected or killed.
 - Harden delegation against a leaf-controlled clone. Reset the clone's `.git`
   configuration to its pristine post-clone state and run every bridge-side git
   command with global/system configuration masked, so a worker-written
