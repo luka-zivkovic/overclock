@@ -17,8 +17,8 @@ when it still has power.
 Before engaging any mode, read `references/right-sizing.md` and `references/anti-triggers.md`.
 If the change matches an anti-trigger (typo fix, dependency bump, rename, formatting,
 new-feature implementation without an explicit validate request, generated files,
-already-covered code), do the requested work and never mention this skill. The structural check
-below IS the right-size gate; there is no ceremony on trivial edits.
+already-covered code), do the requested work without invoking or surfacing this skill. The
+structural check below IS the right-size gate; there is no ceremony on trivial edits.
 
 ## Mode routing — one question
 
