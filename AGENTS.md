@@ -51,6 +51,10 @@ instructions provider-neutral here; `CLAUDE.md` imports this file for Claude Cod
 
 ## Evidence requirements
 
+- Every non-trivial skill change must declare an `objective`, `rubric`, or `subjective` evidence
+  tier in its committed eval/experiment record or PR description. The tier governs the acceptance
+  claim; it never relaxes the behavioral and routing evidence required below. Follow the adopted
+  definitions in `docs/skill-authoring-notes.md`.
 - Behavioral changes require a committed live-eval case or an explicit reason the existing case
   already covers them.
 - Routing changes require positive and negative controls. Update the trigger battery when that

@@ -12,6 +12,7 @@ from audit_skills import (  # noqa: E402
     audit_openai_metadata,
     audit_routing_battery_contract,
     discover,
+    render_markdown,
 )
 from validate_skill import parse_frontmatter  # noqa: E402
 
@@ -164,6 +165,24 @@ interface:
         self.assertTrue(
             any("routing battery install matrix" in message for message in messages)
         )
+
+    def test_markdown_does_not_infer_a_change_evidence_tier(self) -> None:
+        rendered = render_markdown(
+            [
+                {
+                    "plugin": "example-plugin",
+                    "name": "example-skill",
+                    "grade": "PASS",
+                    "tokens": 100,
+                    "eval": "qa/evals/example.json",
+                    "findings": [],
+                }
+            ],
+            Path("plugins"),
+        )
+
+        self.assertNotIn("| Tier |", rendered)
+        self.assertIn("does not assign a change-level evidence tier", rendered)
 
 
 if __name__ == "__main__":

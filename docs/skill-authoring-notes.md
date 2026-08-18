@@ -8,8 +8,9 @@ Conventions worth borrowing, lifted from two audited repos (2026-07-19):
   `docs/solutions/skill-design/` corpus of ~30 skill-design learnings.
 
 These are authoring conventions, not skill candidates — skill adoption verdicts live in
-`docs/brainstorm/external-eval-*.md`. Nothing here is binding until it's applied to a skill (which
-is a shipping change: version bump + evals per the maintainer contract).
+`docs/brainstorm/external-eval-*.md`. The evidence-tier section is binding because the maintainer
+contract explicitly adopts it. The other notes are not binding until applied to a skill (which is
+a shipping change: version bump + evals per the maintainer contract).
 
 ## From mattpocock/skills (`writing-great-skills`)
 
@@ -105,21 +106,29 @@ whole (verdicts in the external-eval log):
 
 ## Evidence tiers for skill changes
 
-(Adopted from skill-mastery during its dissolution, 2026-08-20.)
+(Adopted from skill-mastery during its dissolution, 2026-08-18.)
 
-Every non-trivial skill change should declare what kind of evidence supports
-it, and be held to that tier's accept rule — nothing stricter, nothing looser.
+Every non-trivial skill change declares what kind of evidence supports it in its committed
+eval/experiment record or PR description. The tier limits the acceptance claim the evidence can
+support; it never weakens the behavioral or routing evidence required by `AGENTS.md`.
 
 | Tier | Verifier | Accept rule |
 |---|---|---|
-| `objective` | Script, test, exact match, schema check, exit code | Strict validation improvement |
-| `rubric` | Governed LLM judge (coeval golden-set gate), 3+ runs | New version wins consistently; never graded by the model context that produced the edit |
-| `subjective` | No reliable scorer | No scored gate — record review notes, claim no measured gain |
+| `objective` | Script, test, exact match, schema check, or exit code | The candidate strictly improves the declared deterministic check without regression |
+| `rubric` | Independent judge over predeclared cases and a fixed rubric | The candidate passes the preregistered threshold without regression; the authoring context never grades its own edit |
+| `subjective` | No reliable scorer | Record qualitative review notes and claim no measured gain |
 
 Rules of thumb:
-- Most skills in this repo are `rubric` or `subjective`. Do not label a
-  judgment skill `objective` because a script can count its words.
-- Rubric-tier gating runs through coeval (`tools/ci/gate.mjs` against the
-  skill's bench project), not hand-rolled pairwise judging.
-- A change with no tier declared is a `subjective` change and ships on
-  review alone — that is allowed, but say so.
+- Most behavioral-quality changes are `rubric` or `subjective`. Do not label a judgment change
+  `objective` because a script can count its words.
+- A tier belongs to a change, not to the skill body. Do not infer it from words such as `test`,
+  `schema`, or `git` in `SKILL.md`.
+- Rubric evidence may use Overclock's committed live-eval or experiment harness. When using
+  Coeval, follow the pinned
+  [evidence-tier recipe](https://github.com/luka-zivkovic/coeval/blob/b7161e253be162a2e2c310e6a779475b2003868d/docs/evidence-tier-gating.md)
+  and record the Coeval revision, project, golden-set size, baseline/candidate revisions, and gate
+  result. The recipe's `tools/ci/gate.mjs` path is relative to a Coeval checkout, not this repo.
+  Fewer than roughly ten human-adjudicated golden cases is wiring evidence, not quality evidence.
+- `Subjective` means only that no scored improvement gate is honest. Behavioral changes still need
+  the committed live-eval case or existing-case rationale required by `AGENTS.md`, and routing
+  changes still need positive and negative controls.
