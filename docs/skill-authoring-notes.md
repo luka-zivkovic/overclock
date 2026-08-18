@@ -102,3 +102,24 @@ whole (verdicts in the external-eval log):
   red."
 - *Decision primer for re-runs* — a review skill re-run on the same artifact carries prior-round
   applied/rejected decisions so rejected findings don't resurface.
+
+## Evidence tiers for skill changes
+
+(Adopted from skill-mastery during its dissolution, 2026-08-20.)
+
+Every non-trivial skill change should declare what kind of evidence supports
+it, and be held to that tier's accept rule — nothing stricter, nothing looser.
+
+| Tier | Verifier | Accept rule |
+|---|---|---|
+| `objective` | Script, test, exact match, schema check, exit code | Strict validation improvement |
+| `rubric` | Governed LLM judge (coeval golden-set gate), 3+ runs | New version wins consistently; never graded by the model context that produced the edit |
+| `subjective` | No reliable scorer | No scored gate — record review notes, claim no measured gain |
+
+Rules of thumb:
+- Most skills in this repo are `rubric` or `subjective`. Do not label a
+  judgment skill `objective` because a script can count its words.
+- Rubric-tier gating runs through coeval (`tools/ci/gate.mjs` against the
+  skill's bench project), not hand-rolled pairwise judging.
+- A change with no tier declared is a `subjective` change and ships on
+  review alone — that is allowed, but say so.
