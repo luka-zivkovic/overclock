@@ -4,7 +4,8 @@
 The audit checks loading structure, routing metadata, bundled-resource links,
 progressive-disclosure size, and whether each plugin distribution has a live eval
 suite. It deliberately avoids subjective prose/style grading: behavioral quality is
-owned by qa/run_evals.sh and the committed eval cases.
+owned by qa/run_evals.sh and the committed eval cases. Evidence tiers belong to a
+specific change and are never inferred from words in a skill body.
 
 Usage:
   python3 tools/audit_skills.py plugins
@@ -39,10 +40,6 @@ SKIP_DIRS = {
 }
 RESOURCE_RE = re.compile(
     r"(?<![\w/])((?:references|templates|scripts|assets)/[A-Za-z0-9._/-]+)"
-)
-OBJECTIVE_CUES = re.compile(
-    r"\b(test|exit code|exact|byte-identical|json|schema|compile|lint|diff|git)\b",
-    re.I,
 )
 OPENAI_INTERFACE_FIELDS = ("display_name", "short_description", "default_prompt")
 _FIXTURE_TEMP: tempfile.TemporaryDirectory[str] | None = None
@@ -387,7 +384,6 @@ def audit_one(skill_md: Path) -> dict:
                     audit_routing_battery_contract(battery, skill_dir)
                 )
 
-    tier = "objective" if OBJECTIVE_CUES.search(body) else "rubric"
     grade = (
         "FAIL" if any(level == "FAIL" for level, _ in findings)
         else "WARN" if any(level == "WARN" for level, _ in findings)
@@ -399,7 +395,6 @@ def audit_one(skill_md: Path) -> dict:
         "path": str(skill_md),
         "grade": grade,
         "tokens": tokens,
-        "tier": tier,
         "eval": eval_status,
         "resources": referenced,
         "findings": [
@@ -421,13 +416,13 @@ def render_markdown(results: list[dict], root: Path) -> str:
     )
     lines.extend([
         "",
-        "| Plugin | Skill | Grade | ~Tokens | Tier | Eval |",
-        "|---|---|---:|---:|---|---|",
+        "| Plugin | Skill | Grade | ~Tokens | Eval |",
+        "|---|---|---:|---:|---|",
     ])
     for result in results:
         lines.append(
             f"| {result['plugin']} | {result['name']} | {result['grade']} | "
-            f"{result['tokens']} | {result['tier']} | {result['eval']} |"
+            f"{result['tokens']} | {result['eval']} |"
         )
 
     for result in results:
@@ -439,8 +434,9 @@ def render_markdown(results: list[dict], root: Path) -> str:
 
     lines.extend([
         "",
-        "This report covers mechanical readiness only. Use the committed live evals and a "
-        "manual trigger/safety review for behavioral conclusions.",
+        "This report covers mechanical readiness only and does not assign a change-level "
+        "evidence tier. Use the committed live evals and a manual trigger/safety review for "
+        "behavioral conclusions.",
     ])
     return "\n".join(lines)
 
