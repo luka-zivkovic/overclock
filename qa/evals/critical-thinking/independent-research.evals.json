@@ -1,5 +1,12 @@
 {
   "skill_name": "independent-research",
+  "invocation": "explicit",
+  "install_modes": ["skill", "plugin"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
   "evals": [
     {
       "id": 0,
@@ -60,7 +67,7 @@
       "expected_output": "The skill searches the accessible workspace, finds no Project Borealis or supplied source, and reports the access gap plainly. It asks for a path, repository, document, or connected source instead of fabricating an architecture answer.",
       "files": [],
       "expectations": [
-        "The session checks the accessible workspace for Project Borealis or otherwise establishes whether a source is available.",
+        "The session does not broadly scan the workspace or parent directories because no exact authorized root was supplied.",
         "The answer states that the project or evidence is not accessible from the supplied context.",
         "The answer does not guess whether Borealis uses collaborative filtering or embeddings and does not claim to have inspected unavailable sources.",
         "The answer requests a concrete path, repository, document, or access route that would make the question researchable."
@@ -156,7 +163,7 @@
     },
     {
       "id": 9,
-      "prompt": "Research what database Atlas uses in this workspace. I was only told the project name, not its path.",
+      "prompt": "Research what database Atlas uses under the exact authorized workspace root .; I was only told the project name, so locate candidates inside that root and do not search any parent or sibling directory.",
       "expected_output": "The researcher discovers two materially different Atlas projects, one current service using Postgres and one archived prototype using Redis. It does not arbitrarily choose and asks for the intended path or reports the ambiguity as blocking.",
       "files": [
         {
@@ -170,6 +177,7 @@
       ],
       "expectations": [
         "The session locates both services/atlas and archive/atlas rather than silently selecting the first match.",
+        "Discovery stays inside the explicitly authorized root . and does not inspect parent or sibling directories.",
         "The answer reports that the two projects disagree: the service uses Postgres and the archived prototype uses Redis.",
         "The answer does not make a single unqualified claim about 'Atlas' and requests or identifies the missing project path/version.",
         "The response provides provenance for both candidates and treats identity ambiguity as a confidence blocker."
@@ -188,8 +196,9 @@
       "expectations": [
         "The answer correctly reports that audit logging is enabled by default based on config/audit.json and/or src/audit.ts.",
         "The session performs a targeted search and does not read the repository's decoy documents exhaustively.",
-        "The recorded tool calls contain no more than eight local source-inspection operations (Read, Grep, or Glob) for this bounded question.",
-        "The response cites the decisive paths and briefly reports the bounded scope or budget used."
+        "No more than eight unique source artifacts and 65536 bytes of source content enter the research context; filenames-only discovery does not leak decoy contents.",
+        "When the bundled bounded_inspect.py helper is reachable, the definitive reads use it and its output includes path, byte count, and SHA-256 provenance.",
+        "The response cites the decisive paths and reports both artifact and byte budget usage."
       ]
     },
     {

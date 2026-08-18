@@ -87,9 +87,48 @@ else:
 
             claude = next(item for item in result["instruction_files"] if item["path"].endswith("CLAUDE.md"))
             self.assertEqual(claude["kind"], "symlink")
+            self.assertFalse(claude["link_target_disclosed"])
             self.assertNotIn("sha256", claude)
             self.assertNotIn("top-secret-value", serialized)
+            self.assertNotIn("outside-secret.md", json.dumps(claude))
             self.assertEqual(before, after)
+
+    def test_symlink_target_text_and_cli_diagnostics_are_never_echoed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            root = base / "project"
+            root.mkdir()
+            (root / "CLAUDE.md").symlink_to("TOKEN=dont-disclose.md")
+            bin_dir = base / "bin"
+            bin_dir.mkdir()
+            executable = bin_dir / "claude"
+            executable.write_text(
+                """#!/usr/bin/env python3
+import sys
+if sys.argv[1:] == ["--version"]:
+    print("TOKEN=version-secret")
+    raise SystemExit(0)
+print("TOKEN=stderr-secret", file=sys.stderr)
+raise SystemExit(7)
+""",
+                encoding="utf-8",
+            )
+            executable.chmod(0o755)
+            env = dict(os.environ)
+            env["PATH"] = f"{bin_dir}{os.pathsep}{os.defpath}"
+            env["CLAUDE_CONFIG_DIR"] = str(base / "user-config")
+
+            result = inventory.collect_inventory(root, env)
+            serialized = json.dumps(result)
+
+            self.assertNotIn("dont-disclose", serialized)
+            self.assertNotIn("version-secret", serialized)
+            self.assertNotIn("stderr-secret", serialized)
+            self.assertEqual(result["host"]["version"], "unknown")
+            self.assertEqual(
+                result["host"]["error"],
+                "claude plugin list exited 7",
+            )
 
     def test_instruction_metadata_records_format_without_contents(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -170,6 +209,112 @@ else:
                 ["z-renamed-lessons"],
             )
             self.assertEqual(result["standalone_overlaps"][0]["name"], "lessons-learned")
+
+    def test_standalone_scan_reads_frontmatter_from_large_real_skills(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            skills = root / ".claude" / "skills"
+            skills.mkdir(parents=True)
+            catalog = inventory.load_catalog()
+            expected = {
+                name
+                for entry in catalog["packages"]
+                for name in entry["skill_names"]
+            }
+            source_by_name = {
+                path.parent.name: path
+                for path in (REPO / "plugins").glob("*/skills/*/SKILL.md")
+            }
+            source_skills = [source_by_name[name] for name in sorted(expected)]
+            for index, source in enumerate(source_skills):
+                target = skills / f"renamed-{index:02d}"
+                target.mkdir()
+                (target / "SKILL.md").write_bytes(source.read_bytes())
+            env = dict(os.environ)
+            env["CLAUDE_CONFIG_DIR"] = str(root / "user-config")
+            env["PATH"] = ""
+
+            result = inventory.collect_inventory(root, env)
+
+            observed = {entry["name"] for entry in result["standalone_overlaps"]}
+            self.assertEqual(observed, expected)
+            self.assertGreater(
+                max(source.stat().st_size for source in source_skills),
+                8_192,
+            )
+
+    def test_standalone_scan_finds_name_after_old_eight_kib_prefix(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            skill = root / ".claude" / "skills" / "renamed-memory"
+            skill.mkdir(parents=True)
+            (skill / "SKILL.md").write_text(
+                "---\n"
+                "description: >\n"
+                f"  {'large frontmatter ' * 700}\n"
+                "name: session-handoff\n"
+                "---\n"
+                "# Body\n",
+                encoding="utf-8",
+            )
+            env = dict(os.environ)
+            env["CLAUDE_CONFIG_DIR"] = str(root / "user-config")
+            env["PATH"] = ""
+
+            result = inventory.collect_inventory(root, env)
+
+            self.assertEqual(
+                [entry["name"] for entry in result["standalone_overlaps"]],
+                ["session-handoff"],
+            )
+
+    def test_user_instruction_metadata_requires_explicit_opt_in(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "project"
+            config = Path(temp) / "user-config"
+            root.mkdir()
+            config.mkdir()
+            (config / "CLAUDE.md").write_text(
+                "private user instructions\n", encoding="utf-8"
+            )
+            env = dict(os.environ)
+            env["CLAUDE_CONFIG_DIR"] = str(config)
+            env["PATH"] = ""
+
+            default = inventory.collect_inventory(root, env)
+            opted_in = inventory.collect_inventory(
+                root, env, include_user_instructions=True
+            )
+
+            self.assertFalse(
+                any(item["scope"] == "user" for item in default["instruction_files"])
+            )
+            self.assertTrue(
+                any(item["scope"] == "user" for item in opted_in["instruction_files"])
+            )
+            self.assertNotIn("private user instructions", json.dumps(opted_in))
+
+    def test_writable_reports_effective_access_not_any_mode_bit(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            target = root / "CLAUDE.md"
+            target.write_text("instructions\n", encoding="utf-8")
+            target.chmod(0o400)
+            env = dict(os.environ)
+            env["CLAUDE_CONFIG_DIR"] = str(root / "user-config")
+            env["PATH"] = ""
+
+            result = inventory.collect_inventory(root, env)
+            item = next(
+                entry
+                for entry in result["instruction_files"]
+                if entry["path"].endswith("CLAUDE.md")
+            )
+
+            self.assertEqual(item["writable"], inventory.effective_writable(target))
+            self.assertEqual(
+                item["writable_basis"], "effective access at inventory time"
+            )
 
 
 if __name__ == "__main__":

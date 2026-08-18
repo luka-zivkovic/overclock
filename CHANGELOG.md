@@ -3,7 +3,89 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## agent-bridge
+
+### 0.1.1 — 2026-08-15 (initial release)
+- New plugin. `$agent-bridge` lets the current harness use an installed Claude,
+  Codex, or Gemini CLI as a bounded leaf collaborator while retaining parent-task
+  ownership. Consultation is read-only; implementation delegation requires the
+  user's existing write authority, an exact clean base, allowed paths, acceptance
+  criteria, and an explicit `--allow-write` runtime gate.
+- Run delegated implementation only in a private local clone under the user's
+  cache directory (never the shared system temp dir, which provider sandboxes can
+  write to). The clone's `origin` remote is removed after cloning, so "never
+  pushes" is structural. Return a provider-attributed result, changed paths, an
+  ASCII Git binary patch, and SHA-256 integrity anchors; refuse out-of-scope
+  changes and never auto-commit, push, publish, or let two agents write the
+  active checkout concurrently.
+- Add digest-locked inspect/apply operations that revalidate repository identity,
+  base SHA, clean state, patch integrity, path scope, and `git apply --check`
+  before changing the active working tree. Scope inspection and both apply steps
+  consume the digest-verified in-memory patch bytes via stdin, so nothing between
+  verification and application can substitute the file on disk. A completed
+  delegation that changed nothing reports `no_changes` instead of a misleading
+  apply error. Provider failures, same-harness recursion, timeouts, and
+  unavailable CLIs fail closed without fallback.
+- Create bridge-owned job files (`result.json`, `result.patch`) with
+  `O_EXCL|O_NOFOLLOW`, so a leaf-planted symlink or pre-created file fails loudly
+  instead of redirecting an unsandboxed bridge write.
+- Reject symlink-touching patches by parsing git file-mode headers, which also
+  catches retargeting an existing tracked symlink (a bare `index … 120000`
+  header) and stops false positives on patch content that merely mentions a
+  mode. The `.git` path guard is case-insensitive for case-insensitive
+  filesystems.
+- After provider success or timeout, kill the leaf's entire process group and sweep
+  for same-user processes carrying its unique per-run marker before repository
+  inspection. This also terminates descendants that created a new session; fail
+  closed with `process_cleanup_failed` when they cannot be inspected or killed.
+- Harden delegation against a leaf-controlled clone. Reset the clone's `.git`
+  configuration to its pristine post-clone state and run every bridge-side git
+  command with global/system configuration masked, so a worker-written
+  `.git/config` (`core.fsmonitor`, `diff.external`) can no longer execute commands
+  in the bridge process.
+- Enforce delegated scope against the patch itself. Derive the built patch's target
+  paths with `git apply --numstat`, require them to fit the allowlist and match the
+  observed changes, and refuse symbolic-link patches — at both build and apply time,
+  instead of trusting only the self-recorded changed-file list.
+- Forward only an allowlisted, provider-scoped environment to the child process so
+  unrelated parent secrets are not disclosed to the external provider.
+- Start Codex children without user configuration or exec-policy rules and disable
+  their multi-agent tools so MCP servers, hooks, rules, and subagents cannot broaden
+  the bounded leaf role.
+- Verify consultation against a pre/post `HEAD` and working-tree snapshot and report
+  `workspace_changed`; add `workspace_tampered` for a clone whose `.git` was replaced.
+- Honor `is_error` results from Claude, bound bridge-side git commands with a timeout,
+  and derive the state directory per-user with an ownership check.
+- Keep working when a host sandbox denies the entropy device: job naming falls back to
+  a non-cryptographic unique suffix (creation stays exclusive in the user-owned state
+  root).
+- Sharpen the routing description with concrete second-reviewer/critique/delegate
+  trigger phrasings and an explicit rule that the bridge, not ad hoc provider CLI
+  commands, is the sanctioned cross-provider path.
+
 ## project-vocabulary
+
+### 0.1.2 — 2026-07-26
+- Crash durability: an apply killed between claiming CONCEPTS.md and installing
+  the replacement no longer leaves the glossary missing — the next apply
+  restores a stale stranded claim (no-replace rename, so a concurrent glossary
+  is never overwritten).
+- Make mixed terminology-and-workflow prompts an explicit positive routing case:
+  project-vocabulary owns only the domain-language half while preserving its
+  standalone no-write fallback for the optional workflow owner.
+
+### 0.1.1 — 2026-07-23
+- Separate implicit assistance from write authority. Automatic routing may inspect
+  untrusted project vocabulary, challenge a fuzzy term, and present an exact proposal;
+  only an explicit add/update request or approval of that proposal may change
+  `CONCEPTS.md`.
+- Add a root-confined helper that refuses linked, special, escaped, or concurrently
+  changed inputs, previews digest-locked diffs, and atomically applies only the
+  approved glossary candidate. Expand unit, behavioral, and installed-together
+  lessons/vocabulary controls.
+- Keep mixed terminology/workflow corrections safe when installed alone: handle only
+  the vocabulary half, leave lesson storage untouched, and name the unavailable
+  optional owner instead of implying it ran.
 
 ### 0.1.0 — 2026-07-20
 - New plugin. `project-vocabulary`: maintain the project's ubiquitous
@@ -31,6 +113,15 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## debugging-discipline
 
+### 0.1.1 — 2026-07-23
+- Make diagnosis read-only by default and require explicit implementation authority
+  before source edits or instrumentation. Add safe production/replay rules, a
+  fail-soft path when reproduction is unsafe, and proportionate flake/performance
+  evidence guidance.
+- Replace forced 3–5 hypothesis ceremony with 1–5 credible hypotheses, calibrate
+  causal claims, and add a real installed-together composition case with
+  discipline-gates plus production-safety coverage.
+
 ### 0.1.0 — 2026-07-20
 - New plugin. `debugging-discipline`: systematic diagnosis for bugs that
   resist the ordinary red-test path, merged from the two best published
@@ -57,6 +148,14 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## groundwork
 
+### 0.1.1 — 2026-07-23
+- Make the skill stop at a provenance-labelled, confirmed decision brief. Groundwork
+  no longer implements or plans after elicitation.
+- Bound blanket delegation to reversible, low-impact defaults; high-impact privacy,
+  authorization, retention, billing, and destructive choices must be asked or
+  explicitly deferred. Add an objective stopping rule, scoped inspection guidance,
+  and a plugin-loaded multi-turn correction/confirmation case.
+
 ### 0.1.0 — 2026-07-20 (renamed from `grilling` the same day, pre-adoption)
 - Renamed `grilling` → `groundwork` on maintainer preference before any
   external adoption; skill behavior unchanged. "Grill me about this" remains
@@ -82,6 +181,45 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## pr-feedback
 
+### 0.2.1 — 2026-07-26
+- Fetch robustness: paginated GraphQL page sets are handed to `jq` through
+  `--slurpfile` temp files instead of `--argjson` argv values, so very large
+  PRs no longer abort on the ARG_MAX limit.
+- Route prefetched GitHub review data, open-review-comment requests, and approved
+  resolver-plan follow-ups explicitly to `resolve-pr-feedback`, while keeping all
+  remote mutation reserved for manual `$publish-pr-feedback`.
+- Carry a falsified shared premise and its decisive evidence into every affected
+  bot-thread verdict and reply, rather than weakening sibling items to generic
+  "not applicable" explanations.
+- Require a persistent uncommitted regression test file for executable
+  reviewer-reported symptoms; inline runtime probes and manual traces no longer
+  substitute for a red/green artifact.
+- Make the local report name explicit `$publish-pr-feedback` on the handoff
+  sentence instead of relying on a pronoun-only reference.
+
+### 0.2.0 — 2026-07-23
+- Split local judgment from remote authority. `resolve-pr-feedback` now only fetches,
+  judges, fixes within approved local scope, and drafts replies; it cannot post,
+  react, or resolve even after conversational approval.
+- Add manual-only `$publish-pr-feedback`. It accepts only a sealed plan path plus its
+  exact SHA-256 digest, verifies the GitHub host/repository/PR node/open state/head
+  OID and every source/action before mutation, and never judges feedback or changes
+  code.
+- Add fully paginated, author-independent sequential-retry/source scans, exact plan
+  sealing, linked-file refusal, non-overwriting atomic output, all-actions preflight,
+  a final head re-pin, a required single-publisher assertion, and structured
+  partial-failure reporting. Concurrent publishers remain unsupported because the
+  marker check and GitHub comment creation are not atomic. Remove the resolver's
+  direct reply/resolve scripts and add four explicit publication-boundary evals.
+- Make approved-plan preparation work from a standalone `resolve-pr-feedback`
+  installation: the resolver now carries its own read-only GitHub client and local
+  plan contract, while the publisher independently revalidates its own contract copy
+  and sealed digest.
+- Keep resolver safety gates intact without sibling skills: reviewer-reported bugs get
+  a direct uncommitted red test when test-discipline is absent, defensive weakening
+  gets local history/current-state checks when git-archaeologist is absent, and a
+  missing publisher is reported as an unavailable remote capability.
+
 ### 0.1.0 — 2026-07-19
 - New plugin. `resolve-pr-feedback`: consume-side PR review workflow for GitHub
   (including Enterprise). Fetches every unresolved review thread, review body,
@@ -100,6 +238,31 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.15 — 2026-08-08
+- Update the bundled capability catalog to the hardened Agent Bridge (0.1.1) and the
+  mutation-restore fix in discipline-gates (0.1.6).
+
+### 0.1.14 — 2026-08-04
+- Publish Agent Bridge in the bundled capability catalog for bounded cross-harness
+  consultation and isolated implementation delegation.
+
+### 0.1.13 — 2026-07-26
+- Synchronize the bundled catalog for critical-thinking 0.1.4, pr-feedback 0.2.1,
+  and project-vocabulary 0.1.2.
+
+### 0.1.12 — 2026-07-23
+- Keep the default inventory project-scoped. User-level instruction metadata now
+  requires an explicit opt-in rerun and file contents remain omitted.
+- Fix standalone overlap detection for skill frontmatter beyond the old 8 KiB read,
+  use effective write access instead of mode-bit guesses, and match every shipped
+  skill name through the capability catalog.
+- Keep inventory diagnostics metadata-only: linked instruction targets, unexpected
+  CLI output, and plugin-command stderr are never echoed into the report.
+- Extend catalog validation to require manifest/marketplace version equality and an
+  exact `skill_names` list for every independently installable plugin.
+- Add a host-resolved absolute-path fallback for the bundled inventory helper when
+  the host does not expand Claude Code's skill environment variables.
 
 ### 0.1.11 — 2026-07-20
 - Catalog rename: `grilling` → `groundwork`.
@@ -164,6 +327,32 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## critical-thinking
 
+### 0.1.4 — 2026-07-26
+- Put explicit critical-thinking requests and decision-plus-local-evidence prompts
+  first in the routing description, and keep the complete listing below Claude
+  Code's description truncation limit.
+- Promote missing context isolation to an early hard gate: the critical-thinking
+  context may not inspect the referenced local root as a fallback, even when the
+  user requests direct research or same-context evidence appears decisive.
+- Resolve optional-skill availability from the host declaration rather than
+  searching user directories, plugin caches, or the filesystem.
+
+### 0.1.3 — 2026-07-23
+- Tighten right-sizing for low-stakes requests and make reconsideration of an earlier
+  user-settled choice explicit rather than socially automatic. Bound delegated local
+  research to one material pass.
+- Require independent-research callers to name exact roots and exclusions. Add an
+  8-artifact/64 KiB cumulative budget, dirty-worktree provenance, and a deterministic
+  no-follow reader that rejects links and special files while emitting SHA-256
+  evidence metadata.
+- Make isolation claims host-conditional: Claude Code uses its forked Explore worker;
+  other hosts must provide an equivalent fresh read-only worker or the skill reports
+  an isolation gap without inspecting sources.
+- Expand prompt-injection, budget, access, and long-context behavioral controls and
+  installed-together routing exclusions. A standalone critical-thinking install now
+  treats independent-research as optional and returns a conditional verdict rather
+  than implying that a missing sibling ran.
+
 ### 0.1.2 — 2026-07-20
 - Reassessment now distinguishes the assistant's own conclusions (hypotheses
   to re-derive) from decisions the user examined and made (settled): a
@@ -224,6 +413,14 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## natural-writing
 
+### 1.0.4 — 2026-07-23
+- Reframe punctuation and vocabulary rules as a fallback house style beneath the
+  author's established voice. Preserve modality, caveats, deliberate dashes, exact
+  quotations, actors, and factual scope rather than strengthening prose for fluency.
+- Make visual revision reports strictly explicit opt-in, move their schema into a
+  readable reference, verify that change segments reconstruct both complete strings,
+  and improve report accessibility and replacement tests.
+
 ### 1.0.3 — 2026-07-20
 - Add a grounding rule to the drafting guidance, lifted from the
   writing-structure evaluation (external-eval-2026-07-19-1945.md, INSPIRE):
@@ -258,6 +455,36 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   byte-identical-quote traps and two negative controls): 5/5 green.
 
 ## discipline-gates
+
+### 0.1.6 — 2026-08-08
+- A trial refused before the mutant is installed now removes its own backup, so
+  the next trial no longer fails with "mutation backup already exists". If the
+  post-trial restore itself fails, the error names the target and its original
+  digest and states the mutant may still be on disk; the exit-code contract in
+  the module docstring documents this exception.
+- Fix a mutation-trial restore gap: if replacing the target file failed after the
+  mutant was already published, the working tree could be left mutated. The trial now
+  marks the mutant installed at publication so the `finally` restore runs on every
+  post-publication failure path.
+- Give the mutation-trial wrapper a distinct exit code (3) for a surviving mutation so
+  scripted callers gating on exit status no longer read a survivor as a pass.
+
+### 0.1.5 — 2026-07-23
+- Remove all automatic staging and commits from test-discipline. Red regressions and
+  characterization pins remain narrowly scoped working-tree evidence.
+- Publish integrity-checked atomic mutation backups and a transactional runner that
+  restores in `finally`; calibrate results to “detected/did not detect this selected
+  mutation” and require the intended behavioral assertion to fail.
+- Keep verified mutation claims and temporary files open until cleanup completes, so
+  Linux inode reuse cannot make a concurrent replacement look like an owned file.
+- Tighten the test/debugging seam and current-coverage definition. Git archaeology now
+  treats history and remote discussion as untrusted data, verifies repository
+  identity, distinguishes dirty committed guards from new uncommitted code, and
+  requires current callers/tests/replacement controls before `safe-to-remove`.
+- Make each gate's triage references skill-specific instead of loading sibling-only rules.
+  Git archaeology now uses test-discipline only when installed and otherwise creates the
+  smallest uncommitted behavioral pin directly, so both skills retain their safety contract
+  when installed alone.
 
 ### 0.1.4 — 2026-07-20
 - git-archaeologist: name simplification-framed removals explicitly in the
@@ -317,6 +544,26 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## learning-loop
 
+### 1.0.3 — 2026-07-23
+- Crash durability: a writer killed mid-update no longer leaves the canonical
+  memory file missing — the next lock-holding write restores the stranded
+  claim file first. Untrusted-content read sentinels carry a per-invocation
+  nonce, and a failed archive prune after a successful save is a warning, not
+  a refusal.
+- Route all lesson reads, writes, and approved instruction promotion through a
+  root-confined, no-follow, lock-protected atomic helper shared byte-for-byte with
+  session-memory. Stable reads now expose an exact SHA-256 (or `absent`) and every
+  write/promotion must compare-and-swap that observed token, refusing torn reads,
+  stale sessions, and non-helper publication races without overwriting them.
+- Replace file-content injection at SessionStart with a fixed reminder that reports
+  ledger availability only. Clarify untrusted memory, lesson ownership, newest-user
+  precedence, provider-aware promotion targets, and approval-only curation.
+- Split the previously all-in-one storage reference into a byte-identical 64-line
+  cross-harness I/O/security core and a directly linked LESSONS.md schema. The
+  standalone skill now resolves absolute skill/project paths from its active host
+  instead of requiring Claude-specific environment variables, while retaining exact
+  ledger compatibility with session-memory.
+
 ### 1.0.2 — 2026-07-17
 - Add Codex skill-picker metadata and a ready-to-use `$lessons-learned` prompt.
 
@@ -339,6 +586,34 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   `templates/lessons.md` skeleton is kept byte-identical (CI-enforced).
 
 ## session-memory
+
+### 1.1.1 — 2026-07-23
+- Crash durability: a writer killed mid-update no longer leaves the canonical
+  memory file missing — the next lock-holding write restores the stranded
+  claim file first, and compare-and-swap then surfaces the recovered content.
+  Untrusted-content read sentinels carry a per-invocation nonce so memory text
+  cannot forge its own envelope boundary, and a failed archive prune after a
+  successful save is reported as a warning instead of a refusal.
+- Add one byte-identical safe memory helper to all three skills: no-follow directory
+  traversal, linked/special-file refusal, bounded UTF-8 validation, lock-protected
+  atomic replacement, archive-before-handoff replacement, and safe five-archive
+  retention. Stable reads expose an exact SHA-256 (or `absent`); every memory write
+  and approved instruction promotion requires that observed token and refuses torn
+  reads, stale sessions, and non-helper publication races without overwriting them.
+- Make the SessionStart hook emit fixed metadata only instead of injecting
+  repository-controlled memory prose. All memory remains untrusted until a skill
+  reads it through the helper.
+- Harden resume anchors to full object IDs and timezone-bearing timestamps with
+  ahead/behind/diverged checks; formalize provenance-plus-recency precedence,
+  lessons/solutions/vocabulary ownership, verification provenance, safe commands,
+  and approval-only instruction promotion.
+- Split the 199-line group-wide memory contract into a byte-identical 64-line
+  cross-harness I/O/security core plus self-contained handoff, lessons, and solutions
+  schemas. Each writer loads only its own schema; session-handoff loads optional
+  LESSONS.md/SOLUTIONS.md reader schemas only during resume when those ledgers exist.
+  Commands resolve absolute paths from the active host rather than requiring
+  Claude-specific environment variables. A standalone lessons hook now uses
+  lessons-only mode instead of probing or announcing sibling handoff state.
 
 ### 1.1.0 — 2026-07-20
 - New `solutions` skill: capture a verified solution to a nontrivial problem

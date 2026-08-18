@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'r=$(git rev-parse --show-toplevel 2>/dev/null || pwd); m=\"$r/.ai/memory\"; if [ -f \"$m/LESSONS.md\" ]; then echo \"$(grep -c \"^## \" \"$m/LESSONS.md\") project lesson(s) recorded in .ai/memory/LESSONS.md - before acting, consult entries whose When condition matches the work.\"; fi'",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/lessons-learned/scripts/memory_io.py\" hook --mode lessons",
             "timeout": 10,
             "statusMessage": "Checking .ai/memory/LESSONS.md"
           }

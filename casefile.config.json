@@ -5,7 +5,9 @@
     { "ruleId": "capability/hook-shell-command", "path": "plugins/learning-loop/hooks/" },
     { "ruleId": "capability/hook-shell-command", "path": "plugins/session-memory/hooks/" },
     { "ruleId": "capability/network-call", "path": "qa/fixtures/" },
+    { "ruleId": "capability/network-call", "path": "qa/eval_sandbox.py" },
     { "ruleId": "capability/rm-rf", "path": "qa/" },
+    { "ruleId": "capability/secret-env-read", "path": "qa/run_evals.sh" },
     { "ruleId": "capability/write-outside-artifact", "path": "tools/audit_skills.py" }
   ]
 }

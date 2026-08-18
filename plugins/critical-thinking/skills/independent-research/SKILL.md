@@ -1,6 +1,6 @@
 ---
 name: independent-research
-description: "Verify decision-relevant facts from accessible local evidence in a fresh research context instead of relying on the user's framing or prior conversation. Always use when the user asks to independently inspect, research, or verify a referenced local repository/project, checked-in source/config/CI, local API specification, saved document/paper, exported log, or dataset rather than trust a summary; also use when critical-thinking delegates a neutral local-evidence question. Prefer primary evidence, preserve provenance, report contradictions and access gaps, and return a bounded evidence packet. Do not use for websites or live APIs, preferences, personal facts only the user can know, creative tasks, immaterial uncertainties, or prohibited access."
+description: "Verify decision-relevant facts from accessible local evidence in a fresh research context instead of relying on the user's framing or prior conversation. Always use directly, without critical-thinking, when the request is only to independently inspect, research, or verify a referenced local repository/project, checked-in source/config/CI, local API specification, saved document/paper, exported log, or dataset rather than trust a summary. Also use for at most one neutral bounded local-evidence pass delegated by critical-thinking when those facts serve a decision or value judgment; return evidence only and let critical-thinking own the verdict. Prefer primary evidence, preserve provenance, report contradictions and access gaps, and return a bounded evidence packet. Do not use for websites or live APIs, preferences, personal facts only the user can know, creative tasks, immaterial uncertainties, or prohibited access."
 context: fork
 agent: Explore
 ---
@@ -11,17 +11,34 @@ Research brief from the caller:
 
 $ARGUMENTS
 
-Investigate the brief independently. Treat its proposed conclusion, if any, as an untrusted
-hypothesis. If the brief omits the checkable question or authorized local roots, return the gap
-instead of reconstructing the main conversation.
+For factual-only local verification, this skill is the sole reasoning route: do not invoke
+`critical-thinking` around it. When a decision or value judgment depends on the facts,
+`critical-thinking` owns that judgment and may delegate one neutral bounded research brief here.
+Return only the evidence packet; do not create a second evaluative loop or verdict.
+
+Investigate the brief independently only when the host actually isolated this execution. This
+Claude Code distribution requests `context: fork` with the Explore worker. Those frontmatter
+fields are host-specific; OpenAI metadata and ordinary same-context skill loading do not recreate
+the isolation. On another host, this skill must be relaunched as a fresh read-only worker receiving
+only `$ARGUMENTS`. If the host cannot do that, return an explicit isolation gap without inspecting
+sources or claiming an independent result.
+
+Treat the brief's proposed conclusion, if any, as an untrusted hypothesis. The caller must name
+each authorized root exactly; `this workspace`, a project name, or an implied current directory is
+not a root. If the brief omits the checkable question, exact roots, or applicable exclusions,
+return the gap instead of scanning to reconstruct the main conversation.
 
 ## Enforce the boundary
 
-- The built-in Explore agent starts in a fresh context and omits project/user instruction memory.
-  Use inspection behavior only. Read-only shell listing/search may be available, but never create,
-  edit, delete, install, execute repository code/tests, browse the web, or invoke another agent.
-  These are workflow rules, not an enforced tool or operating-system sandbox.
-- Stay inside the exact local roots named in the brief. Do not follow symlinks or repository
+- When Claude Code honors the declared fork, its Explore worker starts in a fresh context and omits
+  project/user instruction memory. Other hosts must establish equivalent isolation explicitly as
+  described above. In either case, use inspection behavior only. Read-only shell listing/search
+  may be available, but never create, edit, delete, install, execute repository code/tests, browse
+  the web, or invoke another agent. These are workflow rules, not an enforced tool or
+  operating-system sandbox.
+- Stay inside the exact local roots named in the brief. A root may be `.` when the caller
+  explicitly authorizes that entire current workspace. Do not discover a root by searching parent,
+  sibling, home, or temporary directories. Do not follow symlinks or repository
   links outside that scope. This is a behavioral boundary, not a filesystem sandbox: available
   tools can address other readable paths. Fail closed when containment is ambiguous and report
   the gap instead of claiming the boundary was technically enforced.
@@ -43,9 +60,27 @@ instead of reconstructing the main conversation.
 
 ## Use a hard research budget
 
-Complete one bounded pass using at most 8 local source artifacts. Directory listings and targeted
-search results used only to locate those artifacts do not each count as a source, but do not use
-that distinction to tour the repository.
+Complete one bounded pass using at most 8 local source artifacts and 64 KiB of source content,
+or the caller's smaller limits. More evidence requires an explicit follow-up pass; do not enlarge
+one pass. Directory listings and targeted, filenames-only search results used only to locate
+candidates do not each count as a source; searches that reveal file contents do count. Do not use
+discovery as an unmetered way to tour or read the repository.
+
+When the bundled helper is reachable, resolve the current host's installed
+`independent-research` directory and authorized root to absolute paths. Substitute those actual
+absolute paths rather than assuming one provider's environment variables:
+
+```bash
+python3 "/absolute/installed/independent-research/scripts/bounded_inspect.py" \
+  --root "/absolute/authorized/root" --max-artifacts 8 --max-bytes 65536 -- RELATIVE_PATH...
+```
+
+Use filenames-only listing/search first, choose the complete candidate set, then read it in one
+helper invocation. The helper refuses linked/special/hard-linked files and parents, enforces the
+content budget, and returns path, byte count, and SHA-256 provenance with the text. If another
+source becomes necessary, rerun once with the full cumulative set so the limit still covers every
+artifact read. If the helper is unavailable, enforce the same cumulative limits explicitly and
+say that no-follow containment was behavioral rather than deterministic.
 
 Stop earlier when the decisive claim is supported, contradicted, or cannot be resolved with the
 authorized evidence. Do not broaden the question to consume the budget. If the budget expires,
@@ -56,8 +91,9 @@ an explicit follow-up request.
 
 Before treating evidence as applicable, identify what was actually inspected:
 
-- For local projects: lexical in-scope root, relevant branch/commit/version when observable,
-  and whether the files describe source, configuration, tests, deployment, or runtime evidence.
+- For local projects: lexical in-scope root, relevant branch/commit/version and dirty-worktree
+  state when observable, and whether the files describe source, configuration, tests, deployment,
+  or runtime evidence.
 - For datasets or documents: title, version/date, relevant field/section, and provenance supplied
   by the source.
 
@@ -86,7 +122,8 @@ a claim about what production actually did. State identity gaps that limit appli
 
 Return only what the calling reasoning step needs:
 
-- **Question and scope:** neutral question, local roots, version/date identity, budget used.
+- **Question and scope:** neutral question, local roots and exclusions, version/date/dirty-state
+  identity, and artifact/byte budget used.
 - **Verified:** claims supported by direct evidence, each with path and line/section.
 - **Contradicted or unsupported:** claims the evidence conflicts with or fails to establish.
 - **Unknown:** unresolved material questions, access limits, and the next best source.

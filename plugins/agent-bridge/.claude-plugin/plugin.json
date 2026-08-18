@@ -1,0 +1,19 @@
+{
+  "name": "agent-bridge",
+  "displayName": "Agent Bridge",
+  "description": "Use another installed coding harness as a bounded leaf collaborator for read-only consultation or isolated implementation delegation. The parent retains ownership, validates digest-locked patches, and never auto-commits or silently broadens write scope.",
+  "version": "0.1.1",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "delegation",
+    "collaboration",
+    "claude",
+    "codex",
+    "gemini",
+    "multi-agent",
+    "provider"
+  ]
+}

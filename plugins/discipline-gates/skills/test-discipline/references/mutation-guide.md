@@ -19,23 +19,58 @@ module, not that it observes behavior. Prefer a mutation that keeps the code run
 ## Applying and restoring — the contract
 
 - Mutate exactly ONE file. Never stack mutations.
-- Back up the exact pre-mutation bytes BEFORE mutating with
-  `python3 "${CLAUDE_SKILL_DIR}/scripts/mutation_backup.py" backup FILE --root "${CLAUDE_PROJECT_DIR}"`.
-  It creates adjacent `<file>.mutbak` and refuses a pre-existing backup, a symlink, a
-  hard-linked file, a special file, a linked parent, or an out-of-project path. Do not replace
-  this helper with `cp`, `mv`, a HEAD snapshot, or a hand-rolled command.
+- Prefer the transaction wrapper:
+
+  Resolve the current host's installed `test-discipline` directory and authorized project root to
+  absolute paths, then substitute those actual values:
+
+  ```bash
+  python3 "/absolute/installed/test-discipline/scripts/mutation_trial.py" src/module.py \
+    --root "/absolute/project/root" --old 'EXACT ORIGINAL' --new 'MUTATION' \
+    -- TARGET_TEST_COMMAND...
+  ```
+
+  It backs up, applies exactly one replacement, runs only the target test, and attempts restore in
+  `finally`. Restoration is a compare-before-replace operation: it proceeds only while the target
+  still matches the captured mutant SHA-256. If anything changed the file during the trial, the
+  current file and backup are both preserved and the wrapper reports a recovery conflict.
+- Wrapper exit codes: `0` — mutated run exited nonzero and the clean rerun passed; `1` — the
+  trial refused or errored; `2` — the clean rerun failed after restore; `3` — the trial
+  completed and the mutation survived. Gate on `3` as well as nonzero when scripting: a
+  surviving mutant exits `3`, not `0`.
+- The adjacent `<file>.mutbak` is an atomic integrity container: it stores the original bytes plus
+  size, SHA-256, path, and mode metadata. Both helpers refuse a pre-existing backup, symlink,
+  hard-linked file, special file, linked parent, or out-of-project target.
+- If exact replacement cannot express the mutant, use the absolute installed path to
+  `mutation_backup.py backup` before a manual mutation. Immediately after applying the mutant,
+  capture its digest with the helper's `digest` action. In cleanup, call `restore` with
+  `--expected-current-sha256 MUTANT_SHA`. A mismatch refuses to overwrite and retains the backup.
+  Do not substitute `cp`, `mv`, a HEAD snapshot, or a hand-rolled command.
+
+  ```bash
+  python3 "/absolute/installed/test-discipline/scripts/mutation_backup.py" \
+    backup src/module.py --root "/absolute/project/root"
+  # Apply exactly one reviewed mutation to src/module.py.
+  python3 "/absolute/installed/test-discipline/scripts/mutation_backup.py" \
+    digest src/module.py --root "/absolute/project/root"
+  # Copy the printed digest exactly as MUTANT_SHA, run only the target test, then:
+  python3 "/absolute/installed/test-discipline/scripts/mutation_backup.py" \
+    restore src/module.py --root "/absolute/project/root" \
+    --expected-current-sha256 MUTANT_SHA
+  ```
+
+  If restore reports a digest conflict, stop. The current target and `.mutbak` are intentional
+  recovery artifacts; show both paths/digests and ask the user how to reconcile them.
 - Run ONLY the target test (single file or single test filter), never the whole suite.
-- **Restore FIRST, unconditionally** by running
-  `python3 "${CLAUDE_SKILL_DIR}/scripts/mutation_backup.py" restore FILE --root "${CLAUDE_PROJECT_DIR}"`
-  — before reading results closely, before reporting, before asking the user anything, even if
-  the runner crashed or something looks wrong.
-- After restoring, rerun the test once to prove the tree is back to green.
-- If a session is interrupted mid-mutation, rerun the helper's `restore` action; a leftover
-  `.mutbak` file means restoration did not complete.
+- After successful restoration, rerun the target test once. A leftover `.mutbak` means either
+  cleanup did not complete or a concurrent edit blocked safe restoration. Inspect the reported
+  digests; never force the backup over a changed target.
 
 ## Verdicts
 
-- Mutated run went RED → the test is real. Report: validated — it fails when the code breaks.
-- Mutated run stayed GREEN → the test is vacuous (tautology, mock-asserts-the-mock, snapshot
-  never read). Restore first, then strengthen or rewrite the test so it observes real
-  behavior, and validate the new version the same way.
+- Mutated run was NONZERO → inspect the failure output. It detected the selected regression only
+  when the intended behavioral assertion failed for the predicted reason. Syntax/import/setup
+  errors, timeouts, signals, and unrelated assertion failures are wrong-red and inconclusive.
+- Mutated run stayed GREEN → the test did not detect this mutation. First check whether the
+  mutant is meaningful and non-equivalent. If it is, strengthen the test. Use “vacuous” only
+  when separate inspection shows the test never exercises or observes the production behavior.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Bridge"
+  short_description: "Consult or delegate safely across coding agents"
+  default_prompt: "Use $agent-bridge to ask another coding harness for a bounded consultation or implementation subtask."

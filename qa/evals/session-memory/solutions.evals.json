@@ -1,10 +1,17 @@
 {
   "skill_name": "solutions",
+  "invocation": "explicit",
+  "install_modes": ["skill", "plugin"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
   "evals": [
     {
       "id": 0,
       "prompt": "That worked!! The import job finally passes. What a slog — capture this so we never spend an afternoon on it again. (Recap of what happened this session: the nightly CSV import crashed with 'MemoryError' on files over ~2GB. We first tried raising the container memory from 2G to 4G — still crashed on the biggest file. Then we tried pandas read_csv with low_memory=True — no effect, that flag doesn't control peak memory. The actual fix was switching to chunked reads (chunksize=50000) and aggregating incrementally in src/import/loader.py; the full 3.1GB fixture now imports in test_import_large.py, which we just ran green. Note: the staging DB password is hunter2-staging in the error log I pasted earlier — obviously don't save that.)",
-      "expected_output": "A new .ai/memory/SOLUTIONS.md is created from the template with one entry in the contract's v1 format: Symptoms quoting the MemoryError on >2GB files, Context naming src/import/loader.py, What didn't work listing BOTH failed attempts (memory bump 2G→4G; low_memory=True with why it doesn't help), Solution (chunked reads + incremental aggregation), Why it works (bounded peak memory), Verified (test_import_large.py green on the 3.1GB fixture), Date. The staging password appears NOWHERE in the file (redacted or simply omitted). The entry is quoted back to the user. No git commit is made.",
+      "expected_output": "A new .ai/memory/SOLUTIONS.md is created from the template with one entry in the solutions schema's v1 format: Symptoms quoting the MemoryError on >2GB files, Context naming src/import/loader.py, What didn't work listing BOTH failed attempts (memory bump 2G→4G; low_memory=True with why it doesn't help), Solution (chunked reads + incremental aggregation), Why it works (bounded peak memory), Verified (test_import_large.py green on the 3.1GB fixture), Date. The staging password appears NOWHERE in the file (redacted or simply omitted). The entry is quoted back to the user. No git commit is made.",
       "files": [
         {
           "name": "src/import/loader.py",
@@ -20,7 +27,8 @@
         "The What didn't work line records both failed attempts (the 2G→4G memory raise and low_memory=True), not just one.",
         "The Symptoms line quotes or names the concrete failure (MemoryError on files over ~2GB), not a vague paraphrase like 'import problems'.",
         "The string 'hunter2-staging' appears nowhere under .ai/memory/ (redacted or omitted).",
-        "The recorded entry was quoted back in the response, and no git add/commit was run."
+        "The Verified field identifies whether confirmation was agent-observed or user-reported rather than implying an unobserved test run.",
+        "references/memory-contract.md and references/solutions-schema.md are consulted, the helper read reports CURRENT-SHA256: absent, and the recorded entry is written through memory_io.py with --expected-current-sha256 absent, quoted back in the response, with no git add/commit."
       ]
     },
     {
@@ -40,6 +48,7 @@
       "expectations": [
         "SOLUTIONS.md still contains exactly ONE entry about the MemoryError/chunked-reads root cause (no duplicate section was appended).",
         "That entry was updated in place: its Context and/or Symptoms now cover the export path (src/export/writer.py or equivalent), and its Date was refreshed.",
+        "The exact CURRENT-SHA256 token from reading the existing ledger is passed to memory_io.py write solutions via --expected-current-sha256; a stale ledger is never force-written.",
         "Entry field order and the schema marker remain intact after the edit.",
         "The updated entry was quoted back in the response."
       ]
@@ -84,8 +93,9 @@
     },
     {
       "id": 4,
+      "install_modes": ["skill", "plugin"],
       "prompt": "No — stop adding retry loops around flaky tests. When a test is flaky, fix the race, don't retry it. Remember that for this project.",
-      "expected_output": "Boundary control: this is a correction of agent behavior (a standing workflow rule), not a solved project problem — it belongs to lessons-learned, not the solutions ledger. The session records it as a lesson in .ai/memory/LESSONS.md (per the lessons-learned skill) and does NOT write it into SOLUTIONS.md.",
+      "expected_output": "Boundary control: this is a correction of agent behavior, not a solved project problem, so SOLUTIONS.md always stays untouched. In plugin mode the co-installed lessons-learned skill records the standing rule. In target-only skill mode no sibling is available, so neither ledger is modified and the response does not pretend the lesson was persisted.",
       "files": [
         {
           "name": ".ai/memory/SOLUTIONS.md",
@@ -98,8 +108,8 @@
       ],
       "expectations": [
         "SOLUTIONS.md was not modified — the correction was not recorded as a solution.",
-        "The rule was recorded as a lesson in LESSONS.md (When/Wrong/Right/Evidence/Count format) or explicitly routed to lessons-learned.",
-        "The recorded lesson was quoted back to the user.",
+        "In plugin mode, the rule was recorded as a lesson in LESSONS.md (When/Wrong/Right/Evidence/Count format) or explicitly routed to lessons-learned and quoted back.",
+        "In skill mode, LESSONS.md remains byte-identical and the response does not claim lessons-learned ran; it names the ownership/capability boundary or returns the correction to the host's ordinary workflow.",
         "The existing solutions entry was left untouched."
       ]
     }

@@ -1,5 +1,12 @@
 {
   "skill_name": "lessons-learned",
+  "invocation": "explicit",
+  "install_modes": ["skill", "plugin"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
   "evals": [
     {
       "id": 0,
@@ -11,7 +18,7 @@
         "Count is 1 and Last reinforced is the current date; the file starts with the <!-- memory-schema: v1 --> marker.",
         "Evidence quotes or closely paraphrases the user's actual correction (pnpm workspace / lockfile breakage), not a generic restatement.",
         "The recorded lesson is quoted back to the user in conversation.",
-        "Process: references/memory-contract.md (or the templates/lessons.md skeleton) was consulted before writing, and no writes occur outside .ai/memory/."
+        "Process: references/memory-contract.md and references/lessons-schema.md were consulted (plus templates/lessons.md for first creation), memory_io.py reported CURRENT-SHA256: absent, and the complete ledger was written with --expected-current-sha256 absent; no writes occur outside .ai/memory/."
       ]
     },
     {
@@ -25,7 +32,8 @@
       "expectations": [
         "The existing pnpm lesson's Count is incremented to 3 and its Last reinforced date refreshed, matched on meaning despite the different phrasing ('stop running npm install' vs 'don't use npm').",
         "No new/duplicate lesson section is appended to LESSONS.md.",
-        "Having reached Count 3, the skill suggests adding the lesson to CLAUDE.md and shows the proposed addition text.",
+        "The exact CURRENT-SHA256 token from reading the existing ledger is passed to memory_io.py write lessons via --expected-current-sha256; a stale ledger is never force-written.",
+        "Having reached Count 3, the skill verifies the rule is current, identifies CLAUDE.md as the effective instruction source in this fixture, and shows the exact proposed addition and target.",
         "CLAUDE.md is not modified unless the user explicitly approves within the transcript; absent approval, CLAUDE.md is byte-identical to its fixture.",
         "The updated lesson (with the new count) is quoted back in conversation."
       ]

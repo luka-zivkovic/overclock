@@ -1,4 +1,4 @@
 interface:
   display_name: "Natural Writing"
-  short_description: "Write human prose without canned AI tells"
-  default_prompt: "Use $natural-writing to draft or revise this long-form prose so it sounds human while preserving meaning and quotations."
+  short_description: "Polish prose while preserving voice and truth"
+  default_prompt: "Use $natural-writing to draft or revise this prose in its established voice, preserving claims, uncertainty, caveats, and quotations."

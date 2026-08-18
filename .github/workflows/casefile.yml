@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 20
       - name: Install casefile
-        run: npm install -g github:luka-zivkovic/casefile
+        run: npm install -g casefile@0.1.0
       - name: Scan marketplace
         run: casefile scan . --json --out casefile-report.json --fail-on warning --no-store
       - name: Upload report

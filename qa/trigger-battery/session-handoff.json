@@ -1,0 +1,53 @@
+{
+  "skill": "session-handoff",
+  "install_modes": ["skill", "plugin"],
+  "plugin": "session-memory",
+  "forbidden_skills": ["lessons-learned", "solutions"],
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "detector": {
+    "type": "skill_or_contract",
+    "path": ".ai/memory/HANDOFF.md"
+  },
+  "note": "Routing battery. FIRED means the Skill tool selected session-handoff or a save request wrote the handoff through its contract.",
+  "fixture_git": true,
+  "fixture_files": {
+    ".ai/memory/HANDOFF.md": "<!-- memory-schema: v1 -->\n# Session Handoff\nSaved: 2026-07-20T10:00:00Z\n\n## Current goal\nFinish the auth migration.\n\n## Plan\n- [~] Replace the refresh endpoint\n\n## Decisions\n- Use JWT access tokens [user-approved] — mobile clients cannot retain cookies.\n\n## Failed approaches\n- localStorage refresh token — FAILED because XSS exposes it.\n\n## Open questions\n- none\n\n## Next steps\n1. Finish src/auth.ts.\n\n## Key files\n- src/auth.ts\n\n## Environment anchors\n- Branch: main\n- HEAD: 0000000000000000000000000000000000000000\n- Dirty files: clean\n- Date: 2026-07-20T10:00:00Z\n"
+  },
+  "should_trigger": [
+    "I'm about to run out of context. Save a handoff so the next session can continue.",
+    "Let's stop here for today and checkpoint the current plan and dead ends.",
+    "Resume where we left off in the previous session.",
+    "What were we working on before I closed the last session?",
+    "I copied this handoff from my other machine; use it to restore the task."
+  ],
+  "should_not": [
+    {
+      "prompt": "Continue with the next implementation step we just discussed.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Commit the current changes with a sensible message.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Write a concise status update for the pull request.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "No, use pnpm here. Remember that workflow rule.",
+      "allowed_skills": ["lessons-learned"]
+    },
+    {
+      "prompt": "That fixed the deadlock; capture the verified solution.",
+      "allowed_skills": ["solutions"]
+    },
+    {
+      "prompt": "Push this branch to origin.",
+      "allowed_skills": []
+    }
+  ]
+}

@@ -1,12 +1,16 @@
 {
   "skill": "independent-research",
+  "install_modes": ["skill", "plugin"],
   "plugin": "critical-thinking",
+  "forbidden_skills": [
+    "critical-thinking"
+  ],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
     "specificity": 0.9
   },
-  "note": "Routing battery for independent-research. Every prompt receives a committed local project with implementation, runtime/CI, API specification, saved paper, and exported logs. FIRED means the Skill tool selected independent-research.",
+  "note": "Routing battery for factual-only independent-research with critical-thinking installed beside it. Every prompt receives a committed local project with implementation, runtime/CI, API specification, saved paper, and exported logs. A positive requires independent-research and forbids a competing critical-thinking route.",
   "fixture_git": true,
   "fixture_files": {
     "README.md": "# Atlas\nRedis accelerates session lookups. See checked-in source for durable storage.\n",
@@ -20,18 +24,40 @@
   },
   "should_trigger": [
     "Inspect the referenced repository and verify whether Redis is actually the source of truth.",
-    "Research my claim that the checked-in customer store at . persists durable data in Redis instead of trusting my summary.",
+    "Research my claim that the checked-in customer store under the exact authorized root . persists durable data in Redis instead of trusting my summary.",
     "Independently inspect the local API specification at ./spec/openapi.yaml, without relying on our earlier summary, and verify whether /v1/customers is declared.",
     "Independently verify what runtime version the project at . really uses by inspecting its config and CI.",
     "Read the saved paper in ./papers and check whether the headline matches its methods and results.",
     "Look through the accessible logs and determine whether the outage explanation is supported."
   ],
   "should_not": [
-    "I prefer the blue design. Help me explain that preference to the team.",
-    "Give me twenty names for a bakery; don't research or evaluate them yet.",
-    "Format this JSON and sort the keys.",
-    "What is 17 multiplied by 24?",
-    "I'm disappointed that the release slipped and just need to vent.",
-    "Use only the facts in this prompt and do not browse: imagine a company with two equal competitors."
+    {
+      "prompt": "I prefer the blue design. Help me explain that preference to the team.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Give me twenty names for a bakery; don't research or evaluate them yet.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Format this JSON and sort its keys.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "What is 17 multiplied by 24?",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "I'm disappointed that the release slipped and just need to vent.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Use only the facts in this prompt and do not browse: imagine a company with two equal competitors.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Look up today's exchange rate on the live central-bank website.",
+      "allowed_skills": []
+    }
   ]
 }

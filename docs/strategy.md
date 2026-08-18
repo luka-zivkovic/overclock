@@ -30,6 +30,10 @@ so it ships to no user and needs no version bump.
      genuinely load-bearing discipline — keep it strict.)
    - **No collision.** It must not fight another skill *already in this kit* for the same trigger.
      Non-redundancy is scoped to **your installed kit**, not the whole ecosystem.
+   - **Standalone first.** Every skill directory must execute correctly when installed by itself.
+     Group packaging may improve routing or compose workflows, but sibling descriptions, hooks,
+     scripts, and references are never implicit dependencies. Test target-only, owning-plugin, and
+     intended-stack modes separately.
 
 3. **Grounding is research, not a gate.** Check what already exists — built-ins, official plugins,
    published skills, the base model's own ability — to build the skill **better** and avoid pointless
@@ -45,6 +49,38 @@ so it ships to no user and needs no version bump.
 ## Skill candidate ledger
 
 Append-only. Each candidate carries a verdict and the evidence behind it.
+
+### agent-bridge — BUILD, v0.1 published; cross-provider validation pending (2026-08-04)
+- **Demand:** direct maintainer request for one harness to consult or delegate a
+  bounded implementation subtask to another provider while the original harness
+  remains responsible for the overall task.
+- **Grounding:** OpenAI's `codex-plugin-cc` confirms the local-auth/runtime pattern:
+  a thin model-facing layer delegates through a deterministic companion, with
+  readiness checks, provider-native sandbox selection, resumable/background jobs,
+  and explicit result handling. Agent Bridge generalizes the useful core across
+  Claude, Codex, and Gemini without copying the review gate or Codex-only app-server
+  broker into v0.1.
+- **Product shape:** one independently installable `agent-bridge` skill with two
+  explicit modes. `consult` is read-only. `delegate` requires implementation
+  authority, a clean exact base, non-empty path scope and acceptance criteria, and
+  runs only in an isolated local clone. A digest-locked patch is separately inspected
+  and applied by the parent; no background jobs, resume, auto-commit, push, publish,
+  or in-place child writes in v0.1.
+- **Trust model:** current-conversation authorization is required before sharing
+  scoped repository context with another provider. Provider output is untrusted
+  advice or an untrusted candidate patch; the parent verifies and owns integration.
+- **Next:** the shipped code paths (isolation, git-environment hardening, patch-derived
+  scope enforcement, environment allowlist, consult integrity snapshot) are covered by
+  deterministic tests. Real Claude→Codex use was validated 2026-08-08 against codex-cli
+  0.144.2 on a scratch repository using local CLI auth: consult returned a correct answer
+  with the active tree verified unchanged, and delegate produced a digest-locked
+  single-file patch in the uid-scoped isolated clone that passed inspect and apply with
+  scope enforced from the patch itself. Live behavioral evals pass 5/5 on Sonnet, and the
+  routing battery passes both install modes against the sibling stack (skill 47/48, stack
+  47/48; precision 94.7%, recall 100%, specificity 96.7% — all above the 90/80/90 gate).
+  Claude→Gemini remains unvalidated (CLI not installed); record one real bounded Gemini run
+  before treating that provider as supported. Only after that, consider persistent threads,
+  background jobs, dirty-worktree snapshots, or full handoff.
 
 ### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a
@@ -70,6 +106,11 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   initialized pr-kit arms. Generic must beat baseline independently; initialized context must then
   show material source-valid lift over generic. The skill-shaped candidate lives under the
   experiment directory and is intentionally unpublished until both gates pass.
+- **Pilot result (2026-07-22): FAILED.** The initialized arm accumulated two losses, so its lift
+  gate was mathematically failed before the remaining cases; the generic arm also had not earned
+  publication. `pr-kit` remains unpublished. The next legitimate step is to diagnose those losses,
+  revise the experimental candidate if warranted, and rerun the same committed gates. The scaffold
+  is not a roadmap or publication authorization.
 - **Mechanics hardening (2026-07-17):** grounding against EveryInc's compound-engineering plugin
   added delta-aware profile-input digests, deterministic risk-scope signals, exact changed-line
   finding validation, a silent-pass verification lens, and positive/negative behavioral controls.

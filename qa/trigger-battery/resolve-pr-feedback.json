@@ -1,5 +1,7 @@
 {
   "skill": "resolve-pr-feedback",
+  "install_modes": ["skill", "plugin"],
+  "forbidden_skills": ["publish-pr-feedback"],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
@@ -16,15 +18,43 @@
     "The review bot left 12 comments on PR 42 — can you deal with them?",
     "Work through the reviewer feedback on this pull request and fix what's legit.",
     "Resolve the open review threads on my PR; push back where the reviewer is wrong.",
-    "Here's a review comment to handle: https://github.com/acme/widgets/pull/17#discussion_r99182 — take care of it."
+    "Here's a review comment to handle: https://github.com/acme/widgets/pull/17#discussion_r99182 — take care of it.",
+    "Address the review feedback on my PR. I already ran the fetch script for you since this sandbox has no network — the output is in review/threads.json. The code is on this branch; work the feedback.",
+    "Can you handle the open review comments on this PR? Fetched thread data is in review/threads.json (no network here). Do what you can and tell me what needs me.",
+    "I approve only the null-guard review thread and its exact drafted reply. Prepare the resolver's unsealed local plan at review/null-guard-plan.json; do not publish it."
   ],
   "should_not": [
-    "Review my PR before I open it — check the diff for bugs.",
-    "Do a code review of src/api.js.",
-    "A reviewer commented 'consider caching this' — do you agree with that take?",
-    "Merge PR 42 once CI is green.",
-    "Address the review comments on my GitLab merge request.",
-    "Fix the typo in README.md.",
-    "Summarize what the reviewers said on PR 42, don't change anything."
+    {
+      "prompt": "Review my PR before I open it — check the diff for bugs.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Do a code review of src/api.js.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "A reviewer commented 'consider caching this' — do you agree with that take?",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Merge PR 42 once CI is green.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Address the review comments on my GitLab merge request.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Post the already-approved PR reply plan and resolve its listed GitHub threads.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Fix the typo in README.md.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Summarize what the reviewers said on PR 42, don't change anything.",
+      "allowed_skills": []
+    }
   ]
 }

@@ -1,0 +1,43 @@
+{
+  "skill": "lessons-learned",
+  "install_modes": ["skill", "plugin"],
+  "plugin": "learning-loop",
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "detector": {
+    "type": "skill_or_contract",
+    "path": ".ai/memory/LESSONS.md"
+  },
+  "note": "Distribution-specific routing battery for the standalone learning-loop package.",
+  "should_trigger": [
+    "No, don't use npm here — use pnpm, this is a pnpm workspace. Remember that workflow rule.",
+    "You keep doing this — we always run migrations before integration tests. Add that to your lessons.",
+    "What lessons do you have recorded for this project?",
+    "Remember that deploys use DEPLOY_TOKEN; the current value is secret_123 and must not be stored."
+  ],
+  "should_not": [
+    {
+      "prompt": "Actually, change the /export endpoint to return JSON instead of XML.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Use port 4000 just for this one test run.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Commit the current changes with a sensible message.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "No — we don't call them Teams anymore, that's a Workspace. Keep the terminology straight.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "The importer OOM is fixed by chunked reads; capture that project solution.",
+      "allowed_skills": []
+    }
+  ]
+}

@@ -6,17 +6,73 @@ on:
   workflow_dispatch:
     inputs:
       skill:
-        description: Which skill or plugin group to evaluate
+        description: Which skill distribution or plugin group to evaluate
         type: choice
-        options: [all, overclock-setup, session-memory, learning-loop, discipline-gates, setup, session-handoff, lessons-learned, test-discipline, git-archaeologist, natural-writing, critical-thinking, independent-research]
-        default: all
+        options:
+          - agent-bridge/agent-bridge
+          - critical-thinking/critical-thinking
+          - critical-thinking/independent-research
+          - debugging-discipline/debugging-discipline
+          - discipline-gates/git-archaeologist
+          - discipline-gates/test-discipline
+          - groundwork/groundwork
+          - learning-loop/lessons-learned
+          - natural-writing/natural-writing
+          - overclock-setup/setup
+          - pr-feedback/publish-pr-feedback
+          - pr-feedback/resolve-pr-feedback
+          - project-vocabulary/project-vocabulary
+          - session-memory/lessons-learned
+          - session-memory/session-handoff
+          - session-memory/solutions
+          - critical-thinking
+          - discipline-gates
+          - pr-feedback
+          - session-memory
+          - all
+        default: critical-thinking/critical-thinking
+      suite:
+        description: Run behavioral cases, routing controls, or both
+        type: choice
+        options: [behavior, routing, both]
+        default: behavior
+      model:
+        description: Claude model used by evaluated and routing sessions
+        type: string
+        default: claude-sonnet-5
+      effort:
+        description: Effort for behavioral sessions
+        type: choice
+        options: [low, medium, high, xhigh, max]
+        default: medium
+      install_mode:
+        description: Installation evidence to exercise
+        type: choice
+        options: [skill, declared, plugin, stack]
+        default: skill
+      eval_only:
+        description: Optional behavioral case ID; requires one exact plugin/skill target
+        type: string
+        required: false
+      routing_samples:
+        description: Samples per routing prompt
+        type: number
+        default: 1
       compare_baseline:
-        description: Also run the same cases with all skills disabled
+        description: Also run behavioral cases with all skills disabled
+        type: boolean
+        default: false
+      confirm_all:
+        description: Required acknowledgement for the potentially expensive all-skills target
         type: boolean
         default: false
 
 permissions:
   contents: read
+
+concurrency:
+  group: live-evals
+  cancel-in-progress: false
 
 jobs:
   evals:
@@ -24,17 +80,58 @@ jobs:
     timeout-minutes: 180
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      EVAL_MODEL: ${{ inputs.model }}
+      EVAL_EFFORT: ${{ inputs.effort }}
+      EVAL_ONLY: ${{ inputs.eval_only }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install sandbox dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes bubblewrap socat
 
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Run live eval suite
+      - name: Validate dispatch
         env:
-          SKILL: ${{ inputs.skill }}
-          COMPARE_BASELINE: ${{ inputs.compare_baseline }}
+          TARGET: ${{ inputs.skill }}
+          SUITE: ${{ inputs.suite }}
+          INSTALL_MODE: ${{ inputs.install_mode }}
+          ROUTING_SAMPLES: ${{ inputs.routing_samples }}
+          CONFIRM_ALL: ${{ inputs.confirm_all }}
         run: |
+          set -euo pipefail
+          if [ "$TARGET" = "all" ] && [ "$CONFIRM_ALL" != "true" ]; then
+            echo "::error::The all-skills target requires confirm_all=true because it can be expensive."
+            exit 2
+          fi
+          if [ -n "$EVAL_ONLY" ] && [[ "$TARGET" != */* ]]; then
+            echo "::error::eval_only requires one exact plugin/skill target."
+            exit 2
+          fi
+          if ! [[ "$ROUTING_SAMPLES" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::routing_samples must be a positive integer."
+            exit 2
+          fi
+          if [ "$INSTALL_MODE" = "stack" ] && [ "$TARGET" = "overclock-setup/setup" ]; then
+            echo "::error::setup does not declare stack evidence."
+            exit 2
+          fi
+          echo "target=$TARGET suite=$SUITE model=$EVAL_MODEL effort=$EVAL_EFFORT install_mode=$INSTALL_MODE"
+
+      - name: Run behavioral evals
+        if: inputs.suite == 'behavior' || inputs.suite == 'both'
+        env:
+          TARGET: ${{ inputs.skill }}
+          COMPARE_BASELINE: ${{ inputs.compare_baseline }}
+          INSTALL_MODE: ${{ inputs.install_mode }}
+        run: |
+          set -euo pipefail
+          if [ "$INSTALL_MODE" != "declared" ]; then
+            export EVAL_INSTALL_MODE="$INSTALL_MODE"
+          fi
           run_suite() {
             local status=0
             bash qa/run_evals.sh "$@" || status=$?
@@ -43,50 +140,159 @@ jobs:
             fi
             return "$status"
           }
-          case "$SKILL" in
+          if [[ "$TARGET" == */* ]]; then
+            run_suite "$TARGET"
+            exit
+          fi
+          case "$TARGET" in
             all)
-              run_suite overclock-setup/setup session-memory/session-handoff session-memory/lessons-learned learning-loop/lessons-learned discipline-gates/test-discipline discipline-gates/git-archaeologist natural-writing/natural-writing critical-thinking/critical-thinking critical-thinking/independent-research
-              ;;
-            overclock-setup|setup)
-              run_suite overclock-setup/setup
+              run_suite \
+                agent-bridge/agent-bridge \
+                critical-thinking/critical-thinking \
+                critical-thinking/independent-research \
+                debugging-discipline/debugging-discipline \
+                discipline-gates/git-archaeologist \
+                discipline-gates/test-discipline \
+                groundwork/groundwork \
+                learning-loop/lessons-learned \
+                natural-writing/natural-writing \
+                overclock-setup/setup \
+                pr-feedback/publish-pr-feedback \
+                pr-feedback/resolve-pr-feedback \
+                project-vocabulary/project-vocabulary \
+                session-memory/lessons-learned \
+                session-memory/session-handoff \
+                session-memory/solutions
               ;;
             session-memory)
-              run_suite session-memory/session-handoff session-memory/lessons-learned
+              run_suite \
+                session-memory/lessons-learned \
+                session-memory/session-handoff \
+                session-memory/solutions
               ;;
-            learning-loop)
-              run_suite learning-loop/lessons-learned
+            pr-feedback)
+              run_suite \
+                pr-feedback/publish-pr-feedback \
+                pr-feedback/resolve-pr-feedback
               ;;
             discipline-gates)
-              run_suite discipline-gates/test-discipline discipline-gates/git-archaeologist
-              ;;
-            session-handoff)
-              run_suite session-memory/session-handoff
-              ;;
-            lessons-learned)
-              run_suite session-memory/lessons-learned
-              ;;
-            test-discipline|git-archaeologist)
-              run_suite "discipline-gates/$SKILL"
-              ;;
-            natural-writing)
-              run_suite natural-writing/natural-writing
+              run_suite \
+                discipline-gates/git-archaeologist \
+                discipline-gates/test-discipline
               ;;
             critical-thinking)
-              run_suite critical-thinking/critical-thinking critical-thinking/independent-research
+              run_suite \
+                critical-thinking/critical-thinking \
+                critical-thinking/independent-research
               ;;
-            independent-research)
-              run_suite critical-thinking/independent-research
+            *) run_suite "$TARGET/$TARGET" ;;
+          esac
+
+      - name: Run routing batteries
+        if: inputs.suite == 'routing' || inputs.suite == 'both'
+        env:
+          TARGET: ${{ inputs.skill }}
+          MODEL: ${{ inputs.model }}
+          INSTALL_MODE: ${{ inputs.install_mode }}
+          ROUTING_SAMPLES: ${{ inputs.routing_samples }}
+        run: |
+          set -euo pipefail
+          routing_args=(--model "$MODEL" --samples "$ROUTING_SAMPLES")
+          if [ "$INSTALL_MODE" != "declared" ]; then
+            routing_args+=(--install-mode "$INSTALL_MODE")
+          fi
+          run_batteries() {
+            local battery
+            for battery in "$@"; do
+              python3 qa/trigger_battery.py \
+                "qa/trigger-battery/$battery.json" "${routing_args[@]}"
+            done
+          }
+          case "$TARGET" in
+            all)
+              run_batteries \
+                agent-bridge \
+                critical-thinking \
+                debugging-discipline \
+                git-archaeologist \
+                groundwork \
+                independent-research \
+                learning-loop-lessons-learned \
+                lessons-learned \
+                natural-writing \
+                project-vocabulary \
+                resolve-pr-feedback \
+                session-handoff \
+                solutions \
+                test-discipline
+              ;;
+            critical-thinking)
+              run_batteries critical-thinking independent-research
+              ;;
+            discipline-gates)
+              run_batteries git-archaeologist test-discipline
+              ;;
+            pr-feedback)
+              run_batteries resolve-pr-feedback
+              ;;
+            session-memory)
+              run_batteries lessons-learned session-handoff solutions
+              ;;
+            agent-bridge/agent-bridge) run_batteries agent-bridge ;;
+            critical-thinking/critical-thinking) run_batteries critical-thinking ;;
+            critical-thinking/independent-research) run_batteries independent-research ;;
+            debugging-discipline/debugging-discipline) run_batteries debugging-discipline ;;
+            discipline-gates/git-archaeologist) run_batteries git-archaeologist ;;
+            discipline-gates/test-discipline) run_batteries test-discipline ;;
+            groundwork/groundwork) run_batteries groundwork ;;
+            learning-loop/lessons-learned) run_batteries learning-loop-lessons-learned ;;
+            natural-writing/natural-writing) run_batteries natural-writing ;;
+            pr-feedback/resolve-pr-feedback) run_batteries resolve-pr-feedback ;;
+            project-vocabulary/project-vocabulary) run_batteries project-vocabulary ;;
+            session-memory/lessons-learned) run_batteries lessons-learned ;;
+            session-memory/session-handoff) run_batteries session-handoff ;;
+            session-memory/solutions) run_batteries solutions ;;
+            overclock-setup/setup|pr-feedback/publish-pr-feedback)
+              echo "::error::No implicit-routing battery exists for the manually invoked target $TARGET."
+              exit 2
+              ;;
+            *)
+              echo "::error::No routing mapping exists for $TARGET."
+              exit 2
               ;;
           esac
 
       - name: Job summary
         if: always()
-        run: python3 qa/summarize_eval_results.py qa/_work/results >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          if [ -d qa/_work/results ]; then
+            python3 qa/summarize_eval_results.py qa/_work/results >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if compgen -G 'qa/_work/trigger-battery/*.results.json' > /dev/null; then
+            python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          print("\n## Routing batteries\n")
+          print("| Artifact | Score | Cost (USD) |")
+          print("|---|---:|---:|")
+          for path in sorted(Path("qa/_work/trigger-battery").glob("*.results.json")):
+              data = json.loads(path.read_text())
+              current = data["scores"]["current"]
+              print(
+                  f"| {path.stem} | {current['correct']}/{current['total']} | "
+                  f"{current['total_cost_usd']:.4f} |"
+              )
+          PY
+          fi
 
       - name: Upload transcripts and gradings
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: eval-artifacts
-          path: qa/_work/results/
+          path: |
+            qa/_work/results/
+            qa/_work/trigger-battery/
           retention-days: 30
+          if-no-files-found: warn

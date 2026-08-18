@@ -8,7 +8,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "tools"))
 
-from audit_skills import audit_openai_metadata, discover  # noqa: E402
+from audit_skills import (  # noqa: E402
+    audit_openai_metadata,
+    audit_routing_battery_contract,
+    discover,
+)
 from validate_skill import parse_frontmatter  # noqa: E402
 
 
@@ -144,6 +148,22 @@ interface:
                 if severity == "FAIL"
             )
         self.assertEqual(failures, [])
+
+    def test_routing_audit_directly_rejects_missing_install_matrix(self) -> None:
+        skill_dir = REPO / "plugins/natural-writing/skills/natural-writing"
+        findings = audit_routing_battery_contract(
+            {
+                "skill": "natural-writing",
+                "thresholds": {"precision": 0.9},
+                "should_trigger": ["Polish this essay."],
+                "should_not": ["Fix this bug."],
+            },
+            skill_dir,
+        )
+        messages = [message for severity, message in findings if severity == "FAIL"]
+        self.assertTrue(
+            any("routing battery install matrix" in message for message in messages)
+        )
 
 
 if __name__ == "__main__":

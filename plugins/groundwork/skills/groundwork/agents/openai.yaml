@@ -1,4 +1,4 @@
 interface:
   display_name: "Groundwork"
-  short_description: "Interview the user one decision at a time until aligned"
-  default_prompt: "Use $groundwork to interview me one question at a time — each with a recommended answer — until we reach a confirmed shared understanding of this work."
+  short_description: "Interview one decision at a time into a confirmed brief"
+  default_prompt: "Use $groundwork to interview me one decision at a time, then present a provenance-labelled decision brief and stop for my confirmation before any planning or implementation."

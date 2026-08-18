@@ -12,7 +12,7 @@ Fill-in-ready skeleton for `.ai/memory/LESSONS.md`. Copy the skeleton when creat
 - **When:** <trigger condition — the concrete situation where this lesson applies>
 - **Wrong:** <the approach that failed or was corrected>
 - **Right:** <the approach to use instead>
-- **Evidence:** <what actually happened — quote the user correction or the failure>
+- **Evidence:** <[user-correction] or [agent-observed] plus what actually happened>
 - **Count:** 1
 - **Last reinforced:** <ISO-8601 date>
 ```
@@ -35,7 +35,7 @@ Fill-in-ready skeleton for `.ai/memory/LESSONS.md`. Copy the skeleton when creat
 - **When:** installing, adding, or updating JS dependencies in this repo
 - **Wrong:** running `npm install` / `npm i <pkg>` — creates package-lock.json, which conflicts with the committed pnpm-lock.yaml and breaks CI
 - **Right:** use `pnpm install` / `pnpm add <pkg>`; the repo is a pnpm workspace
-- **Evidence:** 2026-06-03 user: "no, don't use npm here, this is a pnpm workspace"; 2026-06-10 user: "stop running npm install — I already told you this" after npm install regenerated package-lock.json
+- **Evidence:** [user-correction] 2026-06-03: "no, don't use npm here, this is a pnpm workspace"; [user-correction] 2026-06-10: "stop running npm install — I already told you this" after npm install regenerated package-lock.json
 - **Count:** 2
 - **Last reinforced:** 2026-06-10
 ```

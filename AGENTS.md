@@ -27,6 +27,13 @@ instructions provider-neutral here; `CLAUDE.md` imports this file for Claude Cod
 - Keep `SKILL.md` focused on core execution. Put branch-specific detail in directly linked
   `references/`, deterministic helpers in `scripts/`, reusable output material in `assets/`, and
   fill-in documents in `templates/`.
+- Every skill directory must remain independently installable and executable. Its scripts,
+  imports, references, templates, and assets must resolve within that skill directory. Sibling
+  skills may be optional composition partners only: guard the handoff with an availability check
+  and define a safe standalone fallback or explicit scope stop.
+- Shared references may contain only material every listed skill needs. Keep sibling-specific
+  schemas, routing rules, and procedures in that sibling's own directly linked reference so
+  standalone prompts do not pay unrelated context cost.
 - Files listed together in `tools/shared-files.txt` are intentionally duplicated and must remain
   byte-identical.
 
@@ -49,6 +56,11 @@ instructions provider-neutral here; `CLAUDE.md` imports this file for Claude Cod
 - Routing changes require positive and negative controls. Update the trigger battery when that
   skill has one; add one for a new model-invoked skill whose routing is not fully exercised by its
   behavioral suite.
+- Every behavioral suite and routing battery must include `skill` evidence for the target alone.
+  A multi-skill or hook-bearing owner must also include `plugin` evidence, and a case that declares
+  external composition must use `stack`. Isolated artifacts must contain no sibling skills, plugin
+  hooks, or group descriptions; routing controls must fail any skill selection outside that
+  prompt's declared ownership.
 - Do not treat `qa/_work/` output as source. It is generated local evidence and stays uncommitted.
 - Prefer deterministic assertions for structure, versions, file state, and safety boundaries;
   reserve model grading for behavior that cannot be checked mechanically.

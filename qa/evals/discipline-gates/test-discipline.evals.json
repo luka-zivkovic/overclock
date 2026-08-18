@@ -1,10 +1,17 @@
 {
   "skill_name": "test-discipline",
+  "invocation": "explicit",
+  "install_modes": ["skill", "plugin"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
   "evals": [
     {
       "id": 0,
       "prompt": "parseAmount in src/money.js returns 434 for '$4.35' — it should return 435 (cents). Fix it.",
-      "expected_output": "repro mode: a test asserting parseAmount('$4.35') === 435 is written and RUN before any edit to src/money.js, observed failing with the wrong value 434, committed red, then the production fix lands (floor -> round or equivalent) and the test goes green; the new test is then validated by mutating src/money.js, seeing red, and restoring.",
+      "expected_output": "repro mode: a test asserting parseAmount('$4.35') === 435 is written and run before src/money.js changes, observed failing with 434, then the production fix turns it green. The uncommitted test is transactionally mutation-checked and the original fixed bytes are restored. The skill does not stage, commit, or push.",
       "files": [
         { "name": "package.json", "description": "node --test runner wired as the test script." },
         { "name": "src/money.js", "description": "parseAmount with the floating-point cents bug: 4.35*100 = 434.99999999999994, so Math.floor returns 434." }
@@ -12,9 +19,9 @@
       "expectations": [
         "A test file asserting the CORRECT behavior (parseAmount('$4.35') returns 435) was written and executed BEFORE src/money.js was edited (tool-call order is the evidence).",
         "The test's first run failed for the stated reason — the wrong value 434 — not an import or setup error.",
-        "The red test was committed before or together with the fix, as shown in git log.",
-        "src/money.js was fixed and the test rerun green; the final working tree has no leftover mutation (git diff/status clean apart from the committed fix and test).",
-        "A validate pass ran on the new test: src/money.js was temporarily mutated, the test rerun red, and the file restored (tool calls show the mutate-run-restore cycle or an equivalent git checkout/backup restore)."
+        "No stage, commit, or push was performed; the new test and production fix remain narrow working-tree changes and unrelated index/worktree state is preserved.",
+        "src/money.js was fixed and the test rerun green; the final working tree has no leftover mutation or .mutbak file.",
+        "A validate pass transactionally mutation-checked the new test: only the target test ran against the mutant, its nonzero output was inspected and showed the intended 435-vs-wrong-value assertion failure, the exact fixed bytes were restored, and the clean target test reran green."
       ]
     },
     {
@@ -35,7 +42,7 @@
     {
       "id": 2,
       "prompt": "Refactor formatDuration in src/duration.js into smaller helper functions. Behavior must stay identical — this is cleanup only.",
-      "expected_output": "characterize mode: coverage absence for formatDuration is verified first (tests/ only covers sku.js), pinning tests capturing CURRENT behavior — including the quirky negative-input '0s' clamp and the dropped seconds when hours are present — are written, run green on the pre-edit code, and committed BEFORE the refactor; the refactor lands with the pins still green and behavior unchanged.",
+      "expected_output": "characterize mode: coverage absence for formatDuration is verified first, tests pin CURRENT behavior and run green on pre-edit code, then the refactor keeps them green. The pins remain uncommitted working-tree artifacts and no staging, commit, or push occurs.",
       "files": [
         { "name": "package.json", "description": "node --test runner wired as the test script." },
         { "name": "src/duration.js", "description": "Untested formatDuration with two quirks: negative input returns '0s'; when hours are present seconds are dropped ('1h 5m')." },
@@ -44,7 +51,8 @@
       "expectations": [
         "The absence of behavioral coverage for formatDuration was verified before pinning (e.g. the test directory was searched/read; the existing sku tests were not mistaken for coverage).",
         "Characterization tests capturing CURRENT behavior were written, including at least one quirky edge (negative input returning '0s', or seconds being dropped when hours are present) pinned AS-IS rather than 'fixed'.",
-        "The pinning tests ran green against the pre-edit code and were committed before the refactor commit (git log order is the evidence).",
+        "The pinning tests ran green against the pre-edit code before the refactor (tool-call order and captured output are the evidence).",
+        "No stage, commit, or push occurred; the tests remain narrow working-tree artifacts and unrelated user changes are preserved.",
         "After the refactor, the same tests still pass and formatDuration's observable behavior is unchanged.",
         "The refactor did not silently change behavior: no pin was edited to make a behavior change pass without explicit acknowledgment in the transcript."
       ]
@@ -52,17 +60,18 @@
     {
       "id": 3,
       "prompt": "I just wrote tests/order.test.js and it passes — validate that it can actually fail before I trust it.",
-      "expected_output": "validate mode: src/order.js is mutated, ONLY tests/order.test.js is rerun, it STAYS GREEN (the test asserts a local reimplementation and never imports src/order.js) so it is flagged vacuous; src/order.js is restored byte-identical to the fixture, and the test is strengthened to import and assert the real module (then re-validated) or the vacuity is clearly reported.",
+      "expected_output": "validate mode: a transactional mutation of src/order.js runs only tests/order.test.js and survives. The response first states the precise result—this test did not detect this meaningful mutation—then separately inspects the test and can call it vacuous because it never imports production code. src/order.js is integrity-restored before strengthening/re-validation.",
       "files": [
         { "name": "src/order.js", "description": "applyDiscount implementation, committed." },
         { "name": "tests/order.test.js", "description": "Committed vacuous test: defines a local applyDiscount arrow function and asserts THAT, never importing ../src/order — green no matter what src/order.js does." }
       ],
       "expectations": [
         "A mutation was applied to src/order.js and only the target test (tests/order.test.js) was rerun against it — not the whole suite.",
-        "The test staying green under mutation was recognized and reported as vacuousness (it never exercises src/order.js), not as the test 'passing'.",
+        "The green mutated run was first reported as 'did not detect this mutation'; vacuity was concluded only after independently observing that the test never exercises src/order.js.",
         "src/order.js ends byte-identical to its committed fixture state: the mutation was fully restored (git diff/status show no change to src/order.js and no leftover .mutbak file).",
         "The test was strengthened to import and assert the real module (and shown to go red under mutation or equivalent), or the vacuity was clearly reported to the user as the outcome.",
-        "Restoration happened before or immediately with the final report — the session never ends with mutated production code."
+        "Restoration happened before or immediately with the final report — the session never ends with mutated production code.",
+        "No stage, commit, push, git checkout, or HEAD-based restore substituted for the integrity-checked transaction."
       ]
     },
     {
@@ -82,7 +91,7 @@
     {
       "id": 5,
       "prompt": "parseAmount in src/money.js returns 434 for '$4.35' instead of 435. Fix it; the repository may already have a regression test.",
-      "expected_output": "repro mode reuses the existing committed failing tests/money.test.js as the red oracle, confirms it fails with 434 before editing src/money.js, fixes the implementation to green, and does not create a duplicate test or redundant red-test commit.",
+      "expected_output": "repro mode reuses the existing failing tests/money.test.js as the red oracle, confirms 434 before editing src/money.js, fixes the implementation to green, and creates no duplicate test. It does not stage, commit, or push.",
       "files": [
         { "name": "src/money.js", "description": "The same Math.floor cents bug as eval-0." },
         { "name": "tests/money.test.js", "description": "An existing committed regression test that already asserts '$4.35' becomes 435 and fails with 434." }
@@ -90,7 +99,7 @@
       "expectations": [
         "The existing tests/money.test.js was discovered and run before src/money.js was edited.",
         "Its first run failed for the stated 434-vs-435 reason and was used as the red oracle.",
-        "No duplicate regression test file or redundant test case was created, and no test-only commit was added for the already committed test.",
+        "No duplicate regression test file or redundant test case was created, and the skill did not stage, commit, or push.",
         "src/money.js was fixed and the existing test reran green.",
         "Validate mode mutation-checked the existing regression test and restored src/money.js to the exact fixed pre-mutation content with no backup left behind."
       ]
@@ -98,16 +107,80 @@
     {
       "id": 6,
       "prompt": "Refactor formatDuration in src/duration.js into smaller helpers without changing behavior.",
-      "expected_output": "Because tests/duration.test.js already asserts the function's main and quirky edge behaviors, characterize mode stays silent: no new pin tests or pre-refactor characterization commit. The refactor uses the existing suite as its behavior pin and keeps it green.",
+      "expected_output": "Because tests/duration.test.js already asserts the function's main and quirky edge behaviors, characterize mode stays silent: no new pin tests or pre-refactor characterization artifact. The refactor uses the existing suite as its behavior pin and keeps it green.",
       "files": [
         { "name": "src/duration.js", "description": "formatDuration implementation from the characterization case." },
         { "name": "tests/duration.test.js", "description": "Existing behavioral coverage for negative, seconds, minutes, and hours paths." }
       ],
       "expectations": [
         "The existing duration test was inspected and recognized as behavioral coverage before refactoring.",
-        "No new characterization test or separate pre-refactor pin commit was created.",
+        "No new characterization test or separate pre-refactor pin artifact was created.",
         "The requested refactor was performed without changing observable behavior and the existing duration test remained green.",
         "The response does not announce characterize-mode ceremony; the existing suite is simply used as the pin."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I just finished a new slugify feature and its fresh test passes. Do not change the feature; explicitly mutation-check whether tests/slugify.test.js detects the claimed lowercase behavior.",
+      "expected_output": "Explicit standalone validate is allowed even though the surrounding implementation is a new feature. One meaningful lowercase mutation is applied transactionally and only tests/slugify.test.js runs. The result is reported as nonzero or survived; a nonzero is called detection only after the intended lowercase assertion is observed. src/slugify.js is restored byte-identical, with no feature takeover or commit.",
+      "files": [
+        {
+          "name": "src/slugify.js",
+          "description": "New slugify implementation that lowercases and hyphenates input."
+        },
+        {
+          "name": "tests/slugify.test.js",
+          "description": "Fresh green test asserting the lowercase behavior."
+        }
+      ],
+      "expectations": [
+        "Validate mode runs because the user explicitly requested a mutation-check; repro/characterize feature-work ceremony does not appear.",
+        "Exactly one meaningful mutation targeting lowercase behavior is applied and only tests/slugify.test.js runs against it.",
+        "The wrapper/result distinguishes nonzero from survived; the response calls the regression detected only after inspecting that the intended lowercase assertion failed, without generalizing one mutant into proof of overall test quality.",
+        "src/slugify.js is restored to its exact original digest, the clean target test reruns green, and no .mutbak remains.",
+        "No stage, commit, push, or unrelated feature edit occurs."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Write a unit test for computeDiscount in src/discount.js. This is test-only: do not change production code and do not mutation-check it.",
+      "expected_output": "The proportional test-only path inspects project conventions, adds the smallest behavioral test for the named existing function, and runs only the relevant test target. It neither edits production code nor invokes mutation validation, and leaves the test uncommitted.",
+      "files": [
+        {
+          "name": "src/discount.js",
+          "description": "Existing computeDiscount behavior: totals at or above 100 receive 10, lower totals receive 0."
+        },
+        {
+          "name": "package.json",
+          "description": "Node project using node --test."
+        }
+      ],
+      "expectations": [
+        "A project-conventional test imports the real computeDiscount implementation and asserts at least the threshold behavior requested.",
+        "Only the relevant new test target is run and its observed pass/fail result is reported.",
+        "src/discount.js and all other production files remain unchanged.",
+        "No mutant, .mutbak, mutation helper, staging, commit, or push occurs because the request explicitly excluded validation."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Validate whether tests/price.test.js catches a regression in src/price.js. If the mutant run exits nonzero because of a syntax/import/setup error or an unrelated assertion, do not call that detection.",
+      "expected_output": "Validate mode runs one meaningful behavior mutation transactionally. The workflow reports the wrapper's nonzero/survived result, inspects the actual failure output, and calls detection only if the intended price assertion failed for the predicted reason. A wrong-red is reported as inconclusive. Source is restored and the clean target test reruns.",
+      "files": [
+        {
+          "name": "src/price.js",
+          "description": "Existing price calculation suitable for a behavior-preserving syntax-valid mutation."
+        },
+        {
+          "name": "tests/price.test.js",
+          "description": "Green target test plus a fixture setup that can produce a distinguishable unrelated failure if output is not inspected."
+        }
+      ],
+      "expectations": [
+        "The result is first described as nonzero or survived, not automatically as detected/real.",
+        "The target-test failure output is inspected and compared with the predicted intended assertion failure.",
+        "Any syntax, import, setup, timeout, signal, or unrelated assertion failure is labelled wrong-red/inconclusive rather than evidence the intended regression was detected.",
+        "src/price.js is restored to its captured original digest, the clean target test reruns, and no backup or recovery claim remains after a successful trial."
       ]
     }
   ]
