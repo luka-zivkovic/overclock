@@ -442,6 +442,32 @@ class FindingValidationTests(unittest.TestCase):
             self.assertEqual(len(result["findings"]), 1)
             self.assertEqual(result["duplicates_removed"], 1)
 
+    def test_cli_accepts_json_payload_without_pipe_or_temporary_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            base, head = self.review_repo(root)
+            payload = base_review_payload()
+            payload["findings"][0]["failure_path"] = "worker's return changed"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(REVIEWER / "scripts" / "validate_findings.py"),
+                    "--repo",
+                    str(root),
+                    "--base",
+                    base,
+                    "--head",
+                    head,
+                    "--payload-json",
+                    json.dumps(payload),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+            self.assertEqual(json.loads(completed.stdout)["status"], "valid")
+
 
 class ReviewInspectionTests(unittest.TestCase):
     def review_repo(self, root: Path) -> tuple[str, str]:
@@ -462,12 +488,14 @@ class ReviewInspectionTests(unittest.TestCase):
             shown = review_inspector.local_show(root, head, "src/worker.py", 1, 2)
             history = review_inspector.local_log(root, head, "src/worker.py", 10)
             blame = review_inspector.local_blame(root, head, "src/worker.py", 1, 2)
+            searched = review_inspector.local_search(root, head, "return 2", "src", 10)
 
             self.assertIn(head, status)
             self.assertIn("+    return 2", diff)
             self.assertIn("return 2", shown)
             self.assertIn("head", history)
             self.assertIn("filename src/worker.py", blame)
+            self.assertIn("src/worker.py:2", searched)
             self.assertEqual(git(root, "rev-parse", "HEAD"), before_head)
             self.assertEqual(
                 git(root, "status", "--porcelain=v1", "--untracked-files=all"),
@@ -554,6 +582,16 @@ class CandidateContractTests(unittest.TestCase):
         self.assertNotIn("Bash(gh *)", skill)
         self.assertIn("silent-pass-verification", skill)
         self.assertIn("scripts/validate_findings.py", skill)
+        self.assertIn("one physical command line", skill)
+        self.assertIn("inspect_review.py search", skill)
+        self.assertIn("never shell `grep`, `find`, or `rg`", skill)
+        self.assertIn("never redirect the full diff", skill)
+        self.assertIn("never abbreviate them", skill)
+        self.assertIn("Commands that merely print, count, locate, list", skill)
+        self.assertIn("do not list or probe the skill's reference", skill)
+        self.assertIn("inspect_review.py\" log", skill)
+        self.assertIn("--payload-json", skill)
+        self.assertNotIn("PR_KIT_FINDINGS", skill)
         self.assertIn("compact coverage ledger", skill)
 
     def test_initializer_names_its_only_write_target(self) -> None:
