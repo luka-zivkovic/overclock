@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.16",
+      "version": "0.1.17",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -77,7 +77,7 @@
     {
       "id": "natural-writing",
       "display_name": "Natural Writing",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "publication_status": "published",
       "provides": [
         "natural-prose-writing",

@@ -30,17 +30,18 @@
     {
       "id": 1,
       "prompt": "draft/launch-post.md reads like AI wrote it. Make it sound natural and human — edit the file in place. Keep everything factually true.",
-      "expected_output": "The draft is rewritten in place in the requested natural style: gratuitous dashes, AI-tell vocabulary, bot scaffolding, the orchestra analogy, and decorative bold are gone; the hedge pile is cut; but the one load-bearing caveat (Postgres 14+ only, older versions silently return incomplete results) survives, and the post still announces the same product with the same claims.",
+      "expected_output": "The draft is rewritten in place in the requested natural style: gratuitous dashes, AI-tell vocabulary, bot scaffolding, performed-casual phrasing, manufactured punch and closure, the orchestra analogy, and decorative bold are gone; the hedge pile is cut; but the one load-bearing caveat (Postgres 14+ only, older versions silently return incomplete results) survives, and the post still announces the same product with the same claims.",
       "files": [
         {
           "name": "draft/launch-post.md",
-          "description": "AI-sloppy launch post: em-dashes, 'delve'/'leverage'/'tapestry'/'robust'/'seamless'/'utilizes'/'crucial'/'paradigm shift'/'testament', 'In today's fast-paced world', 'Furthermore', 'In conclusion', 'Buckle up', 'Let's dive in', an orchestra analogy, decorative-bold bullet leads, a hedge pile ('results may vary and every data stack is different and your mileage may depend') wrapped around ONE load-bearing caveat: Postgres 14+ only, older versions silently return incomplete results."
+          "description": "AI-sloppy launch post: em-dashes, 'delve'/'leverage'/'tapestry'/'robust'/'seamless'/'utilizes'/'crucial'/'paradigm shift'/'testament', performed-casual phrasing, a cadence-only contrast and verbless parallel, significance tails, unsupported value verbs, summary buttons, 'In today's fast-paced world', 'Furthermore', 'In conclusion', 'Buckle up', 'Let's dive in', an orchestra analogy, decorative-bold bullet leads, a hedge pile ('results may vary and every data stack is different and your mileage may depend') wrapped around ONE load-bearing caveat: Postgres 14+ only, older versions silently return incomplete results."
         }
       ],
       "expectations": [
         "draft/launch-post.md was edited in place and contains no em-dashes or en-dashes.",
-        "The AI-tell words are gone from the revised file: delve, leverage, tapestry, robust, seamless, utilizes, crucial, paradigm, testament (or replaced with plain words).",
+        "The AI-tell words are gone from the revised file: delve, leverage, tapestry, robust, seamless, utilizes, crucial, paradigm, testament, unlock, empower, transform (or replaced with concrete plain wording supported by the source).",
         "The bot scaffolding is gone: 'In today's fast-paced world', 'Furthermore', 'In conclusion', 'Buckle up', 'Let's dive in' appear nowhere; the orchestra analogy is removed rather than reworded into another analogy.",
+        "The performed or cadence-only phrases are gone: 'Here's the thing', 'isn't just another analytics tool', 'completely different way to work', 'Same warehouse, radically better decisions', 'which is exactly what makes it work', 'The result?', and 'In short: data finally feels human' appear nowhere. Their unsupported interpretations are deleted rather than rephrased into new slogans, while the concrete product claims remain.",
         "The load-bearing caveat SURVIVES in substance: the revised post still says QueryPilot requires Postgres 14 or newer and that older versions silently return incomplete results (any phrasing); the surrounding throat-clearing hedges ('results may vary', 'every data stack is different', 'mileage may depend') are cut.",
         "The post still announces the same product and claims (no invented features, no dropped sections beyond trimming); the revision reads as edited prose, not a from-scratch different post."
       ]

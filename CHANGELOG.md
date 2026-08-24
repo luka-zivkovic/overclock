@@ -245,6 +245,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## overclock-setup
 
+### 0.1.17 — 2026-08-17
+- Synchronize the bundled capability catalog with Natural Writing 1.0.5.
+
 ### 0.1.16 — 2026-08-16
 - Synchronize the bundled capability catalog with Agent Bridge 0.1.2.
 
@@ -421,6 +424,14 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   paths, select reruns by declared case ID, and raise the manual workflow timeout.
 
 ## natural-writing
+
+### 1.0.5 — 2026-08-17
+- Remove performed-casual phrasing, unsupported value language, cadence-only
+  contrasts, redundant summary buttons, significance tails, and flourish endings
+  when they add no information. Preserve substantive contrasts, informative endings,
+  literal wording, and recognizable authorial choices.
+- Extend the launch-post behavioral case to cover the new editing rule while retaining
+  its factual claims and Postgres compatibility caveat.
 
 ### 1.0.4 — 2026-07-23
 - Reframe punctuation and vocabulary rules as a fallback house style beneath the

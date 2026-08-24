@@ -607,9 +607,11 @@ mkdir -p "$NW/eval-1/draft"
 cat > "$NW/eval-1/draft/launch-post.md" <<'EOF'
 # Announcing QueryPilot — Your Data's New Best Friend
 
-In today's fast-paced world, teams need to leverage their data more than ever. That's why we're
-thrilled to announce QueryPilot — a robust, seamless analytics layer that lets you delve into
-your data warehouse without writing a single line of SQL.
+Here's the thing: QueryPilot isn't just another analytics tool. It's a completely different way
+to work. Same warehouse, radically better decisions. In today's fast-paced world, teams need to
+leverage their data more than ever. That's why we're thrilled to announce QueryPilot — a robust,
+seamless analytics layer that lets you delve into your data warehouse without writing a single
+line of SQL.
 
 **Effortless setup.** Getting started is like conducting an orchestra — every integration plays
 its part in perfect harmony. Simply connect your warehouse and QueryPilot handles the rest.
@@ -620,10 +622,11 @@ data stack is different and your mileage may depend on configuration, QueryPilot
 Postgres 14 or newer — older versions silently return incomplete results.
 
 **Built to scale.** QueryPilot is a testament to what modern infrastructure can achieve. It
-utilizes cutting-edge caching to deliver crucial performance gains.
+utilizes cutting-edge caching to deliver crucial performance gains, which is exactly what makes
+it work. The result? Teams unlock insight, empower stakeholders, and transform every decision.
 
 In conclusion, QueryPilot represents a paradigm shift in how teams interact with data. Buckle up —
-the journey is just beginning. Let's dive in together.
+the journey is just beginning. Let's dive in together. In short: data finally feels human.
 EOF
 ( cd "$NW/eval-1" && git init -q -b main && git add -A && git commit -qm "launch post draft" )
 

@@ -2,7 +2,7 @@
   "name": "natural-writing",
   "displayName": "Natural Writing",
   "description": "Draft and revise long-form prose in the author's established voice. When none exists, applies a plainspoken fallback house style while preserving claims, uncertainty, caveats, quotations, and deliberate punctuation. Optional revision reports are schema-checked, reconstruction-verified, and explicit opt-in only.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": {
     "name": "Luka Zivkovic"
   },
