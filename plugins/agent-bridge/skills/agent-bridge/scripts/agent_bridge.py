@@ -31,7 +31,9 @@ MODES = ("consult", "delegate")
 CHILD_MARKER = "OVERCLOCK_AGENT_BRIDGE_CHILD"
 JOB_MARKER = "OVERCLOCK_AGENT_BRIDGE_JOB"
 STATE_ROOT_ENV = "AGENT_BRIDGE_STATE_DIR"
-DEFAULT_TIMEOUT_SECONDS = 900
+DEFAULT_CONSULT_TIMEOUT_SECONDS = 900
+DEFAULT_DELEGATE_TIMEOUT_SECONDS = 3600
+MAX_TIMEOUT_SECONDS = 7200
 GIT_TIMEOUT_SECONDS = 600
 MAX_RESULT_BYTES = 2 * 1024 * 1024
 MAX_REQUEST_BYTES = 256 * 1024
@@ -71,6 +73,24 @@ def diagnostic(value: str) -> str:
     if len(text) <= MAX_DIAGNOSTIC_CHARS:
         return text
     return text[-MAX_DIAGNOSTIC_CHARS:]
+
+
+def resolve_timeout_seconds(mode: str, requested: int | None) -> int:
+    if mode not in MODES:
+        raise BridgeError("invalid_request", f"unknown mode: {mode}")
+    timeout_seconds = requested
+    if timeout_seconds is None:
+        timeout_seconds = (
+            DEFAULT_CONSULT_TIMEOUT_SECONDS
+            if mode == "consult"
+            else DEFAULT_DELEGATE_TIMEOUT_SECONDS
+        )
+    if timeout_seconds < 1 or timeout_seconds > MAX_TIMEOUT_SECONDS:
+        raise BridgeError(
+            "invalid_request",
+            f"timeout must be between 1 and {MAX_TIMEOUT_SECONDS} seconds",
+        )
+    return timeout_seconds
 
 
 def run_process(
@@ -1092,6 +1112,7 @@ def execute_run(args: argparse.Namespace) -> dict[str, Any]:
         "workspace": str(workspace),
         "base_sha": base_sha,
         "request": request,
+        "timeout_seconds": args.timeout_seconds,
         "response": provider_result.get("response", ""),
         "stderr": provider_result.get("stderr", ""),
         "session_id": provider_result.get("session_id"),
@@ -1271,7 +1292,15 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--mode", required=True, choices=MODES)
     run.add_argument("--cwd", required=True)
     run.add_argument("--allow-write", action="store_true")
-    run.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
+    run.add_argument(
+        "--timeout-seconds",
+        type=int,
+        default=None,
+        help=(
+            "Provider timeout override in seconds (1-7200). "
+            "Defaults to 900 for consult and 3600 for delegate."
+        ),
+    )
 
     inspect = subparsers.add_parser("inspect", help="Inspect a digest-locked result and patch")
     inspect.add_argument("--result", required=True)
@@ -1291,8 +1320,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print_json(check_provider(args.provider))
             return 0
         if args.command == "run":
-            if args.timeout_seconds < 1 or args.timeout_seconds > 3600:
-                raise BridgeError("invalid_request", "timeout must be between 1 and 3600 seconds")
+            args.timeout_seconds = resolve_timeout_seconds(args.mode, args.timeout_seconds)
             result = execute_run(args)
             print_json(result)
             return 0 if result.get("status") == "completed" else 1

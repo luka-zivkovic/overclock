@@ -244,6 +244,7 @@ class AgentBridgeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             payload = json.loads(result.stdout)
             self.assertEqual(payload["status"], "completed")
+            self.assertEqual(payload["timeout_seconds"], 900)
             self.assertEqual(payload["response"], "leaf completed")
             self.assertEqual(payload["session_id"], "claude-session")
             self.assertEqual((repo / "src" / "value.txt").read_text(), "original\n")
@@ -264,6 +265,7 @@ class AgentBridgeTests(unittest.TestCase):
             env = self.make_env(root, "allowed-write")
             payload = self.good_delegate_result(repo, env)
             self.assertEqual(payload["changed_files"], ["src/value.txt"])
+            self.assertEqual(payload["timeout_seconds"], 3600)
             self.assertNotEqual(Path(str(payload["workspace"])), repo)
             self.assertEqual((repo / "src" / "value.txt").read_text(), "original\n")
 
@@ -833,6 +835,16 @@ class AgentBridgeUnitTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.bridge = load_bridge_module()
+
+    def test_timeout_defaults_are_mode_aware_bounded_and_overridable(self) -> None:
+        self.assertEqual(self.bridge.resolve_timeout_seconds("consult", None), 900)
+        self.assertEqual(self.bridge.resolve_timeout_seconds("delegate", None), 3600)
+        self.assertEqual(self.bridge.resolve_timeout_seconds("delegate", 7200), 7200)
+        for value in (0, 7201):
+            with self.subTest(value=value):
+                with self.assertRaises(self.bridge.BridgeError) as error:
+                    self.bridge.resolve_timeout_seconds("delegate", value)
+                self.assertEqual(error.exception.status, "invalid_request")
 
     def test_symlink_mode_headers_are_detected_including_retargets(self) -> None:
         retarget = (
