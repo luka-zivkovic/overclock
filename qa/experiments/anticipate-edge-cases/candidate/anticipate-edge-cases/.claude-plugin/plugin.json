@@ -1,0 +1,17 @@
+{
+  "name": "anticipate-edge-cases",
+  "displayName": "Anticipate Edge Cases (Phase 0 Candidate)",
+  "description": "Experimental clean-room pre-review analysis that turns change intent and a pinned pre-change repository snapshot into a bounded edge-case risk brief without inspecting implementation code.",
+  "version": "0.1.0-phase0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "edge-cases",
+    "requirements",
+    "risk-analysis",
+    "pre-implementation"
+  ]
+}

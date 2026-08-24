@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "skill_name": "audit-consumer-contracts",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "should_trigger": [
+    "Use $audit-consumer-contracts to check whether this reviewed PR breaks existing consumers.",
+    "Run $audit-consumer-contracts as an append-only second pass over this frozen review.",
+    "Use $audit-consumer-contracts on these exact commits and trace persisted consumers of the renamed key."
+  ],
+  "should_not_trigger": [
+    "Review this pull request.",
+    "Before reading the implementation, anticipate edge cases for this issue.",
+    "Fix the findings in this PR review.",
+    "Improve the wording in this README.",
+    "Debug why the currently running service crashes."
+  ]
+}

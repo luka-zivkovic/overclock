@@ -1,0 +1,6 @@
+{
+  "name": "review-contract-gaps-v4-candidate",
+  "displayName": "Review Contract Gaps V4 Candidate",
+  "description": "Experimental contract-gap audit with strict intended-line evidence assembly.",
+  "version": "0.0.0"
+}

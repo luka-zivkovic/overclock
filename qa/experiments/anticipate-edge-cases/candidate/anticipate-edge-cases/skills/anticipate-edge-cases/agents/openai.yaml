@@ -1,0 +1,6 @@
+interface:
+  display_name: "Anticipate Edge Cases"
+  short_description: "Build a pre-implementation review risk brief"
+  default_prompt: "Use $anticipate-edge-cases to turn this change request into a repository-grounded risk brief without reading its implementation."
+policy:
+  allow_implicit_invocation: false

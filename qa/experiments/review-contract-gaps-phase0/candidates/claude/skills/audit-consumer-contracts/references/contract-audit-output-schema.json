@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "base",
+    "head",
+    "surface_sha256",
+    "base_review_sha256",
+    "decisions",
+    "coverage"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "base": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "head": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "surface_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "base_review_sha256": {
+      "oneOf": [
+        {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        {"type": "null"}
+      ]
+    },
+    "decisions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/decision"}
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaced",
+        "verified",
+        "confirmed",
+        "already_covered",
+        "defeated",
+        "unreachable",
+        "unresolved",
+        "skipped",
+        "blind_spots"
+      ],
+      "properties": {
+        "surfaced": {"type": "integer", "minimum": 0},
+        "verified": {"type": "integer", "minimum": 0},
+        "confirmed": {"type": "integer", "minimum": 0},
+        "already_covered": {"type": "integer", "minimum": 0},
+        "defeated": {"type": "integer", "minimum": 0},
+        "unreachable": {"type": "integer", "minimum": 0},
+        "unresolved": {"type": "integer", "minimum": 0},
+        "skipped": {"type": "integer", "minimum": 0},
+        "blind_spots": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "$defs": {
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line", "ref", "line_text", "role"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "ref": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "line_text": {"type": "string"},
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "external_endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "line",
+        "ref",
+        "line_text",
+        "role",
+        "direction",
+        "expectation"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "ref": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "line_text": {"type": "string"},
+        "role": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["producer", "consumer"]},
+        "expectation": {"type": "string", "minLength": 1}
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "priority",
+        "confidence",
+        "title",
+        "file",
+        "line",
+        "side",
+        "changed_line",
+        "failure_path",
+        "impact",
+        "evidence",
+        "suggested_comment"
+      ],
+      "properties": {
+        "priority": {"enum": ["P0", "P1", "P2"]},
+        "confidence": {"enum": ["high", "medium"]},
+        "title": {"type": "string", "minLength": 1},
+        "file": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "side": {"enum": ["LEFT", "RIGHT"]},
+        "changed_line": {"type": "string"},
+        "failure_path": {"type": "string", "minLength": 1},
+        "impact": {"type": "string", "minLength": 1},
+        "evidence": {
+          "type": "array",
+          "minItems": 4,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "suggested_comment": {"type": "string", "minLength": 1}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "disposition",
+        "root_cause_key",
+        "reason",
+        "external_endpoint",
+        "head_evidence",
+        "reachable_sequence",
+        "guards_checked",
+        "finding"
+      ],
+      "properties": {
+        "surface_id": {"type": "string", "pattern": "^S[1-9][0-9]*$"},
+        "disposition": {
+          "enum": [
+            "confirmed-new-finding",
+            "already-covered",
+            "defeated",
+            "unreachable",
+            "unresolved"
+          ]
+        },
+        "root_cause_key": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "external_endpoint": {"$ref": "#/$defs/external_endpoint"},
+        "head_evidence": {"$ref": "#/$defs/anchor"},
+        "reachable_sequence": {"type": "string", "minLength": 1},
+        "guards_checked": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "finding": {
+          "oneOf": [
+            {"$ref": "#/$defs/finding"},
+            {"type": "null"}
+          ]
+        }
+      }
+    }
+  }
+}

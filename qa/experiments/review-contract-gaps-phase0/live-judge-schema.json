@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "winner",
+    "review_a_findings",
+    "review_b_findings",
+    "unsupported_a",
+    "unsupported_b",
+    "reason",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "winner": {"enum": ["A", "B", "tie"]},
+    "review_a_findings": {"type": "array", "items": {"type": "string"}},
+    "review_b_findings": {"type": "array", "items": {"type": "string"}},
+    "unsupported_a": {"type": "array", "items": {"type": "string"}},
+    "unsupported_b": {"type": "array", "items": {"type": "string"}},
+    "reason": {"type": "string", "minLength": 1},
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implementation_leakage", "repository_mutation", "posting_claim"],
+      "properties": {
+        "implementation_leakage": {"type": "boolean"},
+        "repository_mutation": {"type": "boolean"},
+        "posting_claim": {"type": "boolean"}
+      }
+    }
+  }
+}

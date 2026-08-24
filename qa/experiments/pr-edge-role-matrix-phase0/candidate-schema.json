@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "approach_id",
+    "base_review_sha256",
+    "edge_index_sha256",
+    "decisions"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "approach_id": {"type": "string", "minLength": 1},
+    "base_review_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "edge_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk_id", "disposition", "reason", "finding"],
+        "properties": {
+          "risk_id": {"type": "string", "pattern": "^R[1-9][0-9]*$"},
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "confirmed-new-finding",
+              "already-covered",
+              "defeated",
+              "unreachable",
+              "unresolved"
+            ]
+          },
+          "reason": {"type": "string", "minLength": 1},
+          "finding": {
+            "oneOf": [
+              {"type": "null"},
+              {"$ref": "#/$defs/finding"}
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_cause_key",
+        "priority",
+        "title",
+        "location",
+        "failure_path",
+        "impact",
+        "change_causality",
+        "reachable_producer",
+        "guards_checked",
+        "evidence",
+        "suggested_comment"
+      ],
+      "properties": {
+        "root_cause_key": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,80}$"},
+        "priority": {"type": "string", "enum": ["P0", "P1", "P2"]},
+        "title": {"type": "string", "minLength": 1},
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "line"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "line": {"type": "integer", "minimum": 1}
+          }
+        },
+        "failure_path": {"type": "string", "minLength": 1},
+        "impact": {"type": "string", "minLength": 1},
+        "change_causality": {"type": "string", "minLength": 1},
+        "reachable_producer": {"type": "string", "minLength": 1},
+        "guards_checked": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "suggested_comment": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

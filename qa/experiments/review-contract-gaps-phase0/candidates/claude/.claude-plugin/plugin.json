@@ -1,0 +1,6 @@
+{
+  "name": "review-contract-audit",
+  "displayName": "Review Contract Audit Candidate",
+  "description": "Experimental target-only consumer-contract audit skill.",
+  "version": "0.0.0"
+}

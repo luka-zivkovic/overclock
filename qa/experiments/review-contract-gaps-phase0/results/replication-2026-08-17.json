@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "status": "behavior-passed-mechanics-failed",
+  "candidate": "review-contract-gaps",
+  "candidate_changed_after_sample_1": false,
+  "run_root": "qa/_work/review-contract-replication.4kQLbj",
+  "screen_root": "qa/_work/review-contract-tournament.5imBcr",
+  "gate": "replication-gate.json",
+  "replication": {
+    "samples": [2, 3],
+    "review_blocks": 20,
+    "per_sample": {
+      "2": {
+        "wins": 1,
+        "ties": 9,
+        "losses": 0,
+        "unjudged": 0,
+        "unsupported_candidate_findings": 0,
+        "negative_case_findings": 0,
+        "retention_passed": true,
+        "passed": true
+      },
+      "3": {
+        "wins": 5,
+        "ties": 5,
+        "losses": 0,
+        "unjudged": 0,
+        "unsupported_candidate_findings": 0,
+        "negative_case_findings": 0,
+        "retention_passed": true,
+        "passed": true
+      }
+    },
+    "aggregate": {
+      "wins": 6,
+      "ties": 14,
+      "losses": 0,
+      "findings": 6,
+      "distinct_win_cases": [
+        "agent-guardrails-input",
+        "instance-ai-write-lock",
+        "node-registry-swap",
+        "saved-agent-tool-schema"
+      ],
+      "win_reviewers": ["built-in", "prkit"],
+      "behavior_passed": true
+    },
+    "mechanics": {
+      "valid_ledgers": 15,
+      "invalid_ledgers": 5,
+      "valid_ledger_rate": 0.75,
+      "repair_required": 15,
+      "repair_dependency_rate": 0.75,
+      "mechanics_passed": false
+    },
+    "known_description_case": {
+      "sample_2_recovered_over_built_in": true,
+      "sample_3_recovered_over_built_in": true
+    },
+    "cost": {
+      "attempts": 48,
+      "accepted_attempts": 37,
+      "failed_attempts": 11,
+      "accepted_audit_cost_usd": 31.17151665,
+      "failed_audit_cost_usd": 4.67189505,
+      "accepted_repair_cost_usd": 6.213804,
+      "failed_repair_cost_usd": 7.0389723,
+      "judge_cost_usd": 3.0623946,
+      "all_attempt_cost_usd": 52.1585826,
+      "permission_denials": 68
+    }
+  },
+  "combined_three_sample_result": {
+    "review_blocks": 30,
+    "wins": 9,
+    "ties": 21,
+    "losses": 0,
+    "findings": 9,
+    "valid_ledgers": 23,
+    "invalid_ledgers": 7,
+    "repair_required": 23,
+    "known_description_recovery_by_sample": {
+      "1": false,
+      "2": true,
+      "3": true
+    },
+    "broad_candidate_cost_usd": 79.47661035,
+    "broad_candidate_attempts": 71,
+    "permission_denials": 96
+  },
+  "decision": {
+    "behavior": "pass",
+    "mechanics": "fail",
+    "next": "redesign deterministic parent-side evidence assembly",
+    "publish": false,
+    "automatic_composition": false
+  }
+}

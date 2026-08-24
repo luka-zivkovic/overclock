@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "edge_index_sha256", "base_review_sha256", "decision", "selected_risk_ids", "specialist_surface", "reason"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "edge_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "base_review_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "decision": {"type": "string", "enum": ["route", "stop"]},
+    "selected_risk_ids": {"type": "array", "items": {"type": "string", "pattern": "^R[1-9][0-9]*$"}},
+    "specialist_surface": {"type": ["string", "null"]},
+    "reason": {"type": "string", "minLength": 1}
+  }
+}

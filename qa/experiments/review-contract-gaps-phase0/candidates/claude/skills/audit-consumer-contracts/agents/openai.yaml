@@ -1,0 +1,6 @@
+interface:
+  display_name: "Audit Consumer Contracts"
+  short_description: "Verify changed contracts against real consumers"
+  default_prompt: "Use $audit-consumer-contracts to check this PR for broken pre-existing consumers."
+policy:
+  allow_implicit_invocation: false

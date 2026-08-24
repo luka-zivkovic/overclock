@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "status": "behavior-passed-mechanics-failed",
+  "candidate": "review-contract-gaps-v4",
+  "run_root": "qa/_work/review-contract-mechanics-v4.KST9oM",
+  "gate": "mechanics-redesign-v4-gate.json",
+  "provenance": {
+    "candidate_plugin_sha256": "593d2c530c1eb7ea44e93c9dc196a475397717d76636aa6eb378b812b798dc4a",
+    "gate_sha256": "18cc2140f9543b50ea8291fa6d1ad69ba61dd1b4fbf3bbfea8af7b67143f20fd",
+    "matrix_provenance_sha256": "7a90f128fe20ba4d9d760bb9639b1fd8c955854d4e43daa7095448919d95bc37",
+    "runner_sha256": "e95a93041983555f8d724884651f579d0ab42ef8e65da8e53268bc0f1c00f564",
+    "review_blocks": 10,
+    "review_blind_discoveries": 5,
+    "reviewer_families": ["built-in", "prkit"],
+    "model": "claude-sonnet-5",
+    "effort": "medium"
+  },
+  "behavior": {
+    "wins": 1,
+    "ties": 9,
+    "losses": 0,
+    "unjudged": 0,
+    "unsupported_candidate_findings": 0,
+    "negative_case_findings": 0,
+    "retention_passed": true,
+    "passed": true,
+    "win_case": "instance-ai-write-lock",
+    "win_reviewers": ["prkit"],
+    "admitted_root_causes": [
+      "instance-ai-adapter-unarchive-missing-editor-write-lock-check"
+    ]
+  },
+  "semantic_discovery": {
+    "submitted_claims": 4,
+    "cases_with_claims": [
+      "agent-guardrails-input",
+      "instance-ai-write-lock",
+      "node-registry-swap",
+      "saved-agent-tool-schema"
+    ],
+    "claims": [
+      {
+        "case_id": "agent-guardrails-input",
+        "root_cause_key": "nullish-coalescing-fallback-shadowed-by-preexisting-non-null-base-description",
+        "materialized": false,
+        "reason": "The exact producer fragment `...promptTypeOptions,` became one 17-character identifier after edge-ellipsis stripping and was rejected by V4's two-identifier specificity rule."
+      },
+      {
+        "case_id": "instance-ai-write-lock",
+        "root_cause_key": "instance-ai-adapter-unarchive-missing-editor-write-lock-check",
+        "materialized": true,
+        "changed_anchor": "The genuinely added archive() lock line at head line 691.",
+        "admitted_against": ["prkit"],
+        "covered_by": ["built-in"],
+        "blind_judgments": ["tie", "win"]
+      },
+      {
+        "case_id": "node-registry-swap",
+        "root_cause_key": "postProcessLoaders-whole-object-publish-races-with-concurrent-invocations-on-shared-this.loaders",
+        "materialized": true,
+        "covered_by": ["built-in", "prkit"],
+        "blind_judgments": ["tie", "tie"]
+      },
+      {
+        "case_id": "saved-agent-tool-schema",
+        "root_cause_key": "resource-mapper-auto-refresh-key-not-provided-in-chathub-tool-modals",
+        "materialized": false,
+        "reason": "Both exact `<NodeToolSettingsContent` consumer lines were rejected solely because each contained one identifier, despite full-file intended-line resolution and approximate line hints."
+      }
+    ],
+    "known_description_case": {
+      "discovered_review_blind": true,
+      "materialized": false,
+      "admitted": false
+    },
+    "v3_false_anchor_case": {
+      "archive_if_ai_temporary_discovered": false,
+      "unsafe_anchor_materialized": false,
+      "replacement_claim": "unarchive omission anchored to the genuinely added archive lock line"
+    }
+  },
+  "mechanics": {
+    "discovery_success_rate": 1.0,
+    "fully_materialized_discovery_rate": 0.6,
+    "submitted_claims": 4,
+    "materialized_claims": 2,
+    "rejected_claims": 2,
+    "rejected_claim_rate": 0.5,
+    "coverage_complete_block_rate": 1.0,
+    "repair_sessions": 0,
+    "permission_denials": 0,
+    "passed": false,
+    "primary_failure": "The intended-line-first resolver removed V3's unsafe redirection, but requiring two distinct identifiers rejected exact, line-hinted component tags and spread-property lines that are sufficiently distinctive when resolved across the complete file."
+  },
+  "cost": {
+    "attempts": 10,
+    "accepted_attempts": 10,
+    "failed_attempts": 0,
+    "discovery_cost_usd": 5.248392,
+    "coverage_cost_usd": 0.9274602,
+    "judge_cost_usd": 0.4484409,
+    "all_attempt_cost_usd": 6.6242931
+  },
+  "excluded_transport_attempts": [
+    {
+      "run_root": "qa/_work/review-contract-mechanics-v4.klkuxf",
+      "reason": "Claude returned an account spend-limit HTTP 429 before inference on every request.",
+      "cost_usd": 0.0,
+      "counted_as_sample": false
+    },
+    {
+      "run_root": "qa/_work/review-contract-mechanics-v4.WhkZ2P",
+      "reason": "Claude OAuth had expired; all bounded attempts failed before inference.",
+      "cost_usd": 0.0,
+      "counted_as_sample": false
+    }
+  ],
+  "decision": {
+    "behavior": "pass",
+    "mechanics": "fail",
+    "next": "preserve intended-line-first resolution and the 16-character floor, allow exact or high-coverage one-identifier fragments, then replay the frozen gate",
+    "publish": false,
+    "automatic_composition": false,
+    "advance_fresh_pr_ab": false
+  }
+}

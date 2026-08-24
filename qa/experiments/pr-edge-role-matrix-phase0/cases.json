@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "repository": "n8n-io/n8n",
+  "selected_at": "2026-08-17",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "historical_calibration": [
+    {
+      "id": "credential-model-selection",
+      "number": 33820,
+      "base_sha": "dc05720609e7fe51509aca4a3affe563afaa6408",
+      "head_sha": "608cd26a0db4dffed119cab2821978de5a6fa9ee",
+      "evidence": "pr-edge-composition-phase0"
+    },
+    {
+      "id": "data-table-identity-reconcile",
+      "number": 33867,
+      "base_sha": "6660c45c7dc987699e5b728cae995741a807bd83",
+      "head_sha": "ea55a006010325cd8d0df61eda7fad4e52a04604",
+      "evidence": "pr-edge-composition-phase0"
+    },
+    {
+      "id": "durable-scheduler-provisioning",
+      "number": 33970,
+      "base_sha": "3b24f493d8c7de21ba3199c89186d3a375601cca",
+      "head_sha": "e72722fc64271932ee7b97aab00edefbb7c94608",
+      "evidence": "pr-edge-composition-phase0"
+    },
+    {
+      "id": "rundeck-ssl-validation",
+      "number": 33960,
+      "base_sha": "9cb1cd622061146cf4813255a03874f4d3ce94a9",
+      "head_sha": "87a2571567fd7f876db70c287b8a9da424aac13a",
+      "evidence": "pr-edge-composition-phase0"
+    }
+  ],
+  "screening_cases": [
+    {
+      "id": "frozen-error-prototype",
+      "number": 33897,
+      "url": "https://github.com/n8n-io/n8n/pull/33897",
+      "title": "fix(core): Construct execution errors correctly when Error.prototype is frozen",
+      "base_sha": "2059108fbbfecd36362fdce9377167f45f80f363",
+      "head_sha": "410c39020c2176d84a21450a834c29cc822c1aeb",
+      "surface": "runtime-error-semantics"
+    },
+    {
+      "id": "agent-guardrails-input",
+      "number": 33762,
+      "url": "https://github.com/n8n-io/n8n/pull/33762",
+      "title": "fix(Agent Node): Fall back to guardrails input and hide auto prompt source without a chat trigger",
+      "base_sha": "9471f21ba6fb5d44c63a5115e62fcf5e3a986f69",
+      "head_sha": "6c7739888b7342189af52218b997a0d999a0293a",
+      "surface": "ui-runtime-graph-contract"
+    }
+  ],
+  "confirmation": {
+    "case_count": 3,
+    "selection_time": "after-screening-winners-are-frozen",
+    "selection_inputs": "GitHub PR metadata only; no diff, changed-file list, comments, reviews, or CI discussion",
+    "eligibility": [
+      "merged behavioral change",
+      "immutable base and head available locally",
+      "not used in any prior edge-composition run",
+      "no target-PR discussion in the experiment context",
+      "three distinct behavioral surfaces across the set"
+    ],
+    "required_manifest_fields": [
+      "id",
+      "number",
+      "url",
+      "title",
+      "base_sha",
+      "head_sha",
+      "surface",
+      "selected_at"
+    ],
+    "cases": []
+  },
+  "human_support_study": {
+    "case_count": 4,
+    "selection_time": "after-automatic-confirmation-cases-are-frozen",
+    "eligibility": [
+      "same eligibility rules as automatic confirmation",
+      "not shown previously to the participating reviewer",
+      "one distinct PR per packet for each participating reviewer"
+    ],
+    "packet_rotation": [
+      "control",
+      "raw-human-sidecar",
+      "coverage-map-human-sidecar",
+      "test-scenario-human-sidecar"
+    ],
+    "cases": []
+  }
+}

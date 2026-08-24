@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "samples": [2, 3],
+  "candidate": "review-contract-gaps",
+  "candidate_policy": "Reuse the exact candidate tree frozen in the sample-1 tournament without edits.",
+  "input_policy": "Reuse the exact five cases, two reviewer families, and ten frozen base reviews from sample 1. Each audit runs in a fresh session and may not inspect another candidate or experiment output.",
+  "per_sample_behavior_gate": {
+    "minimum_wins": 1,
+    "maximum_losses": 0,
+    "maximum_unsupported_candidate_findings": 0,
+    "maximum_unjudged_deltas": 0,
+    "negative_case_findings": 0,
+    "retention": true
+  },
+  "combined_behavior_gate": {
+    "minimum_distinct_win_cases": 2,
+    "required_win_reviewers": ["built-in", "prkit"]
+  },
+  "mechanics_gate": {
+    "minimum_valid_ledger_rate": 0.9,
+    "maximum_repair_dependency_rate": 0.25,
+    "maximum_transport_attempts_per_analysis": 2,
+    "maximum_transport_attempts_per_repair": 2
+  },
+  "diagnostic_only": {
+    "known_description_miss": "Track whether a built-in-review audit recovers the unreachable existing-description fallback defect; do not make one historical root cause the sole usefulness gate."
+  },
+  "decision_policy": {
+    "behavior_failed": "Park the broad semantic candidate.",
+    "behavior_passed_mechanics_failed": "Preserve semantic reasoning and redesign deterministic parent-side evidence assembly.",
+    "both_passed": "Advance to a fresh-PR comparison of the unchanged and mechanically simplified candidates."
+  }
+}

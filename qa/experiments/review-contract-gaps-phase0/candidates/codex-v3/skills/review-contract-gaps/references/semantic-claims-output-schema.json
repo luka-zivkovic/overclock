@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "evidence_hint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line_hint", "snippet", "ref", "role"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line_hint": {"type": "integer", "minimum": 1},
+        "snippet": {"type": "string", "minLength": 1},
+        "ref": {"enum": ["base", "head"]},
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "contract_hint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line_hint", "snippet", "ref", "role", "statement"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line_hint": {"type": "integer", "minimum": 1},
+        "snippet": {"type": "string", "minLength": 1},
+        "ref": {"const": "base"},
+        "role": {"type": "string", "minLength": 1},
+        "statement": {"type": "string", "minLength": 1}
+      }
+    },
+    "changed_hint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line_hint", "snippet", "side", "role"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "line_hint": {"type": "integer", "minimum": 1},
+        "snippet": {"type": "string", "minLength": 1},
+        "side": {"enum": ["LEFT", "RIGHT"]},
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "decision", "root_cause_key", "changed_anchor", "contract", "producer",
+        "consumers", "guards_checked", "scenario", "priority", "confidence", "title",
+        "failure_path", "impact", "suggested_comment"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^C[1-9][0-9]*$"},
+        "decision": {"type": "string", "minLength": 1},
+        "root_cause_key": {"type": "string", "minLength": 1},
+        "changed_anchor": {"$ref": "#/$defs/changed_hint"},
+        "contract": {"$ref": "#/$defs/contract_hint"},
+        "producer": {"$ref": "#/$defs/evidence_hint"},
+        "consumers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/evidence_hint"}
+        },
+        "guards_checked": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "scenario": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["precondition", "action", "observable_failure"],
+          "properties": {
+            "precondition": {"type": "string", "minLength": 1},
+            "action": {"type": "string", "minLength": 1},
+            "observable_failure": {"type": "string", "minLength": 1}
+          }
+        },
+        "priority": {"enum": ["P0", "P1", "P2"]},
+        "confidence": {"enum": ["high", "medium"]},
+        "title": {"type": "string", "minLength": 1},
+        "failure_path": {"type": "string", "minLength": 1},
+        "impact": {"type": "string", "minLength": 1},
+        "suggested_comment": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "claims", "inspected_surfaces", "blind_spots"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+    "inspected_surfaces": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "blind_spots": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

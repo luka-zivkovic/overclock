@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "skill_name": "anticipate-edge-cases",
+  "invocation": "explicit",
+  "install_modes": [
+    "skill"
+  ],
+  "cases": [
+    {
+      "id": "webhook-retry-positive",
+      "kind": "positive",
+      "prompt": "Use $anticipate-edge-cases. Change request: retry outgoing webhook deliveries up to three times when the HTTP request times out. The implementation is already committed on the current feature branch, but do not inspect it; give me the pre-review risk brief.",
+      "files": [
+        {
+          "path": "docs/webhooks.md",
+          "base": "# Webhook delivery\n\nEach logical delivery has a stable `delivery_id`, sent as `X-Delivery-ID`. A receiver may process the request before its HTTP response reaches us. Delivery attempts are recorded only after an HTTP response is received.\n"
+        },
+        {
+          "path": "src/webhook_delivery.py",
+          "base": "def deliver(client, store, delivery):\n    response = client.post(\n        delivery.endpoint,\n        json=delivery.payload,\n        headers={\"X-Delivery-ID\": delivery.delivery_id},\n    )\n    store.record_attempt(delivery.delivery_id, response.status_code)\n    return response\n",
+          "head": "IMPLEMENTATION_SENTINEL_SHOULD_NEVER_APPEAR = True\n\ndef deliver(client, store, delivery):\n    for attempt in range(3):\n        try:\n            response = client.post(\n                delivery.endpoint,\n                json=delivery.payload,\n                headers={\"X-Delivery-ID\": delivery.delivery_id},\n            )\n            store.record_attempt(delivery.delivery_id, response.status_code)\n            return response\n        except TimeoutError:\n            if attempt == 2:\n                raise\n"
+        },
+        {
+          "path": "tests/test_webhook_delivery.py",
+          "base": "def test_records_successful_delivery(fake_client, store, delivery):\n    response = deliver(fake_client, store, delivery)\n    assert response.status_code == 200\n    assert store.attempts == [(delivery.delivery_id, 200)]\n"
+        }
+      ],
+      "expectations": [
+        "The helper resolves the analysis base to the main/feature merge base rather than committed feature HEAD.",
+        "No tool output or answer contains IMPLEMENTATION_SENTINEL_SHOULD_NEVER_APPEAR or claims about the unseen retry-loop implementation.",
+        "The risk brief identifies the timeout-after-remote-success sequence: the receiver may act, the response may be lost, and a retry may duplicate the external side effect unless the stable delivery ID has an established idempotency contract.",
+        "The duplicate-delivery risk cites docs/webhooks.md and/or src/webhook_delivery.py at the exact analysis-base SHA and distinguishes a decision or review probe from a confirmed defect.",
+        "The brief remains bounded, labels requirements versus inference, reports coverage, and ends with the required implementation-not-inspected statement.",
+        "Repository HEAD, branch, index, and working tree remain unchanged."
+      ]
+    },
+    {
+      "id": "help-copy-negative",
+      "kind": "negative",
+      "prompt": "Use $anticipate-edge-cases. Change request: replace the CLI help text 'Print result' with 'Print the result'. This is wording only; no command behavior or output format changes.",
+      "files": [
+        {
+          "path": "src/cli.py",
+          "base": "HELP = \"Print result\"\n\ndef run(args):\n    return execute(args)\n",
+          "head": "HELP = \"Print the result\"\n\ndef run(args):\n    return execute(args)\n"
+        }
+      ],
+      "expectations": [
+        "The response says No material pre-implementation edge cases or an equivalent compact no-op.",
+        "The skill does not produce generic security, concurrency, persistence, or failure-mode checklist padding.",
+        "The skill does not tour the repository after the prompt establishes a wording-only non-behavioral change.",
+        "The response does not inspect or describe the head implementation and leaves all repository state unchanged."
+      ]
+    }
+  ]
+}

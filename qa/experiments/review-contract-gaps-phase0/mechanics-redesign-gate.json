@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "candidate": "review-contract-gaps-v2",
+  "sample": "mechanics-v2-1",
+  "candidate_policy": "Create a new candidate tree; preserve the broad semantic inventory and contract-tracing instructions while replacing model-authored evidence transcription and review-aware discovery.",
+  "input_policy": "Reuse the exact five cases, two reviewer families, and ten frozen sample-1 base reviews. Run one review-blind discovery per case, then subtract independently against each frozen review.",
+  "behavior_gate": {
+    "minimum_wins": 1,
+    "maximum_losses": 0,
+    "maximum_unsupported_candidate_findings": 0,
+    "maximum_unjudged_deltas": 0,
+    "negative_case_findings": 0,
+    "retention": true
+  },
+  "mechanics_gate": {
+    "minimum_discovery_success_rate": 0.9,
+    "minimum_fully_materialized_discovery_rate": 0.9,
+    "maximum_rejected_claim_rate": 0.1,
+    "minimum_coverage_complete_block_rate": 0.9,
+    "maximum_model_repair_sessions": 0,
+    "maximum_permission_denials": 5,
+    "maximum_all_attempt_cost_usd": 35.0,
+    "maximum_transport_attempts_per_stage": 2
+  },
+  "diagnostic_only": {
+    "known_description_miss": "Track whether the review-blind discovery recovers the unreachable existing-description fallback defect; do not use one historical root cause as the sole gate."
+  },
+  "stop_conditions": {
+    "behavior": "Any loss or unsupported candidate finding blocks fresh-PR work.",
+    "mechanics": "Below 70% full materialization or coverage completeness means redesign the interface instead of tuning the prompt.",
+    "budget": "Do not start fresh-PR evaluation from this run; the all-attempt replay budget is 35 USD."
+  },
+  "decision_policy": {
+    "behavior_failed": "Park or diagnose semantic regressions before further spend.",
+    "behavior_passed_mechanics_failed": "Keep the semantic candidate experimental and redesign the remaining mechanical boundary.",
+    "both_passed": "Freeze V2 and advance to a small fresh-PR comparison."
+  }
+}
