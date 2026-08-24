@@ -13,10 +13,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install casefile
+      - name: Install Casefile
         run: npm install -g casefile@0.1.0
       - name: Scan marketplace
-        run: casefile scan . --config casefile.config.json --json --out casefile-report.json --fail-on warning --no-store
+        run: |
+          scan_root="${RUNNER_TEMP}/overclock-scan"
+          mkdir -p "$scan_root"
+          git archive HEAD | tar -x -C "$scan_root"
+          # Published 0.1 reads casefile.config.json from the scan root. Switch to
+          # the explicit --config interface once Casefile 0.2 is published.
+          casefile scan "$scan_root" --json --out casefile-report.json --fail-on warning --no-store
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
