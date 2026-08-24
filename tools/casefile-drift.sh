@@ -2,7 +2,8 @@
 # Supply-chain tripwire: scan this checkout with casefile, compare contentHash
 # to the previous scan, fail loudly on criticals. Agent harnesses load skills
 # from this checkout live, so every pull is a supply-chain event.
-# Requires: casefile on PATH (`npm install -g casefile@0.1.0`).
+# Requires: a Casefile build with explicit --config support. CI temporarily uses published 0.1
+# in artifact-local compatibility mode until the config-aware release is available on npm.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$(mktemp)"

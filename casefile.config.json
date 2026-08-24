@@ -25,6 +25,14 @@
       "path": "qa/eval_sandbox.py"
     },
     {
+      "ruleId": "capability/network-call",
+      "path": "qa/experiments/pr-edge-role-matrix-phase0/run_screen.py"
+    },
+    {
+      "ruleId": "capability/network-call",
+      "path": "qa/experiments/review-contract-gaps-phase0/run_live_matrix.py"
+    },
+    {
       "ruleId": "capability/rm-rf",
       "path": "qa/"
     },
