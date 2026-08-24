@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "edge_index_sha256", "risks", "summary"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "edge_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk_id", "implementation_outcome", "review_value", "evidence", "notes"],
+        "properties": {
+          "risk_id": {"type": "string", "pattern": "^R[1-9][0-9]*$"},
+          "implementation_outcome": {
+            "type": "string",
+            "enum": ["actual-defect", "handled-by-implementation", "decision-question", "unreachable", "irrelevant"]
+          },
+          "review_value": {
+            "type": "string",
+            "enum": ["new-finding", "material-strengthening", "test-guidance", "decorative", "none"]
+          },
+          "evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "notes": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distinct_material_root_causes", "risks_with_any_value", "risks_without_value"],
+      "properties": {
+        "distinct_material_root_causes": {"type": "integer", "minimum": 0},
+        "risks_with_any_value": {"type": "integer", "minimum": 0},
+        "risks_without_value": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

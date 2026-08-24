@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "skill_name": "audit-consumer-contracts",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "cases": [
+    {
+      "id": "shadowed-fallback-positive",
+      "kind": "positive",
+      "prompt": "Use $audit-consumer-contracts on the current feature branch against main. The frozen review is at frozen-review.md. Change requirement: the auto option must display the new 'Requires a chat trigger' explanation when rendered without a chat trigger, including when its existing option object already has a description. Audit only missed producer/consumer contract violations and return an append-only delta.",
+      "files": [
+        {
+          "path": "src/definitions.py",
+          "base": "PROMPT_OPTIONS = [{\"value\": \"auto\", \"description\": \"Use the connected chat input\"}]\n"
+        },
+        {
+          "path": "src/renderer.py",
+          "base": "def option_description(option):\n    return option[\"description\"]\n",
+          "head": "def option_description(option):\n    return option.get(\"description\") or \"Requires a chat trigger\"\n"
+        },
+        {
+          "path": "src/prompt_ui.py",
+          "base": "from definitions import PROMPT_OPTIONS\nfrom renderer import option_description\n\ndef render_auto_prompt():\n    return option_description(PROMPT_OPTIONS[0])\n"
+        },
+        {
+          "path": "frozen-review.md",
+          "base": "No actionable findings.\n"
+        }
+      ],
+      "expectations": [
+        "The deterministic surface includes description and/or the auto option contract with src/definitions.py as an external base match.",
+        "The verifier classifies src/definitions.py as a producer and traces its non-empty description through src/prompt_ui.py into the changed fallback expression.",
+        "Exactly one finding explains that the new hint is unreachable for the production option and anchors the changed renderer line.",
+        "The frozen review hash is preserved and no base-review text is rewritten.",
+        "Repository state remains unchanged."
+      ]
+    },
+    {
+      "id": "persisted-key-positive",
+      "kind": "positive",
+      "prompt": "Use $audit-consumer-contracts on the current feature branch against main. The frozen review is at frozen-review.md. Check external persisted consumers of changed keys.",
+      "files": [
+        {
+          "path": "src/schema.py",
+          "base": "TABLE_KEY = \"dataTableId\"\n",
+          "head": "TABLE_KEY = \"tableId\"\n"
+        },
+        {
+          "path": "src/workflow_loader.py",
+          "base": "def load_table(node):\n    return node[\"parameters\"][\"dataTableId\"]\n"
+        },
+        {
+          "path": "frozen-review.md",
+          "base": "No actionable findings.\n"
+        }
+      ],
+      "expectations": [
+        "The extractor surfaces dataTableId with src/workflow_loader.py as an external base match.",
+        "Exactly one finding traces a persisted raw dataTableId through the unchanged loader and anchors the changed schema line.",
+        "The result does not speculate about consumers not present in the repository.",
+        "The frozen review remains unchanged and repository state is clean."
+      ]
+    },
+    {
+      "id": "alias-handled-negative",
+      "kind": "negative",
+      "prompt": "Use $audit-consumer-contracts on the current feature branch against main. The frozen review is at frozen-review.md. Return only confirmed additions.",
+      "files": [
+        {
+          "path": "src/schema.py",
+          "base": "TABLE_KEY = \"dataTableId\"\n",
+          "head": "TABLE_KEY = \"tableId\"\nLEGACY_TABLE_KEYS = {\"dataTableId\": TABLE_KEY}\n"
+        },
+        {
+          "path": "src/workflow_loader.py",
+          "base": "def normalize_key(key):\n    return key\n",
+          "head": "def normalize_key(key):\n    return LEGACY_TABLE_KEYS.get(key, key)\n"
+        },
+        {
+          "path": "src/persisted_workflow.py",
+          "base": "SAVED_NODE = {\"parameters\": {\"dataTableId\": \"table-42\"}}\n"
+        },
+        {
+          "path": "frozen-review.md",
+          "base": "No actionable findings.\n"
+        }
+      ],
+      "expectations": [
+        "The old persisted key is surfaced but the alias is inspected as defeating evidence.",
+        "No finding is admitted and no speculative warning or empty appendix is returned.",
+        "The frozen review remains unchanged and repository state is clean."
+      ]
+    },
+    {
+      "id": "wording-no-surface-negative",
+      "kind": "negative",
+      "prompt": "Use $audit-consumer-contracts on the current feature branch against main. The frozen review is at frozen-review.md. This is a wording-only change.",
+      "files": [
+        {
+          "path": "README.md",
+          "base": "Print result.\n",
+          "head": "Print the result.\n"
+        },
+        {
+          "path": "frozen-review.md",
+          "base": "No actionable findings.\n"
+        }
+      ],
+      "expectations": [
+        "The deterministic extractor returns no eligible external contract surface.",
+        "The skill returns the compact two-line no-op without model-driven repository exploration.",
+        "No generic review, security, concurrency, or testing checklist appears.",
+        "Repository state remains unchanged."
+      ]
+    }
+  ]
+}

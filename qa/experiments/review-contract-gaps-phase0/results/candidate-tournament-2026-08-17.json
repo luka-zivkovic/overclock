@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "status": "screen-passed-replication-required",
+  "run_root": "qa/_work/review-contract-tournament.5imBcr",
+  "source_matrix_root": "qa/_work/review-contract-matrix.pdoyMY",
+  "samples": 1,
+  "cases": 5,
+  "reviewer_families": [
+    "built-in",
+    "prkit"
+  ],
+  "review_blocks": 10,
+  "arms": {
+    "audit-consumer-contracts": {
+      "source": "results/live-matrix-pilot-2026-08-17.json",
+      "findings": 0,
+      "wins": 0,
+      "ties": 10,
+      "losses": 0,
+      "valid_ledgers": 7,
+      "invalid_ledgers": 3,
+      "known_description_miss_recovered_over_built_in": false
+    },
+    "review-contract-gaps": {
+      "findings": 3,
+      "wins": 3,
+      "ties": 7,
+      "losses": 0,
+      "valid_ledgers": 8,
+      "invalid_ledgers": 2,
+      "known_description_miss_recovered_over_built_in": false,
+      "negative_case_passed": true,
+      "retention_passed": true,
+      "win_cases": [
+        "agent-guardrails-input",
+        "instance-ai-write-lock",
+        "node-registry-swap"
+      ],
+      "win_reviewers": [
+        "built-in",
+        "prkit"
+      ]
+    }
+  },
+  "broad_findings": [
+    {
+      "case_id": "agent-guardrails-input",
+      "reviewer": "built-in",
+      "priority": "P2",
+      "title": "New 'auto requires chat trigger' guard skips Agent typeVersion 3 nodes",
+      "judgment": "broad"
+    },
+    {
+      "case_id": "node-registry-swap",
+      "reviewer": "built-in",
+      "priority": "P1",
+      "title": "postProcessLoaders() end-of-function reset silently drops concurrent lazy-cache writes to this.loaded",
+      "judgment": "broad"
+    },
+    {
+      "case_id": "instance-ai-write-lock",
+      "reviewer": "prkit",
+      "priority": "P1",
+      "title": "assertNotLockedByEditor breaks the unguarded setup-decline revert, leaving trigger-test changes unrevertable",
+      "judgment": "broad"
+    }
+  ],
+  "broad_cost": {
+    "attempts": 23,
+    "accepted_attempts": 19,
+    "failed_attempts": 4,
+    "accepted_audit_cost_usd": 17.45435265,
+    "failed_audit_cost_usd": 2.3006787,
+    "accepted_repair_cost_usd": 2.9322507,
+    "failed_repair_cost_usd": 2.5645713,
+    "judge_cost_usd": 2.0661744,
+    "all_attempt_cost_usd": 27.31802775,
+    "permission_denials": 28
+  },
+  "decision": {
+    "winner": "review-contract-gaps",
+    "publish": false,
+    "automatic_composition": false,
+    "next": "Replicate the broad semantic arm on fresh samples before considering a smaller production design. Do not return to lexical ranking or automatic edge-brief placement."
+  }
+}

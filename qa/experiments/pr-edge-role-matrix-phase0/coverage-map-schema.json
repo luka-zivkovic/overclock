@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "base_review_sha256", "edge_index_sha256", "risks"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "base_review_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "edge_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk_id", "coverage", "reason"],
+        "properties": {
+          "risk_id": {"type": "string", "pattern": "^R[1-9][0-9]*$"},
+          "coverage": {"type": "string", "enum": ["covered", "unclear", "uncovered"]},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

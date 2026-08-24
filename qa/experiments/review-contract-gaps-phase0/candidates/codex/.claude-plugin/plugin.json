@@ -1,0 +1,6 @@
+{
+  "name": "review-contract-gaps-candidate",
+  "displayName": "Review Contract Gaps Candidate",
+  "description": "Experimental broad semantic contract-gap audit skill.",
+  "version": "0.0.0"
+}

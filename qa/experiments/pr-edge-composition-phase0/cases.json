@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "repository": "n8n-io/n8n",
+  "selected_at": "2026-08-16",
+  "redesigned_at": "2026-08-17",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "edge_budget_usd": 1.0,
+  "review_budget_usd": 2.0,
+  "delta_budget_usd": 1.5,
+  "arms": [
+    { "id": "baseline", "reviewer": "built-in-code-review", "augmentation": "none" },
+    { "id": "baseline_late_edge", "reviewer": "built-in-code-review", "augmentation": "late-reveal-edge-delta" },
+    { "id": "prkit", "reviewer": "pr-kit-review-pr", "augmentation": "none" },
+    { "id": "prkit_late_edge", "reviewer": "pr-kit-review-pr", "augmentation": "late-reveal-edge-delta" }
+  ],
+  "cases": [
+    {
+      "id": "credential-model-selection",
+      "evaluation_phase": "regression",
+      "number": 33820,
+      "url": "https://github.com/n8n-io/n8n/pull/33820",
+      "title": "fix(editor): Preserve valid model selection when switching credentials",
+      "base_sha": "dc05720609e7fe51509aca4a3affe563afaa6408",
+      "head_sha": "608cd26a0db4dffed119cab2821978de5a6fa9ee"
+    },
+    {
+      "id": "data-table-identity-reconcile",
+      "evaluation_phase": "regression",
+      "number": 33867,
+      "url": "https://github.com/n8n-io/n8n/pull/33867",
+      "title": "fix(core): Reconcile data table name collisions on source control pull",
+      "base_sha": "6660c45c7dc987699e5b728cae995741a807bd83",
+      "head_sha": "ea55a006010325cd8d0df61eda7fad4e52a04604"
+    },
+    {
+      "id": "durable-scheduler-provisioning",
+      "evaluation_phase": "generalization",
+      "number": 33970,
+      "url": "https://github.com/n8n-io/n8n/pull/33970",
+      "title": "feat: Add durable scheduler job provisioning (no-changelog)",
+      "base_sha": "3b24f493d8c7de21ba3199c89186d3a375601cca",
+      "head_sha": "e72722fc64271932ee7b97aab00edefbb7c94608"
+    },
+    {
+      "id": "rundeck-ssl-validation",
+      "evaluation_phase": "generalization",
+      "number": 33960,
+      "url": "https://github.com/n8n-io/n8n/pull/33960",
+      "title": "fix: Rundeck node supports configurable SSL validation",
+      "base_sha": "9cb1cd622061146cf4813255a03874f4d3ce94a9",
+      "head_sha": "87a2571567fd7f876db70c287b8a9da424aac13a"
+    }
+  ]
+}

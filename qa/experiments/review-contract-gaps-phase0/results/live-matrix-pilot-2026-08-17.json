@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "stopped-after-pilot",
+  "run_root": "qa/_work/review-contract-matrix.pdoyMY",
+  "planned_samples": 3,
+  "completed_samples": 1,
+  "cases": 5,
+  "reviewer_families": ["built-in", "prkit"],
+  "review_blocks": 10,
+  "composition_outcomes": {
+    "wins": 0,
+    "ties": 10,
+    "losses": 0,
+    "blind_judges_run": 0,
+    "reason": "Every real audit proposed zero confirmed additions, so fail-closed append-only composition returns the frozen base review."
+  },
+  "audit_coverage": {
+    "surfaced": 112,
+    "verified": 54,
+    "confirmed": 0,
+    "already_covered": 4,
+    "defeated": 22,
+    "unreachable": 28,
+    "unresolved": 0,
+    "skipped": 58
+  },
+  "admission": {
+    "valid_without_or_after_repair": 7,
+    "invalid_nonfinding_ledgers": 3,
+    "valid_real_repair_ledgers": 5,
+    "confirmed_findings_in_invalid_ledgers": 0
+  },
+  "known_contract_case": {
+    "case_id": "agent-guardrails-input",
+    "built_in_base_found_known_description_bug": false,
+    "prkit_base_found_known_description_bug": true,
+    "built_in_audit_added_known_description_bug": false,
+    "description_surface_rank": 11,
+    "built_in_surfaces_verified": 2,
+    "built_in_surfaces_skipped": 14
+  },
+  "cost": {
+    "attempts": 36,
+    "accepted_attempts": 30,
+    "failed_attempts": 6,
+    "accepted_cost_usd": 23.9059887,
+    "failed_cost_usd": 6.76942365,
+    "all_attempt_cost_usd": 30.67541235,
+    "permission_denials": 17
+  },
+  "promotion": false,
+  "stop_reason": "Zero additions across ten reviewer/case blocks, failure on the intended known-miss block, high second-pass cost, and brittle exact-evidence serialization made two more samples unjustified."
+}

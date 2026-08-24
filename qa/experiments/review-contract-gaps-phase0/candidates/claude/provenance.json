@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "provider": "claude",
+  "provider_version": "2.1.233 (Claude Code)",
+  "mode": "consult",
+  "status": "completed",
+  "result_path": "/Users/makina/.cache/overclock-agent-bridge/bridge-20260817T112342Z-e056bab5/result.json",
+  "result_sha256": "cd0fb8076cd2e53e21f1b1460f420f4ee02d617f1eca09929b7451f37a206b16",
+  "session_id": "65868b94-ae32-49fb-9e22-4a410abe1d24",
+  "base_sha": "4002664bca8916bcb41cc970408f264ac7876876",
+  "workspace_changed": false,
+  "excluded_attempt": {
+    "reason": "The parent wrote the independent Codex candidate while the first consultation snapshot was active, so Agent Bridge returned workspace_changed and the response was not used.",
+    "result_path": "/Users/makina/.cache/overclock-agent-bridge/bridge-20260817T111832Z-dd9637ec/result.json",
+    "result_sha256": "866fd47e41ab00c0d428d23d7a035c4b7f1f0e4014956507af8d3063b46a3bfc",
+    "status": "workspace_changed"
+  },
+  "materialization": "The active checkout was dirty with unrelated user work, so Agent Bridge delegate mode was unavailable. The parent materialized and verified the read-only proposal, then recorded every synthesis change in the experiment README."
+}

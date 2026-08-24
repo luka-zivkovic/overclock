@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "candidate": "review-contract-gaps-v4",
+  "sample": "mechanics-v4-1",
+  "candidate_policy": "Preserve review-blind contract discovery and root-cause subtraction. Resolve the intended distinctive source line across the complete file before changed-line membership, reject generic fragments, require changed anchors to quote genuinely added or removed causal lines, and require contract snippets to exist in the base tree.",
+  "input_policy": "Reuse the exact five cases, two reviewer families, and ten frozen sample-1 base reviews. Run one review-blind discovery per case, then subtract independently against each frozen review.",
+  "behavior_gate": {
+    "minimum_wins": 1,
+    "maximum_losses": 0,
+    "maximum_unsupported_candidate_findings": 0,
+    "maximum_unjudged_deltas": 0,
+    "negative_case_findings": 0,
+    "retention": true
+  },
+  "mechanics_gate": {
+    "minimum_discovery_success_rate": 0.9,
+    "minimum_fully_materialized_discovery_rate": 0.9,
+    "maximum_rejected_claim_rate": 0.1,
+    "minimum_coverage_complete_block_rate": 0.9,
+    "maximum_model_repair_sessions": 0,
+    "maximum_permission_denials": 5,
+    "maximum_all_attempt_cost_usd": 35.0,
+    "maximum_transport_attempts_per_stage": 2
+  },
+  "diagnostic_only": {
+    "known_description_miss": "Track whether review-blind discovery recovers and admits the unreachable existing-description fallback defect; do not use one historical root cause as the sole gate.",
+    "v3_false_anchor": "The unchanged archiveIfAiTemporary block must never materialize by redirecting one of its fragments to an unrelated changed line."
+  },
+  "stop_conditions": {
+    "behavior": "Any loss or unsupported candidate finding blocks fresh-PR work.",
+    "mechanics": "Failure to reach 90% full materialization or coverage completeness means diagnose the remaining boundary before fresh-PR work.",
+    "budget": "Do not start fresh-PR evaluation from this run; the all-attempt replay budget is 35 USD."
+  },
+  "decision_policy": {
+    "behavior_failed": "Park or diagnose semantic regressions before further spend.",
+    "behavior_passed_mechanics_failed": "Keep the candidate experimental and diagnose the remaining evidence boundary.",
+    "both_passed": "Freeze V4 and advance to a small fresh-PR comparison."
+  }
+}

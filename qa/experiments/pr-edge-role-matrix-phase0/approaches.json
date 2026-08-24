@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "reviewer_blocks": ["built-in-code-review", "pr-kit-review-pr"],
+  "approaches": [
+    {
+      "id": "base-review",
+      "lane": "automatic-final-review",
+      "family": "control",
+      "edge_exposure": "none",
+      "base_review_exposure": "is-the-output",
+      "implementation_access": "primary-review-only",
+      "output_policy": "frozen-review",
+      "admission": "none",
+      "screening_action": "reuse"
+    },
+    {
+      "id": "upfront-full-brief",
+      "lane": "automatic-final-review",
+      "family": "before-review",
+      "edge_exposure": "full-brief-before-primary-review",
+      "base_review_exposure": "none",
+      "implementation_access": "primary-review",
+      "output_policy": "replacement-review",
+      "admission": "reviewer-discretion",
+      "screening_action": "historical-only"
+    },
+    {
+      "id": "upfront-probes-only",
+      "lane": "automatic-final-review",
+      "family": "before-review",
+      "edge_exposure": "scenarios-and-probes-before-primary-review",
+      "base_review_exposure": "none",
+      "implementation_access": "primary-review",
+      "output_policy": "replacement-review",
+      "admission": "reviewer-discretion",
+      "screening_action": "run"
+    },
+    {
+      "id": "parallel-independent-challenger",
+      "lane": "automatic-final-review",
+      "family": "parallel",
+      "edge_exposure": "full-index-to-independent-challenger",
+      "base_review_exposure": "none-during-verification",
+      "implementation_access": "challenger",
+      "output_policy": "append-confirmed",
+      "admission": "strict",
+      "screening_action": "run"
+    },
+    {
+      "id": "late-batch-confirmed",
+      "lane": "automatic-final-review",
+      "family": "after-review",
+      "edge_exposure": "full-index-after-freeze",
+      "base_review_exposure": "full-frozen-review",
+      "implementation_access": "one-batch-verifier",
+      "output_policy": "append-confirmed",
+      "admission": "strict",
+      "screening_action": "run"
+    },
+    {
+      "id": "late-per-risk-confirmed",
+      "lane": "automatic-final-review",
+      "family": "after-review",
+      "edge_exposure": "one-risk-per-fresh-verifier",
+      "base_review_exposure": "full-frozen-review",
+      "implementation_access": "isolated-verifiers",
+      "output_policy": "append-confirmed",
+      "admission": "strict",
+      "screening_action": "run"
+    },
+    {
+      "id": "coverage-filtered-per-risk",
+      "lane": "automatic-final-review",
+      "family": "after-review",
+      "edge_exposure": "no-diff-coverage-filter-then-one-risk",
+      "base_review_exposure": "filter-and-isolated-verifiers",
+      "implementation_access": "isolated-verifiers-after-filter",
+      "output_policy": "append-confirmed",
+      "admission": "strict",
+      "screening_action": "run"
+    },
+    {
+      "id": "test-scenario-confirmed",
+      "lane": "automatic-final-review",
+      "family": "after-review",
+      "edge_exposure": "risk-translated-to-test-scenario",
+      "base_review_exposure": "full-frozen-review",
+      "implementation_access": "scenario-verifiers",
+      "output_policy": "append-confirmed",
+      "admission": "strict",
+      "screening_action": "run"
+    },
+    {
+      "id": "conditional-no-findings-challenger",
+      "lane": "automatic-final-review",
+      "family": "conditional",
+      "edge_exposure": "one-risk-only-if-zero-base-findings",
+      "base_review_exposure": "trigger-count-and-isolated-verifiers",
+      "implementation_access": "isolated-verifiers-when-triggered",
+      "output_policy": "append-confirmed-or-exact-base",
+      "admission": "strict",
+      "screening_action": "derive"
+    },
+    {
+      "id": "conditional-high-impact-challenger",
+      "lane": "automatic-final-review",
+      "family": "conditional",
+      "edge_exposure": "sealed-high-impact-risks-only",
+      "base_review_exposure": "full-frozen-review",
+      "implementation_access": "isolated-verifiers-when-triggered",
+      "output_policy": "append-confirmed-or-exact-base",
+      "admission": "strict",
+      "screening_action": "derive"
+    },
+    {
+      "id": "raw-human-sidecar",
+      "lane": "reviewer-support",
+      "family": "sidecar",
+      "edge_exposure": "full-brief-beside-frozen-review",
+      "base_review_exposure": "separate-artifact",
+      "implementation_access": "human-reviewer",
+      "output_policy": "separate-support-packet",
+      "admission": "human-judgment",
+      "screening_action": "defer-human-study"
+    },
+    {
+      "id": "coverage-map-human-sidecar",
+      "lane": "reviewer-support",
+      "family": "sidecar",
+      "edge_exposure": "covered-unclear-uncovered-map",
+      "base_review_exposure": "map-generator-and-human-reviewer",
+      "implementation_access": "human-reviewer",
+      "output_policy": "separate-support-packet",
+      "admission": "human-judgment",
+      "screening_action": "defer-human-study"
+    },
+    {
+      "id": "test-scenario-human-sidecar",
+      "lane": "reviewer-support",
+      "family": "sidecar",
+      "edge_exposure": "manual-test-scenarios",
+      "base_review_exposure": "separate-artifact",
+      "implementation_access": "human-reviewer",
+      "output_policy": "separate-support-packet",
+      "admission": "human-judgment",
+      "screening_action": "defer-human-study"
+    },
+    {
+      "id": "risk-router-only",
+      "lane": "diagnostic",
+      "family": "routing",
+      "edge_exposure": "sealed-index-only",
+      "base_review_exposure": "finding-count-and-blind-spots-only",
+      "implementation_access": "none",
+      "output_policy": "route-or-stop",
+      "admission": "none",
+      "screening_action": "run"
+    },
+    {
+      "id": "author-preflight",
+      "lane": "diagnostic",
+      "family": "preflight",
+      "edge_exposure": "full-brief-before-implementation",
+      "base_review_exposure": "none",
+      "implementation_access": "post-hoc-auditor-only",
+      "output_policy": "risk-utility-audit",
+      "admission": "none",
+      "screening_action": "run"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "status": "behavior-failed-mechanics-passed",
+  "candidate": "review-contract-gaps-v5",
+  "run_root": "qa/_work/review-contract-mechanics-v5.0gNhI3",
+  "gate": "mechanics-redesign-v5-gate.json",
+  "provenance": {
+    "candidate_plugin_sha256": "52aef70639d957a8638cb48afd4aa131dfedc2e7f39c9e1bf829faf8ab530fd3",
+    "gate_sha256": "37c94fc492b25e28a7ef8220079787ca20c68c3af51f6157c5a3311a6a5c53c9",
+    "matrix_provenance_sha256": "7a90f128fe20ba4d9d760bb9639b1fd8c955854d4e43daa7095448919d95bc37",
+    "runner_sha256": "e95a93041983555f8d724884651f579d0ab42ef8e65da8e53268bc0f1c00f564",
+    "review_blocks": 10,
+    "review_blind_discoveries": 5,
+    "reviewer_families": ["built-in", "prkit"],
+    "model": "claude-sonnet-5",
+    "effort": "medium"
+  },
+  "behavior": {
+    "wins": 2,
+    "ties": 6,
+    "losses": 2,
+    "unjudged": 0,
+    "unsupported_candidate_findings": 2,
+    "negative_case_findings": 0,
+    "retention_passed": true,
+    "passed": false,
+    "win_blocks": [
+      "agent-guardrails-input/built-in",
+      "saved-agent-tool-schema/prkit"
+    ],
+    "loss_blocks": [
+      "instance-ai-write-lock/built-in",
+      "instance-ai-write-lock/prkit"
+    ]
+  },
+  "semantic_discovery": {
+    "submitted_claims": 3,
+    "cases_with_claims": [
+      "agent-guardrails-input",
+      "instance-ai-write-lock",
+      "saved-agent-tool-schema"
+    ],
+    "claims": [
+      {
+        "case_id": "agent-guardrails-input",
+        "root_cause_key": "auto-option-disabled-description-fallback-unreachable-because-base-option-already-has-description",
+        "materialized": true,
+        "admitted_against": ["built-in"],
+        "covered_by": ["prkit"],
+        "blind_judgments": ["win", "tie"]
+      },
+      {
+        "case_id": "instance-ai-write-lock",
+        "root_cause_key": "unguarded-preTestSnapshot-restore-write",
+        "materialized": true,
+        "admitted_against": ["built-in", "prkit"],
+        "blind_judgments": ["loss", "loss"],
+        "unsupported_reason": "Both judges found that the snapshot-restore call predates and is untouched by the PR. The cited base controller call did not entail the claim's universal rule that every write-after-read path must carry expectedChecksum, so the new handleUpdate guard did not make this pre-existing restore path a change-caused defect."
+      },
+      {
+        "case_id": "saved-agent-tool-schema",
+        "root_cause_key": "resource-mapper-auto-refresh-guard-not-propagated-to-chathub-tool-config",
+        "materialized": true,
+        "admitted_against": ["prkit"],
+        "covered_by": ["built-in"],
+        "blind_judgments": ["tie", "win"]
+      }
+    ],
+    "no_claim_cases": [
+      "frozen-error-prototype",
+      "node-registry-swap"
+    ],
+    "known_description_case": {
+      "discovered_review_blind": true,
+      "materialized": true,
+      "admitted_against": ["built-in"],
+      "covered_by": ["prkit"]
+    },
+    "v3_false_anchor_case": {
+      "unsafe_anchor_materialized": false
+    }
+  },
+  "mechanics": {
+    "discovery_success_rate": 1.0,
+    "fully_materialized_discovery_rate": 1.0,
+    "submitted_claims": 3,
+    "materialized_claims": 3,
+    "rejected_claims": 0,
+    "rejected_claim_rate": 0.0,
+    "coverage_complete_block_rate": 1.0,
+    "repair_sessions": 0,
+    "permission_denials": 3,
+    "passed": true,
+    "primary_result": "Full-file intended-line resolution plus a 16-character/one-identifier floor materialized every submitted claim while preserving changed-line, base-ref, review-retention, and no-repair invariants."
+  },
+  "cost": {
+    "attempts": 15,
+    "accepted_attempts": 15,
+    "failed_attempts": 0,
+    "discovery_cost_usd": 6.1651881,
+    "coverage_cost_usd": 1.1361126,
+    "judge_cost_usd": 2.0227128,
+    "all_attempt_cost_usd": 9.3240135
+  },
+  "decision": {
+    "behavior": "fail",
+    "mechanics": "pass",
+    "next": "freeze the V5 evidence resolver; tighten semantic causal-contract admission so a cited base example cannot be generalized into an unsupported universal invariant, then replay behavior before fresh PRs",
+    "publish": false,
+    "automatic_composition": false,
+    "advance_fresh_pr_ab": false
+  }
+}

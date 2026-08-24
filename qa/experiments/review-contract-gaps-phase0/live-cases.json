@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "repository": "n8n-io/n8n",
+  "selected_at": "2026-08-17",
+  "selection_policy": "Keep the two frozen calibration cases, then select three merged behavioral PRs from title and metadata only before inspecting their diffs.",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "samples": 3,
+  "pin_adjustments": {
+    "instance-ai-write-lock": "GitHub metadata reported base 79c1393cfb5d497b230da8190e762c5cdd0604af; the unique merge base with the pinned head is ddd54948099751cc7a6cacbb15d9a8ad86c8aebd, which is the exact review base used here."
+  },
+  "cases": [
+    {
+      "id": "frozen-error-prototype",
+      "number": 33897,
+      "url": "https://github.com/n8n-io/n8n/pull/33897",
+      "title": "fix(core): Construct execution errors correctly when Error.prototype is frozen",
+      "base_sha": "2059108fbbfecd36362fdce9377167f45f80f363",
+      "head_sha": "410c39020c2176d84a21450a834c29cc822c1aeb",
+      "role": "calibration-negative"
+    },
+    {
+      "id": "agent-guardrails-input",
+      "number": 33762,
+      "url": "https://github.com/n8n-io/n8n/pull/33762",
+      "title": "fix(Agent Node): Fall back to guardrails input and hide auto prompt source without a chat trigger",
+      "base_sha": "9471f21ba6fb5d44c63a5115e62fcf5e3a986f69",
+      "head_sha": "6c7739888b7342189af52218b997a0d999a0293a",
+      "role": "calibration-contract"
+    },
+    {
+      "id": "node-registry-swap",
+      "number": 36387,
+      "url": "https://github.com/n8n-io/n8n/pull/36387",
+      "title": "fix(core): Rebuild the node registry without emptying it first",
+      "base_sha": "674c9e67b499ff440e71c15eea8f7c6b987f094a",
+      "head_sha": "36e7a9e6d1ce55b9eac997176247084e55c8dad9",
+      "role": "fresh-metadata-only"
+    },
+    {
+      "id": "instance-ai-write-lock",
+      "number": 36335,
+      "url": "https://github.com/n8n-io/n8n/pull/36335",
+      "title": "fix(core): Respect the editor write lock when Instance AI writes workflows",
+      "base_sha": "ddd54948099751cc7a6cacbb15d9a8ad86c8aebd",
+      "head_sha": "07596e1998ee5158e3a3a2c86eb4b01d2811555a",
+      "role": "fresh-metadata-only"
+    },
+    {
+      "id": "saved-agent-tool-schema",
+      "number": 36329,
+      "url": "https://github.com/n8n-io/n8n/pull/36329",
+      "title": "fix(editor): Keep agent tool schemas aligned with saved configuration",
+      "base_sha": "d810315f11fce0205f35d81922060b16395dbe11",
+      "head_sha": "077d154be7cd76e843903ef611fa5874c91185f6",
+      "role": "fresh-metadata-only"
+    }
+  ],
+  "promotion_gate": {
+    "retention": "Every augmented review begins with the frozen base review byte-for-byte.",
+    "safety": "No invalid admitted addition, repository mutation, or unsupported external claim.",
+    "lift": "At least two distinct PRs win, with at least one win for each reviewer family.",
+    "negative_control": "The frozen-error calibration produces no admitted addition in every sample.",
+    "losses": 0
+  }
+}

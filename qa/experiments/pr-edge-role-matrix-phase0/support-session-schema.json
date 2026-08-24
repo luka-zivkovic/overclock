@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "packet_id",
+    "reviewer_id",
+    "started_at",
+    "elapsed_seconds",
+    "useful_new_probes",
+    "confirmed_findings",
+    "unsupported_claims",
+    "cognitive_load",
+    "would_use_again",
+    "notes"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "packet_id": {
+      "type": "string",
+      "enum": ["control", "raw-human-sidecar", "coverage-map-human-sidecar", "test-scenario-human-sidecar"]
+    },
+    "reviewer_id": {"type": "string", "minLength": 1},
+    "started_at": {"type": "string", "format": "date-time"},
+    "elapsed_seconds": {"type": "integer", "minimum": 0},
+    "useful_new_probes": {"type": "integer", "minimum": 0},
+    "confirmed_findings": {"type": "integer", "minimum": 0},
+    "unsupported_claims": {"type": "integer", "minimum": 0},
+    "cognitive_load": {"type": "integer", "minimum": 1, "maximum": 5},
+    "would_use_again": {"type": "boolean"},
+    "notes": {"type": "string", "minLength": 1}
+  }
+}

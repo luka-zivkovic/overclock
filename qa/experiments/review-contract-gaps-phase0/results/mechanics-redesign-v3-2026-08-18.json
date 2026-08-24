@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "status": "behavior-failed-mechanics-failed",
+  "candidate": "review-contract-gaps-v3",
+  "run_root": "qa/_work/review-contract-mechanics-v3.2CJarI",
+  "gate": "mechanics-redesign-v3-gate.json",
+  "provenance": {
+    "candidate_plugin_sha256": "887e364f119e521df6b8985a8622449a9796ac1ba02474f4b2435e0cc9165cc2",
+    "gate_sha256": "7b432d7312d9b7d3236a66bc3a5698640432d4809f7f21b3a587286d9b19b927",
+    "matrix_provenance_sha256": "7a90f128fe20ba4d9d760bb9639b1fd8c955854d4e43daa7095448919d95bc37",
+    "runner_sha256": "e95a93041983555f8d724884651f579d0ab42ef8e65da8e53268bc0f1c00f564",
+    "review_blocks": 10,
+    "review_blind_discoveries": 5,
+    "reviewer_families": ["built-in", "prkit"],
+    "model": "claude-sonnet-5",
+    "effort": "medium"
+  },
+  "behavior": {
+    "wins": 4,
+    "ties": 5,
+    "losses": 1,
+    "unjudged": 0,
+    "unsupported_candidate_findings": 2,
+    "negative_case_findings": 0,
+    "retention_passed": true,
+    "passed": false,
+    "win_cases": [
+      "agent-guardrails-input/built-in",
+      "node-registry-swap/built-in",
+      "node-registry-swap/prkit",
+      "instance-ai-write-lock/prkit"
+    ],
+    "loss_case": "instance-ai-write-lock/built-in"
+  },
+  "semantic_discovery": {
+    "submitted_claims": 4,
+    "cases_with_claims": [
+      "agent-guardrails-input",
+      "instance-ai-write-lock",
+      "node-registry-swap",
+      "saved-agent-tool-schema"
+    ],
+    "claims": [
+      {
+        "case_id": "agent-guardrails-input",
+        "root_cause_key": "nullish-coalescing-fallback-never-fires-because-producer-always-sets-description",
+        "materialized": true,
+        "admitted_against": ["built-in"],
+        "covered_by": ["prkit"],
+        "blind_judgments": ["win", "tie"]
+      },
+      {
+        "case_id": "instance-ai-write-lock",
+        "root_cause_key": "instance-ai-archive-temp-bypasses-write-lock",
+        "materialized": true,
+        "admitted_against": ["built-in", "prkit"],
+        "blind_judgments": ["loss", "win"],
+        "unsafe_anchor": {
+          "intended_hint_line": 718,
+          "resolved_line": 643,
+          "resolved_text": "workflowId,",
+          "reason": "The any-fragment resolver treated a short generic line inside the multi-line snippet as sufficient changed-line evidence and selected an unrelated changed hunk."
+        }
+      },
+      {
+        "case_id": "node-registry-swap",
+        "root_cause_key": "loaded-credentials-lazy-cache-lost-on-publish",
+        "materialized": true,
+        "admitted_against": ["built-in", "prkit"],
+        "blind_judgments": ["win-with-unsupported-impact", "win"],
+        "unsupported_reason": "One judge verified the cache-loss mechanism but rejected the claimed credential-class reconstruction impact because the lower-level loader cache persists."
+      },
+      {
+        "case_id": "saved-agent-tool-schema",
+        "root_cause_key": "resource-mapper-auto-refresh-disable-not-propagated-to-sibling-tool-config-modals",
+        "materialized": false,
+        "reason": "The claim declared a base contract at ResourceMapper.vue for an injection-key line introduced by the change; deterministic rejection was correct and should not be loosened."
+      }
+    ],
+    "known_description_case": {
+      "discovered_review_blind": true,
+      "materialized": true,
+      "admitted_against": ["built-in"],
+      "covered_by": ["prkit"]
+    }
+  },
+  "mechanics": {
+    "discovery_success_rate": 1.0,
+    "fully_materialized_discovery_rate": 0.8,
+    "submitted_claims": 4,
+    "materialized_claims": 3,
+    "rejected_claims": 1,
+    "rejected_claim_rate": 0.25,
+    "coverage_complete_block_rate": 1.0,
+    "repair_sessions": 0,
+    "permission_denials": 0,
+    "passed": false,
+    "improvement_over_v2": {
+      "fully_materialized_discovery_rate": {"v2": 0.4, "v3": 0.8},
+      "rejected_claim_rate": {"v2": 0.75, "v3": 0.25}
+    },
+    "primary_failure": "Resolving against any concrete fragment was too permissive: a short generic fragment from an unchanged method block matched an unrelated changed line, turning an out-of-diff concern into an apparently valid changed anchor."
+  },
+  "cost": {
+    "attempts": 16,
+    "accepted_attempts": 16,
+    "failed_attempts": 0,
+    "discovery_cost_usd": 4.5127341,
+    "coverage_cost_usd": 1.6718292,
+    "judge_cost_usd": 2.8032507,
+    "all_attempt_cost_usd": 8.987814
+  },
+  "decision": {
+    "behavior": "fail",
+    "mechanics": "fail",
+    "next": "preserve V3 as evidence; require a strong intended-line match or coherent multi-line neighborhood, reject generic fragments, and keep base-contract/ref failures closed before considering another frozen replay",
+    "publish": false,
+    "automatic_composition": false,
+    "advance_fresh_pr_ab": false
+  }
+}

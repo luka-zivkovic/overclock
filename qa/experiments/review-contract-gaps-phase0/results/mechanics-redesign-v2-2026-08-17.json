@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "status": "behavior-passed-mechanics-failed",
+  "candidate": "review-contract-gaps-v2",
+  "run_root": "qa/_work/review-contract-mechanics-v2.phDa9r",
+  "gate": "mechanics-redesign-gate.json",
+  "provenance": {
+    "candidate_plugin_sha256": "8ddfc80217dc76bf97a5018e1c25b40af6b8b61dd878739d87c64bde7fd2285b",
+    "gate_sha256": "7ade884ef32c813629e3c7aefd183f850ea9831c18171d12f0a70ac3a6c0a973",
+    "matrix_provenance_sha256": "7a90f128fe20ba4d9d760bb9639b1fd8c955854d4e43daa7095448919d95bc37",
+    "runner_sha256": "5049062c4625a7249549ee8c4b790bd72fb3a1477e215549ecc98178bc049421",
+    "review_blocks": 10,
+    "review_blind_discoveries": 5,
+    "reviewer_families": ["built-in", "prkit"]
+  },
+  "behavior": {
+    "wins": 2,
+    "ties": 8,
+    "losses": 0,
+    "unjudged": 0,
+    "unsupported_candidate_findings": 0,
+    "negative_case_findings": 0,
+    "retention_passed": true,
+    "passed": true,
+    "win_case": "node-registry-swap",
+    "win_reviewers": ["built-in", "prkit"],
+    "admitted_root_causes": ["loaded-cache-swap-discards-concurrent-writes"]
+  },
+  "semantic_discovery": {
+    "submitted_claims": 4,
+    "cases_with_claims": [
+      "agent-guardrails-input",
+      "instance-ai-write-lock",
+      "node-registry-swap",
+      "saved-agent-tool-schema"
+    ],
+    "claims": [
+      {
+        "case_id": "agent-guardrails-input",
+        "root_cause_key": "auto-option-description-fallback-unreachable-because-base-description-always-set",
+        "materialized": false,
+        "reason": "Multi-line changed, contract, and producer snippets were rejected by the one-line-only helper; the remaining consumer hint also failed exact matching."
+      },
+      {
+        "case_id": "instance-ai-write-lock",
+        "root_cause_key": "editor-write-lock-not-enforced-on-archiveIfAiTemporary",
+        "materialized": false,
+        "reason": "Multi-line and abbreviated evidence snippets were rejected by the one-line-only exact matcher."
+      },
+      {
+        "case_id": "node-registry-swap",
+        "root_cause_key": "loaded-cache-swap-discards-concurrent-writes",
+        "materialized": true,
+        "admitted_against": ["built-in", "prkit"],
+        "blind_judgments": ["win", "win"]
+      },
+      {
+        "case_id": "saved-agent-tool-schema",
+        "root_cause_key": "execution-success-driven-schema-refetch-not-gated-by-autoRefresh-flag",
+        "materialized": false,
+        "reason": "Multi-line changed and contract snippets were rejected by the one-line-only helper."
+      }
+    ],
+    "known_description_case": {
+      "discovered_review_blind": true,
+      "materialized": false,
+      "admitted": false
+    }
+  },
+  "mechanics": {
+    "discovery_success_rate": 1.0,
+    "fully_materialized_discovery_rate": 0.4,
+    "submitted_claims": 4,
+    "materialized_claims": 1,
+    "rejected_claims": 3,
+    "rejected_claim_rate": 0.75,
+    "coverage_complete_block_rate": 1.0,
+    "repair_sessions": 0,
+    "permission_denials": 0,
+    "passed": false,
+    "primary_failure": "The schema and prompt requested one source-line snippet, but the structured-output schema could not enforce that shape and the deterministic helper rejected multi-line or abbreviated snippets instead of resolving them from path plus line hint."
+  },
+  "cost": {
+    "attempts": 9,
+    "accepted_attempts": 9,
+    "failed_attempts": 0,
+    "discovery_cost_usd": 5.7893832,
+    "coverage_cost_usd": 0.641319,
+    "judge_cost_usd": 1.0996875,
+    "all_attempt_cost_usd": 7.5303897
+  },
+  "excluded_transport_attempt": {
+    "run_root": "qa/_work/review-contract-mechanics-v2.unHLM4",
+    "reason": "Claude Code returned an account spend-limit HTTP 429 before inference on every request.",
+    "cost_usd": 0.0,
+    "counted_as_sample": false
+  },
+  "decision": {
+    "behavior": "pass",
+    "mechanics": "fail",
+    "next": "preserve semantic discovery and add deterministic multi-line/path-plus-line-hint resolution before another frozen replay",
+    "publish": false,
+    "automatic_composition": false,
+    "advance_fresh_pr_ab": false
+  }
+}

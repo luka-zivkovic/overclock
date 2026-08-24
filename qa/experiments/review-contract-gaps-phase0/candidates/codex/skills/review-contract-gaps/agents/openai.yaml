@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review Contract Gaps"
+  short_description: "Find verified contract gaps after a PR review"
+  default_prompt: "Use $review-contract-gaps to find verified contract gaps missing from this frozen PR review."
+policy:
+  allow_implicit_invocation: false

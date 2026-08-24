@@ -1,0 +1,6 @@
+{
+  "name": "review-contract-gaps-v2-candidate",
+  "displayName": "Review Contract Gaps V2 Candidate",
+  "description": "Experimental semantic contract-gap audit with deterministic evidence assembly.",
+  "version": "0.0.0"
+}
