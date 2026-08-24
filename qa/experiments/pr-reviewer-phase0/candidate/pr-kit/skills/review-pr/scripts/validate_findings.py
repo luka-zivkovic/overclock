@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate changed-line evidence and normalize PR Kit findings from stdin."""
+"""Validate changed-line evidence and normalize PR Kit findings."""
 
 from __future__ import annotations
 
@@ -250,9 +250,17 @@ def main() -> int:
     parser.add_argument("--repo", required=True, type=Path)
     parser.add_argument("--base", required=True)
     parser.add_argument("--head", required=True)
+    parser.add_argument(
+        "--payload-json",
+        help="candidate JSON supplied as one argument; stdin remains available for compatibility",
+    )
     args = parser.parse_args()
     try:
-        payload = json.load(sys.stdin)
+        payload = (
+            json.loads(args.payload_json)
+            if args.payload_json is not None
+            else json.load(sys.stdin)
+        )
         result, errors = validate_payload(payload, args.repo, args.base, args.head)
     except (json.JSONDecodeError, OSError, UnicodeError, ValueError) as exc:
         result, errors = None, [str(exc)]

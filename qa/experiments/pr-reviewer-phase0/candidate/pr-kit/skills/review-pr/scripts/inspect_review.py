@@ -20,6 +20,7 @@ ISSUE_TARGET_RE = re.compile(
 )
 GITHUB_REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 MAX_OUTPUT_BYTES = 2 * 1024 * 1024
+MAX_SEARCH_RESULTS = 100
 PR_FIELDS = (
     "number,title,body,url,state,isDraft,author,baseRefName,baseRefOid,"
     "headRefName,headRefOid,changedFiles,additions,deletions"
@@ -170,6 +171,40 @@ def local_blame(root: Path, ref: str, path: str, start: int, end: int) -> str:
     )
 
 
+def local_search(
+    root: Path,
+    ref: str,
+    query: str,
+    prefix: str | None,
+    limit: int,
+) -> str:
+    if not 2 <= len(query) <= 256 or any(ord(character) < 32 for character in query):
+        raise ValueError("query must contain 2-256 printable characters")
+    if not 1 <= limit <= MAX_SEARCH_RESULTS:
+        raise ValueError(f"limit must be between 1 and {MAX_SEARCH_RESULTS}")
+    commit = resolve_commit(root, ref)
+    command = ["git", "grep", "--no-color", "-n", "-F", "-e", query, commit, "--"]
+    normalized_prefix = safe_path(prefix) if prefix else None
+    if normalized_prefix:
+        command.append(normalized_prefix)
+    result = run(command, cwd=root)
+    if result.returncode not in {0, 1}:
+        raise ValueError(result.stderr.strip() or "git grep failed")
+    lines = result.stdout.splitlines()
+    return json.dumps(
+        {
+            "ref": commit,
+            "query": query,
+            "prefix": normalized_prefix,
+            "matches": lines[:limit],
+            "returned": min(len(lines), limit),
+            "truncated": len(lines) > limit,
+        },
+        indent=2,
+        sort_keys=True,
+    )
+
+
 def validate_github_target(value: str, pattern: re.Pattern[str], kind: str) -> str:
     if not pattern.fullmatch(value):
         raise ValueError(f"{kind} target must be a number or canonical GitHub URL")
@@ -242,6 +277,13 @@ def build_parser() -> argparse.ArgumentParser:
     blame.add_argument("--start", required=True, type=int)
     blame.add_argument("--end", required=True, type=int)
 
+    search = subparsers.add_parser("search")
+    search.add_argument("--repo", required=True, type=Path)
+    search.add_argument("--ref", required=True)
+    search.add_argument("--query", required=True)
+    search.add_argument("--prefix")
+    search.add_argument("--limit", type=int, default=50)
+
     for name in ("pr-metadata", "pr-diff", "pr-comments"):
         command = subparsers.add_parser(name)
         command.add_argument("--target", required=True)
@@ -267,6 +309,10 @@ def main() -> int:
         elif args.command == "blame":
             result = local_blame(
                 repository(args.repo), args.ref, args.path, args.start, args.end
+            )
+        elif args.command == "search":
+            result = local_search(
+                repository(args.repo), args.ref, args.query, args.prefix, args.limit
             )
         elif args.command == "pr-metadata":
             result = github_pr_metadata(args.target, args.github_repo)
