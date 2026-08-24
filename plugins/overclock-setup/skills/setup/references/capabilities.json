@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -212,7 +212,7 @@
     {
       "id": "agent-bridge",
       "display_name": "Agent Bridge",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "publication_status": "published",
       "provides": [
         "cross-agent-consultation",

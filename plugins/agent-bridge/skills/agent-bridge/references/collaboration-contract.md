@@ -43,6 +43,11 @@ patch creates, retargets, converts, or deletes a symbolic link. Bridge-owned job
 exclusively (`O_EXCL`, no symlink following), so a worker cannot pre-plant a path the bridge would
 write through.
 
+Provider timeouts are mode-aware: 900 seconds for `consult` and 3600 seconds for `delegate` when no
+override is supplied. Callers may set `--timeout-seconds` from 1 through 7200 seconds for an unusually
+small or large bounded task. The resolved value is stored in the result. Extending the timeout does
+not change cleanup or integration behavior.
+
 Only an allowlisted, provider-scoped environment is forwarded to the child process (baseline
 variables plus that provider's own credential prefixes); unrelated parent secrets are not passed
 down. The provider runs as the leader of a dedicated process group; after success as well as timeout,

@@ -5,6 +5,12 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## agent-bridge
 
+### 0.1.2 — 2026-08-16
+- Give implementation delegations a realistic 60-minute default while keeping
+  read-only consultations at 15 minutes. Explicit bounded runs may request up to
+  two hours, and every result records the resolved timeout without weakening
+  process cleanup or patch-integration gates.
+
 ### 0.1.1 — 2026-08-15 (initial release)
 - New plugin. `$agent-bridge` lets the current harness use an installed Claude,
   Codex, or Gemini CLI as a bounded leaf collaborator while retaining parent-task
@@ -238,6 +244,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.16 — 2026-08-16
+- Synchronize the bundled capability catalog with Agent Bridge 0.1.2.
 
 ### 0.1.15 — 2026-08-08
 - Update the bundled capability catalog to the hardened Agent Bridge (0.1.1) and the

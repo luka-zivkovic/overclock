@@ -1,6 +1,6 @@
 ---
 name: agent-bridge
-description: "Use a DIFFERENT installed coding provider (Codex or Gemini when you are Claude; any provider other than the one now running) as a bounded leaf collaborator while the current agent keeps ownership of the user's task. The trigger is that the user names such a different provider as the actor — Codex, Gemini, 'another installed coding provider', 'cross-provider help', or agent-bridge itself. When a request names a different provider, this skill owns it even if the verb is review, critique, diagnose, second opinion, or implement: 'use Codex as a second reviewer for this diff', 'ask Codex to diagnose why this parser fails', 'get Gemini's independent critique', 'implement the fix but delegate these paths to Gemini in an isolated workspace', 'use that cross-provider help now'. Route here for those over sibling review, critique, debugging, or interview skills, which handle the same verbs only when the current agent does the work itself with no different provider named. Also use when work is blocked and the user authorized cross-provider help in this conversation. This skill is the only sanctioned path to another provider: never construct ad hoc codex, gemini, or claude CLI commands for consultation or delegation. Consult for read-only analysis; delegate only when the user's request already authorizes implementation, with exact allowed paths and acceptance checks. Do not use for routine work the current agent can finish directly, for review/critique/diagnosis the current agent should do itself when no different provider is named, to collect extra votes, or without current authorization to share scoped context externally. Do NOT use for same-harness requests — asking the current harness to spawn, call, or delegate to another session of itself (for example Claude Code asked to open another Claude Code session) is not cross-provider; decline it directly without this skill. Do not use to let two agents write the active checkout concurrently."
+description: "Use a DIFFERENT installed coding provider as a bounded leaf collaborator while the current agent keeps ownership. Trigger when the user names Claude, Codex, Gemini, another installed provider, cross-provider help, or agent-bridge as the actor for consultation, review, critique, diagnosis, a second opinion, or implementation; also use when blocked and the user authorized cross-provider help in this conversation. This skill owns those requests over sibling review, debugging, or interview skills and is the only sanctioned provider-CLI path. Use consult for read-only analysis. Use delegate only for user-authorized implementation with a clean exact HEAD, explicit allowed paths and acceptance checks, an isolated patch, and parent verification. Do not use for routine work with no different provider named, extra votes, absent sharing authorization, same-harness requests, or concurrent writes to the active checkout. Never invoke provider CLIs ad hoc."
 ---
 
 # Agent Bridge
@@ -108,6 +108,12 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/agent_bridge.py" run \
 <request JSON>
 AGENT_BRIDGE_REQUEST
 ```
+
+The helper defaults consultations to 900 seconds and delegated writes to 3600 seconds. Omit
+`--timeout-seconds` for those mode-aware defaults. Use an explicit value from 1 through 7200 seconds
+only when the bounded workload justifies it; do not force the shorter consultation default onto an
+implementation run. A longer timeout does not relax process cleanup, repository isolation, scope
+validation, or any integration gate.
 
 The helper never falls back to another provider. A successful delegate run returns a result path,
 result digest, patch path, patch digest, exact base SHA, changed paths, verification reported by the
