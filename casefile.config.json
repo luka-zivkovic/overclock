@@ -39,6 +39,22 @@
     {
       "ruleId": "quality/oversized-body",
       "path": "plugins/critical-thinking/skills/critical-thinking/"
+    },
+    {
+      "ruleId": "quality/oversized-body",
+      "path": "plugins/critical-thinking/skills/independent-research/"
+    },
+    {
+      "ruleId": "quality/oversized-body",
+      "path": "plugins/debugging-discipline/skills/debugging-discipline/"
+    },
+    {
+      "ruleId": "quality/oversized-body",
+      "path": "plugins/project-vocabulary/skills/project-vocabulary/"
+    },
+    {
+      "ruleId": "quality/oversized-body",
+      "path": "plugins/session-memory/skills/session-handoff/"
     }
   ]
 }
