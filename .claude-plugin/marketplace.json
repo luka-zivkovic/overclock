@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.16",
+      "version": "0.1.17",
       "category": "development",
       "keywords": [
         "setup",
@@ -56,7 +56,7 @@
       "name": "natural-writing",
       "source": "./plugins/natural-writing",
       "description": "Draft and revise multi-paragraph prose in the author's established voice. With no supplied voice, uses a plainspoken fallback house style while preserving factual claims, uncertainty, caveats, quotations, and deliberate punctuation. Optional visual revision reports are reconstruction-verified and explicit opt-in.",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "writing",
       "keywords": [
         "writing",
