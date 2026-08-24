@@ -16,7 +16,7 @@ jobs:
       - name: Install casefile
         run: npm install -g casefile@0.1.0
       - name: Scan marketplace
-        run: casefile scan . --json --out casefile-report.json --fail-on warning --no-store
+        run: casefile scan . --config casefile.config.json --json --out casefile-report.json --fail-on warning --no-store
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4

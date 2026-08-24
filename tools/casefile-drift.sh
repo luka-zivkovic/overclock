@@ -10,7 +10,7 @@ OUT="$(mktemp)"
 PREV=$(casefile history "$ROOT" --json 2>/dev/null | python3 -c \
   "import json,sys; r=json.load(sys.stdin); print(r[0]['contentHash'] if r else '')" 2>/dev/null || echo "")
 
-casefile scan "$ROOT" --json --out "$OUT" --fail-on none >/dev/null
+casefile scan "$ROOT" --config "$ROOT/casefile.config.json" --json --out "$OUT" --fail-on none >/dev/null
 
 CUR=$(python3 -c "import json; print(json.load(open('$OUT'))['artifact']['contentHash'])")
 CRIT=$(python3 -c "import json; print(json.load(open('$OUT'))['summary']['critical'])")
