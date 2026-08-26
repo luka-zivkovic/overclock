@@ -1,0 +1,30 @@
+{
+  "skill": "local-eval-stack",
+  "plugin": "eval-stack",
+  "install_modes": ["skill"],
+  "samples": 3,
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.8,
+    "specificity": 0.9
+  },
+  "note": "Routes requests to self-host the Ironside + Coeval evaluation loop, capture local agent sessions, or bootstrap governed local judging. It must stay out of generic eval writing, existing-instance CI gates, hosted platforms, observability-only work, and production multi-user deployments.",
+  "should_trigger": [
+    "Help me self-host the full local agent evaluation stack with Ironside traces, Coeval judging, and Casefile scans.",
+    "Set up Ironside and Coeval on my workstation so I can capture skill runs and adjudicate judged results locally.",
+    "Import my latest Codex and Claude Code sessions into a local Ironside instance and tag which skills were used.",
+    "Wire this pi agent to my own Ironside trace store, then help me create a calibrated Coeval judge for its sessions.",
+    "I want a governed, local-first evaluation loop for agent skills with human adjudication and golden sets.",
+    "Bootstrap one local Coeval bench project per skill and verify captured Ironside traces before judging them."
+  ],
+  "should_not": [
+    "Write a five-point rubric for judging whether support answers are empathetic.",
+    "Add a Coeval gate to CI; our Coeval instance and judge projects are already running.",
+    "Recommend a hosted LLM observability SaaS for our production platform.",
+    "Deploy Ironside and Coeval as a public multi-tenant company service with SSO.",
+    "Create three behavioral eval prompts for this new skill and add them to qa/evals.",
+    "Debug why our existing Docker Compose service cannot reach Postgres.",
+    "Add OpenTelemetry tracing to this Node API; no agent or LLM evaluation is involved.",
+    "Scan this repository for secrets and risky install scripts with Casefile."
+  ]
+}

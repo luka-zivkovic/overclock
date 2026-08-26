@@ -1,6 +1,6 @@
 {
   "name": "overclock",
-  "description": "Overclock — Claude Code plugins that run your model past spec.",
+  "description": "Overclock \u2014 Claude Code plugins that run your model past spec.",
   "owner": {
     "name": "Luka Zivkovic"
   },
@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.17",
+      "version": "0.1.18",
       "category": "development",
       "keywords": [
         "setup",
@@ -175,6 +175,22 @@
         "flaky-tests",
         "root-cause",
         "bisect"
+      ]
+    },
+    {
+      "name": "eval-stack",
+      "source": "./plugins/eval-stack",
+      "description": "Self-host a local, governed evaluation stack for agent skills: ironside trace store, coeval judged evaluation with human adjudication, Claude Code and Codex session importers, a pi tracer that tags skill usage, and casefile scanning.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "evals",
+        "self-hosted",
+        "tracing",
+        "llm-judge",
+        "coeval",
+        "ironside",
+        "casefile"
       ]
     }
   ]

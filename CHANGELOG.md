@@ -3,6 +3,22 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## eval-stack
+
+### 0.1.0 — 2026-08-26 (initial release)
+- Add a local-first workflow that connects Ironside trace capture, Coeval judged
+  evaluation with human adjudication, calibrated judge projects, and Casefile
+  scanning without presenting localhost defaults as production architecture.
+- Ship deterministic Claude Code and Codex post-hoc importers plus a live pi
+  tracer. All three use the same byte caps and redact quoted JSON assignments,
+  environment-style secrets, bearer credentials, and Ironside read/write-scoped
+  token formats before ingest.
+- Add behavioral and routing evidence for setup order, secret and model-spend
+  boundaries, session import, and the explicit production multi-user anti-trigger.
+- The workflow verifies live components and pauses before credential writes or
+  paid judge calls; it never silently turns calibration into an unbounded
+  auto-judging job.
+
 ## agent-bridge
 
 ### 0.1.2 — 2026-08-16
@@ -244,6 +260,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.18 — 2026-08-26
+- Publish Eval Stack 0.1.0 in the capability catalog so the report-only setup
+  advisor can recommend the local tracing and governed-evaluation workflow.
 
 ### 0.1.17 — 2026-08-17
 - Synchronize the bundled capability catalog with Natural Writing 1.0.5.

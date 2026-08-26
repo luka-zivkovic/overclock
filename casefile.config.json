@@ -63,6 +63,20 @@
     {
       "ruleId": "quality/oversized-body",
       "path": "plugins/session-memory/skills/session-handoff/"
+    },
+    {
+      "ruleId": "capability/write-outside-artifact",
+      "path": "plugins/eval-stack/skills/local-eval-stack/scripts/ironside-tracer.ts"
+    },
+    {
+      "ruleId": "capability/write-outside-artifact",
+      "path": "plugins/eval-stack/skills/local-eval-stack/scripts/import-claude-session.mjs",
+      "reason": "false positive: flagged line is the skill-detection comment/regex mentioning /skills/<name>/SKILL.md; the importer only reads a transcript and its config, and writes nothing to disk"
+    },
+    {
+      "ruleId": "capability/write-outside-artifact",
+      "path": "plugins/eval-stack/skills/local-eval-stack/scripts/import-codex-session.mjs",
+      "reason": "false positive: flagged line is the skill-detection comment/regex mentioning /skills/<name>/SKILL.md; the importer only reads a rollout and its config, and writes nothing to disk"
     }
   ]
 }
