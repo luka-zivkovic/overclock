@@ -5,6 +5,21 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## eval-stack
 
+### 0.2.0 — 2026-08-27
+- Add the `skill-maintenance` skill: the findings-driven maintenance loop for
+  judged skills. It pulls Coeval findings (failure clusters, human override
+  reasons, golden deltas) via the Coeval MCP tools or findings CLI, drafts one
+  bounded SKILL.md patch on a workshop copy, and opens a PR citing the findings
+  — the human merges, always.
+- Encode rubric co-evolution as a required step: a patch that moves an
+  invariant must propose the paired probe edit through Coeval's guarded flow
+  (new version, regression versus golden, block-on-flip) so the judge never
+  silently measures the previous skill version.
+- Pin the validation split: gate-check plus fresh judging run pre-merge in the
+  PR; post-merge stays mechanical (Casefile CI, version bump, optional
+  re-baseline). Hard boundaries: no findings means no patch, never weaken a
+  rubric or test to pass, never adjudicate, never auto-merge.
+
 ### 0.1.0 — 2026-08-26 (initial release)
 - Add a local-first workflow that connects Ironside trace capture, Coeval judged
   evaluation with human adjudication, calibrated judge projects, and Casefile
@@ -260,6 +275,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.19 — 2026-08-27
+- Synchronize the bundled capability catalog with Eval Stack 0.2.0, which adds
+  the findings-driven `skill-maintenance` skill.
 
 ### 0.1.18 — 2026-08-26
 - Publish Eval Stack 0.1.0 in the capability catalog so the report-only setup

@@ -16,6 +16,7 @@ on:
           - discipline-gates/git-archaeologist
           - discipline-gates/test-discipline
           - eval-stack/local-eval-stack
+          - eval-stack/skill-maintenance
           - groundwork/groundwork
           - learning-loop/lessons-learned
           - natural-writing/natural-writing
@@ -155,6 +156,7 @@ jobs:
                 discipline-gates/git-archaeologist \
                 discipline-gates/test-discipline \
                 eval-stack/local-eval-stack \
+                eval-stack/skill-maintenance \
                 groundwork/groundwork \
                 learning-loop/lessons-learned \
                 natural-writing/natural-writing \
@@ -226,6 +228,7 @@ jobs:
                 project-vocabulary \
                 resolve-pr-feedback \
                 session-handoff \
+                skill-maintenance \
                 solutions \
                 test-discipline
               ;;
@@ -248,6 +251,7 @@ jobs:
             discipline-gates/git-archaeologist) run_batteries git-archaeologist ;;
             discipline-gates/test-discipline) run_batteries test-discipline ;;
             eval-stack/local-eval-stack) run_batteries local-eval-stack ;;
+            eval-stack/skill-maintenance) run_batteries skill-maintenance ;;
             groundwork/groundwork) run_batteries groundwork ;;
             learning-loop/lessons-learned) run_batteries learning-loop-lessons-learned ;;
             natural-writing/natural-writing) run_batteries natural-writing ;;

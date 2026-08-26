@@ -1122,6 +1122,162 @@ def build_eval_stack(root: Path) -> None:
         init_repo(work, f"local eval stack fixture {index}")
 
 
+def build_skill_maintenance(root: Path) -> None:
+    base = root / "skill-maintenance"
+
+    def findings(
+        skill: str,
+        clusters: list[dict],
+        probes: list[str],
+        golden_cases: int,
+    ) -> str:
+        return json.dumps(
+            {
+                "project": f"{skill}-bench",
+                "skill": skill,
+                "since": "2026-08-01",
+                "clusters": clusters,
+                "active_rubric": {
+                    "version": 3,
+                    "probes": probes,
+                },
+                "golden": {
+                    "cases": golden_cases,
+                    "deltas_since": [],
+                },
+            },
+            indent=2,
+        )
+
+    # eval-0: real findings — one human-backed cluster, one judge-only cluster
+    work = base / "eval-0"
+    write(
+        work,
+        "findings/natural-writing-findings.json",
+        findings(
+            "natural-writing",
+            [
+                {
+                    "id": "cluster-hedging-openers",
+                    "occurrences": 9,
+                    "summary": "Outputs open with hedging boilerplate before the point.",
+                    "override_reasons": [
+                        "finding-121: human overrode PASS to FAIL — opener buries the answer",
+                        "finding-134: human overrode PASS to FAIL — two hedge sentences before content",
+                        "finding-140: human overrode PASS to FAIL — skill body never names openers",
+                    ],
+                },
+                {
+                    "id": "cluster-list-density",
+                    "occurrences": 3,
+                    "summary": "Judge-only: verdicts flag bullet-heavy answers; no human adjudication yet.",
+                    "override_reasons": [],
+                },
+            ],
+            [
+                "probe-1: no banned filler phrases from the list",
+                "probe-2: concrete nouns outnumber abstractions in the first paragraph",
+                "probe-3: no em-dash chains",
+            ],
+            5,
+        ),
+    )
+    write(
+        work,
+        "plugins/writing/skills/natural-writing/SKILL.md",
+        "---\nname: natural-writing\ndescription: \"Write plainly. Use for prose drafting.\"\n---\n\n"
+        "# Natural writing\n\n- Avoid the banned filler phrases list.\n"
+        "- Prefer concrete nouns over abstractions.\n- Never chain em-dashes.\n",
+    )
+    init_repo(work, "skill maintenance fixture 0")
+
+    # eval-1: structurally valid export with ZERO findings
+    work = base / "eval-1"
+    write(
+        work,
+        "findings/session-handoff-findings.json",
+        findings(
+            "session-handoff",
+            [],
+            [
+                "probe-1: handoff names the branch and dirty files",
+                "probe-2: resume replays open decisions before new work",
+            ],
+            4,
+        ),
+    )
+    write(
+        work,
+        "plugins/session/skills/session-handoff/SKILL.md",
+        "---\nname: session-handoff\ndescription: \"Save and resume working state between sessions.\"\n---\n\n"
+        "# Session handoff\n\nIn order to make certain that continuity is being preserved, it is "
+        "important that the state of the session should be captured in a manner that is both "
+        "complete and also verbose enough to be fully understood later on.\n",
+    )
+    init_repo(work, "skill maintenance fixture 1")
+
+    # eval-2: findings that move an invariant a rubric probe encodes
+    work = base / "eval-2"
+    write(
+        work,
+        "findings/commit-style-findings.json",
+        findings(
+            "commit-style",
+            [
+                {
+                    "id": "cluster-subject-length",
+                    "occurrences": 11,
+                    "summary": "Human reviewers keep overriding FAIL verdicts on 51-72 char subjects.",
+                    "override_reasons": [
+                        "finding-201: human overrode FAIL to PASS — 63-char subject is fine, team agreed on 72",
+                        "finding-207: human overrode FAIL to PASS — 55 chars, limit too strict",
+                        "finding-215: human overrode FAIL to PASS — policy decision: 72 is the new limit",
+                    ],
+                },
+            ],
+            [
+                "probe-1: imperative mood in the subject",
+                "probe-2: subject line is at most 50 characters",
+                "probe-3: body explains why, not what",
+            ],
+            6,
+        ),
+    )
+    write(
+        work,
+        "plugins/git/skills/commit-style/SKILL.md",
+        "---\nname: commit-style\ndescription: \"House commit message conventions.\"\n---\n\n"
+        "# Commit style\n\n- Imperative mood.\n- Subject line at most 50 characters.\n"
+        "- The body explains why, not what.\n",
+    )
+    init_repo(work, "skill maintenance fixture 2")
+
+    # eval-3: a gate-check result with one golden flip
+    work = base / "eval-3"
+    write(
+        work,
+        "gate/run-gate-check-output.json",
+        json.dumps(
+            {
+                "project": "natural-writing-bench",
+                "candidate_rubric_version": 4,
+                "golden_agreement": "5/6",
+                "flips": [
+                    {
+                        "case": "golden-004",
+                        "was": "pass",
+                        "now": "fail",
+                        "note": "blocks activation pending human adjudication",
+                    }
+                ],
+                "gate": "blocked",
+            },
+            indent=2,
+        ),
+    )
+    init_repo(work, "skill maintenance fixture 3")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build deterministic supplemental live-eval fixtures."
@@ -1140,6 +1296,7 @@ def main() -> int:
     build_session_handoff(root)
     build_solutions(root)
     build_eval_stack(root)
+    build_skill_maintenance(root)
     return 0
 
 

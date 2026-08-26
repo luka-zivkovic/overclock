@@ -1,0 +1,54 @@
+{
+  "skill": "skill-maintenance",
+  "plugin": "eval-stack",
+  "install_modes": ["skill", "plugin"],
+  "samples": 3,
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.8,
+    "specificity": 0.9
+  },
+  "note": "Routes findings-driven maintenance of an already-judged skill: pull coeval findings, draft one bounded workshop patch, co-evolve the rubric through the guarded flow, gate pre-merge, open a PR for a human. It must stay out of findings-free skill editing, new skill or rubric authoring, eval-stack setup, verdict adjudication, and anything that merges.",
+  "should_trigger": [
+    "Update our natural-writing skill based on what its coeval findings say — the bench has accumulated a month of adjudications.",
+    "The reviewers keep overriding the judge's verdicts on commit-style; fold those override reasons back into the skill.",
+    "Run the skill-maintenance loop on session-handoff: pull its findings, propose a bounded patch, and open the PR.",
+    "What do the coeval verdicts and failure clusters say we should fix in the test-discipline skill, and can you draft the patch?",
+    "Our judged skill's findings show a recurring failure cluster — turn it into a SKILL.md patch and validate it against the golden set before the PR.",
+    "Apply the latest coeval findings export to the drafting skill, including any rubric probe that has to move with it."
+  ],
+  "should_not": [
+    {
+      "prompt": "Tighten up the wording in our natural-writing SKILL.md — no eval data, I just think it reads clunky.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Write a brand-new skill for reviewing database migrations.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Author the first judging rubric for our new skill and calibrate it in coeval.",
+      "allowed_skills": ["local-eval-stack"]
+    },
+    {
+      "prompt": "Set up ironside and coeval on my machine so we can start judging skills locally.",
+      "allowed_skills": ["local-eval-stack"]
+    },
+    {
+      "prompt": "Adjudicate the pending coeval exceptions for me and promote the ones you agree with to the golden set.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "The skill-patch PR is green — merge it and enable auto-merge for future maintenance PRs.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "The gate keeps failing one golden case; just relax that rubric probe so the suite passes.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Review this pull request that changes our API error handling.",
+      "allowed_skills": []
+    }
+  ]
+}
