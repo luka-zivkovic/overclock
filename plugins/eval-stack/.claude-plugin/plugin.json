@@ -1,0 +1,19 @@
+{
+  "name": "eval-stack",
+  "displayName": "Eval Stack",
+  "description": "Self-host a local, governed evaluation stack for agent skills: ironside (trace store), coeval (judged evaluation with human adjudication), casefile (supply-chain scanning), and a pi session tracer. One skill walks an agent through standing it all up, wiring capture, and authoring calibrated judges.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "evals",
+    "self-hosted",
+    "tracing",
+    "llm-judge",
+    "coeval",
+    "ironside",
+    "local-first"
+  ]
+}

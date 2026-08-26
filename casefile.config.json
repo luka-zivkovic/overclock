@@ -63,6 +63,10 @@
     {
       "ruleId": "quality/oversized-body",
       "path": "plugins/session-memory/skills/session-handoff/"
+    },
+    {
+      "ruleId": "capability/write-outside-artifact",
+      "path": "plugins/eval-stack/skills/local-eval-stack/scripts/ironside-tracer.ts"
     }
   ]
 }

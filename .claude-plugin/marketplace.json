@@ -1,6 +1,6 @@
 {
   "name": "overclock",
-  "description": "Overclock — Claude Code plugins that run your model past spec.",
+  "description": "Overclock \u2014 Claude Code plugins that run your model past spec.",
   "owner": {
     "name": "Luka Zivkovic"
   },
@@ -176,6 +176,11 @@
         "root-cause",
         "bisect"
       ]
+    },
+    {
+      "name": "eval-stack",
+      "source": "./plugins/eval-stack",
+      "description": "Self-host a local, governed evaluation stack for agent skills: ironside trace store, coeval judged evaluation with human adjudication, a pi session tracer that tags skill usage, and casefile scanning \u2014 one skill walks an agent through the whole setup, wiring, and judge calibration."
     }
   ]
 }
