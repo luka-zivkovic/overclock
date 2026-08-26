@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.18",
+      "version": "0.1.19",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -192,7 +192,7 @@
     {
       "id": "eval-stack",
       "display_name": "Eval Stack",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "publication_status": "published",
       "provides": [
         "local-agent-evaluation",
@@ -200,7 +200,8 @@
         "governed-llm-judging"
       ],
       "skill_names": [
-        "local-eval-stack"
+        "local-eval-stack",
+        "skill-maintenance"
       ],
       "depends_on": [],
       "conflicts_with": [],
@@ -209,7 +210,7 @@
         "~/.pi/agent/ironside-tracer.json"
       ],
       "minimum_host_version": null,
-      "selection": "Choose to self-host Ironside and Coeval locally, capture agent sessions, calibrate governed judges, and scan evaluated skills with Casefile."
+      "selection": "Choose to self-host Ironside and Coeval locally, capture agent sessions, calibrate governed judges, scan evaluated skills with Casefile, and run the findings-driven maintenance loop on judged skills."
     },
     {
       "id": "pr-feedback",

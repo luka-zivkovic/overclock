@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Maintenance"
+  short_description: "Findings-driven bounded skill patches, gated"
+  default_prompt: "Use $skill-maintenance to pull the target skill's coeval findings, draft one bounded workshop-copy patch with any paired rubric edit through the guarded flow, validate against the golden gate, and open a PR for my review — never merge or adjudicate."

@@ -1,7 +1,7 @@
 {
   "skill": "local-eval-stack",
   "plugin": "eval-stack",
-  "install_modes": ["skill"],
+  "install_modes": ["skill", "plugin"],
   "samples": 3,
   "thresholds": {
     "precision": 0.9,
@@ -18,13 +18,41 @@
     "Bootstrap one local Coeval bench project per skill and verify captured Ironside traces before judging them."
   ],
   "should_not": [
-    "Write a five-point rubric for judging whether support answers are empathetic.",
-    "Add a Coeval gate to CI; our Coeval instance and judge projects are already running.",
-    "Recommend a hosted LLM observability SaaS for our production platform.",
-    "Deploy Ironside and Coeval as a public multi-tenant company service with SSO.",
-    "Create three behavioral eval prompts for this new skill and add them to qa/evals.",
-    "Debug why our existing Docker Compose service cannot reach Postgres.",
-    "Add OpenTelemetry tracing to this Node API; no agent or LLM evaluation is involved.",
-    "Scan this repository for secrets and risky install scripts with Casefile."
+    {
+      "prompt": "Write a five-point rubric for judging whether support answers are empathetic.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add a Coeval gate to CI; our Coeval instance and judge projects are already running.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Recommend a hosted LLM observability SaaS for our production platform.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Deploy Ironside and Coeval as a public multi-tenant company service with SSO.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Create three behavioral eval prompts for this new skill and add them to qa/evals.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Debug why our existing Docker Compose service cannot reach Postgres.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add OpenTelemetry tracing to this Node API; no agent or LLM evaluation is involved.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Scan this repository for secrets and risky install scripts with Casefile.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Fold last month's coeval override reasons back into the judged natural-writing skill and open the patch PR.",
+      "allowed_skills": ["skill-maintenance"]
+    }
   ]
 }

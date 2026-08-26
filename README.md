@@ -152,6 +152,11 @@ keeps ingest credentials write-scoped, and stops before writing secrets or spend
 tokens. Production multi-user hosting, hosted eval platforms, rubric-only work, and CI gating for an
 already-running Coeval instance remain separate concerns.
 
+A second skill, `skill-maintenance`, closes the loop: it pulls a judged skill's Coeval findings,
+drafts one bounded workshop-copy patch, co-evolves the judge's rubric through the guarded flow when
+an invariant moves, validates against the golden gate, and opens a PR. Findings inform, humans
+merge, gates verify — no findings means no patch.
+
 </details>
 
 <details>
@@ -283,7 +288,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 116 declared live cases | 17 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 120 declared live cases | 18 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 
