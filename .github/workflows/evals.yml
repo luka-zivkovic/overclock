@@ -15,6 +15,7 @@ on:
           - debugging-discipline/debugging-discipline
           - discipline-gates/git-archaeologist
           - discipline-gates/test-discipline
+          - eval-stack/local-eval-stack
           - groundwork/groundwork
           - learning-loop/lessons-learned
           - natural-writing/natural-writing
@@ -153,6 +154,7 @@ jobs:
                 debugging-discipline/debugging-discipline \
                 discipline-gates/git-archaeologist \
                 discipline-gates/test-discipline \
+                eval-stack/local-eval-stack \
                 groundwork/groundwork \
                 learning-loop/lessons-learned \
                 natural-writing/natural-writing \
@@ -215,6 +217,7 @@ jobs:
                 critical-thinking \
                 debugging-discipline \
                 git-archaeologist \
+                local-eval-stack \
                 groundwork \
                 independent-research \
                 learning-loop-lessons-learned \
@@ -244,6 +247,7 @@ jobs:
             debugging-discipline/debugging-discipline) run_batteries debugging-discipline ;;
             discipline-gates/git-archaeologist) run_batteries git-archaeologist ;;
             discipline-gates/test-discipline) run_batteries test-discipline ;;
+            eval-stack/local-eval-stack) run_batteries local-eval-stack ;;
             groundwork/groundwork) run_batteries groundwork ;;
             learning-loop/lessons-learned) run_batteries learning-loop-lessons-learned ;;
             natural-writing/natural-writing) run_batteries natural-writing ;;

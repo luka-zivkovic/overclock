@@ -52,6 +52,7 @@ installs, removes, enables, disables, or edits anything.
 | **project-vocabulary** | One ubiquitous language per project, applied in conversation with approval-gated writes | `/plugin install project-vocabulary@overclock` |
 | **discipline-gates** | Evidence before bug fixes, refactors, and defensive-code removal | `/plugin install discipline-gates@overclock` |
 | **debugging-discipline** | Safe, authority-aware diagnosis for bugs that resist ordinary tests | `/plugin install debugging-discipline@overclock` |
+| **eval-stack** | A self-hosted loop from agent traces to governed, human-adjudicated evaluation | `/plugin install eval-stack@overclock` |
 | **natural-writing** | Voice-preserving long-form prose with a plainspoken fallback style | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
@@ -134,6 +135,22 @@ assumptions, and tests one to five credible hypotheses with predictions.
 Diagnosis is read-only by default; source edits and instrumentation require explicit implementation
 authority. It composes with discipline-gates when installed: an ordinary seamed bug gets its red
 test from test-discipline, while trivial causes fast-path out with no ceremony.
+
+</details>
+
+<details>
+<summary><strong>eval-stack</strong> — own the path from real sessions to governed evidence</summary>
+
+`eval-stack` connects the rest of the public toolchain into one local workflow: Ironside stores
+traces, bundled importers capture Claude Code and Codex sessions, a pi extension traces live work,
+Coeval runs calibrated judges with human adjudication, and Casefile scans the skills under test.
+Session reads of `SKILL.md` become `skill:` trace tags, so evaluations can be grounded in actual
+usage instead of hand-written demos.
+
+The workflow is intentionally scoped to one developer's machine. It verifies running services,
+keeps ingest credentials write-scoped, and stops before writing secrets or spending judge-model
+tokens. Production multi-user hosting, hosted eval platforms, rubric-only work, and CI gating for an
+already-running Coeval instance remain separate concerns.
 
 </details>
 
@@ -266,7 +283,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 112 declared live cases | 16 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 116 declared live cases | 17 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

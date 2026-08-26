@@ -78,22 +78,23 @@ export const MAX_FIELD_BYTES = 50_000;
 // Env-var-shaped assignments (API_KEY=..., token: "...") and well-known token
 // formats. Starting point: casefile's secret-env-read patterns.
 const SECRET_ASSIGNMENT_RE =
-  /\b([A-Za-z0-9_-]*(?:api[_-]?key|apikey|token|secret|passw(?:or)?d|credentials?|authorization)[A-Za-z0-9_-]*)(\s*[=:]\s*)(["']?)[^\s"'`]{6,}\3/gi;
+  /((?:["']?)[A-Za-z0-9_-]*(?:api[_-]?key|apikey|token|secret|passw(?:or)?d|credentials?|authorization)[A-Za-z0-9_-]*(?:["']?)\s*[=:]\s*)(["']?)([^\s"'`,}\[\]]{6,})\2/gi;
 const KNOWN_TOKEN_RES: RegExp[] = [
   /\bsk-[A-Za-z0-9_-]{16,}\b/g, // OpenAI/Anthropic-style
-  /\b[A-Za-z0-9]+_sk_[A-Za-z0-9]{16,}\b/g, // ironside_sk_*, coeval_sk_*, ...
+  /\b[A-Za-z0-9]+_(?:sk|sc)_[A-Za-z0-9_-]{16,}\b/g, // ironside_sk_*, ironside_sc_*, ...
   /\bgh[pousr]_[A-Za-z0-9]{20,}\b/g, // GitHub tokens
   /\bAKIA[0-9A-Z]{16}\b/g, // AWS access key id
   /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g, // Slack
-  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/g // Authorization headers
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/gi // Authorization headers
 ];
 
 /** Redacts env-var-shaped assignments and well-known secret token formats. */
 export function redactSecrets(text: string): string {
-  let out = text.replace(SECRET_ASSIGNMENT_RE, (_m, key: string, sep: string, quote: string) => {
-    return `${key}${sep}${quote}[REDACTED]${quote}`;
-  });
+  let out = text;
   for (const re of KNOWN_TOKEN_RES) out = out.replace(re, "[REDACTED]");
+  out = out.replace(SECRET_ASSIGNMENT_RE, (_m, prefix: string, quote: string) => {
+    return `${prefix}${quote}[REDACTED]${quote}`;
+  });
   return out;
 }
 

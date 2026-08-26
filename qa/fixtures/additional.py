@@ -1063,6 +1063,65 @@ def rollup(path):
     init_repo(work, "lesson versus solution fixture")
 
 
+def build_eval_stack(root: Path) -> None:
+    base = root / "local-eval-stack"
+    for index in range(4):
+        work = base / f"eval-{index}"
+        write(
+            work,
+            "README.md",
+            "# Local eval stack fixture\n\nNo credentials or external services are bundled.\n",
+        )
+        if index == 1:
+            records = [
+                {
+                    "timestamp": "2026-08-26T11:00:00.000Z",
+                    "type": "session_meta",
+                    "payload": {"id": "rollout-example", "cwd": str(work)},
+                },
+                {
+                    "timestamp": "2026-08-26T11:00:01.000Z",
+                    "type": "event_msg",
+                    "payload": {"type": "task_started", "turn_id": "turn-example"},
+                },
+                {
+                    "timestamp": "2026-08-26T11:00:02.000Z",
+                    "type": "response_item",
+                    "payload": {
+                        "type": "custom_tool_call",
+                        "call_id": "read-example",
+                        "name": "read",
+                        "input": {
+                            "path": "/tmp/plugins/eval-stack/skills/local-eval-stack/SKILL.md"
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2026-08-26T11:00:03.000Z",
+                    "type": "response_item",
+                    "payload": {
+                        "type": "custom_tool_call_output",
+                        "call_id": "read-example",
+                        "output": "fixture read complete",
+                    },
+                },
+                {
+                    "timestamp": "2026-08-26T11:00:04.000Z",
+                    "type": "event_msg",
+                    "payload": {
+                        "type": "task_complete",
+                        "last_agent_message": "fixture complete",
+                    },
+                },
+            ]
+            write(
+                work,
+                "sessions/rollout-example.jsonl",
+                "".join(json.dumps(record) + "\n" for record in records),
+            )
+        init_repo(work, f"local eval stack fixture {index}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build deterministic supplemental live-eval fixtures."
@@ -1080,6 +1139,7 @@ def main() -> int:
     build_project_vocabulary(root)
     build_session_handoff(root)
     build_solutions(root)
+    build_eval_stack(root)
     return 0
 
 
