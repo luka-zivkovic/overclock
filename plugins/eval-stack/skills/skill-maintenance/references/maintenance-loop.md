@@ -28,7 +28,8 @@ CLI fallback (works everywhere): the findings command in the coeval-audit
 script family, run from a coeval checkout:
 
 ```bash
-node skills/coeval-audit/scripts/coeval-submit.mjs check --env-var COEVAL_API_KEY_<PROJECT>     # connectivity
+node skills/coeval-audit/scripts/coeval-submit.mjs check --env-var COEVAL_API_KEY_<PROJECT>
+(script paths and flags live in the coeval repo — verify against your coeval checkout; they are not drift-checked from here)     # connectivity
 node skills/coeval-audit/scripts/coeval-submit.mjs findings --env-var COEVAL_API_KEY_<PROJECT>  # the findings export
 ```
 
