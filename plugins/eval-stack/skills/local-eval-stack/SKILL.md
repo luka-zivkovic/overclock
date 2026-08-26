@@ -22,7 +22,10 @@ exact commands, the failure modes, and the order-sensitive steps.
    extension (`scripts/ironside-tracer.ts`); it maps sessions→traces,
    turns→spans, LLM calls→generations, tools→spans, tags traces with
    `skill:<name>` on any SKILL.md read, redacts secret-shaped strings, and
-   fails open. → `references/pi-tracer.md`
+   fails open. → `references/pi-tracer.md`. Claude Code and Codex sessions
+   import post-hoc from their on-disk logs with the same mapping
+   (`scripts/import-claude-session.mjs`, `scripts/import-codex-session.mjs`)
+   → `references/importing-claude-codex.md`
 3. **coeval** — judging. Postgres in docker, api+web dev servers, headless
    bootstrap of one bench project per judged skill.
    → `references/coeval-setup.md`

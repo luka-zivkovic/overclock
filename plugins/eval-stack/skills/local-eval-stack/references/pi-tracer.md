@@ -36,7 +36,10 @@ dead-letter queue and the credential's ingest scope.
 
 ## Other harnesses
 
-Claude Code: use coeval's bundled `coeval-audit` skill capture hook
-(per-repo opt-in) for skill-run capture; there is no CC ironside tracer
-yet. Codex: no capture path yet — manual JSONL into coeval remains the
-bridge.
+Claude Code and Codex both import post-hoc from their on-disk session
+logs via the bundled importers (`scripts/import-claude-session.mjs`,
+`scripts/import-codex-session.mjs`) — same envelope, same redaction and
+truncation rules, idempotent re-runs, with hook recipes for automatic
+capture. → `references/importing-claude-codex.md`. For skill-run capture
+into coeval specifically, coeval's bundled `coeval-audit` skill capture
+hook (per-repo opt-in) still applies to Claude Code.
