@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Eval Stack"
+  short_description: "Self-host ironside + coeval and wire governed skill evaluation locally"
+  default_prompt: "Use $local-eval-stack to stand up the local eval stack: ironside trace store, coeval judging, calibrated judge projects, and casefile scanning. Follow the phase references in order and stop for my confirmation before anything that spends API tokens or writes credentials."
