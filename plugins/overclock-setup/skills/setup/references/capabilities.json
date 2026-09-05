@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.19",
+      "version": "0.1.20",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -250,6 +250,24 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose when Claude, Codex, or Gemini should consult or delegate a bounded task to a different installed harness while the parent retains ownership."
+    },
+    {
+      "id": "lateral-engineering",
+      "display_name": "Lateral Engineering",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "lateral-engineering"
+      ],
+      "skill_names": [
+        "lateral-engineering"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose for non-obvious engineering alternatives that challenge assumptions and name costs; skip safe production guidance, routine implementation, and incident mitigation."
     }
   ]
 }
