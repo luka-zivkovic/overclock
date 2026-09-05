@@ -28,6 +28,17 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   for the user's go-ahead before the first live request in a conversation and
   never edits application code or commits run output.
 
+## lateral-engineering
+
+### 0.1.0 — 2026-09-05 (initial release)
+- Add an advisory skill for unconventional engineering alternatives: mechanism-free goals,
+  hidden assumptions, six move families, an arbitrary oblique constraint, and prosecution of
+  conventional candidates before ranking 4–6 grounded reframings with explicit tradeoffs.
+- Ship a standalone moves catalog with cross-field precedents, implicit routing with concrete
+  anti-triggers, two requested author-run examples, and behavioral/routing controls.
+- Evidence tier is subjective: author-run examples check the requested output contract, without
+  claiming measured creativity gains or successful live routing.
+
 ## eval-stack
 
 ### 0.2.2 — 2026-09-11
@@ -319,6 +330,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.23 — 2026-09-20
+- Add Lateral Engineering 0.1.0 to the report-only capability catalog, separating creative
+  engineering alternatives from production guidance and routine implementation.
 
 ### 0.1.22 — 2026-09-19
 - Catalog `api-bench` 0.1.0 as a published package.

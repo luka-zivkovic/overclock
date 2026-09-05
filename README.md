@@ -54,6 +54,7 @@ installs, removes, enables, disables, or edits anything.
 | **overclock-setup** | A safe, explicit recommendation for the rest of the toolkit | `/plugin install overclock-setup@overclock` |
 | **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
+| **lateral-engineering** | Non-obvious engineering alternatives with broken assumptions, costs, and grounding | `/plugin install lateral-engineering@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **groundwork** | A one-question-at-a-time interview that ends at a confirmed decision brief | `/plugin install groundwork@overclock` |
 | **project-vocabulary** | One ubiquitous language per project, applied in conversation with approval-gated writes | `/plugin install project-vocabulary@overclock` |
@@ -313,7 +314,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 130 declared live cases | 19 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 135 declared live cases | 20 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

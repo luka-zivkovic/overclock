@@ -1311,6 +1311,13 @@ def build_skill_maintenance(root: Path) -> None:
     init_repo(work, "skill maintenance fixture 3")
 
 
+def build_lateral_engineering(root: Path) -> None:
+    for index in range(5):
+        work = root / "lateral-engineering" / f"eval-{index}"
+        write(work, "README.md", "# Advisory fixture\n\nNo implementation work is requested.\n")
+        init_repo(work, f"lateral engineering advisory fixture {index}")
+
+
 def _bench_tool(name: str, description: str, properties: dict, required: list[str]) -> dict:
     return {
         "name": name,
@@ -1504,6 +1511,7 @@ def main() -> int:
     build_eval_stack(root)
     build_skill_maintenance(root)
     build_api_bench(root)
+    build_lateral_engineering(root)
     return 0
 
 

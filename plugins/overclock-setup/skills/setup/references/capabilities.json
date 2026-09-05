@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.22",
+      "version": "0.1.23",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -269,6 +269,24 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose to simulate how an application would call the Claude Messages API or an OpenAI-compatible endpoint with a prompt, tool schemas, and stubbed tool results under hard caps, and to compare prompt variants on real transcripts."
+    },
+    {
+      "id": "lateral-engineering",
+      "display_name": "Lateral Engineering",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "lateral-engineering"
+      ],
+      "skill_names": [
+        "lateral-engineering"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose for non-obvious engineering alternatives that challenge assumptions and name costs; skip safe production guidance, routine implementation, and incident mitigation."
     }
   ]
 }

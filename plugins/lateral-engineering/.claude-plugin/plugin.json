@@ -1,0 +1,17 @@
+{
+  "name": "lateral-engineering",
+  "displayName": "Lateral Engineering",
+  "description": "Generate non-obvious engineering approaches by exposing assumptions, applying lateral moves, and prosecuting conventional candidates before ranking grounded alternatives with explicit costs.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "architecture",
+    "creative",
+    "lateral-thinking",
+    "reframing"
+  ]
+}

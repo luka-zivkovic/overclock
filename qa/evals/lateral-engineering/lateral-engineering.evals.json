@@ -1,0 +1,114 @@
+{
+  "skill_name": "lateral-engineering",
+  "invocation": "explicit",
+  "install_modes": [
+    "skill"
+  ],
+  "evidence_tier": "subjective",
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "How could a coding harness be optimized so a 4B model like Gemma E4B can reliably produce games like 2048 and minesweeper, generalizing to other games?",
+      "expected_output": "An advisory, grounded reframing pass that follows the output contract.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Neutral fixture sentinel; all case work is advisory and this file stays unchanged."
+        }
+      ],
+      "expectations": [
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
+        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
+        "Keep the stated 4B capability constraint, distinguish generalizing to unfamiliar rules from memorizing 2048/minesweeper, and include an Untested grounding with a cheap concrete experiment and an observable pass/fail signal. Do not invent Gemma performance measurements or verified model specifications."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Our trace-annotation pipeline for LLM evals is slow because every trace goes through a human review queue. How else could this be done?",
+      "expected_output": "An advisory, grounded reframing pass that follows the output contract.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Neutral fixture sentinel; all case work is advisory and this file stays unchanged."
+        }
+      ],
+      "expectations": [
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
+        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
+        "Consider whether every trace needs a human label and whether the needed output is labels or a reliable evaluation decision. Do not assert universal review requirements are removable if they are actual contractual obligations."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our trace-annotation pipeline is slow. In the previous round you proposed parallel reviewers, a faster queue, and caching duplicate labels. I already know those patterns. Reframe this and tell me which previous ideas fail your novelty test.",
+      "expected_output": "An advisory, grounded reframing pass that follows the output contract.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Neutral fixture sentinel; all case work is advisory and this file stays unchanged."
+        }
+      ],
+      "expectations": [
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
+        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
+        "The core briefly identifies at least one convicted prior idea and its familiar pattern, and the new spine moves beyond it without reprinting the previous conventional solutions."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We need the safe, production-proven answer for retrying a transient HTTP 503. Explain the ordinary approach briefly; no brainstorming or unconventional architecture.",
+      "expected_output": "A silent no-op for the skill: ordinary safe guidance only.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Neutral fixture sentinel; all case work is advisory and this file stays unchanged."
+        }
+      ],
+      "expectations": [
+        "Give proportionate ordinary retry guidance with bounded retries and attention to retry safety/idempotency; do not perform a reframing exercise, display the lateral format, or announce skill ceremony.",
+        "Leave the workspace unchanged and do not execute experiments or commit anything."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I want ideas, not best practices: our agent infrastructure is over-engineered and the obvious fix is expensive. Reframe this, even though I have not supplied scale or budget yet.",
+      "expected_output": "An advisory, grounded reframing pass that follows the output contract.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Neutral fixture sentinel; all case work is advisory and this file stays unchanged."
+        }
+      ],
+      "expectations": [
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
+        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
+        "Ask only one or two sharp constraint questions while still providing a usable first pass with explicit working assumptions. Do not fabricate budget, latency, deployment, or model facts and do not stop at a long intake questionnaire."
+      ]
+    }
+  ]
+}

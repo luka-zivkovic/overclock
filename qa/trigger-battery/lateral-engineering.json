@@ -1,0 +1,124 @@
+{
+  "skill": "lateral-engineering",
+  "install_modes": [
+    "skill"
+  ],
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.9,
+    "specificity": 0.9
+  },
+  "note": "Subjective quality change; routing measurements are separate. Closed-world ownership: only lateral-engineering on positives and no skill on target-only negatives. No external composition is declared.",
+  "should_trigger": [
+    {
+      "prompt": "Don't give me the usual architecture for our agent fleet. Find non-obvious alternatives.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "Our trace-annotation pipeline for LLM evals is slow because every trace goes through a human review queue. How else could this be done?",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "I want ideas, not best practices, for reducing LLM inference costs.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "Reframe this system design: our event ingestion service keeps needing more coordination.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "Find out-of-the-box approaches to developer tooling for debugging ephemeral containers.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "We are stuck scaling our data pipeline; the obvious fix doubles the budget. What assumptions can we break?",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "Our infrastructure is over-engineered and expensive. Suggest creative ways to make whole pieces unnecessary.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "Give me lateral approaches to reliability when individual agents frequently fail.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "How else could a fixed 4B model make unfamiliar puzzle games reliably? Challenge the harness design.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    },
+    {
+      "prompt": "Can we solve this performance problem through a different unit of work? I want unconventional ideas.",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
+    }
+  ],
+  "should_not": [
+    {
+      "prompt": "Give me the safe, production-proven architecture for retrying payments. No creative alternatives.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "We have an active outage. Give me the safest immediate mitigation for HTTP 503 errors.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "What is a message queue?",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Explain KV caching in a transformer.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Fix the typo in README.md.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Implement exponential backoff in the existing retry helper.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Our pipeline is slow. Explain how to profile it using standard tools.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Brainstorm creative names for my bakery.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Write a one-shot implementation plan for an already approved data export design.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Critique the evidence behind this latency claim; do not propose alternative architectures.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Interview me about requirements for our new feature.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Create and maintain a living feature dossier for team invitations.",
+      "allowed_skills": []
+    }
+  ]
+}
