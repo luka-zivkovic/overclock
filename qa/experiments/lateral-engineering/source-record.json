@@ -1,0 +1,27 @@
+{
+  "skill": "lateral-engineering",
+  "version": "0.1.0",
+  "evidence_tier": "subjective",
+  "date": "2026-09-05",
+  "execution": "author-session self-runs; no isolated or independent grading",
+  "source_sha256": {
+    "SKILL.md": "8ff4b2eed054bdcef5e449fb61d8fe5c590915158b4255ae1e95fde0f0dc1212",
+    "agents/openai.yaml": "47d3f6b26efbe86fec4afa720f376b1d73c642bee652919a6ff3dbe718041d6e",
+    "references/moves.md": "8931750da308cfdadacac3355e63523611936c92c617ecfa8a5e83ddb9302cf2"
+  },
+  "examples": {
+    "game-harness.md": "6383ce1c38d5e8f8ec55272f0d22c6c71f687ca4e1edb896ce5aee0f59bab42d",
+    "trace-annotation.md": "3f957deabf1cf22a97bc60e81506c5066161e3573a6c8e9583a49f24e359f326"
+  },
+  "live_behavior": "not run: required explicit API credentials absent",
+  "live_routing": "not run: required explicit API credentials absent",
+  "pr_validation": {
+    "base_commit": "f6cbd795afdee0676a4b807d152fd63dacf8db02",
+    "unit_tests": 367,
+    "unit_test_result": "pass",
+    "skill_distributions": 19,
+    "maintainer_checks": "pass",
+    "claude_plugin_validation": "pass",
+    "isolated_marketplace_smoke": "pass"
+  }
+}

@@ -285,6 +285,23 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   Build only if the right-sizing decision itself proves a recurring pain. Parked
   pending that evidence.
 
+### lateral-engineering — BUILD, v0.1 authored (2026-09-05)
+- **Demand:** direct maintainer request for a reusable procedure that escapes conventional
+  engineering answers when creative alternatives are wanted.
+- **Grounding:** expose hidden assumptions through a private conventional draft; apply six move
+  families plus an arbitrary constraint; prosecute conventional candidates before presenting
+  distinct, grounded alternatives. The catalog transfers mechanisms across fields rather than
+  treating precedent as a prerequisite for an idea.
+- **Boundary:** owns deliberate engineering ideation, not general critique (`critical-thinking`),
+  requirements elicitation (`groundwork`), debugging, implementation, or safe production advice.
+  One standalone skill, no hooks, no sibling dependencies, no writes, no auto-commit, and no
+  automatic execution of experiments.
+- **Evidence:** tier `subjective`. The two requested author-run examples and qualitative review
+  notes live in `qa/experiments/lateral-engineering/`; five committed behavioral cases and a
+  target-only routing battery cover creative requests, reruns, thin input, and anti-triggers.
+  No baseline lift or live routing success is claimed; isolated live runs require credentials
+  unavailable during authoring. Structural checks do not establish creative quality.
+
 ## Groundings performed (reference)
 
 - **Ultraplan** (Claude Code, ~2026): hands planning to a cloud Opus 4.6 web session;

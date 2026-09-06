@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.19",
+      "version": "0.1.20",
       "category": "development",
       "keywords": [
         "setup",
@@ -191,6 +191,20 @@
         "coeval",
         "ironside",
         "casefile"
+      ]
+    },
+    {
+      "name": "lateral-engineering",
+      "source": "./plugins/lateral-engineering",
+      "description": "Generate non-obvious engineering approaches by exposing assumptions, applying lateral moves, and prosecuting conventional candidates before ranking grounded alternatives with explicit costs.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "engineering",
+        "architecture",
+        "creative",
+        "lateral-thinking",
+        "reframing"
       ]
     }
   ]
