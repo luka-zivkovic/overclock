@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="assets/overclock-hero.svg" alt="Three inputs converge through a speed dial and four gates into one arrow" width="100%">
+  <img src="assets/overclock-hero.png" alt="An illuminated flywheel turns a stream of instruction cards into an ordered path" width="100%">
 </p>
 
 <h1 align="center">Overclock</h1>
 
 <p align="center">
-  <strong>Claude Code plugins that run your model past spec.</strong><br>
-  Memory, critical reasoning, writing, and engineering discipline with explicit boundaries.
+  <strong>Keep what your agent learns. Improve how it works.</strong><br>
+  Reusable skills for memory, reasoning, writing, debugging, and evaluation.
 </p>
 
 <p align="center">
@@ -28,7 +28,14 @@ repeated mistakes, agreeable reasoning, AI-sounding prose, and risky edits made 
 exists. Each plugin is independently installable. The setup advisor helps choose a compatible set
 without changing your machine.
 
+Start with memory when the same lessons keep getting lost. Add focused skills
+for the work you do often, then use the evaluation tools to inspect real runs
+and propose improvements. Your lessons, handoffs, and verified solutions stay
+in readable Markdown that you can review and version.
+
 ## Quick start
+
+Run these commands **inside Claude Code**:
 
 ```text
 /plugin marketplace add luka-zivkovic/overclock
