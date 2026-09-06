@@ -31,8 +31,8 @@ class RepoDocsTest(unittest.TestCase):
                 missing.append(target)
         self.assertEqual(missing, [])
 
-        hero = REPO / "assets/overclock-hero.png"
-        self.assertIn('src="assets/overclock-hero.png"', readme)
+        hero = REPO / "assets/overclock-agent-powerup.png"
+        self.assertIn('src="assets/overclock-agent-powerup.png"', readme)
         self.assertTrue(hero.is_file())
         self.assertLess(hero.stat().st_size, 2_000_000)
         header = hero.read_bytes()[:24]

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/overclock-hero.png" alt="An illuminated flywheel turns a stream of instruction cards into an ordered path" width="100%">
+  <img src="assets/overclock-agent-powerup.png" alt="An AI agent powering up with clenched fists, a rising energy aura, and levitating stones" width="100%">
 </p>
 
 <h1 align="center">Overclock</h1>
