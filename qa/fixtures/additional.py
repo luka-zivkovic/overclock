@@ -1065,7 +1065,7 @@ def rollup(path):
 
 def build_eval_stack(root: Path) -> None:
     base = root / "local-eval-stack"
-    for index in range(4):
+    for index in range(7):
         work = base / f"eval-{index}"
         write(
             work,
