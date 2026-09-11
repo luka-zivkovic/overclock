@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -21,6 +23,43 @@ PI_TRACER = SCRIPTS / "ironside-tracer.ts"
 
 
 class EvalStackScriptsTests(unittest.TestCase):
+    def test_plural_credentials_and_unquoted_separator_tails_are_fully_redacted(self) -> None:
+        containers = {"secrets": {"db": "opaque-value"}, "passwords": ["opaque-password"],
+                      "api_keys": {"openai": "opaque-key"}, "SECRETS_JSON": "opaque-blob",
+                      "passWord": "opaque mixed password", "db.passWord": "opaque-password",
+                      "safe": "keep me"}
+        for module, typescript in ((CLAUDE_IMPORTER, False), (CODEX_IMPORTER, False), (PI_TRACER, True)):
+            with self.subTest(module=module.name):
+                cleaned = self.call_export(module, "sanitizeField", containers, typescript=typescript)
+                self.assertNotIn("opaque", cleaned)
+                self.assertIn("keep me", cleaned)
+                for text, prefix in (("DB_PASSWORD=p&ss;word", "DB_PASSWORD="),
+                                     ("password=ab&cd&e", "password="),
+                                     ("password: ab&cd;e", "password: ")):
+                    self.assertEqual(self.call_export(module, "sanitizeField", text, typescript=typescript),
+                                     prefix + "[REDACTED]")
+
+    def test_nonsecret_fields_and_flat_chains_survive_redaction(self) -> None:
+        ordinary = {"max_tokens": 123, "input_tokens": 22, "output_tokens": 9,
+                    "tokenizer": "standard", "secretary": "assistant", "token_count": 31}
+        query = "GET /search?" + "&".join(f"p{i}=v{i}" for i in range(80))
+        path = "PATH=" + ":".join(f"/opt/tool{i}/bin" for i in range(80))
+        for module, typescript in ((CLAUDE_IMPORTER, False), (CODEX_IMPORTER, False), (PI_TRACER, True)):
+            with self.subTest(module=module.name):
+                self.assertEqual(json.loads(self.call_export(module, "sanitizeField", ordinary, typescript=typescript)), ordinary)
+                for value in (query, path, "usage: input_tokens=22 output_tokens=9"):
+                    self.assertEqual(self.call_export(module, "sanitizeField", value, typescript=typescript), value)
+                secret_query = query + "&api_key=opaque-credential&keep=visible"
+                cleaned = self.call_export(module, "sanitizeField", secret_query, typescript=typescript)
+                # Ambiguous free-text secret tails are consumed conservatively, including later parameters.
+                self.assertEqual(cleaned, query + "&api_key=[REDACTED]")
+                for value in ("URL=https://example.invalid/?api_key=opaque-credential&keep=visible",
+                              "wrapper=client_secret=opaque-credential;keep=visible",
+                              {"accessToken": "opaque-credential", "client_secret": "opaque-credential", "X-API-Key": "opaque-credential"}):
+                    cleaned = self.call_export(module, "sanitizeField", value, typescript=typescript)
+                    self.assertNotIn("opaque-credential", cleaned)
+                    self.assertIn("[REDACTED]", cleaned)
+
     def call_export(
         self,
         module: Path,
@@ -53,9 +92,146 @@ process.stdout.write(JSON.stringify(result ?? null));
             text=True,
             capture_output=True,
             check=False,
+            timeout=5,
         )
         self.assertEqual(completed.returncode, 0, completed.stderr)
         return json.loads(completed.stdout)
+
+    def test_long_unbroken_tool_output_does_not_stall_redaction(self) -> None:
+        for module, typescript in (
+            (CLAUDE_IMPORTER, False), (CODEX_IMPORTER, False), (PI_TRACER, True)
+        ):
+            for source in ("a" * 60_000, "token" * 12_000):
+                with self.subTest(module=module.name, prefix=source[:5]):
+                    result = self.call_export(module, "sanitizeField", source, typescript=typescript)
+                    self.assertEqual(result[:50_000], source[:50_000])
+                    self.assertIn("[truncated 10000 bytes", result)
+
+    def test_structured_and_nested_secrets_are_removed_before_serialization(self) -> None:
+        for module, typescript in (
+            (CLAUDE_IMPORTER, False), (CODEX_IMPORTER, False), (PI_TRACER, True)
+        ):
+            for source in (
+                {"password": "synthetic secret with spaces", "safe": "keep me"},
+                {"credentials": {"username": "synthetic-user", "value": "hidden-value"}, "safe": "keep me"},
+                {"command": 'echo {"apiKey":"nested-secret-123456"}', "safe": "keep me"},
+                json.dumps({"command": 'echo {"apiKey":"nested-secret-123456"}', "safe": "keep me"}),
+                'password="synthetic secret with spaces" safe="keep me"',
+                '''command='password="synthetic secret with spaces"' safe="keep me"''',
+                'command="echo {\\"apiKey\\":\\"nested-secret-123456\\"}" safe="keep me"',
+            ):
+                with self.subTest(module=module.name, source=source):
+                    sanitized = self.call_export(module, "sanitizeField", source, typescript=typescript)
+                    for secret in ("synthetic secret", "synthetic-user", "hidden-value", "nested-secret-123456"):
+                        self.assertNotIn(secret, sanitized)
+                    self.assertIn("keep me", sanitized)
+                    self.assertIn("[REDACTED]", sanitized)
+
+    def test_claude_native_skill_calls_and_reads_are_tagged_without_search_false_positives(self) -> None:
+        calls = [
+            ("Skill", {"skill": "natural-writing"}),
+            ("Skill", {"skill": "apps/web:deploy"}),
+            ("Skill", {"skill": "/plugin:review"}),
+            ("Skill", {"skill": "discipline-gates:test-discipline"}),
+            ("Skill", {"skill": "natural-writing"}),
+            ("Read", {"file_path": "/plugins/skills/groundwork/SKILL.md"}),
+            ("Bash", {"command": "rg /plugins/skills/false-positive/SKILL.md"}),
+            ("Grep", {"pattern": "/plugins/skills/also-false/SKILL.md"}),
+            ("Skill", {"skill": "malformed skill\nwith spaces"}),
+        ]
+        lines = [json.dumps({
+            "type": "assistant", "sessionId": "native-skill-test",
+            "timestamp": "2026-09-10T10:00:00Z", "message": {
+                "id": "msg-1", "content": [
+                    {"type": "tool_use", "id": f"tool-{i}", "name": name, "input": value}
+                    for i, (name, value) in enumerate(calls)
+                ]
+            }
+        })]
+        result = self.call_export(CLAUDE_IMPORTER, "mapClaudeSession", lines)
+        self.assertEqual(result["events"][0]["body"]["tags"], [
+            "skill:natural-writing", "skill:apps/web:deploy", "skill:plugin:review",
+            "skill:discipline-gates:test-discipline", "skill:groundwork"
+        ])
+
+    def test_codex_notification_selects_its_session_instead_of_the_newest(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            sessions = home / ".codex/sessions/2026/09/10"
+            sessions.mkdir(parents=True)
+            target = "11111111-1111-4111-8111-111111111111"
+            other = "22222222-2222-4222-8222-222222222222"
+            for index, identifier in enumerate((target, other)):
+                path = sessions / f"rollout-2026-09-10T10-00-0{index}-{identifier}.jsonl"
+                path.write_text(json.dumps({
+                    "timestamp": "2026-09-10T10:00:00Z", "type": "session_meta",
+                    "payload": {"id": identifier, "cwd": "/synthetic/repo"},
+                }) + "\n")
+                os.utime(path, (index + 1, index + 1))
+            event = json.dumps({"type": "agent-turn-complete", "thread-id": target})
+            for mode in ("--notify", "--latest"):
+                result = subprocess.run(
+                    ["node", str(CODEX_IMPORTER), mode, "--dry-run", event],
+                    env={"HOME": str(home), "PATH": os.environ["PATH"]},
+                    capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout)["events"][0]["body"]["id"], target)
+            manual = subprocess.run(
+                ["node", str(CODEX_IMPORTER), "--latest", "--dry-run"],
+                env={"HOME": str(home), "PATH": os.environ["PATH"]},
+                capture_output=True, text=True,
+            )
+            self.assertEqual(manual.returncode, 0, manual.stderr)
+            self.assertEqual(json.loads(manual.stdout)["events"][0]["body"]["id"], other)
+
+    def test_codex_notification_refuses_missing_or_ambiguous_session_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            identifier = "11111111-1111-4111-8111-111111111111"
+            cases = [
+                "not-json", json.dumps({"type": "agent-turn-complete"}),
+                json.dumps({"type": "agent-turn-complete", "thread-id": "../outside"}),
+                json.dumps({"type": "agent-turn-complete", "thread-id": identifier}),
+            ]
+            for event in cases:
+                result = subprocess.run(
+                    ["node", str(CODEX_IMPORTER), "--notify", "--dry-run", event],
+                    env={"HOME": str(home), "PATH": os.environ["PATH"]},
+                    capture_output=True, text=True,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, "")
+            sessions = home / ".codex/sessions"
+            sessions.mkdir(parents=True)
+            event = json.dumps({"type": "agent-turn-complete", "thread-id": identifier})
+            for index in range(2):
+                path = sessions / f"rollout-2026-09-10T10-00-0{index}-{identifier}.jsonl"
+                path.write_text(json.dumps({"timestamp": "2026-09-10T10:00:00Z",
+                    "type": "session_meta", "payload": {"id": identifier}}) + "\n")
+            duplicate = subprocess.run(
+                ["node", str(CODEX_IMPORTER), "--notify", "--dry-run", event],
+                env={"HOME": str(home), "PATH": os.environ["PATH"]},
+                capture_output=True, text=True,
+            )
+            self.assertNotEqual(duplicate.returncode, 0)
+            self.assertIn("found 2", duplicate.stderr)
+            self.assertEqual(duplicate.stdout, "")
+
+    def test_codex_notification_does_not_trust_a_filename_without_matching_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            identifier = "11111111-1111-4111-8111-111111111111"
+            candidate = root / f"rollout-example-{identifier}.jsonl"
+            candidate.write_text(json.dumps({"type": "session_meta", "payload": {"id": "wrong"}}) + "\n")
+            completed = subprocess.run(
+                ["node", "--input-type=module", "--eval",
+                 "import {findRolloutForThread} from " + json.dumps(CODEX_IMPORTER.as_uri()) +
+                 "; findRolloutForThread(process.argv[1], process.argv[2]);", identifier, str(root)],
+                capture_output=True, text=True,
+            )
+            self.assertNotEqual(completed.returncode, 0)
+            self.assertIn("found 0", completed.stderr)
 
     def test_all_capture_paths_redact_json_assignments_and_scoped_tokens(self) -> None:
         secret = "abcdefghijklmnop123456"
@@ -114,6 +290,8 @@ process.stdout.write(JSON.stringify(result ?? null));
                                 "input": {
                                     "path": "/tmp/plugins/eval-stack/skills/local-eval-stack/SKILL.md",
                                     "token": secret,
+                                    "password": "claude password with spaces",
+                                    "command": 'echo {"apiKey":"claude-nested-secret"}',
                                 },
                             },
                             {"type": "text", "text": "Configured safely."},
@@ -147,6 +325,8 @@ process.stdout.write(JSON.stringify(result ?? null));
         self.assertIn("skill:local-eval-stack", first["events"][0]["body"]["tags"])
         encoded = json.dumps(first, sort_keys=True)
         self.assertNotIn(secret, encoded)
+        self.assertNotIn("claude password", encoded)
+        self.assertNotIn("claude-nested-secret", encoded)
         ids = [event["body"]["id"] for event in first["events"]]
         self.assertEqual(len(ids), len(set(ids)))
 
@@ -199,6 +379,8 @@ process.stdout.write(JSON.stringify(result ?? null));
                         "input": {
                             "path": "/tmp/plugins/eval-stack/skills/local-eval-stack/SKILL.md",
                             "authorization": f"Bearer {secret}",
+                            "password": "codex password with spaces",
+                            "command": 'echo {"apiKey":"codex-nested-secret"}',
                         },
                     },
                 }
@@ -242,6 +424,8 @@ process.stdout.write(JSON.stringify(result ?? null));
         self.assertIn("skill:local-eval-stack", first["events"][0]["body"]["tags"])
         encoded = json.dumps(first, sort_keys=True)
         self.assertNotIn(secret, encoded)
+        self.assertNotIn("codex password", encoded)
+        self.assertNotIn("codex-nested-secret", encoded)
         ids = [event["body"]["id"] for event in first["events"]]
         self.assertEqual(len(ids), len(set(ids)))
 
@@ -260,6 +444,27 @@ process.stdout.write(JSON.stringify(result ?? null));
         )
         self.assertEqual(skill, "local-eval-stack")
         self.assertIsNone(non_skill)
+
+    def test_pi_envelopes_redact_tool_fields_and_error_messages(self) -> None:
+        state = self.call_export(PI_TRACER, "initialTracerState", typescript=True)
+        sensitive = {"password": "pi password with spaces", "command": 'echo {"apiKey":"pi-nested-secret"}'}
+        events = [
+            {"kind": "session_start", "sessionId": "synthetic", "cwd": "/synthetic/repo", "at": 1},
+            {"kind": "turn_start", "at": 2},
+            {"kind": "tool_start", "toolCallId": "t1", "toolName": "bash", "args": sensitive, "at": 3},
+            {"kind": "tool_end", "toolCallId": "t1", "toolName": "bash", "output": sensitive, "isError": True, "at": 4},
+            {"kind": "assistant_message", "text": "Request failed", "stopReason": "error",
+             "errorMessage": 'password="pi password with spaces"', "at": 5},
+        ]
+        envelopes = []
+        for event in events:
+            result = self.call_export(PI_TRACER, "mapTracerEvent", state, event, typescript=True)
+            state = result["state"]
+            envelopes.extend(result["events"])
+        encoded = json.dumps(envelopes)
+        self.assertNotIn("pi password", encoded)
+        self.assertNotIn("pi-nested-secret", encoded)
+        self.assertIn("[REDACTED]", encoded)
 
 
 if __name__ == "__main__":

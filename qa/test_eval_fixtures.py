@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from eval_contract import all_suite_paths, fixture_errors, validate_suite
+from eval_contract import all_suite_paths, fixture_errors, validate_case, validate_suite
 from fixtures.validate_root import validate_root
 
 
@@ -17,6 +17,14 @@ EVAL_ROOT = REPO / "qa" / "evals"
 
 
 class EvalFixtureParityTests(unittest.TestCase):
+    def test_continuation_case_requires_real_plugin_setup(self) -> None:
+        case = {"prompt": "Continue the feature.", "expectations": ["Dossier updated."],
+                "continue_after_setup": True}
+        self.assertTrue(validate_case(case, 0, Path("suite.json")))
+        self.assertTrue(validate_case({**case, "setup_turns": ["Start the dossier."]}, 0, Path("suite.json")))
+        self.assertEqual(validate_case({**case, "setup_turns": ["Start the dossier."],
+                                       "setup_with_plugins": True}, 0, Path("suite.json")), [])
+
     def test_fixture_root_must_be_temporary_and_outside_repository(self) -> None:
         with self.assertRaisesRegex(ValueError, "temporary"):
             validate_root(Path("/opt/overclock-eval-fixtures"), REPO)

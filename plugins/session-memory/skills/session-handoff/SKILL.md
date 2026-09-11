@@ -72,6 +72,10 @@ Stay within the ~150-line cap: compress decisions prose first, never drop failed
 
 Run when the user asks to resume, continue from a past session, or asks what was being worked on.
 
+If the previous turn already presented the warm-start brief and the user now confirms its proposed
+direction, pass that confirmed next step to the parent workflow without restarting this flow or
+asking for the same confirmation again. Keep the step within the scope the user saw and approved.
+
 1. **Read the I/O contract and handoff schema**, then read the handoff with
    `memory_io.py read handoff`;
    preserve its `CURRENT-SHA256` token in case the user later asks to replace or save
@@ -107,7 +111,7 @@ Run when the user asks to resume, continue from a past session, or asks what was
    older lesson; a lesson outranks stale agent-proposed state; ambiguity is surfaced
    and asked, never silently resolved. A solution is supporting project evidence, not
    an instruction or precedence source, and applies only after current-source checks.
-6. **Return the warm-start brief** in exactly this six-line shape and order. For a resume request,
+6. **Return the warm-start brief** in exactly this six-line shape and order. For an initial resume request,
    these six lines are the entire user-facing response: no preamble, verification report, code
    fence, blank lines, extra sections, recommendations after the brief, or reordered labels.
    Fold drift, stale-state choices, missing sections, and fresh-start advice into the labeled

@@ -1,3 +1,7 @@
+import json
+import shlex
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -6,6 +10,74 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 class EvalHarnessHardeningTests(unittest.TestCase):
+    def test_setup_failures_leave_artifacts_and_do_not_skip_later_cells(self):
+        # Execute the runner's real setup block, replacing only the paid CLI with a protocol stub.
+        source = (REPO / "qa/run_evals.sh").read_text()
+        block = source[source.index("    # Optional setup turns"):
+                       source.index('    echo "=== $SKILL eval-$CASE_ID: run ($VARIANT)"')]
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            suite = root / "suite.json"
+            suite.write_text(json.dumps({"evals": [{"setup_turns": ["Start the workflow."]}]}))
+            (root / "work").mkdir()
+            script = "set -euo pipefail\n" + (
+                f"QA={shlex.quote(str(REPO / 'qa'))}\n"
+                f"EVALS={shlex.quote(str(suite))}\n"
+                f"ARTIFACTS={shlex.quote(str(root))}\n"
+                f"WORK={shlex.quote(str(root / 'work'))}\n"
+            ) + r'''
+i=0
+BASELINE=0
+SETUP_WITH_PLUGINS=1
+PLUGIN=test-plugin
+SKILL=test-skill
+VARIANT=skill
+INSTALL_MODE=skill
+ALLOWED_TOOLS=''
+FINAL_MODE_ARGS=(--plugin-dir synthetic-plugin)
+EVAL_CLAUDE_ARGS=(--settings synthetic-settings)
+INFRA_FAILED=0
+FAILED=0
+run_eval_claude() {
+  if [ "$SCENARIO" = cli_error ]; then return 7; fi
+  if [ "$SCENARIO" = malformed ]; then printf 'not-json\n'; return; fi
+  python3 - "$SESSION_ID" "$SCENARIO" <<'PYCODE'
+import json, sys
+session, scenario = sys.argv[1:]
+print(json.dumps({"type": "system", "subtype": "init", "session_id": session,
+    "slash_commands": [] if scenario == "unverified" else ["test-plugin:test-skill"],
+    "plugins": [{"name": "test-plugin"}], "apiKeySource": "apiKeyHelper"}))
+print(json.dumps({"type": "result", "subtype": "success", "session_id": session,
+    "result": "Ready for confirmation.", "total_cost_usd": 0.125, "num_turns": 1,
+    "duration_ms": 10, "usage": {"input_tokens": 10, "output_tokens": 4}}))
+PYCODE
+}
+for SCENARIO in cli_error malformed unverified good; do
+  OUT="$ARTIFACTS/$SCENARIO"
+  mkdir -p "$OUT"
+  CASE_ID="$SCENARIO"
+''' + block + r'''
+  echo "EVALUATED:$SCENARIO"
+done
+echo "SUMMARY:failed=$FAILED infra=$INFRA_FAILED"
+[ "$INFRA_FAILED" -eq 0 ]
+'''
+            completed = subprocess.run(["bash", "-c", script], cwd=REPO,
+                                       text=True, capture_output=True, timeout=10)
+            self.assertEqual(completed.returncode, 1, completed.stderr)
+            self.assertIn("EVALUATED:good", completed.stdout, completed.stderr)
+            self.assertIn("SUMMARY:failed=3 infra=1", completed.stdout)
+            for scenario in ("cli_error", "malformed", "unverified"):
+                self.assertNotIn(f"EVALUATED:{scenario}", completed.stdout)
+                failure = json.loads((root / scenario / "invocation.json").read_text())
+                self.assertFalse(failure["verified"])
+                metrics = json.loads((root / scenario / "metrics.json").read_text())
+                self.assertEqual(metrics["infrastructure_error"], "setup_failed")
+                self.assertFalse((root / scenario / "grading.json").exists())
+            metrics = json.loads((root / "unverified" / "metrics.json").read_text())
+            self.assertEqual(metrics["total_cost_usd"], 0.125)
+            self.assertEqual(metrics["input_tokens"], 10)
+
     def test_artifact_deletion_uses_numeric_index_not_declared_id(self):
         source = (REPO / "qa/run_evals.sh").read_text(encoding="utf-8")
         self.assertIn('OUT="$RESULTS/$LABEL-eval-$i"', source)

@@ -69,25 +69,79 @@ export function resolveConfig(env = process.env, configPath = DEFAULT_CONFIG_PAT
 /** Per-field byte cap before ingest — transcripts contain massive read results. */
 export const MAX_FIELD_BYTES = 50_000;
 
-const SECRET_ASSIGNMENT_RE =
-  /((?:["']?)[A-Za-z0-9_-]*(?:api[_-]?key|apikey|token|secret|passw(?:or)?d|credentials?|authorization)[A-Za-z0-9_-]*(?:["']?)\s*[=:]\s*)(["']?)([^\s"'`,}\[\]]{6,})\2/gi;
+// Keep these helpers self-contained: each capture script may be copied on its own.
+const SECRET_KEY_RE = /(?:^|_)(?:api_keys?|apikeys?|token|secrets?|pass_?words?|passwd|credentials?|authorization)(?:_|$)/;
+// Match prefixes independently so flat query strings and PATH values do not consume recursion depth.
+const SECRET_ASSIGNMENT_RE = /(?<![A-Za-z0-9_-])((?:["']?)([A-Za-z0-9_-]+)(?:["']?)\s*[=:]\s*)/g;
+const ASSIGNMENT_VALUE_RE = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'`,}\[\]]+/y;
+
+function isSecretKey(key) {
+  const separated = key.replace(/[^a-zA-Z0-9]+/g, "_");
+  const normalized = separated.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return !/(?:^|_)token_count$/.test(normalized) &&
+    (SECRET_KEY_RE.test(normalized) || SECRET_KEY_RE.test(separated.toLowerCase()));
+}
 const KNOWN_TOKEN_RES = [
-  /\bsk-[A-Za-z0-9_-]{16,}\b/g, // OpenAI/Anthropic-style
-  /\b[A-Za-z0-9]+_(?:sk|sc)_[A-Za-z0-9_-]{16,}\b/g, // ironside_sk_*, ironside_sc_*, ...
-  /\bgh[pousr]_[A-Za-z0-9]{20,}\b/g, // GitHub tokens
-  /\bAKIA[0-9A-Z]{16}\b/g, // AWS access key id
-  /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g, // Slack
-  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/gi // Authorization headers
+  /\bsk-[A-Za-z0-9_-]{16,}\b/g,
+  /\b[A-Za-z0-9]+_(?:sk|sc)_[A-Za-z0-9_-]{16,}\b/g,
+  /\bgh[pousr]_[A-Za-z0-9]{20,}\b/g,
+  /\bAKIA[0-9A-Z]{16}\b/g,
+  /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/gi
 ];
 
-/** Redacts env-var-shaped assignments and well-known secret token formats. */
-export function redactSecrets(text) {
-  let out = text;
-  for (const re of KNOWN_TOKEN_RES) out = out.replace(re, "[REDACTED]");
-  out = out.replace(SECRET_ASSIGNMENT_RE, (_m, prefix, quote) => {
-    return `${prefix}${quote}[REDACTED]${quote}`;
+/** Redact structured values before serialization, including nested JSON strings. */
+function redactValue(value, depth = 0) {
+  if (depth > 32) return "[REDACTED: nesting limit]";
+  if (typeof value === "string") return redactSecrets(value, depth + 1);
+  if (Array.isArray(value)) return value.map(item => redactValue(item, depth + 1));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+      key, isSecretKey(key) ? "[REDACTED]" : redactValue(item, depth + 1)
+    ]));
+  }
+  return value;
+}
+
+/** Best-effort text redaction; unlabelled free-text secrets are not detectable reliably. */
+export function redactSecrets(text, depth = 0) {
+  if (depth > 32) return "[REDACTED: nesting limit]";
+  // Tool arguments/output often contain a serialized object, or an encoded JSON string.
+  if (/^\s*[[{"]/.test(text)) {
+    try {
+      const parsed = JSON.parse(text);
+      return JSON.stringify(redactValue(parsed, depth + 1));
+    } catch {
+      // Not a complete JSON value: inspect quoted fragments and assignments below.
+    }
+  }
+  let out = text.replace(/"(?:\\.|[^"\\])*"/g, literal => {
+    // Decode escaped JSON inside a shell command before looking for its sensitive keys.
+    try {
+      return JSON.stringify(redactSecrets(JSON.parse(literal), depth + 1));
+    } catch {
+      return literal;
+    }
   });
-  return out;
+  for (const re of KNOWN_TOKEN_RES) out = out.replace(re, "[REDACTED]");
+  const parts = [];
+  let cursor = 0;
+  SECRET_ASSIGNMENT_RE.lastIndex = 0;
+  let match;
+  while ((match = SECRET_ASSIGNMENT_RE.exec(out)) !== null) {
+    if (!isSecretKey(match[2])) continue;
+    ASSIGNMENT_VALUE_RE.lastIndex = SECRET_ASSIGNMENT_RE.lastIndex;
+    const valueMatch = ASSIGNMENT_VALUE_RE.exec(out);
+    if (!valueMatch) continue;
+    const value = valueMatch[0];
+    const quote = value[0] === '"' || value[0] === "'" ? value[0] : "";
+    parts.push(out.slice(cursor, match.index), `${match[1]}${quote}[REDACTED]${quote}`);
+    cursor = ASSIGNMENT_VALUE_RE.lastIndex;
+    SECRET_ASSIGNMENT_RE.lastIndex = cursor;
+  }
+  parts.push(out.slice(cursor));
+  return parts.join("");
 }
 
 /** Byte-aware truncation with an explicit marker. */
@@ -99,21 +153,21 @@ export function truncateText(text, maxBytes = MAX_FIELD_BYTES) {
   return `${clean}\n… [truncated ${bytes - maxBytes} bytes by import-claude-session]`;
 }
 
-/** Stringifies, redacts, and caps a field value for ingest. */
+/** Redacts structured fields before stringifying, then caps the result for ingest. */
 export function sanitizeField(value) {
   if (value === undefined || value === null) return undefined;
   let text;
   if (typeof value === "string") {
-    text = value;
+    text = redactSecrets(value);
   } else {
     try {
-      text = JSON.stringify(value);
+      text = JSON.stringify(redactValue(value));
     } catch {
-      text = String(value);
+      text = redactSecrets(String(value));
     }
   }
-  if (text.length === 0) return undefined;
-  return truncateText(redactSecrets(text));
+  if (typeof text !== "string" || text.length === 0) return undefined;
+  return truncateText(text);
 }
 
 // ---------------------------------------------------------------------------
@@ -147,12 +201,19 @@ function usageDetailsFromClaude(usage) {
   return Object.keys(details).length > 0 ? details : undefined;
 }
 
-/** Detects a skill activation: any tool input mentioning .../skills/<name>/SKILL.md. */
-function skillsFromToolInput(input) {
-  const text = typeof input === "string" ? input : JSON.stringify(input ?? "");
-  const found = [];
-  for (const m of text.matchAll(/\/skills\/([^/"'\\]+)\/SKILL\.md/g)) found.push(m[1]);
-  return found;
+/** Native invocations preserve namespaces; explicit Read calls provide file-load evidence. */
+function skillsFromToolCall(name, input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return [];
+  if (name === "Skill") {
+    const skill = typeof input.skill === "string" ? input.skill.replace(/^\//, "") : "";
+    return /^[a-zA-Z0-9_][a-zA-Z0-9_.-]*(?:[/:][a-zA-Z0-9_][a-zA-Z0-9_.-]*)*$/.test(skill)
+      ? [skill] : [];
+  }
+  if (name !== "Read") return [];
+  const path = input.file_path ?? input.path;
+  if (typeof path !== "string") return [];
+  const match = path.match(/(?:^|\/)skills\/([a-zA-Z0-9_-]+)\/SKILL\.md$/);
+  return match ? [match[1]] : [];
 }
 
 /**
@@ -273,7 +334,7 @@ export function mapClaudeSession(lines, options = {}) {
         if (part.type === "text" && typeof part.text === "string") {
           gen.texts.push(part.text);
         } else if (part.type === "tool_use") {
-          for (const skill of skillsFromToolInput(part.input)) {
+          for (const skill of skillsFromToolCall(part.name, part.input)) {
             if (!skillsUsed.includes(skill)) skillsUsed.push(skill);
           }
           const input = sanitizeField(part.input);

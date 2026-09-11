@@ -12,8 +12,9 @@
 # Usage: qa/run_evals.sh [[plugin/]skill ...]  (default: the session-memory pair)
 # Set EVAL_INSTALL_MODE=skill|plugin|stack to override suite/case declarations.
 # With no override, every case runs its committed `install_modes` matrix.
-# Behavioral suites invoke their target explicitly. Implicit selection belongs to
-# qa/trigger_battery.py so routing and behavior cannot mask one another.
+# Behavioral suites activate their target explicitly. A continue_after_setup case then
+# resumes that session with an ordinary prompt to exercise ongoing behavior. Fresh implicit
+# selection belongs to qa/trigger_battery.py.
 # Set BASELINE=1 to run the same cases with all skills disabled. Baseline expectation
 # failures are reported but do not make the process fail; harness/runtime errors still do.
 # Requires: sandbox-capable claude CLI and ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN.
@@ -264,7 +265,7 @@ PY
     # Each matrix cell receives a fresh copy of the trusted fixture template.
     # Mutations from one install mode can never influence another mode.
     MODE_FIXTURE_ROOT=$(mktemp -d "$FIXTURE_ROOT/$DISTRIBUTION_LABEL-$INSTALL_MODE.XXXXXX")
-    cp -R "$DISTRIBUTION_FIXTURE_ROOT/." "$MODE_FIXTURE_ROOT/"
+    cp -Rp "$DISTRIBUTION_FIXTURE_ROOT/." "$MODE_FIXTURE_ROOT/"
     WORK="$MODE_FIXTURE_ROOT/$SKILL/eval-$i"
     LABEL="$DISTRIBUTION_LABEL-$INSTALL_MODE"
     [ "$BASELINE" -eq 1 ] && LABEL="$LABEL-baseline"
@@ -326,7 +327,13 @@ PY
     else
       FINAL_MODE_ARGS=(--disable-slash-commands --disallowedTools Task)
     fi
-    if [ "$BASELINE" -eq 0 ]; then
+    CONTINUE_AFTER_SETUP=$(python3 - "$EVALS" "$i" <<'PY'
+import json, sys
+case = json.load(open(sys.argv[1]))["evals"][int(sys.argv[2])]
+print("1" if case.get("continue_after_setup", False) else "0")
+PY
+)
+    if [ "$BASELINE" -eq 0 ] && [ "$CONTINUE_AFTER_SETUP" -eq 0 ]; then
       EFFECTIVE_PROMPT=$(PYTHONPATH="$QA" python3 - "$PLUGIN" "$SKILL" "$PROMPT" <<'PY'
 import sys
 from eval_invocation import explicit_prompt
@@ -370,8 +377,9 @@ print("1" if case.get("setup_with_plugins", False) else "0")
 PY
 )
 
-    # Optional setup turns create genuine prior context before the skill is installed.
-    # This lets evals test anchoring, self-consistency, and evidence-based reversals.
+    # Optional setup turns create genuine prior context. setup_with_plugins additionally
+    # exercises explicit activation before an ordinary continuation prompt.
+    SETUP_STATUS=0
     SETUP_N=$(python3 -c "import json;print(len(json.load(open('$EVALS'))['evals'][$i].get('setup_turns', [])))")
     : > "$OUT/context-transcript.md"
     FINAL_SESSION_ARGS=(--no-session-persistence)
@@ -400,21 +408,51 @@ PY
         fi
         printf '%s\n' "$SETUP_EFFECTIVE_PROMPT" > "$OUT/setup-effective-$turn.txt"
         echo "=== $SKILL eval-$i: setup turn $((turn+1))/$SETUP_N"
-        ( cd "$WORK" && run_eval_claude -p "$SETUP_EFFECTIVE_PROMPT" --output-format json \
+        ( cd "$WORK" && run_eval_claude -p "$SETUP_EFFECTIVE_PROMPT" --output-format stream-json --verbose \
             ${EVAL_MODEL_ARGS[@]+"${EVAL_MODEL_ARGS[@]}"} \
             ${EVAL_EFFORT_ARGS[@]+"${EVAL_EFFORT_ARGS[@]}"} \
             ${EVAL_DEBUG_ARGS[@]+"${EVAL_DEBUG_ARGS[@]}"} \
             "${SETUP_SESSION_ARGS[@]}" "${SETUP_MODE_ARGS[@]}" \
             "${EVAL_CLAUDE_ARGS[@]}" --allowedTools "$ALLOWED_TOOLS" \
-          ) > "$OUT/setup-$turn.json" 2>> "$OUT/stderr.log"
-        python3 - "$SETUP_PROMPT" "$OUT/setup-$turn.json" >> "$OUT/context-transcript.md" <<'PY'
+          ) > "$OUT/setup-$turn.jsonl" 2>> "$OUT/stderr.log" || SETUP_STATUS=$?
+        [ "$SETUP_STATUS" -eq 0 ] || break
+        PYTHONPATH="$QA" python3 - "$SETUP_PROMPT" "$OUT/setup-$turn.jsonl" "$OUT/setup-$turn.json" >> "$OUT/context-transcript.md" 2>> "$OUT/stderr.log" <<'PY' || SETUP_STATUS=$?
 import json, pathlib, sys
-prompt, result_path = sys.argv[1], pathlib.Path(sys.argv[2])
-result = json.loads(result_path.read_text()).get("result", "")
-print(f"USER:\n{prompt}\n\nASSISTANT:\n{result}\n")
+from eval_invocation import setup_turn_record
+prompt, stream, result_path = sys.argv[1], pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3])
+result, context = setup_turn_record(stream, prompt)
+result_path.write_text(json.dumps(result))
+print(context)
 PY
+        [ "$SETUP_STATUS" -eq 0 ] || break
+        if [ "$SETUP_WITH_PLUGINS" -eq 1 ] && [ "$BASELINE" -eq 0 ]; then
+          PYTHONPATH="$QA" python3 - "$OUT/setup-$turn.jsonl" \
+            "$OUT/setup-effective-$turn.txt" "$PLUGIN" "$SKILL" \
+            > "$OUT/setup-invocation-$turn.json" 2>> "$OUT/stderr.log" <<'PY' || SETUP_STATUS=$?
+import json, pathlib, sys
+from eval_invocation import invocation_evidence
+evidence = invocation_evidence(
+    pathlib.Path(sys.argv[1]), plugin=sys.argv[3], skill=sys.argv[4],
+    effective_prompt=pathlib.Path(sys.argv[2]).read_text().rstrip("\n"),
+)
+print(json.dumps(evidence, indent=1))
+raise SystemExit(0 if evidence["verified"] else 1)
+PY
+        fi
+        [ "$SETUP_STATUS" -eq 0 ] || break
       done
       FINAL_SESSION_ARGS=(--resume "$SESSION_ID")
+    fi
+    if [ "$SETUP_STATUS" -ne 0 ]; then
+      INFRA_FAILED=1
+      FAILED=$((FAILED+1))
+      PYTHONPATH="$QA" python3 - "$OUT" "$VARIANT" "$turn" "$SETUP_STATUS" <<'PY'
+import pathlib, sys
+from eval_invocation import record_setup_failure
+record_setup_failure(pathlib.Path(sys.argv[1]), sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
+PY
+      echo "=== $SKILL eval-$CASE_ID: SETUP-ERROR ($VARIANT; $INSTALL_MODE)"
+      continue
     fi
 
     echo "=== $SKILL eval-$CASE_ID: run ($VARIANT)"
@@ -470,15 +508,25 @@ PY
     if [ "$BASELINE" -eq 0 ]; then
       PYTHONPATH="$QA" python3 - \
         "$OUT/stdout.jsonl" "$OUT/effective-prompt.txt" "$PLUGIN" "$SKILL" \
+        "$CONTINUE_AFTER_SETUP" "$OUT" "$SETUP_N" \
         > "$OUT/invocation.json" <<'PY' || INVOCATION_STATUS=$?
 import json, pathlib, sys
 from eval_invocation import invocation_evidence
 
+continuation = {}
+if sys.argv[5] == "1":
+    out = pathlib.Path(sys.argv[6])
+    last = int(sys.argv[7]) - 1
+    continuation = {
+        "setup_prompt": (out / f"setup-effective-{last}.txt").read_text().rstrip("\n"),
+        "setup_result": json.loads((out / f"setup-{last}.json").read_text()),
+    }
 evidence = invocation_evidence(
     pathlib.Path(sys.argv[1]),
     plugin=sys.argv[3],
     skill=sys.argv[4],
     effective_prompt=pathlib.Path(sys.argv[2]).read_text(encoding="utf-8").rstrip("\n"),
+    **continuation,
 )
 print(json.dumps(evidence, indent=1))
 raise SystemExit(0 if evidence["verified"] else 1)
@@ -621,6 +669,8 @@ print(
     f"{sum(r['input_tokens'] for r in rows)} input + "
     f"{sum(r['output_tokens'] for r in rows)} output tokens"
 )
+if any(r.get("infrastructure_error") for r in rows):
+    print("METRICS NOTE: setup failures may have unreported usage; totals include available metrics only.")
 PY
 [ "$INFRA_FAILED" -eq 0 ] || exit 1
 [ "$BASELINE" -eq 1 ] || [ "$FAILED" -eq 0 ]

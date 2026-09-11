@@ -6,8 +6,10 @@ from __future__ import annotations
 import argparse
 import json
 import hashlib
+import os
 import shutil
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -934,12 +936,13 @@ module.exports = new Pool({ connectionString: process.env.DATABASE_URL });
 """,
     )
     sha = init_repo(work, "Postgres migration baseline")
+    saved_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     write(
         work,
         ".ai/memory/HANDOFF.md",
         f"""<!-- memory-schema: v1 -->
 # Session Handoff
-Saved: 2026-07-23T09:00:00Z
+Saved: {saved_at}
 
 ## Current goal
 Create the initial production-parity database migration for the service.
@@ -968,7 +971,7 @@ Create the initial production-parity database migration for the service.
 - Branch: main
 - HEAD: {sha}
 - Dirty files: clean
-- Date: 2026-07-23
+- Date: {saved_at}
 """,
     )
 
@@ -1065,7 +1068,7 @@ def rollup(path):
 
 def build_eval_stack(root: Path) -> None:
     base = root / "local-eval-stack"
-    for index in range(7):
+    for index in range(9):
         work = base / f"eval-{index}"
         write(
             work,
@@ -1119,6 +1122,36 @@ def build_eval_stack(root: Path) -> None:
                 "sessions/rollout-example.jsonl",
                 "".join(json.dumps(record) + "\n" for record in records),
             )
+        if index == 7:
+            session = "11111111-1111-4111-8111-111111111111"
+            record = {
+                "type": "assistant", "sessionId": session,
+                "timestamp": "2026-09-10T10:00:00Z", "cwd": str(work),
+                "message": {"id": "msg-1", "content": [
+                    {"type": "tool_use", "id": "skill-1", "name": "Skill", "input": {
+                        "skill": "natural-writing:natural-writing",
+                        "password": "synthetic password with spaces",
+                        "command": 'echo {"apiKey":"synthetic-nested-secret"}',
+                    }},
+                    {"type": "tool_use", "id": "search-1", "name": "Bash", "input": {
+                        "command": "rg ignored /tmp/skills/groundwork/SKILL.md",
+                    }},
+                ]},
+            }
+            write(work, f"sessions/{session}.jsonl", json.dumps(record) + "\n")
+        if index == 8:
+            target = "11111111-1111-4111-8111-111111111111"
+            other = "22222222-2222-4222-8222-222222222222"
+            write(work, "notification.json", json.dumps({
+                "type": "agent-turn-complete", "thread-id": target,
+            }) + "\n")
+            for offset, session in enumerate((target, other)):
+                relative = f"fixture-codex/sessions/2026/09/10/rollout-example-{session}.jsonl"
+                write(work, relative, json.dumps({
+                    "type": "session_meta", "timestamp": "2026-09-10T10:00:00Z",
+                    "payload": {"id": session, "cwd": str(work)},
+                }) + "\n")
+                os.utime(work / relative, (offset + 1, offset + 1))
         init_repo(work, f"local eval stack fixture {index}")
 
 

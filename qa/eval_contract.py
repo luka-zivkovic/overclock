@@ -121,6 +121,10 @@ def validate_case(case: object, index: int, suite: Path) -> list[str]:
         errors.append(f"{prefix} setup_turns must be non-empty strings")
     if case.get("setup_with_plugins") and not setup_turns:
         errors.append(f"{prefix} setup_with_plugins requires setup_turns")
+    if "continue_after_setup" in case and not isinstance(case["continue_after_setup"], bool):
+        errors.append(f"{prefix} continue_after_setup must be boolean")
+    if case.get("continue_after_setup") and (not setup_turns or not case.get("setup_with_plugins")):
+        errors.append(f"{prefix} continue_after_setup requires setup_turns with setup_with_plugins")
     return errors
 
 

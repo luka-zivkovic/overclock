@@ -34,14 +34,14 @@
  *
  * Usage:
  *   node import-codex-session.mjs <rollout.jsonl> [--dry-run]
- *   node import-codex-session.mjs --latest [--dry-run]   # newest rollout under
- *       ~/.codex/sessions (for a notify hook, which gets no rollout path)
+ *   node import-codex-session.mjs --notify [--dry-run] EVENT_JSON
+ *   node import-codex-session.mjs --latest [--dry-run]   # manual newest-rollout selection
  *
  * --dry-run prints the envelope events to stdout instead of POSTing.
  * Zero npm dependencies; Node >= 18.
  */
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { closeSync, constants, fstatSync, openSync, readSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -79,25 +79,79 @@ export function resolveConfig(env = process.env, configPath = DEFAULT_CONFIG_PAT
 /** Per-field byte cap before ingest — rollouts contain massive command outputs. */
 export const MAX_FIELD_BYTES = 50_000;
 
-const SECRET_ASSIGNMENT_RE =
-  /((?:["']?)[A-Za-z0-9_-]*(?:api[_-]?key|apikey|token|secret|passw(?:or)?d|credentials?|authorization)[A-Za-z0-9_-]*(?:["']?)\s*[=:]\s*)(["']?)([^\s"'`,}\[\]]{6,})\2/gi;
+// Keep these helpers self-contained: each capture script may be copied on its own.
+const SECRET_KEY_RE = /(?:^|_)(?:api_keys?|apikeys?|token|secrets?|pass_?words?|passwd|credentials?|authorization)(?:_|$)/;
+// Match prefixes independently so flat query strings and PATH values do not consume recursion depth.
+const SECRET_ASSIGNMENT_RE = /(?<![A-Za-z0-9_-])((?:["']?)([A-Za-z0-9_-]+)(?:["']?)\s*[=:]\s*)/g;
+const ASSIGNMENT_VALUE_RE = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'`,}\[\]]+/y;
+
+function isSecretKey(key) {
+  const separated = key.replace(/[^a-zA-Z0-9]+/g, "_");
+  const normalized = separated.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return !/(?:^|_)token_count$/.test(normalized) &&
+    (SECRET_KEY_RE.test(normalized) || SECRET_KEY_RE.test(separated.toLowerCase()));
+}
 const KNOWN_TOKEN_RES = [
-  /\bsk-[A-Za-z0-9_-]{16,}\b/g, // OpenAI/Anthropic-style
-  /\b[A-Za-z0-9]+_(?:sk|sc)_[A-Za-z0-9_-]{16,}\b/g, // ironside_sk_*, ironside_sc_*, ...
-  /\bgh[pousr]_[A-Za-z0-9]{20,}\b/g, // GitHub tokens
-  /\bAKIA[0-9A-Z]{16}\b/g, // AWS access key id
-  /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g, // Slack
-  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/gi // Authorization headers
+  /\bsk-[A-Za-z0-9_-]{16,}\b/g,
+  /\b[A-Za-z0-9]+_(?:sk|sc)_[A-Za-z0-9_-]{16,}\b/g,
+  /\bgh[pousr]_[A-Za-z0-9]{20,}\b/g,
+  /\bAKIA[0-9A-Z]{16}\b/g,
+  /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/gi
 ];
 
-/** Redacts env-var-shaped assignments and well-known secret token formats. */
-export function redactSecrets(text) {
-  let out = text;
-  for (const re of KNOWN_TOKEN_RES) out = out.replace(re, "[REDACTED]");
-  out = out.replace(SECRET_ASSIGNMENT_RE, (_m, prefix, quote) => {
-    return `${prefix}${quote}[REDACTED]${quote}`;
+/** Redact structured values before serialization, including nested JSON strings. */
+function redactValue(value, depth = 0) {
+  if (depth > 32) return "[REDACTED: nesting limit]";
+  if (typeof value === "string") return redactSecrets(value, depth + 1);
+  if (Array.isArray(value)) return value.map(item => redactValue(item, depth + 1));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+      key, isSecretKey(key) ? "[REDACTED]" : redactValue(item, depth + 1)
+    ]));
+  }
+  return value;
+}
+
+/** Best-effort text redaction; unlabelled free-text secrets are not detectable reliably. */
+export function redactSecrets(text, depth = 0) {
+  if (depth > 32) return "[REDACTED: nesting limit]";
+  // Tool arguments/output often contain a serialized object, or an encoded JSON string.
+  if (/^\s*[[{"]/.test(text)) {
+    try {
+      const parsed = JSON.parse(text);
+      return JSON.stringify(redactValue(parsed, depth + 1));
+    } catch {
+      // Not a complete JSON value: inspect quoted fragments and assignments below.
+    }
+  }
+  let out = text.replace(/"(?:\\.|[^"\\])*"/g, literal => {
+    // Decode escaped JSON inside a shell command before looking for its sensitive keys.
+    try {
+      return JSON.stringify(redactSecrets(JSON.parse(literal), depth + 1));
+    } catch {
+      return literal;
+    }
   });
-  return out;
+  for (const re of KNOWN_TOKEN_RES) out = out.replace(re, "[REDACTED]");
+  const parts = [];
+  let cursor = 0;
+  SECRET_ASSIGNMENT_RE.lastIndex = 0;
+  let match;
+  while ((match = SECRET_ASSIGNMENT_RE.exec(out)) !== null) {
+    if (!isSecretKey(match[2])) continue;
+    ASSIGNMENT_VALUE_RE.lastIndex = SECRET_ASSIGNMENT_RE.lastIndex;
+    const valueMatch = ASSIGNMENT_VALUE_RE.exec(out);
+    if (!valueMatch) continue;
+    const value = valueMatch[0];
+    const quote = value[0] === '"' || value[0] === "'" ? value[0] : "";
+    parts.push(out.slice(cursor, match.index), `${match[1]}${quote}[REDACTED]${quote}`);
+    cursor = ASSIGNMENT_VALUE_RE.lastIndex;
+    SECRET_ASSIGNMENT_RE.lastIndex = cursor;
+  }
+  parts.push(out.slice(cursor));
+  return parts.join("");
 }
 
 /** Byte-aware truncation with an explicit marker. */
@@ -109,21 +163,21 @@ export function truncateText(text, maxBytes = MAX_FIELD_BYTES) {
   return `${clean}\n… [truncated ${bytes - maxBytes} bytes by import-codex-session]`;
 }
 
-/** Stringifies, redacts, and caps a field value for ingest. */
+/** Redacts structured fields before stringifying, then caps the result for ingest. */
 export function sanitizeField(value) {
   if (value === undefined || value === null) return undefined;
   let text;
   if (typeof value === "string") {
-    text = value;
+    text = redactSecrets(value);
   } else {
     try {
-      text = JSON.stringify(value);
+      text = JSON.stringify(redactValue(value));
     } catch {
-      text = String(value);
+      text = redactSecrets(String(value));
     }
   }
-  if (text.length === 0) return undefined;
-  return truncateText(redactSecrets(text));
+  if (typeof text !== "string" || text.length === 0) return undefined;
+  return truncateText(text);
 }
 
 // ---------------------------------------------------------------------------
@@ -537,9 +591,76 @@ export async function postEvents(config, events, fetchImpl = fetch) {
 // CLI
 // ---------------------------------------------------------------------------
 
-export const DEFAULT_SESSIONS_DIR = join(homedir(), ".codex", "sessions");
+export const DEFAULT_SESSIONS_DIR = join(process.env.CODEX_HOME || join(homedir(), ".codex"), "sessions");
 
-/** Newest rollout-*.jsonl under ~/.codex/sessions (notify hooks get no path). */
+/** Parse only the identity needed for import; notification prose never selects a path. */
+export function notificationThreadId(text) {
+  let event;
+  try {
+    event = JSON.parse(text);
+  } catch {
+    throw new Error("notification must be a JSON object");
+  }
+  if (!event || typeof event !== "object" || Array.isArray(event)) {
+    throw new Error("notification must be a JSON object");
+  }
+  if (event.type !== "agent-turn-complete") {
+    throw new Error("unsupported notification type; expected agent-turn-complete");
+  }
+  const id = event["thread-id"];
+  if (typeof id !== "string" || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error("notification requires a UUID thread-id");
+  }
+  return id.toLowerCase();
+}
+
+/** Bound identity inspection to the first record of a regular, non-linked candidate. */
+function rolloutIdentity(path) {
+  const fd = openSync(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+  try {
+    if (!fstatSync(fd).isFile()) throw new Error("rollout is not a regular file");
+    const buffer = Buffer.alloc(1024 * 1024);
+    const bytes = readSync(fd, buffer, 0, buffer.length, 0);
+    const newline = buffer.subarray(0, bytes).indexOf(10);
+    if (newline === -1 && bytes === buffer.length) throw new Error("rollout metadata exceeds 1 MiB");
+    const record = JSON.parse(buffer.subarray(0, newline === -1 ? bytes : newline).toString("utf8"));
+    return record.type === "session_meta" ? record.payload?.id : undefined;
+  } finally {
+    closeSync(fd);
+  }
+}
+
+/** Match notification identity, never global recency, across concurrently active sessions. */
+export function findRolloutForThread(id, root = DEFAULT_SESSIONS_DIR) {
+  if (typeof id !== "string" || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error("invalid rollout thread identity");
+  }
+  const matches = [];
+  const walk = dir => {
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch (error) {
+      if (error.code === "ENOENT") return;
+      throw error;
+    }
+    for (const entry of entries) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.startsWith("rollout-") &&
+               entry.name.toLowerCase().endsWith(`-${id.toLowerCase()}.jsonl`)) {
+        if (rolloutIdentity(path)?.toLowerCase() === id.toLowerCase()) matches.push(path);
+      }
+    }
+  };
+  walk(root);
+  if (matches.length !== 1) {
+    throw new Error(`expected exactly one rollout matching the notification; found ${matches.length}`);
+  }
+  return matches[0];
+}
+
+/** Manual newest-rollout selection; notification mode always uses exact identity. */
 export function findLatestRollout(root = DEFAULT_SESSIONS_DIR) {
   let latest;
   const walk = (dir) => {
@@ -566,9 +687,25 @@ export function findLatestRollout(root = DEFAULT_SESSIONS_DIR) {
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
-  let rolloutPath = args.find((a) => !a.startsWith("--"));
+  const latest = args.includes("--latest");
+  const notify = args.includes("--notify");
+  if (args.some(arg => arg.startsWith("--") && !["--dry-run", "--latest", "--notify"].includes(arg))) {
+    throw new Error("unknown importer option");
+  }
+  const positional = args.filter(arg => !arg.startsWith("--"));
+  if (positional.length > 1 || (latest && notify)) throw new Error("choose one import mode and one input");
+  let rolloutPath = positional[0];
+  let expectedThreadId;
 
-  if (!rolloutPath && args.includes("--latest")) {
+  // Compatibility for the previous --latest notify recipe with appended event JSON.
+  if (notify || (latest && rolloutPath?.trimStart().startsWith("{"))) {
+    expectedThreadId = notificationThreadId(positional[0]);
+    rolloutPath = findRolloutForThread(expectedThreadId);
+  } else if (latest && rolloutPath) {
+    throw new Error("--latest accepts only an optional notification JSON argument");
+  }
+
+  if (!rolloutPath && latest) {
     rolloutPath = findLatestRollout();
     if (!rolloutPath) {
       console.error(`no rollout found under ${DEFAULT_SESSIONS_DIR}`);
@@ -579,6 +716,7 @@ async function main() {
 
   if (!rolloutPath) {
     console.error("usage: import-codex-session.mjs <rollout.jsonl> [--dry-run]\n" +
+      "       import-codex-session.mjs --notify [--dry-run] EVENT_JSON\n" +
       "       import-codex-session.mjs --latest [--dry-run]");
     process.exit(2);
   }
@@ -595,6 +733,9 @@ async function main() {
   const { traceId, events, skipped } = mapCodexSession(lines, {
     ...(config?.environment ? { environment: config.environment } : {})
   });
+  if (expectedThreadId && traceId?.toLowerCase() !== expectedThreadId) {
+    throw new Error("rollout identity changed before import");
+  }
 
   const skippedTotal = Object.values(skipped).reduce((a, b) => a + b, 0);
   if (skippedTotal > 0) {
