@@ -52,7 +52,7 @@ tool-evidence retention, and generated fixture parity.
 
 ## Validation and limits
 
-Local validation after review corrections passes: **381 unit tests**, all 18 skill validators,
+Local validation after review corrections passes: **382 unit tests**, all 18 skill validators,
 18 PASS/0 WARN/0 FAIL in the skill audit, all eight shared-file groups, documentation claims
 (125 cases/18 distributions), the 12-package catalog, version bumps against `origin/master`,
 shell syntax, and diff whitespace checks. Native Claude validation passes for the marketplace
@@ -81,4 +81,12 @@ The parent reproduced them and made these corrections:
 Malformed setup streams continue to fail validation rather than silently dropping evidence;
 only best-effort usage accounting skips malformed lines. The reviewer did not run live behavioral
 judging. The two existing importer cases cover the same workflow after these helper corrections;
-their script-level edge cases are checked deterministically. A focused follow-up review is pending.
+their script-level edge cases are checked deterministically.
+
+The focused review of `d1ded6a` confirmed all five corrections and identified two additional
+low-severity privacy regressions: plural credential containers and unquoted secret tails containing
+`&` or `;`. Both were reproduced and corrected across all three capture scripts. New controls
+cover `secrets`, `passwords`, `api_keys`, `SECRETS_JSON`, mixed-case password keys, and the complete
+unquoted value; conservative text redaction may also consume subsequent URL parameters.
+The bridge's resumed run retained the original session ID, confirming this CLI's basic resume
+behavior without substituting for an isolated behavioral eval. Final confirmation is pending.

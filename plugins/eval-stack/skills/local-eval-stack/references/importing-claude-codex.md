@@ -108,7 +108,9 @@ find ~/.codex/sessions -name 'rollout-*.jsonl' -mtime -1 \
 
 - **Text redaction is best-effort.** Sensitive structured fields and the tested
   quoted/nested forms are covered; arbitrary unlabelled secrets in prose may
-  remain. Inspect a dry-run envelope before enabling automatic capture.
+  remain. Unquoted secret values consume `&` and `;` conservatively, so later URL
+  parameters may also be redacted. Inspect a dry-run envelope before enabling
+  automatic capture.
 - **Post-hoc, not live.** Nothing lands until the hook fires or the
   sweep runs; a hard-crashed session imports only what reached the log.
 - **Whatever the log format omits stays omitted.** Codex reasoning is

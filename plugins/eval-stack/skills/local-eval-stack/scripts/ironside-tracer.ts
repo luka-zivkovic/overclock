@@ -78,15 +78,17 @@ export const MAX_FIELD_BYTES = 50_000;
 // Env-var-shaped assignments (API_KEY=..., token: "...") and well-known token
 // formats. Starting point: casefile's secret-env-read patterns.
 // Keep these helpers self-contained: each capture script may be copied on its own.
-const SECRET_KEY_RE = /(?:^|_)(?:api_key|apikey|token|secret|password|passwd|credentials?|authorization)(?:_|$)/;
+const SECRET_KEY_RE = /(?:^|_)(?:api_keys?|apikeys?|token|secrets?|pass_?words?|passwd|credentials?|authorization)(?:_|$)/;
 // Match prefixes independently so flat query strings and PATH values do not consume recursion depth.
 const SECRET_ASSIGNMENT_RE = /(?<![A-Za-z0-9_-])((?:["']?)([A-Za-z0-9_-]+)(?:["']?)\s*[=:]\s*)/g;
-const ASSIGNMENT_VALUE_RE = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'`,}\[\]&;]+/y;
+const ASSIGNMENT_VALUE_RE = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'`,}\[\]]+/y;
 
 function isSecretKey(key: string): boolean {
-  const normalized = key.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
-    .replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/[^a-zA-Z0-9]+/g, "_").toLowerCase();
-  return !/(?:^|_)token_count$/.test(normalized) && SECRET_KEY_RE.test(normalized);
+  const separated = key.replace(/[^a-zA-Z0-9]+/g, "_");
+  const normalized = separated.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return !/(?:^|_)token_count$/.test(normalized) &&
+    (SECRET_KEY_RE.test(normalized) || SECRET_KEY_RE.test(separated.toLowerCase()));
 }
 const KNOWN_TOKEN_RES = [
   /\bsk-[A-Za-z0-9_-]{16,}\b/g,

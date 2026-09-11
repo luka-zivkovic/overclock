@@ -23,6 +23,22 @@ PI_TRACER = SCRIPTS / "ironside-tracer.ts"
 
 
 class EvalStackScriptsTests(unittest.TestCase):
+    def test_plural_credentials_and_unquoted_separator_tails_are_fully_redacted(self) -> None:
+        containers = {"secrets": {"db": "opaque-value"}, "passwords": ["opaque-password"],
+                      "api_keys": {"openai": "opaque-key"}, "SECRETS_JSON": "opaque-blob",
+                      "passWord": "opaque mixed password", "db.passWord": "opaque-password",
+                      "safe": "keep me"}
+        for module, typescript in ((CLAUDE_IMPORTER, False), (CODEX_IMPORTER, False), (PI_TRACER, True)):
+            with self.subTest(module=module.name):
+                cleaned = self.call_export(module, "sanitizeField", containers, typescript=typescript)
+                self.assertNotIn("opaque", cleaned)
+                self.assertIn("keep me", cleaned)
+                for text, prefix in (("DB_PASSWORD=p&ss;word", "DB_PASSWORD="),
+                                     ("password=ab&cd&e", "password="),
+                                     ("password: ab&cd;e", "password: ")):
+                    self.assertEqual(self.call_export(module, "sanitizeField", text, typescript=typescript),
+                                     prefix + "[REDACTED]")
+
     def test_nonsecret_fields_and_flat_chains_survive_redaction(self) -> None:
         ordinary = {"max_tokens": 123, "input_tokens": 22, "output_tokens": 9,
                     "tokenizer": "standard", "secretary": "assistant", "token_count": 31}
@@ -35,7 +51,8 @@ class EvalStackScriptsTests(unittest.TestCase):
                     self.assertEqual(self.call_export(module, "sanitizeField", value, typescript=typescript), value)
                 secret_query = query + "&api_key=opaque-credential&keep=visible"
                 cleaned = self.call_export(module, "sanitizeField", secret_query, typescript=typescript)
-                self.assertEqual(cleaned, query + "&api_key=[REDACTED]&keep=visible")
+                # Ambiguous free-text secret tails are consumed conservatively, including later parameters.
+                self.assertEqual(cleaned, query + "&api_key=[REDACTED]")
                 for value in ("URL=https://example.invalid/?api_key=opaque-credential&keep=visible",
                               "wrapper=client_secret=opaque-credential;keep=visible",
                               {"accessToken": "opaque-credential", "client_secret": "opaque-credential", "X-API-Key": "opaque-credential"}):
