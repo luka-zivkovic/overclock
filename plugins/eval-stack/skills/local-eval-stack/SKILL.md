@@ -70,7 +70,7 @@ exact commands, the failure modes, and the order-sensitive steps.
 2. **Capture** — pi sessions → ironside. Install the bundled tracer
    extension (`scripts/ironside-tracer.ts`); it maps sessions→traces,
    turns→spans, LLM calls→generations, tools→spans, tags traces with
-   `skill:<name>` on any SKILL.md read, redacts secret-shaped strings, and
+   `skill:<name>` on any SKILL.md read, redacts sensitive fields and token patterns, and
    fails open. → `references/pi-tracer.md`. Claude Code and Codex sessions
    import post-hoc from their on-disk logs with the same mapping
    (`scripts/import-claude-session.mjs`, `scripts/import-codex-session.mjs`)

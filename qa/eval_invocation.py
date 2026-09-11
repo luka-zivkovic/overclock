@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and verify explicit target-skill prompts for behavioral evals."""
+"""Build and verify target activation and continuation evidence for behavioral evals."""
 
 from __future__ import annotations
 
@@ -48,14 +48,40 @@ def _skill_selection(block: dict) -> str | None:
     return None
 
 
+def setup_turn_record(stdout_jsonl: Path, prompt: str) -> tuple[dict, str]:
+    """Retain setup actions and results so the judge can assess the whole conversation."""
+    result = None
+    tool_events: list[dict] = []
+    for line in stdout_jsonl.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        event = json.loads(line)
+        if event.get("type") == "result":
+            result = event
+        elif event.get("type") in {"assistant", "user"}:
+            tool_events.extend(
+                block for block in event.get("message", {}).get("content", [])
+                if isinstance(block, dict) and block.get("type") in {"tool_use", "tool_result"}
+            )
+    if result is None or result.get("is_error") or result.get("subtype") != "success":
+        raise ValueError("setup turn did not complete successfully")
+    context = (
+        f"USER:\n{prompt}\n\nSETUP TOOL EVENTS:\n{json.dumps(tool_events)}\n\n"
+        f"ASSISTANT:\n{result.get('result', '')}\n"
+    )
+    return result, context
+
+
 def invocation_evidence(
     stdout_jsonl: Path,
     *,
     plugin: str,
     skill: str,
     effective_prompt: str,
+    setup_prompt: str | None = None,
+    setup_result: dict | None = None,
 ) -> dict:
-    """Verify that a direct target command was available in the isolated run."""
+    """Verify direct activation, or continuity from its successful isolated setup turn."""
     command = command_name(plugin, skill)
     prefix = f"/{command}"
     requested_directly = (
@@ -68,6 +94,7 @@ def invocation_evidence(
     loaded_plugins: set[str] = set()
     skill_tool_calls: list[str] = []
     api_key_sources: set[str] = set()
+    session_ids: set[str] = set()
     init_events = 0
 
     for raw_line in stdout_jsonl.read_text(encoding="utf-8").splitlines():
@@ -77,6 +104,8 @@ def invocation_evidence(
             continue
         if event.get("type") == "system" and event.get("subtype") == "init":
             init_events += 1
+            if isinstance(event.get("session_id"), str):
+                session_ids.add(event["session_id"])
             if isinstance(event.get("apiKeySource"), str):
                 api_key_sources.add(event["apiKeySource"])
             slash_commands.update(
@@ -102,15 +131,26 @@ def invocation_evidence(
     command_available = command in slash_commands
     target_plugin_loaded = plugin in loaded_plugins
     isolated_auth = api_key_sources == {"apiKeyHelper"}
+    continued_activation = bool(
+        isinstance(setup_prompt, str)
+        and (setup_prompt == prefix or setup_prompt.startswith(prefix + " ") or setup_prompt.startswith(prefix + "\n"))
+        and isinstance(setup_result, dict)
+        and setup_result.get("type") == "result"
+        and setup_result.get("subtype") == "success"
+        and setup_result.get("is_error") is not True
+        and isinstance(setup_result.get("session_id"), str)
+        and session_ids == {setup_result["session_id"]}
+    )
     verified = (
-        requested_directly
+        (continued_activation if setup_prompt is not None else requested_directly)
         and command_available
         and target_plugin_loaded
         and isolated_auth
     )
     return {
-        "mode": EXPLICIT_INVOCATION,
-        "mechanism": "direct-namespaced-command",
+        "mode": "continuation" if setup_prompt is not None else EXPLICIT_INVOCATION,
+        "mechanism": "resumed-explicit-activation" if setup_prompt is not None else "direct-namespaced-command",
+        "continued_activation": continued_activation,
         "requested_command": command,
         "requested_directly": requested_directly,
         "command_available": command_available,

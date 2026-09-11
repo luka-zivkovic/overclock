@@ -21,8 +21,10 @@ Restart pi (or `/reload`). Already-running sessions keep the old config.
 
 - **Fail-open**: ironside down or misconfigured never breaks a session;
   errors log once and drop.
-- **Redaction**: secret-shaped strings (keys/tokens) are replaced with
-  `[REDACTED]` before leaving the process; large fields truncate at 50KB.
+- **Redaction**: sensitive object fields, nested JSON, quoted secret assignments,
+  and known token patterns are replaced with `[REDACTED]` before field truncation
+  at 50KB. Error messages use the same text redactor. Arbitrary unlabelled secrets
+  in prose may remain; text redaction is best-effort.
 - **Kill switch**: `IRONSIDE_TRACER_DISABLE=1`.
 - The config file holds a credential — keep it OUT of any dotfiles/backup
   sync (SECURITY).

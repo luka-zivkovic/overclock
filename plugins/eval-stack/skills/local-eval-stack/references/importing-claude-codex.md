@@ -8,7 +8,8 @@ harnesses land in one trace store with the same shape.
 
 Both scripts read config from `IRONSIDE_URL` + `IRONSIDE_API_KEY` env
 vars, falling back to `~/.pi/agent/ironside-tracer.json`. Both redact
-secret-shaped strings and truncate fields at ~50KB (same rules as the pi
+sensitive object fields, nested JSON, quoted secret assignments, and known token
+patterns before truncating fields at ~50KB (same rules as the pi
 tracer), batch POSTs at the 500-event ingest cap, and take `--dry-run`
 to print the envelope instead of POSTing. Both are **idempotent by
 construction**: every id derives from the session id plus a stable log
@@ -26,7 +27,12 @@ repeated hook fires are safe.
 | user prompt → next prompt | span `turn N` |
 | assistant API message (streamed chunks share `message.id`) | generation: model, text output, input/output/cache token usage |
 | `tool_use` + matching `tool_result` | child span; `level=error` on `is_error` |
-| tool input touching `…/skills/<name>/SKILL.md` | trace tag `skill:<name>` |
+| native `Skill` call with `input.skill` | trace tag `skill:<name>` (preserves a plugin namespace when present) |
+| `Read` of `…/skills/<name>/SKILL.md` | trace tag `skill:<name>` |
+
+Tags identify invocation or file-load attempts, not successful completion. A
+path mentioned in a Bash search, Grep query, or unrelated tool input is not a
+Claude Code skill activation.
 
 **`scripts/import-codex-session.mjs`** — one rollout from
 `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` (first record:
@@ -72,14 +78,22 @@ staying empty.
 Each Stop fire re-imports the whole transcript so far; idempotent
 upserts make that a cheap refresh, not duplication.
 
-**Codex — notify hook.** Codex's `notify` program receives a JSON
-argument on `agent-turn-complete`, but it contains no rollout path — use
-`--latest` (newest rollout by mtime, which is the one that just wrote).
+**Codex — notify hook.** Codex appends one JSON argument on
+`agent-turn-complete`; its `thread-id` identifies the session. Use `--notify`
+to select that rollout even when another session writes more recently.
+See the [official notification contract](https://learn.chatgpt.com/docs/config-file/config-advanced#notifications).
 In `~/.codex/config.toml`:
 
 ```toml
-notify = ["node", "/path/to/scripts/import-codex-session.mjs", "--latest"]
+notify = ["node", "/path/to/scripts/import-codex-session.mjs", "--notify"]
 ```
+
+The importer searches `$CODEX_HOME/sessions` (default `~/.codex/sessions`),
+matches the UUID in both the rollout filename and its `session_meta` record,
+and requires exactly one match. Invalid payloads, missing sessions, and ambiguous
+matches stop before ingest. It never falls back to another session. The former
+`--latest` hook recipe remains compatible when Codex appends notification JSON;
+bare `--latest` is only a manual newest-file selector, with no session guarantee.
 
 **Either — manual or cron sweep.** Idempotency makes a blind sweep safe:
 
@@ -90,6 +104,9 @@ find ~/.codex/sessions -name 'rollout-*.jsonl' -mtime -1 \
 
 ## Honest limits
 
+- **Text redaction is best-effort.** Sensitive structured fields and the tested
+  quoted/nested forms are covered; arbitrary unlabelled secrets in prose may
+  remain. Inspect a dry-run envelope before enabling automatic capture.
 - **Post-hoc, not live.** Nothing lands until the hook fires or the
   sweep runs; a hard-crashed session imports only what reached the log.
 - **Whatever the log format omits stays omitted.** Codex reasoning is

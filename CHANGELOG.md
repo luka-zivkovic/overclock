@@ -5,6 +5,19 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## eval-stack
 
+### 0.2.2 — 2026-09-11
+- Redact sensitive structured values before serialization, including nested/escaped JSON and
+  passwords containing spaces, across both importers and the pi tracer. Redact pi error messages
+  as well; document the remaining best-effort limit for unlabelled free text.
+- Select Codex notify imports by the event's session UUID and matching rollout metadata, with no
+  newest-session fallback. Preserve compatibility with the old notification recipe.
+- Tag native Claude Code `Skill` calls, preserving namespaces, and direct skill-file reads;
+  stop treating arbitrary tool path mentions as activation evidence.
+- Add deterministic regression tests and offline behavioral cases for privacy and notification
+  selection, including a large-output timeout guard. Each capture script remains independently
+  copyable.
+
+
 ### 0.2.1 — 2026-09-07
 - Choose the evaluation question, coding agent, and small example set before setup; reuse supplied choices and keep inspection-only requests scoped to inspection.
 - Make real-data scope, import previews, automatic capture opt-ins, and external judging boundaries explicit. Match completion checks to the chosen goal without treating sample agreement as accuracy evidence.
@@ -279,6 +292,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.21 — 2026-09-11
+- Synchronize the report-only catalog with Eval Stack 0.2.2 and Session Memory 1.1.2.
 
 ### 0.1.20 — 2026-09-07
 - Synchronize the setup catalog with eval-stack 0.2.1.
@@ -652,6 +668,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   `templates/lessons.md` skeleton is kept byte-identical (CI-enforced).
 
 ## session-memory
+
+### 1.1.2 — 2026-09-11
+- Continue the approved next step after the user confirms a warm-start brief, without restarting
+  resume or asking for the same confirmation again.
+- Repair the decision-provenance eval with a real resume turn followed by user confirmation;
+  preserve setup tool evidence and keep migration execution outside the authorized scope.
+
 
 ### 1.1.1 — 2026-07-23
 - Crash durability: a writer killed mid-update no longer leaves the canonical

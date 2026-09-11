@@ -1,7 +1,10 @@
 {
   "skill_name": "session-handoff",
   "invocation": "explicit",
-  "install_modes": ["skill", "plugin"],
+  "install_modes": [
+    "skill",
+    "plugin"
+  ],
   "value_gate": {
     "min_case_wins": 1,
     "max_case_losses": 0,
@@ -131,8 +134,8 @@
     },
     {
       "id": 7,
-      "prompt": "Resume where we left off, then keep going with the next step.",
-      "expected_output": "Warm-start brief in the six-line shape, then work proceeds under the settled decision. The handoff's Decisions carry provenance labels: 'Postgres over SQLite [user-directed]' and 'exponential backoff for the import retries [agent-proposed]'. The next step (set up the database migration baseline) is exactly where SQLite would look simpler, but the session does not propose switching to SQLite or re-ask the database choice — it augments the settled decision (uses Postgres). The agent-proposed retry decision may be revisited or refined without ceremony.",
+      "prompt": "I confirm the Postgres direction and next step in your brief. Proceed with the migration baseline: create db/migrations/001_widgets.sql defining widgets with a bigserial primary key and a non-null text name. Only write the local migration; do not connect to a database or apply it.",
+      "expected_output": "The setup turn verifies the fresh handoff and produces a six-line brief without implementing. After the real confirmation in the evaluated turn, the agent creates the requested local Postgres migration without re-asking or reopening the database choice. The unexamined retry proposal remains revisable.",
       "files": [
         {
           "name": ".ai/memory/HANDOFF.md",
@@ -144,12 +147,17 @@
         }
       ],
       "expectations": [
-        "The warm-start brief was produced in the six-line shape and its 'Decisions in force' value includes the Postgres decision.",
-        "The session did NOT propose switching to SQLite, re-ask the database choice, or present it as open — the [user-directed] decision was treated as settled and work proceeded on Postgres.",
+        "The setup turn produces the six-line warm-start brief, includes Postgres in Decisions in force, and stops before implementation; setup tool calls provide the ordering evidence.",
+        "After the evaluated user confirmation, db/migrations/001_widgets.sql is created with the requested Postgres table; the agent does not reopen the database choice, restart the resume flow, or ask for the same confirmation again.",
         "No fabricated 'new evidence' was invented to justify reopening the settled decision.",
         "The [agent-proposed] retry decision was treated as revisable (either refined, confirmed, or simply not treated as settled) — the settled treatment was NOT extended to the agent-proposed label.",
-        "The session waited for confirmation after the brief before executing (per the resume flow), then continued with the migration step on Postgres."
-      ]
+        "Implementation occurs only after the actual confirmation turn; no database connection, applied migration, unrelated file write, stage, or commit occurs."
+      ],
+      "setup_with_plugins": true,
+      "setup_turns": [
+        "Resume where we left off and present the warm-start brief before taking action."
+      ],
+      "continue_after_setup": true
     }
   ]
 }
