@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from eval_state_checks import apply_checks, fingerprint, validate_checks
@@ -107,7 +108,10 @@ class StateChecksTests(unittest.TestCase):
     def test_permission_fixtures_keep_real_fresh_git_anchors(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            build_session_handoff(root)
+            with patch.dict(os.environ, {"GIT_AUTHOR_NAME": "Fixture", "GIT_COMMITTER_NAME": "Fixture",
+                                        "GIT_AUTHOR_EMAIL": "fixture@example.test",
+                                        "GIT_COMMITTER_EMAIL": "fixture@example.test"}):
+                build_session_handoff(root)
             for index in (7, 8, 9, 10):
                 work = root / "session-handoff" / f"eval-{index}"
                 head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=work, text=True).strip()
