@@ -9,6 +9,7 @@ from pathlib import Path
 
 from eval_packaging import INSTALL_MODES, resolve_install_modes
 from eval_invocation import EXPLICIT_INVOCATION
+from eval_state_checks import validate_checks
 
 
 def _install_modes_error(value: object) -> str | None:
@@ -67,6 +68,7 @@ def validate_case(case: object, index: int, suite: Path) -> list[str]:
     if not isinstance(case, dict):
         return [f"{prefix} must be an object"]
     errors: list[str] = []
+    errors.extend(f"{prefix} {error}" for error in validate_checks(case))
     case_id = case.get("id")
     if case_id is not None and (
         not isinstance(case_id, (str, int))
@@ -183,7 +185,7 @@ def validate_suite(path: Path, eval_root: Path) -> list[str]:
                     f"{resolved}: unknown value_gate fields: {sorted(unknown)}"
                 )
             for key, value in value_gate.items():
-                if not isinstance(value, int) or value < 0:
+                if type(value) is not int or value < 0:
                     errors.append(
                         f"{resolved}: value_gate.{key} must be a non-negative integer"
                     )

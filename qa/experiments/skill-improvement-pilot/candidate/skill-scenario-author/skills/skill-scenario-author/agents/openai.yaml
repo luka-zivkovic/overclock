@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Scenario Author"
+  short_description: "Turn skill failures into executable eval cases"
+  default_prompt: "Use $skill-scenario-author to turn this skill contract or observed failure into executable conversation cases with fixtures and positive and negative controls."
