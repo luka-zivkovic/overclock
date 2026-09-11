@@ -61,7 +61,7 @@ on:
         type: number
         default: 1
       compare_baseline:
-        description: Also run behavioral cases with all skills disabled
+        description: Enforce paired skill benefit (full suites with a declared value_gate only)
         type: boolean
         default: false
       confirm_all:
@@ -135,12 +135,11 @@ jobs:
             export EVAL_INSTALL_MODE="$INSTALL_MODE"
           fi
           run_suite() {
-            local status=0
-            bash qa/run_evals.sh "$@" || status=$?
             if [ "$COMPARE_BASELINE" = "true" ]; then
-              BASELINE=1 bash qa/run_evals.sh "$@" || return $?
+              bash qa/run_value_evals.sh "$@"
+            else
+              bash qa/run_evals.sh "$@"
             fi
-            return "$status"
           }
           if [[ "$TARGET" == */* ]]; then
             run_suite "$TARGET"
