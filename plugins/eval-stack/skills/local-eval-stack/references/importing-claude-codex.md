@@ -30,7 +30,9 @@ repeated hook fires are safe.
 | native `Skill` call with `input.skill` | trace tag `skill:<name>` (preserves a plugin namespace when present) |
 | `Read` of `…/skills/<name>/SKILL.md` | trace tag `skill:<name>` |
 
-Tags identify invocation or file-load attempts, not successful completion. A
+Native names may include directory scopes, such as `apps/web:deploy`; one leading
+slash is removed from a slash-command spelling. Tags identify invocation or file-load attempts,
+not successful completion. A
 path mentioned in a Bash search, Grep query, or unrelated tool input is not a
 Claude Code skill activation.
 

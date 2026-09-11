@@ -70,10 +70,16 @@ export function resolveConfig(env = process.env, configPath = DEFAULT_CONFIG_PAT
 export const MAX_FIELD_BYTES = 50_000;
 
 // Keep these helpers self-contained: each capture script may be copied on its own.
-const SECRET_KEY_RE = /api[_-]?key|token|secret|passw(?:or)?d|credentials?|authorization/i;
-// Parse each assignment once, then classify its key; avoid scanning long words at every offset.
-const SECRET_ASSIGNMENT_RE =
-  /(?<![A-Za-z0-9_-])((?:["']?)([A-Za-z0-9_-]+)(?:["']?)\s*[=:]\s*)("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'`,}\[\]]+)/gi;
+const SECRET_KEY_RE = /(?:^|_)(?:api_key|apikey|token|secret|password|passwd|credentials?|authorization)(?:_|$)/;
+// Match prefixes independently so flat query strings and PATH values do not consume recursion depth.
+const SECRET_ASSIGNMENT_RE = /(?<![A-Za-z0-9_-])((?:["']?)([A-Za-z0-9_-]+)(?:["']?)\s*[=:]\s*)/g;
+const ASSIGNMENT_VALUE_RE = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'`,}\[\]&;]+/y;
+
+function isSecretKey(key) {
+  const normalized = key.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/[^a-zA-Z0-9]+/g, "_").toLowerCase();
+  return !/(?:^|_)token_count$/.test(normalized) && SECRET_KEY_RE.test(normalized);
+}
 const KNOWN_TOKEN_RES = [
   /\bsk-[A-Za-z0-9_-]{16,}\b/g,
   /\b[A-Za-z0-9]+_(?:sk|sc)_[A-Za-z0-9_-]{16,}\b/g,
@@ -90,7 +96,7 @@ function redactValue(value, depth = 0) {
   if (Array.isArray(value)) return value.map(item => redactValue(item, depth + 1));
   if (value && typeof value === "object") {
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [
-      key, SECRET_KEY_RE.test(key) ? "[REDACTED]" : redactValue(item, depth + 1)
+      key, isSecretKey(key) ? "[REDACTED]" : redactValue(item, depth + 1)
     ]));
   }
   return value;
@@ -117,11 +123,23 @@ export function redactSecrets(text, depth = 0) {
     }
   });
   for (const re of KNOWN_TOKEN_RES) out = out.replace(re, "[REDACTED]");
-  return out.replace(SECRET_ASSIGNMENT_RE, (match, prefix, key, value) => {
-    if (!SECRET_KEY_RE.test(key)) return `${prefix}${redactSecrets(value, depth + 1)}`;
+  const parts = [];
+  let cursor = 0;
+  SECRET_ASSIGNMENT_RE.lastIndex = 0;
+  let match;
+  while ((match = SECRET_ASSIGNMENT_RE.exec(out)) !== null) {
+    if (!isSecretKey(match[2])) continue;
+    ASSIGNMENT_VALUE_RE.lastIndex = SECRET_ASSIGNMENT_RE.lastIndex;
+    const valueMatch = ASSIGNMENT_VALUE_RE.exec(out);
+    if (!valueMatch) continue;
+    const value = valueMatch[0];
     const quote = value[0] === '"' || value[0] === "'" ? value[0] : "";
-    return `${prefix}${quote}[REDACTED]${quote}`;
-  });
+    parts.push(out.slice(cursor, match.index), `${match[1]}${quote}[REDACTED]${quote}`);
+    cursor = ASSIGNMENT_VALUE_RE.lastIndex;
+    SECRET_ASSIGNMENT_RE.lastIndex = cursor;
+  }
+  parts.push(out.slice(cursor));
+  return parts.join("");
 }
 
 /** Byte-aware truncation with an explicit marker. */
@@ -185,8 +203,8 @@ function usageDetailsFromClaude(usage) {
 function skillsFromToolCall(name, input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return [];
   if (name === "Skill") {
-    const skill = input.skill;
-    return typeof skill === "string" && /^[a-zA-Z0-9_-]+(?::[a-zA-Z0-9_-]+)*$/.test(skill)
+    const skill = typeof input.skill === "string" ? input.skill.replace(/^\//, "") : "";
+    return /^[a-zA-Z0-9_][a-zA-Z0-9_.-]*(?:[/:][a-zA-Z0-9_][a-zA-Z0-9_.-]*)*$/.test(skill)
       ? [skill] : [];
   }
   if (name !== "Read") return [];

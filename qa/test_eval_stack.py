@@ -23,6 +23,26 @@ PI_TRACER = SCRIPTS / "ironside-tracer.ts"
 
 
 class EvalStackScriptsTests(unittest.TestCase):
+    def test_nonsecret_fields_and_flat_chains_survive_redaction(self) -> None:
+        ordinary = {"max_tokens": 123, "input_tokens": 22, "output_tokens": 9,
+                    "tokenizer": "standard", "secretary": "assistant", "token_count": 31}
+        query = "GET /search?" + "&".join(f"p{i}=v{i}" for i in range(80))
+        path = "PATH=" + ":".join(f"/opt/tool{i}/bin" for i in range(80))
+        for module, typescript in ((CLAUDE_IMPORTER, False), (CODEX_IMPORTER, False), (PI_TRACER, True)):
+            with self.subTest(module=module.name):
+                self.assertEqual(json.loads(self.call_export(module, "sanitizeField", ordinary, typescript=typescript)), ordinary)
+                for value in (query, path, "usage: input_tokens=22 output_tokens=9"):
+                    self.assertEqual(self.call_export(module, "sanitizeField", value, typescript=typescript), value)
+                secret_query = query + "&api_key=opaque-credential&keep=visible"
+                cleaned = self.call_export(module, "sanitizeField", secret_query, typescript=typescript)
+                self.assertEqual(cleaned, query + "&api_key=[REDACTED]&keep=visible")
+                for value in ("URL=https://example.invalid/?api_key=opaque-credential&keep=visible",
+                              "wrapper=client_secret=opaque-credential;keep=visible",
+                              {"accessToken": "opaque-credential", "client_secret": "opaque-credential", "X-API-Key": "opaque-credential"}):
+                    cleaned = self.call_export(module, "sanitizeField", value, typescript=typescript)
+                    self.assertNotIn("opaque-credential", cleaned)
+                    self.assertIn("[REDACTED]", cleaned)
+
     def call_export(
         self,
         module: Path,
@@ -93,6 +113,8 @@ process.stdout.write(JSON.stringify(result ?? null));
     def test_claude_native_skill_calls_and_reads_are_tagged_without_search_false_positives(self) -> None:
         calls = [
             ("Skill", {"skill": "natural-writing"}),
+            ("Skill", {"skill": "apps/web:deploy"}),
+            ("Skill", {"skill": "/plugin:review"}),
             ("Skill", {"skill": "discipline-gates:test-discipline"}),
             ("Skill", {"skill": "natural-writing"}),
             ("Read", {"file_path": "/plugins/skills/groundwork/SKILL.md"}),
@@ -111,7 +133,8 @@ process.stdout.write(JSON.stringify(result ?? null));
         })]
         result = self.call_export(CLAUDE_IMPORTER, "mapClaudeSession", lines)
         self.assertEqual(result["events"][0]["body"]["tags"], [
-            "skill:natural-writing", "skill:discipline-gates:test-discipline", "skill:groundwork"
+            "skill:natural-writing", "skill:apps/web:deploy", "skill:plugin:review",
+            "skill:discipline-gates:test-discipline", "skill:groundwork"
         ])
 
     def test_codex_notification_selects_its_session_instead_of_the_newest(self) -> None:

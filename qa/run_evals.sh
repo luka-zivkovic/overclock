@@ -265,7 +265,7 @@ PY
     # Each matrix cell receives a fresh copy of the trusted fixture template.
     # Mutations from one install mode can never influence another mode.
     MODE_FIXTURE_ROOT=$(mktemp -d "$FIXTURE_ROOT/$DISTRIBUTION_LABEL-$INSTALL_MODE.XXXXXX")
-    cp -R "$DISTRIBUTION_FIXTURE_ROOT/." "$MODE_FIXTURE_ROOT/"
+    cp -Rp "$DISTRIBUTION_FIXTURE_ROOT/." "$MODE_FIXTURE_ROOT/"
     WORK="$MODE_FIXTURE_ROOT/$SKILL/eval-$i"
     LABEL="$DISTRIBUTION_LABEL-$INSTALL_MODE"
     [ "$BASELINE" -eq 1 ] && LABEL="$LABEL-baseline"
@@ -379,6 +379,7 @@ PY
 
     # Optional setup turns create genuine prior context. setup_with_plugins additionally
     # exercises explicit activation before an ordinary continuation prompt.
+    SETUP_STATUS=0
     SETUP_N=$(python3 -c "import json;print(len(json.load(open('$EVALS'))['evals'][$i].get('setup_turns', [])))")
     : > "$OUT/context-transcript.md"
     FINAL_SESSION_ARGS=(--no-session-persistence)
@@ -413,8 +414,9 @@ PY
             ${EVAL_DEBUG_ARGS[@]+"${EVAL_DEBUG_ARGS[@]}"} \
             "${SETUP_SESSION_ARGS[@]}" "${SETUP_MODE_ARGS[@]}" \
             "${EVAL_CLAUDE_ARGS[@]}" --allowedTools "$ALLOWED_TOOLS" \
-          ) > "$OUT/setup-$turn.jsonl" 2>> "$OUT/stderr.log"
-        PYTHONPATH="$QA" python3 - "$SETUP_PROMPT" "$OUT/setup-$turn.jsonl" "$OUT/setup-$turn.json" >> "$OUT/context-transcript.md" <<'PY'
+          ) > "$OUT/setup-$turn.jsonl" 2>> "$OUT/stderr.log" || SETUP_STATUS=$?
+        [ "$SETUP_STATUS" -eq 0 ] || break
+        PYTHONPATH="$QA" python3 - "$SETUP_PROMPT" "$OUT/setup-$turn.jsonl" "$OUT/setup-$turn.json" >> "$OUT/context-transcript.md" 2>> "$OUT/stderr.log" <<'PY' || SETUP_STATUS=$?
 import json, pathlib, sys
 from eval_invocation import setup_turn_record
 prompt, stream, result_path = sys.argv[1], pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3])
@@ -422,10 +424,11 @@ result, context = setup_turn_record(stream, prompt)
 result_path.write_text(json.dumps(result))
 print(context)
 PY
+        [ "$SETUP_STATUS" -eq 0 ] || break
         if [ "$SETUP_WITH_PLUGINS" -eq 1 ] && [ "$BASELINE" -eq 0 ]; then
           PYTHONPATH="$QA" python3 - "$OUT/setup-$turn.jsonl" \
             "$OUT/setup-effective-$turn.txt" "$PLUGIN" "$SKILL" \
-            > "$OUT/setup-invocation-$turn.json" <<'PY'
+            > "$OUT/setup-invocation-$turn.json" 2>> "$OUT/stderr.log" <<'PY' || SETUP_STATUS=$?
 import json, pathlib, sys
 from eval_invocation import invocation_evidence
 evidence = invocation_evidence(
@@ -436,8 +439,20 @@ print(json.dumps(evidence, indent=1))
 raise SystemExit(0 if evidence["verified"] else 1)
 PY
         fi
+        [ "$SETUP_STATUS" -eq 0 ] || break
       done
       FINAL_SESSION_ARGS=(--resume "$SESSION_ID")
+    fi
+    if [ "$SETUP_STATUS" -ne 0 ]; then
+      INFRA_FAILED=1
+      FAILED=$((FAILED+1))
+      PYTHONPATH="$QA" python3 - "$OUT" "$VARIANT" "$turn" "$SETUP_STATUS" <<'PY'
+import pathlib, sys
+from eval_invocation import record_setup_failure
+record_setup_failure(pathlib.Path(sys.argv[1]), sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
+PY
+      echo "=== $SKILL eval-$CASE_ID: SETUP-ERROR ($VARIANT; $INSTALL_MODE)"
+      continue
     fi
 
     echo "=== $SKILL eval-$CASE_ID: run ($VARIANT)"
@@ -654,6 +669,8 @@ print(
     f"{sum(r['input_tokens'] for r in rows)} input + "
     f"{sum(r['output_tokens'] for r in rows)} output tokens"
 )
+if any(r.get("infrastructure_error") for r in rows):
+    print("METRICS NOTE: setup failures may have unreported usage; totals include available metrics only.")
 PY
 [ "$INFRA_FAILED" -eq 0 ] || exit 1
 [ "$BASELINE" -eq 1 ] || [ "$FAILED" -eq 0 ]

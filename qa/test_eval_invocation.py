@@ -7,10 +7,25 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from eval_invocation import command_name, explicit_prompt, invocation_evidence, setup_turn_record
+from eval_invocation import command_name, explicit_prompt, invocation_evidence, setup_turn_record, record_setup_failure
 
 
 class EvalInvocationTests(unittest.TestCase):
+    def test_failed_setup_accounting_tolerates_malformed_metrics_without_a_grade(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp)
+            (out / "setup-0.jsonl").write_text("not-json\n" + json.dumps({
+                "type": "result", "subtype": "error", "usage": "invalid",
+                "total_cost_usd": "invalid", "duration_ms": -1, "num_turns": None,
+            }))
+            record_setup_failure(out, "baseline", 0, 2)
+            metrics = json.loads((out / "metrics.json").read_text())
+            self.assertEqual(metrics["infrastructure_error"], "setup_failed")
+            self.assertEqual(metrics["total_cost_usd"], 0)
+            self.assertEqual(metrics["input_tokens"], 0)
+            self.assertFalse(json.loads((out / "invocation.json").read_text())["verified"])
+            self.assertFalse((out / "grading.json").exists())
+
     def test_setup_record_retains_tool_actions_and_results_for_judging(self) -> None:
         call = {"type": "tool_use", "id": "edit-1", "name": "Edit", "input": {"file_path": "feature.md"}}
         output = {"type": "tool_result", "tool_use_id": "edit-1", "content": "saved"}

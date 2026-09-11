@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
 
@@ -70,6 +71,34 @@ def setup_turn_record(stdout_jsonl: Path, prompt: str) -> tuple[dict, str]:
         f"ASSISTANT:\n{result.get('result', '')}\n"
     )
     return result, context
+
+
+def record_setup_failure(out: Path, variant: str, turn: int, exit_status: int) -> None:
+    """Keep a failed cell visible without fabricating a model grade or losing later cells."""
+    failure = {"mode": "setup", "verified": False, "setup_turn": turn,
+               "exit_status": exit_status, "error": "setup_failed"}
+    (out / "invocation.json").write_text(json.dumps(failure, indent=1) + "\n")
+    results = []
+    for stream in sorted(out.glob("setup-*.jsonl")):
+        result = None
+        for line in stream.read_text(encoding="utf-8").splitlines():
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue  # Accounting only; malformed evidence still fails setup validation.
+            if isinstance(event, dict) and event.get("type") == "result":
+                result = event
+        if result is not None:
+            results.append(result)
+    metrics = {"variant": variant, "infrastructure_error": "setup_failed"}
+    def number(value: object) -> int | float:
+        return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0 else 0
+    for field in ("total_cost_usd", "duration_ms", "num_turns"):
+        metrics[field] = sum(number(result.get(field)) for result in results)
+    for field in ("input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"):
+        metrics[field] = sum(number(result["usage"].get(field)) for result in results
+                             if isinstance(result.get("usage"), dict))
+    (out / "metrics.json").write_text(json.dumps(metrics, indent=1) + "\n")
 
 
 def invocation_evidence(

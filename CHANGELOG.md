@@ -16,6 +16,8 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Add deterministic regression tests and offline behavioral cases for privacy and notification
   selection, including a large-output timeout guard. Each capture script remains independently
   copyable.
+- Preserve ordinary token counters and long query/PATH values, recognize directory-scoped native
+  skill names, and retain fixture timestamps when copying eval cases between installation modes.
 
 
 ### 0.2.1 — 2026-09-07
@@ -674,6 +676,8 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   resume or asking for the same confirmation again.
 - Repair the decision-provenance eval with a real resume turn followed by user confirmation;
   preserve setup tool evidence and keep migration execution outside the authorized scope.
+- Record setup failures as infrastructure errors while continuing later eval cases; preserve
+  available usage accounting without fabricating a behavioral grade.
 
 
 ### 1.1.1 — 2026-07-23

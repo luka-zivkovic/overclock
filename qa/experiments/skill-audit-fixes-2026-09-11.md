@@ -52,13 +52,33 @@ tool-evidence retention, and generated fixture parity.
 
 ## Validation and limits
 
-Local validation on the audit-only branch passes: **378 unit tests**, all 18 skill validators,
+Local validation after review corrections passes: **381 unit tests**, all 18 skill validators,
 18 PASS/0 WARN/0 FAIL in the skill audit, all eight shared-file groups, documentation claims
 (125 cases/18 distributions), the 12-package catalog, version bumps against `origin/master`,
 shell syntax, and diff whitespace checks. Native Claude validation passes for the marketplace
-and all three affected plugins. Independent Claude Fable 5.1 review is pending.
+and all three affected plugins.
 
 Live paired behavioral judging and routing runs remain pending because the isolated eval harness lacks
 `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN`. No measured model-quality improvement is claimed
 from deterministic tests or a source review. The catalog changes versions only; existing Setup
 cases still cover report-only behavior.
+
+## Independent review
+
+Claude Fable 5.1 (`claude-fable-5-1`, high effort) reviewed PR #30 through the installed agent-bridge
+skill. The initial review covered base `d04319a` through head `314b1d2`; it reported no blocking
+defects, one medium harness finding, and four lower-priority fidelity/compatibility findings.
+The parent reproduced them and made these corrections:
+
+| Finding | Correction and evidence |
+| --- | --- |
+| Setup failure aborts later cells | Guard setup execution, stream validation, and activation verification. Record an infrastructure failure plus available metrics, omit a fabricated grade, and continue the matrix. A test executes the production setup block with CLI-error, malformed-stream, unverified-activation, and successful protocol stubs; only the successful cell proceeds and the batch still exits nonzero. |
+| Flat chains exhaust redaction depth | Scan assignment prefixes iteratively; query strings and PATH values no longer recurse per pair. Controls preserve 80 ordinary entries while still redacting a secret at the end and inside an unquoted URL/wrapper. |
+| Ordinary token fields are redacted | Classify normalized key segments, preserving token counters, tokenizer, and secretary fields while covering camel-case and separated credential keys. All three capture scripts use the same controls. |
+| Scoped native skills are omitted | Accept directory scopes and dots within names, and normalize one leading slash; retain malformed-name and incidental-path negative controls. |
+| Fixture copy loses timestamps | Use `cp -Rp`; a local copy probe verifies both distinct source mtimes survive. The existing notification case therefore retains its concurrent-session ordering premise. |
+
+Malformed setup streams continue to fail validation rather than silently dropping evidence;
+only best-effort usage accounting skips malformed lines. The reviewer did not run live behavioral
+judging. The two existing importer cases cover the same workflow after these helper corrections;
+their script-level edge cases are checked deterministically. A focused follow-up review is pending.
