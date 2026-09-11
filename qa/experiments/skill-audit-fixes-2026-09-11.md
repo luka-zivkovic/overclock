@@ -89,4 +89,7 @@ low-severity privacy regressions: plural credential containers and unquoted secr
 cover `secrets`, `passwords`, `api_keys`, `SECRETS_JSON`, mixed-case password keys, and the complete
 unquoted value; conservative text redaction may also consume subsequent URL parameters.
 The bridge's resumed run retained the original session ID, confirming this CLI's basic resume
-behavior without substituting for an isolated behavioral eval. Final confirmation is pending.
+behavior without substituting for an isolated behavioral eval. The final Fable 5.1 pass reviewed
+`fafef29`, confirmed both privacy corrections, and found no new actionable defect in that diff.
+All seven review findings are addressed. These three review passes remain source/synthetic
+evidence; the isolated live behavioral and routing gates are still pending.
