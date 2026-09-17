@@ -1,0 +1,16 @@
+{
+  "name": "judgment-experiments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Recorded experiments on packing, calibration, stability, and adversarial input.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@overclock/judgment-core": "workspace:*",
+    "@overclock/semantic-sql": "workspace:*",
+    "@overclock/semantic-types": "workspace:*"
+  }
+}

@@ -58,7 +58,7 @@ export interface SemanticEngineOptions {
   judge: Judge;
   /** Default: MemoryRowCache(). Pass NoRowCache to disable. */
   rowCache?: RowCache;
-  /** Rows per judge call. Default 100. */
+  /** Rows per judge call. Default 16: see experiments/RESULTS.md (packing); drift grows slowly with size, token cost per row flattens past 16. */
   packSize?: number;
   /** Upper bound on canonical state bytes per pack. Default 64 KiB. */
   maxPackBytes?: number;
@@ -162,7 +162,7 @@ export class SemanticEngine {
   constructor(options: SemanticEngineOptions) {
     this.judge = options.judge;
     this.rowCache = options.rowCache ?? new MemoryRowCache();
-    this.packSize = options.packSize ?? 100;
+    this.packSize = options.packSize ?? 16;
     this.maxPackBytes = options.maxPackBytes ?? 64 * 1024;
     this.budget = options.budget ?? 5000;
     this.pricing = options.pricing;

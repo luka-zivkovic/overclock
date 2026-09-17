@@ -1,0 +1,1354 @@
+{
+ "recordedAt": "2026-09-17T18:15:53.041Z",
+ "data": {
+  "sets": [
+   {
+    "predicate": "delay",
+    "instructions": "mentions a shipping delay: a shipment, delivery, or order that is late, delayed, or has not arrived when expected",
+    "calibration": [
+     {
+      "id": "m010",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "m011",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m012",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m013",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m014",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m015",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m016",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m017",
+      "p": 0.35,
+      "label": true
+     },
+     {
+      "id": "m018",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m019",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m020",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m021",
+      "p": 0.96,
+      "label": true
+     },
+     {
+      "id": "m022",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m023",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m024",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m025",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m026",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m027",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "m028",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m029",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m040",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m041",
+      "p": 0.15,
+      "label": false
+     },
+     {
+      "id": "m042",
+      "p": 0.1,
+      "label": false
+     },
+     {
+      "id": "m043",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m044",
+      "p": 0.58,
+      "label": false
+     },
+     {
+      "id": "m045",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m046",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m047",
+      "p": 0.06,
+      "label": false
+     },
+     {
+      "id": "m048",
+      "p": 0.81,
+      "label": true
+     },
+     {
+      "id": "m049",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m050",
+      "p": 0.17,
+      "label": false
+     },
+     {
+      "id": "m051",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m052",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m053",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m054",
+      "p": 0.08,
+      "label": false
+     },
+     {
+      "id": "m055",
+      "p": 0.95,
+      "label": true
+     },
+     {
+      "id": "m056",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m057",
+      "p": 0.78,
+      "label": true
+     },
+     {
+      "id": "m058",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m059",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m070",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m071",
+      "p": 0.45,
+      "label": false
+     },
+     {
+      "id": "m072",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m073",
+      "p": 0.96,
+      "label": true
+     },
+     {
+      "id": "m074",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m075",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m076",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m077",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m078",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m079",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m080",
+      "p": 0.91,
+      "label": true
+     }
+    ],
+    "heldOut": [
+     {
+      "id": "m001",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m002",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m003",
+      "p": 0.45,
+      "label": false
+     },
+     {
+      "id": "m004",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m005",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m006",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m007",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m008",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m009",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m030",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "m031",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m032",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m033",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m034",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m035",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m036",
+      "p": 0.06,
+      "label": false
+     },
+     {
+      "id": "m037",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m038",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m039",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m060",
+      "p": 0.5,
+      "label": false
+     },
+     {
+      "id": "m061",
+      "p": 0.06,
+      "label": false
+     },
+     {
+      "id": "m062",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m063",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m064",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m065",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m066",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m067",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m068",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m069",
+      "p": 0.99,
+      "label": true
+     }
+    ]
+   },
+   {
+    "predicate": "billing",
+    "instructions": "is about billing or payment: charges, invoices, refunds, prices, or subscription cost",
+    "calibration": [
+     {
+      "id": "m010",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m011",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m012",
+      "p": 0.89,
+      "label": true
+     },
+     {
+      "id": "m013",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m014",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m015",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m016",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m017",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m018",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m019",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m020",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m021",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m022",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "m023",
+      "p": 0.44,
+      "label": false
+     },
+     {
+      "id": "m024",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m025",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m026",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m027",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m028",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m029",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m040",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m041",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m042",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m043",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m044",
+      "p": 0.08,
+      "label": false
+     },
+     {
+      "id": "m045",
+      "p": 0.11,
+      "label": false
+     },
+     {
+      "id": "m046",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m047",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "m048",
+      "p": 0.11,
+      "label": false
+     },
+     {
+      "id": "m049",
+      "p": 0.96,
+      "label": true
+     },
+     {
+      "id": "m050",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m051",
+      "p": 0.22,
+      "label": false
+     },
+     {
+      "id": "m052",
+      "p": 0.87,
+      "label": true
+     },
+     {
+      "id": "m053",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "m054",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m055",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m056",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m057",
+      "p": 0.08,
+      "label": false
+     },
+     {
+      "id": "m058",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m059",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m070",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m071",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m072",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m073",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m074",
+      "p": 0.52,
+      "label": false
+     },
+     {
+      "id": "m075",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m076",
+      "p": 0.79,
+      "label": true
+     },
+     {
+      "id": "m077",
+      "p": 0.64,
+      "label": false
+     },
+     {
+      "id": "m078",
+      "p": 0.94,
+      "label": true
+     },
+     {
+      "id": "m079",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "m080",
+      "p": 0.02,
+      "label": false
+     }
+    ],
+    "heldOut": [
+     {
+      "id": "m001",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m002",
+      "p": 0.92,
+      "label": true
+     },
+     {
+      "id": "m003",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m004",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m005",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m006",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m007",
+      "p": 0.06,
+      "label": false
+     },
+     {
+      "id": "m008",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m009",
+      "p": 0.91,
+      "label": true
+     },
+     {
+      "id": "m030",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m031",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "m032",
+      "p": 0.96,
+      "label": true
+     },
+     {
+      "id": "m033",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m034",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m035",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m036",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m037",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m038",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m039",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m060",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m061",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m062",
+      "p": 0.1,
+      "label": false
+     },
+     {
+      "id": "m063",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m064",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m065",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m066",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m067",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m068",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m069",
+      "p": 0.05,
+      "label": false
+     }
+    ]
+   },
+   {
+    "predicate": "angry",
+    "instructions": "expresses anger, hostility, or clear frustration toward the company",
+    "calibration": [
+     {
+      "id": "m010",
+      "p": 0.68,
+      "label": false
+     },
+     {
+      "id": "m011",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m012",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m013",
+      "p": 0.84,
+      "label": false
+     },
+     {
+      "id": "m014",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m015",
+      "p": 0.11,
+      "label": false
+     },
+     {
+      "id": "m016",
+      "p": 0.96,
+      "label": true
+     },
+     {
+      "id": "m017",
+      "p": 0.4,
+      "label": false
+     },
+     {
+      "id": "m018",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m019",
+      "p": 0.31,
+      "label": false
+     },
+     {
+      "id": "m020",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m021",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "m022",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m023",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m024",
+      "p": 0.09,
+      "label": false
+     },
+     {
+      "id": "m025",
+      "p": 0.44,
+      "label": false
+     },
+     {
+      "id": "m026",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m027",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m028",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m029",
+      "p": 0.29,
+      "label": false
+     },
+     {
+      "id": "m040",
+      "p": 0.52,
+      "label": false
+     },
+     {
+      "id": "m041",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m042",
+      "p": 0.95,
+      "label": true
+     },
+     {
+      "id": "m043",
+      "p": 0.72,
+      "label": true
+     },
+     {
+      "id": "m044",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m045",
+      "p": 0.18,
+      "label": false
+     },
+     {
+      "id": "m046",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m047",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m048",
+      "p": 0.85,
+      "label": true
+     },
+     {
+      "id": "m049",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m050",
+      "p": 0.15,
+      "label": false
+     },
+     {
+      "id": "m051",
+      "p": 0.94,
+      "label": true
+     },
+     {
+      "id": "m052",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m053",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m054",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m055",
+      "p": 0.04,
+      "label": false
+     },
+     {
+      "id": "m056",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m057",
+      "p": 0.95,
+      "label": true
+     },
+     {
+      "id": "m058",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m059",
+      "p": 0.57,
+      "label": false
+     },
+     {
+      "id": "m070",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m071",
+      "p": 0.28,
+      "label": false
+     },
+     {
+      "id": "m072",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "m073",
+      "p": 0.03,
+      "label": false
+     },
+     {
+      "id": "m074",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m075",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m076",
+      "p": 0.75,
+      "label": true
+     },
+     {
+      "id": "m077",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m078",
+      "p": 0.1,
+      "label": false
+     },
+     {
+      "id": "m079",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "m080",
+      "p": 0.55,
+      "label": false
+     }
+    ],
+    "heldOut": [
+     {
+      "id": "m001",
+      "p": 0.65,
+      "label": false
+     },
+     {
+      "id": "m002",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m003",
+      "p": 0.88,
+      "label": true
+     },
+     {
+      "id": "m004",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m005",
+      "p": 0.87,
+      "label": true
+     },
+     {
+      "id": "m006",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m007",
+      "p": 0.24,
+      "label": false
+     },
+     {
+      "id": "m008",
+      "p": 0.85,
+      "label": true
+     },
+     {
+      "id": "m009",
+      "p": 0.02,
+      "label": false
+     },
+     {
+      "id": "m030",
+      "p": 0.38,
+      "label": false
+     },
+     {
+      "id": "m031",
+      "p": 0.09,
+      "label": false
+     },
+     {
+      "id": "m032",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m033",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m034",
+      "p": 0,
+      "label": false
+     },
+     {
+      "id": "m035",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "m036",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m037",
+      "p": 0.89,
+      "label": true
+     },
+     {
+      "id": "m038",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "m039",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m060",
+      "p": 0.12,
+      "label": false
+     },
+     {
+      "id": "m061",
+      "p": 0.87,
+      "label": false
+     },
+     {
+      "id": "m062",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "m063",
+      "p": 0.26,
+      "label": false
+     },
+     {
+      "id": "m064",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m065",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m066",
+      "p": 0.87,
+      "label": true
+     },
+     {
+      "id": "m067",
+      "p": 0.57,
+      "label": false
+     },
+     {
+      "id": "m068",
+      "p": 0.01,
+      "label": false
+     },
+     {
+      "id": "m069",
+      "p": 0.93,
+      "label": true
+     }
+    ]
+   },
+   {
+    "predicate": "polite (agent replies)",
+    "instructions": "is polite and professional",
+    "calibration": [
+     {
+      "id": "p001",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "p002",
+      "p": 0.99,
+      "label": true
+     },
+     {
+      "id": "p003",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "p020",
+      "p": 0.58,
+      "label": false
+     },
+     {
+      "id": "p021",
+      "p": 0.68,
+      "label": false
+     },
+     {
+      "id": "p022",
+      "p": 0.91,
+      "label": true
+     }
+    ],
+    "heldOut": [
+     {
+      "id": "p004",
+      "p": 0.95,
+      "label": true
+     },
+     {
+      "id": "p005",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "p006",
+      "p": 0.95,
+      "label": true
+     },
+     {
+      "id": "p007",
+      "p": 0.98,
+      "label": true
+     },
+     {
+      "id": "p008",
+      "p": 0.95,
+      "label": true
+     },
+     {
+      "id": "p009",
+      "p": 0.94,
+      "label": true
+     },
+     {
+      "id": "p010",
+      "p": 0.97,
+      "label": true
+     },
+     {
+      "id": "p011",
+      "p": 0.31,
+      "label": false
+     },
+     {
+      "id": "p012",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "p013",
+      "p": 0.16,
+      "label": false
+     },
+     {
+      "id": "p014",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "p015",
+      "p": 0.07,
+      "label": false
+     },
+     {
+      "id": "p016",
+      "p": 0.05,
+      "label": false
+     },
+     {
+      "id": "p017",
+      "p": 0.1,
+      "label": false
+     },
+     {
+      "id": "p018",
+      "p": 0.08,
+      "label": false
+     },
+     {
+      "id": "p019",
+      "p": 0.17,
+      "label": false
+     }
+    ]
+   }
+  ],
+  "usage": {
+   "requests": 102,
+   "inputTokens": 34344,
+   "outputTokens": 4862
+  }
+ }
+}

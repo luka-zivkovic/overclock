@@ -1,0 +1,440 @@
+{
+ "recordedAt": "2026-09-17T18:15:54.651Z",
+ "data": {
+  "repeats": 5,
+  "items": [
+   {
+    "id": "m001",
+    "text": "Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label created'. It's Friday.",
+    "predicate": "delay",
+    "ps": [
+     0.99,
+     0.99,
+     0.99,
+     0.99,
+     0.99
+    ]
+   },
+   {
+    "id": "m001",
+    "text": "Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label created'. It's Friday.",
+    "predicate": "billing",
+    "ps": [
+     0.03,
+     0.03,
+     0.03,
+     0.03,
+     0.03
+    ]
+   },
+   {
+    "id": "m001",
+    "text": "Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label created'. It's Friday.",
+    "predicate": "angry",
+    "ps": [
+     0.64,
+     0.64,
+     0.64,
+     0.67,
+     0.65
+    ]
+   },
+   {
+    "id": "m008",
+    "text": "Shipment delayed again? The ETA moved from the 3rd to the 9th with no explanation. We have a launch on the 8th.",
+    "predicate": "delay",
+    "ps": [
+     0.99,
+     0.99,
+     0.99,
+     0.99,
+     0.99
+    ]
+   },
+   {
+    "id": "m008",
+    "text": "Shipment delayed again? The ETA moved from the 3rd to the 9th with no explanation. We have a launch on the 8th.",
+    "predicate": "billing",
+    "ps": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ]
+   },
+   {
+    "id": "m008",
+    "text": "Shipment delayed again? The ETA moved from the 3rd to the 9th with no explanation. We have a launch on the 8th.",
+    "predicate": "angry",
+    "ps": [
+     0.86,
+     0.85,
+     0.85,
+     0.86,
+     0.85
+    ]
+   },
+   {
+    "id": "m015",
+    "text": "I was charged twice for the March invoice. Please refund the duplicate.",
+    "predicate": "delay",
+    "ps": [
+     0,
+     0,
+     0,
+     0,
+     0.01
+    ]
+   },
+   {
+    "id": "m015",
+    "text": "I was charged twice for the March invoice. Please refund the duplicate.",
+    "predicate": "billing",
+    "ps": [
+     0.99,
+     0.99,
+     0.99,
+     0.99,
+     0.99
+    ]
+   },
+   {
+    "id": "m015",
+    "text": "I was charged twice for the March invoice. Please refund the duplicate.",
+    "predicate": "angry",
+    "ps": [
+     0.12,
+     0.11,
+     0.13,
+     0.12,
+     0.12
+    ]
+   },
+   {
+    "id": "m022",
+    "text": "Could you resend the receipt for order 8812? My accountant needs it for expenses.",
+    "predicate": "delay",
+    "ps": [
+     0.01,
+     0.01,
+     0,
+     0.01,
+     0.01
+    ]
+   },
+   {
+    "id": "m022",
+    "text": "Could you resend the receipt for order 8812? My accountant needs it for expenses.",
+    "predicate": "billing",
+    "ps": [
+     0.97,
+     0.97,
+     0.97,
+     0.97,
+     0.97
+    ]
+   },
+   {
+    "id": "m022",
+    "text": "Could you resend the receipt for order 8812? My accountant needs it for expenses.",
+    "predicate": "angry",
+    "ps": [
+     0.01,
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   {
+    "id": "m029",
+    "text": "The app logs me out every ten minutes. Started after yesterday's update.",
+    "predicate": "delay",
+    "ps": [
+     0,
+     0,
+     0,
+     0,
+     0.01
+    ]
+   },
+   {
+    "id": "m029",
+    "text": "The app logs me out every ten minutes. Started after yesterday's update.",
+    "predicate": "billing",
+    "ps": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ]
+   },
+   {
+    "id": "m029",
+    "text": "The app logs me out every ten minutes. Started after yesterday's update.",
+    "predicate": "angry",
+    "ps": [
+     0.31,
+     0.29,
+     0.33,
+     0.34,
+     0.36
+    ]
+   },
+   {
+    "id": "m036",
+    "text": "Can you confirm the delivery date for PO 2231? We need to schedule the installers.",
+    "predicate": "delay",
+    "ps": [
+     0.06,
+     0.07,
+     0.06,
+     0.06,
+     0.06
+    ]
+   },
+   {
+    "id": "m036",
+    "text": "Can you confirm the delivery date for PO 2231? We need to schedule the installers.",
+    "predicate": "billing",
+    "ps": [
+     0.04,
+     0.04,
+     0.04,
+     0.03,
+     0.04
+    ]
+   },
+   {
+    "id": "m036",
+    "text": "Can you confirm the delivery date for PO 2231? We need to schedule the installers.",
+    "predicate": "angry",
+    "ps": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ]
+   },
+   {
+    "id": "m043",
+    "text": "The subscription renewed even though I cancelled in October. I want that money back.",
+    "predicate": "delay",
+    "ps": [
+     0.01,
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   {
+    "id": "m043",
+    "text": "The subscription renewed even though I cancelled in October. I want that money back.",
+    "predicate": "billing",
+    "ps": [
+     0.99,
+     0.99,
+     0.99,
+     0.99,
+     0.99
+    ]
+   },
+   {
+    "id": "m043",
+    "text": "The subscription renewed even though I cancelled in October. I want that money back.",
+    "predicate": "angry",
+    "ps": [
+     0.75,
+     0.74,
+     0.73,
+     0.74,
+     0.76
+    ]
+   },
+   {
+    "id": "m050",
+    "text": "The shipping notification arrived but the tracking number doesn't work on the carrier's site.",
+    "predicate": "delay",
+    "ps": [
+     0.18,
+     0.17,
+     0.18,
+     0.17,
+     0.15
+    ]
+   },
+   {
+    "id": "m050",
+    "text": "The shipping notification arrived but the tracking number doesn't work on the carrier's site.",
+    "predicate": "billing",
+    "ps": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ]
+   },
+   {
+    "id": "m050",
+    "text": "The shipping notification arrived but the tracking number doesn't work on the carrier's site.",
+    "predicate": "angry",
+    "ps": [
+     0.14,
+     0.17,
+     0.17,
+     0.15,
+     0.16
+    ]
+   },
+   {
+    "id": "m057",
+    "text": "The driver marked it delivered at 2:14pm. I was home. Nothing came. This is theft as far as I'm concerned.",
+    "predicate": "delay",
+    "ps": [
+     0.78,
+     0.76,
+     0.77,
+     0.8,
+     0.74
+    ]
+   },
+   {
+    "id": "m057",
+    "text": "The driver marked it delivered at 2:14pm. I was home. Nothing came. This is theft as far as I'm concerned.",
+    "predicate": "billing",
+    "ps": [
+     0.07,
+     0.07,
+     0.07,
+     0.07,
+     0.07
+    ]
+   },
+   {
+    "id": "m057",
+    "text": "The driver marked it delivered at 2:14pm. I was home. Nothing came. This is theft as far as I'm concerned.",
+    "predicate": "angry",
+    "ps": [
+     0.96,
+     0.96,
+     0.96,
+     0.96,
+     0.96
+    ]
+   },
+   {
+    "id": "m064",
+    "text": "Please add a purchase order number to future invoices: PO-77812.",
+    "predicate": "delay",
+    "ps": [
+     0.01,
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   {
+    "id": "m064",
+    "text": "Please add a purchase order number to future invoices: PO-77812.",
+    "predicate": "billing",
+    "ps": [
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98
+    ]
+   },
+   {
+    "id": "m064",
+    "text": "Please add a purchase order number to future invoices: PO-77812.",
+    "predicate": "angry",
+    "ps": [
+     0.01,
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   {
+    "id": "m071",
+    "text": "The order shows as shipped but I never got a tracking number.",
+    "predicate": "delay",
+    "ps": [
+     0.43,
+     0.45,
+     0.45,
+     0.46,
+     0.42
+    ]
+   },
+   {
+    "id": "m071",
+    "text": "The order shows as shipped but I never got a tracking number.",
+    "predicate": "billing",
+    "ps": [
+     0.04,
+     0.04,
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   {
+    "id": "m071",
+    "text": "The order shows as shipped but I never got a tracking number.",
+    "predicate": "angry",
+    "ps": [
+     0.24,
+     0.26,
+     0.25,
+     0.26,
+     0.24
+    ]
+   },
+   {
+    "id": "m078",
+    "text": "I'm not angry, just confused: why do I have two active subscriptions?",
+    "predicate": "delay",
+    "ps": [
+     0.01,
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   {
+    "id": "m078",
+    "text": "I'm not angry, just confused: why do I have two active subscriptions?",
+    "predicate": "billing",
+    "ps": [
+     0.94,
+     0.95,
+     0.95,
+     0.95,
+     0.94
+    ]
+   },
+   {
+    "id": "m078",
+    "text": "I'm not angry, just confused: why do I have two active subscriptions?",
+    "predicate": "angry",
+    "ps": [
+     0.1,
+     0.09,
+     0.1,
+     0.1,
+     0.1
+    ]
+   }
+  ]
+ }
+}

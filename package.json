@@ -16,7 +16,9 @@
     "test:live": "LIVE=1 vitest run",
     "test:record": "LIVE=1 JUDGMENT_FIXTURES=record vitest run",
     "showcase": "tsx examples/showcase.ts",
-    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo examples/*.tsbuildinfo"
+    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo examples/*.tsbuildinfo",
+    "experiments": "tsx experiments/run.ts",
+    "experiments:live": "JUDGMENT_FIXTURES=live tsx experiments/run.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",

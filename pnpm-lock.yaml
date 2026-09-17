@@ -46,6 +46,18 @@ importers:
         specifier: ^4.10.1
         version: 4.10.1
 
+  experiments:
+    dependencies:
+      '@overclock/judgment-core':
+        specifier: workspace:*
+        version: link:../packages/judgment-core
+      '@overclock/semantic-sql':
+        specifier: workspace:*
+        version: link:../packages/semantic-sql
+      '@overclock/semantic-types':
+        specifier: workspace:*
+        version: link:../packages/semantic-types
+
   packages/judgment-core:
     dependencies:
       '@typesafe-ai/sdk':

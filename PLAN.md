@@ -49,6 +49,18 @@ score → `{ score, probabilities, legend, confidence }`. Choice questions cap a
 | M | 33 deterministic tests on PGlite (in-process Postgres) with MockJudge; no network | done |
 | S | Stretch: Postgres function `jev_noul(text, text)` via pg_net / plv8; DuckDB scalar UDF | not started |
 
+## Experiments (`experiments/`, results in `experiments/RESULTS.md`)
+
+| Experiment | What it measures | Status |
+| --- | --- | --- |
+| packing | p drift and verdict flips when 4–32 rows share one request, with token cost per row | recorded; default `packSize` set to 16 from the result |
+| heldout | threshold chosen on a 60% fold, accuracy / precision / recall / F1 / Brier / ECE on the other 40% | recorded |
+| stability | the same request repeated 5× with no cache | recorded; small jitter (sd ≤ 0.03), no verdict flips |
+| adversarial | injection, authority tags, negation, sarcasm, padding, obfuscation, self-labeling, quoting; raw vs `untrusted` framing | recorded; framing added as `semantic(..., { untrusted: true })` |
+
+`pnpm experiments:live` re-runs them (about 550 requests); `pnpm experiments` re-renders from the
+stored raw results and CI checks the rendered file is current.
+
 ## Open questions tracked as configuration
 
 - State size and questions-per-request limits are undocumented: `maxStateBytes`,

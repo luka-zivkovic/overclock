@@ -32,7 +32,7 @@ rows[0].$judgments; // { [questionHash]: { p, confidence?, answer, question, cac
    `order by target_column`, and the limit is pushed down when nothing is left to judge.
 2. **Batched post-pass.** Everything else runs after the structural query, in declaration
    order: each filter only judges the rows that survived the previous one, then score
-   ordering, then the limit. Rows are packed `packSize` at a time into one judge call whose
+   ordering, then the limit. Rows are packed `packSize` (default 16) at a time into one judge call whose
    state is `{ rows: [{ id: "r0", text }, ...] }` and whose questions are the original
    question addressed to each row (`Regarding row "r0": ...`, criteria kept). Identical texts
    are judged once. Every judgment is cached per (model, text, question), so the same query
@@ -61,7 +61,7 @@ All of them return rows with `$judgments` attached. Without `engine`, a default 
 const engine = new SemanticEngine({
   judge,                       // any judgment-core Judge (TypeSafeJudge, MockJudge, judgeFromEnv())
   rowCache: new PostgresRowCache(db),   // default MemoryRowCache(); NoRowCache to disable
-  packSize: 100,               // rows per judge call
+  packSize: 16,                // rows per judge call (see experiments/RESULTS.md)
   maxPackBytes: 64 * 1024,     // canonical state per call; larger texts get a call of their own
   concurrency: 4,
   budget: 5000,                // max judgments per query
@@ -138,7 +138,10 @@ const db = new Kysely<DB>({ dialect: new PGliteDialect(new PGlite()) });
 
 - Choice questions cap at 255 labels (TypeSafe documentation).
 - Pack size and concurrency are configuration, not tuned defaults: request limits are not
-  documented, so start with `packSize: 100`, `concurrency: 4`, and adjust to observed errors.
+  documented, so start with `packSize: 16`, `concurrency: 4`, and adjust to observed errors. The
+  packing experiment (`experiments/RESULTS.md`) shows mean drift of 0.02–0.05 in p versus single-row
+  judging up to 32 rows per call, concentrated on borderline items, while input tokens per row fall
+  about 4x.
 - Pricing is not published. Cost is computed from returned usage only when you configure a
   rate; otherwise `estimatedCostUsd` is absent.
 - `whereChoice` is never pushed down (materialized columns are numeric).

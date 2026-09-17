@@ -1,0 +1,45 @@
+name: CI
+
+# Unit tests replay committed fixtures and never call the API. The live job runs on demand.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      live:
+        description: "Also run live tests against TypeSafe (needs the TYPESAFE_API_KEY secret)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Showcase and experiments replay identically
+        run: |
+          SHOWCASE_OUTPUT=/tmp/showcase.md pnpm showcase
+          diff <(grep -v '^| .* s | \|^Generated' examples/SHOWCASE.md) <(grep -v '^| .* s | \|^Generated' /tmp/showcase.md) || echo "::warning::showcase replay differs from the committed file (token columns are expected to differ)"
+          pnpm experiments
+          git diff --exit-code -- experiments/RESULTS.md
+      - name: Live tests
+        if: inputs.live == true
+        env:
+          LIVE: "1"
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+        run: pnpm test

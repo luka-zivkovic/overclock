@@ -1,9 +1,20 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/judgment-core" },
-    { "path": "packages/semantic-types" },
-    { "path": "packages/semantic-sql" },
-    { "path": "examples" }
+    {
+      "path": "packages/judgment-core"
+    },
+    {
+      "path": "packages/semantic-types"
+    },
+    {
+      "path": "packages/semantic-sql"
+    },
+    {
+      "path": "examples"
+    },
+    {
+      "path": "experiments"
+    }
   ]
 }

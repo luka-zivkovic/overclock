@@ -40,6 +40,11 @@ const result = await Reply.safeParseAsync(draft);  // { success, data, evidence[
   `data.$meta`. `review` adds a third band: verdicts within `margin` of a boundary land in
   `needsReview` instead of failing.
 
+**Untrusted content.** `untrusted: true` wraps the state as `{ untrusted_input: value }` and tells
+the judge, in every question, that instruction-like text inside it is just content. In the recorded
+adversarial experiment this framing turned two instruction-injection flips into holds, at the cost
+of a sarcasm case; it is a mitigation, not a guarantee.
+
 ## More than a validator
 
 - `meaning(value, "…")` returns the probability; `assertMeaning(value, "…")` throws below the
