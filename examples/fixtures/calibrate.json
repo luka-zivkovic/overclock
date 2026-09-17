@@ -1,0 +1,291 @@
+{
+ "version": 1,
+ "entries": {
+  "00449705e15b9d305315e9a2468ec040849792e95aebe647d185b8c48eb12aa4": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Sure thing, done. Let me know if anything else comes up.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.497Z"
+  },
+  "15000606ad2987e00f2e49a4e6946b2c269e097a020043fe1a621cb6aeaab34a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.06
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "lol no",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.900Z"
+  },
+  "1e26afc0324eb351beed8226727eb8a4472e30cbf57945c771946e306ee2019b": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.59
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Okay.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.152Z"
+  },
+  "25b7e3e2e1c0382ab8111a1d2a08193c1321cff05623a346b5a3cdb6f7836d5c": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Noted. I'll follow up by end of day with a status.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.640Z"
+  },
+  "2b1bf759fbecf95291a0996ba108447356fcc8b58352f5279ed307f9add33578": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.12
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "If you can't follow simple instructions I can't help you.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.061Z"
+  },
+  "2e63014a5936fc5008f7243260b21be790e97157387c0606325269a0d256b669": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.33
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Read the policy before emailing again.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.891Z"
+  },
+  "32e8c81a7821a50e3c1a61a6227234525678a7b92e52947ace8a5945f1e3baef": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.16
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Your issue isn't a priority.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.122Z"
+  },
+  "45de07b0cdb788237fbae288ea9c1d1dfb4cd124e1d8693d512c054140a38511": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.07
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "This is the third time you've asked. Are you even reading my replies?",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.956Z"
+  },
+  "58632728448037d06e515ce8dd068e68b005f57ad9a4bf6f554969e81b2482cf": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "I understand the frustration. Let me escalate this to our billing team today.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.367Z"
+  },
+  "703abcb53e82459b7c02b2614420531ffffc10ffabe805d7aeb92425f11eb6c0": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.96
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Good afternoon. Your replacement ships tomorrow and I'll email the tracking number.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.376Z"
+  },
+  "87f7b9815b5d71c63188ce0eb69d4f975de77aef8984d0c2a289987045a61af7": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.06
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Whatever. Ticket closed.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.108Z"
+  },
+  "ac824e1e01d8011ebd26d270b5309a345ff5c185a39100aa03c5d5b186d00cf2": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "You're welcome. Have a great weekend.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.613Z"
+  },
+  "b0d19b02728f8f7891f74c0c22270007309f61dfedb6a454ca83c296a69fed2e": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.68
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Per my last email, the invoice was already sent.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.245Z"
+  },
+  "bc7d6a489a2e8f18aeba02c5b17c85c05784a76598d3842ff06de8ad52aafe46": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Thank you for the detailed report. We've reproduced the bug and a patch is scheduled for Friday.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.544Z"
+  },
+  "be1104d16365b62b134c13b895a1e1d9305d379fe358baf58021705571e26d42": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.15
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Not our problem. Contact the carrier.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.805Z"
+  },
+  "d1e6fc0b0b3863e3d085b42cc9cfcd4161b666fdd0ffcde0b450e686b81cfe53": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Sorry for the delay here. I've applied a credit for the affected month.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.493Z"
+  },
+  "e16c257ce28b309981ea1e009ff60857b8a86b0df7553a43ef8891f883744784": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.08
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Fine. Refunded. Don't buy from us again.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.002Z"
+  },
+  "ed8855f65591c8d9291012ecaca0f9f1582528bf47deb1bed173fdf5eb3a8261": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Appreciate your patience. The fix is deployed and your account is unlocked.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.898Z"
+  },
+  "f3555483325f4623bfaf85ce319dfcfda594a47cef83927a6b955d3f0cce8a72": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.9
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "I'll look into it.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:47.294Z"
+  },
+  "f478e7303bec1615ac598731418474967aa47b6d4a60d23368186d8cafb69c2d": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.05
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "As I already told you, refunds take time. Stop asking.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.750Z"
+  },
+  "f7d9d107414c2754d3398ea046956a061fe9210e823ecb7070bf8e306e25afce": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Happy to help. Could you send the order number so I can look this up?",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.363Z"
+  },
+  "fb28b6281663033e60440241388b5cebd7e6ece0842e2963a810fd00069105a4": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Thanks for reaching out! I've refunded the duplicate charge; it should appear within 3 business days.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:45:46.372Z"
+  }
+ }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "@overclock/semantic-sql",
+  "version": "0.1.0",
+  "description": "Judgment as a query operator: semantic WHERE / ORDER BY / GROUP BY over arrays and Kysely queries, with packed batching, row-level caching, cost planning, and materialized semantic columns.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "semantic-sql": "./dist/cli.js"
+  },
+  "files": ["dist", "README.md"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@overclock/judgment-core": "workspace:*",
+    "kysely": "^0.29.6"
+  },
+  "peerDependencies": {
+    "pg": ">=8"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@types/pg": "^8.15.5",
+    "pg": "^8.16.3"
+  }
+}

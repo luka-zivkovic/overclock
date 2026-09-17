@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "outDir": "dist",
+    "noEmit": false,
+    "types": ["node"]
+  },
+  "references": [
+    { "path": "../packages/judgment-core" },
+    { "path": "../packages/semantic-types" },
+    { "path": "../packages/semantic-sql" }
+  ],
+  "include": ["*.ts", "demos/**/*.ts", "test/**/*.ts"]
+}

@@ -1,0 +1,57 @@
+{
+ "version": 1,
+ "entries": {
+  "07d5c048409ae2f1039584553f4c03a334540c1410e4d3abff6bef6fe53e623b": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.05
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Read the docs before wasting my time.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:43:41.702Z"
+  },
+  "12090776ed9081364f4df2d5cec9389d2c4496ce7d55fca13ea0388ec49ef37f": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Thanks for the report! I've filed it and will update you tomorrow.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:43:41.599Z"
+  },
+  "7ea2bf1eecab280245e3ec0d1b147acdc9a7ecb118803b1d12721750b457170e": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.99
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "cites at least one source"
+   },
+   "statePreview": "Smith et al. (2024) report a 12% lift; see https://example.org/paper for the full method.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:43:41.273Z"
+  },
+  "c17d4b95a59845691447a0ada9318d13edf9777f4e6c566cd52cc7f304049fe0": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.02
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "cites at least one source"
+   },
+   "statePreview": "Everyone knows this works. Trust me.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:43:41.394Z"
+  }
+ }
+}

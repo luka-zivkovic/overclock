@@ -1,0 +1,1765 @@
+{
+ "version": 1,
+ "entries": {
+  "003d0eeb9cc94177d17bbbc53dbc75ea21527dbb72131d3375a93af1281da9ae": {
+   "answer": {
+    "type": "choice",
+    "choice": "account",
+    "confidence": 0.99,
+    "probabilities": {
+     "billing": 0,
+     "shipping": 0,
+     "feedback": 0.01,
+     "account": 0.99,
+     "sales": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r1\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.121Z"
+  },
+  "00449705e15b9d305315e9a2468ec040849792e95aebe647d185b8c48eb12aa4": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Sure thing, done. Let me know if anything else comes up.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.918Z"
+  },
+  "012c3e55b1ed0adedd36c43c3828444095a80c5ed3ebe5e2e11d2bdd9314efa1": {
+   "answer": {
+    "type": "choice",
+    "choice": "feedback",
+    "confidence": 1,
+    "probabilities": {
+     "account": 0,
+     "feedback": 1,
+     "billing": 0,
+     "sales": 0,
+     "shipping": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r3\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "019dffa7f0c69338b865a0271233956f161eb1a61fd7cf0547faf27e18533343": {
+   "answer": {
+    "type": "score",
+    "score": 1.53,
+    "confidence": 0.3,
+    "legend": {
+     "0": "none",
+     "1": "mild",
+     "2": "high"
+    },
+    "probabilities": {
+     "0": 0,
+     "1": 0.46,
+     "2": 0.54
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding row \"r0\": urgency",
+    "criteria": [
+     "none",
+     "mild",
+     "high"
+    ]
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.851Z"
+  },
+  "0273edec2a821c21e729dbfd0fbbbd1a688a5abf798cdd1e4f81d8788ae1e1d3": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.58
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": describes actual experience with the product rather than generic praise or hype"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":3,\"text\":\"It's a shoe. It has laces. Fine I guess.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.176Z"
+  },
+  "0409ce02a80522b084453b925fcb5407eeefbcf9a30dd40ca8a35da8802e9b83": {
+   "answer": {
+    "type": "score",
+    "score": 1.09,
+    "confidence": 0.44,
+    "legend": {
+     "0": "confusing",
+     "1": "acceptable",
+     "2": "crystal clear"
+    },
+    "probabilities": {
+     "0": 0.14,
+     "1": 0.63,
+     "2": 0.23
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding the field \"body\": clarity",
+    "criteria": [
+     "confusing",
+     "acceptable",
+     "crystal clear"
+    ]
+   },
+   "statePreview": "{\"subject\":\"Refund\",\"body\":\"As I already said, refunds take time. Read the policy before emailing again.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.282Z"
+  },
+  "0a7b96d2396176851df54d9517ec4853dfd0f2cf50416e20edeab7563b504441": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.02
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": contains personally identifiable information such as a full card number, password, or home address"
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Thanks for flagging the double charge. I've refunded the duplicate pay…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.098Z"
+  },
+  "0c58bd57ad2ac76fc7d9a4dbe3492aefe3ce6884216bc0b8e14012f7a7c3c86d": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.03
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r6\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "0ec7fec308e959a9a3d4d0efbb0a7382966bf1882d3e9d3241d723bdcffc1f3f": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.84
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the star rating is consistent with the sentiment of the text"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":4,\"text\":\"Great shoe. Use code SAVE20 at cheapshoes.example for 20% off, way bett…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.983Z"
+  },
+  "0f39d82f024eaeda4e63e1f973483e2b0e921484bcf15bca1a60d8e9c8d5af90": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r3\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "1070efb6a3c3eff03407cfbc59e1db4036898f5154f73e743171950b71a746e8": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.99
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r7\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "13e5bf3fc2b13fcbf846c1668ea3f910ad2bdadbf1f3f4a335851456653327ba": {
+   "answer": {
+    "type": "choice",
+    "choice": "feedback",
+    "confidence": 0.98,
+    "probabilities": {
+     "billing": 0,
+     "shipping": 0.02,
+     "feedback": 0.98,
+     "account": 0,
+     "sales": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r2\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.121Z"
+  },
+  "15000606ad2987e00f2e49a4e6946b2c269e097a020043fe1a621cb6aeaab34a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.05
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "lol no",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.272Z"
+  },
+  "1788706e127985eef5b1b3492a8084b34eac8f7b09b67332ad7b7f28df920fe5": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is abusive, threatening, or a personal attack"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":2,\"text\":\"Sole started separating after three weeks of road running. Support repl…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.314Z"
+  },
+  "1d414c1fc4a830611f42cd8c4f93c2751aa8c0e7b0e15d75edd9a155c8a3bab1": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.02
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is spam or advertises another seller or discount code"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":1,\"text\":\"Garbage. Whoever designed this should be fired and the company sued.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.832Z"
+  },
+  "1e26afc0324eb351beed8226727eb8a4472e30cbf57945c771946e306ee2019b": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.61
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Okay.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.453Z"
+  },
+  "21f21568b5db9aa754a475b737c11cb007405a1e64e189f4e09d1d084784c6bc": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is spam or advertises another seller or discount code"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Light, grippy, and the toe box finally fits wide feet. Two months in, n…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.664Z"
+  },
+  "23de6235b61433005c2e59e42b6372f47b48e244249dac65a60e7cea0b2aefbe": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.45
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": describes actual experience with the product rather than generic praise or hype"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":1,\"text\":\"Garbage. Whoever designed this should be fired and the company sued.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.832Z"
+  },
+  "243def53e06448b39745fc041db7cfeac9f4569ad69d7b171b781d8e54400fcd": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.02
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is spam or advertises another seller or discount code"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":2,\"text\":\"Sole started separating after three weeks of road running. Support repl…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.314Z"
+  },
+  "2534f36e8ad3e13d3143b816d1d11eee474dbe7b4f2f4f906d34ff140520b97c": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the reply acknowledges the customer's specific topic"
+   },
+   "statePreview": "{\"customer\":\"the app crashes on launch\",\"reply\":\"We received your message about \\\"the app crashes on launch\\\". A spec…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.392Z"
+  },
+  "25b7e3e2e1c0382ab8111a1d2a08193c1321cff05623a346b5a3cdb6f7836d5c": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Noted. I'll follow up by end of day with a status.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.097Z"
+  },
+  "2816113ca84eb613f227a074ffa381e6620436137e8d329ae09065bab447b19d": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the reply acknowledges the customer's specific topic"
+   },
+   "statePreview": "{\"customer\":\"cancel my subscription\",\"reply\":\"We received your message about \\\"cancel my subscription\\\". A specialist…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.173Z"
+  },
+  "2855764f7ff871c1fbb47ca16fecc5b04511436dc55d97b9887a25144fcf0152": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.24
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the output is a faithful summary of the most important information in the input"
+   },
+   "statePreview": "{\"input\":\"Reminder: the office is closed on Monday. Also, the new expense policy caps meals at $40 per day and requir…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.896Z"
+  },
+  "2b1bf759fbecf95291a0996ba108447356fcc8b58352f5279ed307f9add33578": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.11
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "If you can't follow simple instructions I can't help you.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.343Z"
+  },
+  "2e31c8e5436bae5218ba83a6bfb3ce3274b46af8adc78f15f9b838133ce89b7e": {
+   "answer": {
+    "type": "choice",
+    "choice": "billing",
+    "confidence": 0.82,
+    "probabilities": {
+     "account": 0.13,
+     "feedback": 0,
+     "billing": 0.86,
+     "sales": 0.01,
+     "shipping": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r5\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "2e63014a5936fc5008f7243260b21be790e97157387c0606325269a0d256b669": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.33
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Read the policy before emailing again.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.184Z"
+  },
+  "2eaeea2d7188d943db61c073b67e50cc44ac15071290b8fab62b561994a34835": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is abusive, threatening, or a personal attack"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":3,\"text\":\"It's a shoe. It has laces. Fine I guess.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.176Z"
+  },
+  "32e8c81a7821a50e3c1a61a6227234525678a7b92e52947ace8a5945f1e3baef": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.15
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Your issue isn't a priority.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.493Z"
+  },
+  "341d4aa79996ad07aab3e49b750c5fdc997b328b769287ba761cbcc8b0e232c8": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.12
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r2\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "34807196bc12ae8592660d84aff93b08a3946d8fb43f8337eb93b79eff2a277a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.57
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the reply acknowledges the customer's specific topic"
+   },
+   "statePreview": "{\"customer\":\"thanks, all sorted\",\"reply\":\"We received your message about \\\"thanks, all sorted\\\". A specialist will re…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.504Z"
+  },
+  "3795001187175bc0a88c96f898fa9f41c0148352751de7849e96afd4b2e3b521": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.03
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the output is a faithful summary of the most important information in the input"
+   },
+   "statePreview": "{\"input\":\"Hello there. Anyway, the important thing is that the migration to Postgres 17 finished on Tuesday with zero…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.756Z"
+  },
+  "3942b125bb996a6b728caf9c818cd3f31165804b80a0abcce69e3667573ea81a": {
+   "answer": {
+    "type": "score",
+    "score": 1.9,
+    "confidence": 0.85,
+    "legend": {
+     "0": "confusing",
+     "1": "acceptable",
+     "2": "crystal clear"
+    },
+    "probabilities": {
+     "0": 0.01,
+     "1": 0.08,
+     "2": 0.91
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding the field \"body\": clarity",
+    "criteria": [
+     "confusing",
+     "acceptable",
+     "crystal clear"
+    ]
+   },
+   "statePreview": "{\"subject\":\"Welcome to the newsletter\",\"body\":\"Sorry, we can't refund this order because it was delivered and signed …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.522Z"
+  },
+  "3a9f40b4485e5b1a1b8863f9659815b1b45d73fd7837d4b8debe4811c47e8243": {
+   "answer": {
+    "type": "choice",
+    "choice": "sales",
+    "confidence": 0.65,
+    "probabilities": {
+     "billing": 0.01,
+     "shipping": 0,
+     "feedback": 0.01,
+     "account": 0.26,
+     "sales": 0.72
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r5\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.121Z"
+  },
+  "3ca679a01e6cedb4212a2afa9992133cae65f6603a4cd565c05fdd6aaafa0b98": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.09
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": is polite and professional"
+   },
+   "statePreview": "{\"subject\":\"Refund\",\"body\":\"As I already said, refunds take time. Read the policy before emailing again.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.282Z"
+  },
+  "3cc98485df652b03091cc6047ab45c98ac50f26113f8edd9c26584b58b63bf59": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r5\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "41052b299eae3c39f1ce4af8fae3b1cbc4ebcb8a1b850f3624e3fe8aedb8b057": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is spam or advertises another seller or discount code"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":4,\"text\":\"Great shoe. Use code SAVE20 at cheapshoes.example for 20% off, way bett…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.983Z"
+  },
+  "45de07b0cdb788237fbae288ea9c1d1dfb4cd124e1d8693d512c054140a38511": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.07
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "This is the third time you've asked. Are you even reading my replies?",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.340Z"
+  },
+  "462be6f5c285e68f5bcb2e8d8ee5833e83b89f78933fc87e803366d2fe6eeb60": {
+   "answer": {
+    "type": "score",
+    "score": 2,
+    "confidence": 1,
+    "legend": {
+     "0": "none",
+     "1": "mild",
+     "2": "high"
+    },
+    "probabilities": {
+     "0": 0,
+     "1": 0,
+     "2": 1
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding row \"r2\": urgency",
+    "criteria": [
+     "none",
+     "mild",
+     "high"
+    ]
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.851Z"
+  },
+  "4bf6a8349c97dd50511e7f3e61bc47eeaab7361cd526a0964deebb504532b4dd": {
+   "answer": {
+    "type": "score",
+    "score": 1.91,
+    "confidence": 0.86,
+    "legend": {
+     "0": "none",
+     "1": "mild",
+     "2": "high"
+    },
+    "probabilities": {
+     "0": 0,
+     "1": 0.09,
+     "2": 0.91
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding row \"r1\": urgency",
+    "criteria": [
+     "none",
+     "mild",
+     "high"
+    ]
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.851Z"
+  },
+  "551a6753f2d1efc0c459753c71a7e84fd28ca00bcf67843c9fa7c55174b37235": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.67
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the output is a faithful summary of the most important information in the input"
+   },
+   "statePreview": "{\"input\":\"Our Q3 revenue grew 14% year over year, driven by the enterprise tier. Churn fell to 2.1%. We plan to hire …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.595Z"
+  },
+  "55296fd3cdce603ad8346e6416e73e8573793ad3c90225921d35c234d6e41c84": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.69
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the star rating is consistent with the sentiment of the text"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":2,\"text\":\"Sole started separating after three weeks of road running. Support repl…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.314Z"
+  },
+  "55e75eb97b9a90c6a077ebc48fc303000aa4c2bde238b5c6df621f204966c7c7": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.92
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": is polite and professional"
+   },
+   "statePreview": "{\"subject\":\"Welcome to the newsletter\",\"body\":\"Sorry, we can't refund this order because it was delivered and signed …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.522Z"
+  },
+  "58632728448037d06e515ce8dd068e68b005f57ad9a4bf6f554969e81b2482cf": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "I understand the frustration. Let me escalate this to our billing team today.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.813Z"
+  },
+  "5e87bb9696646e05d6518125823081ac34e08962b7ac399455fbc0e7e577322a": {
+   "answer": {
+    "type": "choice",
+    "choice": "answer",
+    "confidence": 1,
+    "probabilities": {
+     "answer": 1,
+     "escalate": 0,
+     "decline": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding the field \"body\": primary intent",
+    "criteria": {
+     "answer": null,
+     "escalate": null,
+     "decline": null
+    }
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Thanks for flagging the double charge. I've refunded the duplicate pay…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.098Z"
+  },
+  "60a3c6cdc630d80b1bbceed75121eaad5775db8143ff43403658f38e0c5746df": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r0\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Requesting the SOC 2 report for our vendor review.\"}]}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.978Z"
+  },
+  "61e222a546a825cd295b99b499f46c2c2343a0e724d1bbed82370cf86b26a832": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is abusive, threatening, or a personal attack"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":4,\"text\":\"Great shoe. Use code SAVE20 at cheapshoes.example for 20% off, way bett…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.983Z"
+  },
+  "656c25a92ac591d2da7e8ddd77768d8528638df7cb003de8324fef07d5f415d0": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.72
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r4\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.660Z"
+  },
+  "68927c48deca69243c990fd8ce085b0ca4e4848dbaca9bd0507b8220358b7644": {
+   "answer": {
+    "type": "choice",
+    "choice": "shipping",
+    "confidence": 1,
+    "probabilities": {
+     "billing": 0,
+     "shipping": 1,
+     "feedback": 0,
+     "account": 0,
+     "sales": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r4\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.121Z"
+  },
+  "68d97b0fef09ecce1f21498b9d774fbcda6562cf941a20d777bb90bb00c93367": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the reply acknowledges the customer's specific topic"
+   },
+   "statePreview": "{\"customer\":\"how do I export my data\",\"reply\":\"We received your message about \\\"how do I export my data\\\". A speciali…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.291Z"
+  },
+  "6a50b8174e89e5343132c80c7a57c19466d1bd891f2a2ee66a226ae9f4bcc097": {
+   "answer": {
+    "type": "noul",
+    "noul": 0
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is abusive, threatening, or a personal attack"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Light, grippy, and the toe box finally fits wide feet. Two months in, n…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.664Z"
+  },
+  "6acf9e72063b2005882d9e2b941f06de6a290d53868c21b99801b93596f4d265": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is abusive, threatening, or a personal attack"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Best. Shoe. Ever. Buy it now, trust me, five stars, amazing, wow.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.441Z"
+  },
+  "6cd0621f82a0a1cdd3a146c4413aa51f1bdd8aafcacb6c70b9802370ee951ecb": {
+   "answer": {
+    "type": "score",
+    "score": 1.99,
+    "confidence": 0.99,
+    "legend": {
+     "0": "confusing",
+     "1": "acceptable",
+     "2": "crystal clear"
+    },
+    "probabilities": {
+     "0": 0,
+     "1": 0.01,
+     "2": 0.99
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding the field \"body\": clarity",
+    "criteria": [
+     "confusing",
+     "acceptable",
+     "crystal clear"
+    ]
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Thanks for flagging the double charge. I've refunded the duplicate pay…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.098Z"
+  },
+  "6de436d8a72f81458ca465ebbf9d7202daf8bbc369ea75aad7df77c48a9e8d7a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.03
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the subject line matches what the body says"
+   },
+   "statePreview": "{\"subject\":\"Welcome to the newsletter\",\"body\":\"Sorry, we can't refund this order because it was delivered and signed …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.522Z"
+  },
+  "703abcb53e82459b7c02b2614420531ffffc10ffabe805d7aeb92425f11eb6c0": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.96
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Good afternoon. Your replacement ships tomorrow and I'll email the tracking number.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.895Z"
+  },
+  "82851d4d13cc6da95fc775d68945a662cdc0cbac7b715f7c96add7838ce6489a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.84
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the star rating is consistent with the sentiment of the text"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":3,\"text\":\"It's a shoe. It has laces. Fine I guess.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.176Z"
+  },
+  "87f7b9815b5d71c63188ce0eb69d4f975de77aef8984d0c2a289987045a61af7": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.05
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Whatever. Ticket closed.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.464Z"
+  },
+  "89688608b71cfe344239954a3b990c3488196db465c99ca1b4dae3a94b16c9d7": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the star rating is consistent with the sentiment of the text"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Best. Shoe. Ever. Buy it now, trust me, five stars, amazing, wow.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.441Z"
+  },
+  "8eab1386051a4debf3018999061359f4dff49c56259b983c7316d00dcea542f2": {
+   "answer": {
+    "type": "choice",
+    "choice": "shipping",
+    "confidence": 1,
+    "probabilities": {
+     "account": 0,
+     "feedback": 0,
+     "billing": 0,
+     "sales": 0,
+     "shipping": 1
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r2\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "8eea00fbbe0feb36a3c7e80eb91182979bcb12194cae7c3f4bdcba9ed6237fff": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": describes actual experience with the product rather than generic praise or hype"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":2,\"text\":\"Sole started separating after three weeks of road running. Support repl…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.314Z"
+  },
+  "8fb737993b6e0cbca2f932b9d357b90cd9d1a3199f4f6da5c333c991870d5d89": {
+   "answer": {
+    "type": "choice",
+    "choice": "shipping",
+    "confidence": 1,
+    "probabilities": {
+     "account": 0,
+     "feedback": 0,
+     "billing": 0,
+     "sales": 0,
+     "shipping": 1
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r0\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "9444fd0b2e15d8af992cbf18efbb30881d3e774b80de44db11f5cdcc97b00c44": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.13
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is spam or advertises another seller or discount code"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Best. Shoe. Ever. Buy it now, trust me, five stars, amazing, wow.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.441Z"
+  },
+  "96d8549c76ff19f6b74cc4e5e8c15ed30584ab2db6e919e141727dcb928aa70a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": describes actual experience with the product rather than generic praise or hype"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Light, grippy, and the toe box finally fits wide feet. Two months in, n…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.664Z"
+  },
+  "a037c08bee0d59b128cfd2e0c587958ddf0c35ad2dedf731ad398fd9b914194a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r1\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "a0e675f31a9a83f12d861af49f87898ab27b847fa5243ab26f57f121cc22a5b5": {
+   "answer": {
+    "type": "choice",
+    "choice": "account",
+    "confidence": 0.39,
+    "probabilities": {
+     "account": 0.52,
+     "feedback": 0,
+     "billing": 0.48,
+     "sales": 0,
+     "shipping": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r1\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "a5113195755fc5f4664e58d9d9dbee78043a562f54afc500b198e4d1365c6523": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": contains personally identifiable information such as a full card number, password, or home address"
+   },
+   "statePreview": "{\"subject\":\"Refund\",\"body\":\"As I already said, refunds take time. Read the policy before emailing again.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.282Z"
+  },
+  "a5b3643428f8fcf30abcbbeb55e980c4b82fc5346cdd1a892dcf8ff1a3e432c1": {
+   "answer": {
+    "type": "score",
+    "score": 1.88,
+    "confidence": 0.82,
+    "legend": {
+     "0": "confusing",
+     "1": "acceptable",
+     "2": "crystal clear"
+    },
+    "probabilities": {
+     "0": 0,
+     "1": 0.11,
+     "2": 0.89
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding the field \"body\": clarity",
+    "criteria": [
+     "confusing",
+     "acceptable",
+     "crystal clear"
+    ]
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Refunded to card 4111 1111 1111 1111 (exp 04/28) for John Q. Public, 1…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.408Z"
+  },
+  "a82d616c4ab801c4aa1c6ad3b9f6f6dbc13b3be606f55217478d7ffbcf04b466": {
+   "answer": {
+    "type": "choice",
+    "choice": "shipping",
+    "confidence": 0.96,
+    "probabilities": {
+     "account": 0,
+     "feedback": 0.03,
+     "billing": 0,
+     "sales": 0,
+     "shipping": 0.97
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r6\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "ac824e1e01d8011ebd26d270b5309a345ff5c185a39100aa03c5d5b186d00cf2": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "You're welcome. Have a great weekend.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.043Z"
+  },
+  "b0d19b02728f8f7891f74c0c22270007309f61dfedb6a454ca83c296a69fed2e": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.7
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Per my last email, the invoice was already sent.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.554Z"
+  },
+  "b3036eb59d0505f30eba0de24031b143669de2b13f3287ac2ae38d0283ad965d": {
+   "answer": {
+    "type": "score",
+    "score": 0.01,
+    "confidence": 0.98,
+    "legend": {
+     "0": "none",
+     "1": "mild",
+     "2": "high"
+    },
+    "probabilities": {
+     "0": 0.99,
+     "1": 0.01,
+     "2": 0
+    }
+   },
+   "question": {
+    "type": "score",
+    "instructions": "Regarding row \"r3\": urgency",
+    "criteria": [
+     "none",
+     "mild",
+     "high"
+    ]
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.851Z"
+  },
+  "b47c1df37c4bea4fb1f7825ef2925f6403feed60ff0bdd64c8cc54e4abbb6763": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r2\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.660Z"
+  },
+  "ba8af31af4acfbca04553e102e2063965c036af9ac1f4dfa5b0a0795111db302": {
+   "answer": {
+    "type": "choice",
+    "choice": "shipping",
+    "confidence": 1,
+    "probabilities": {
+     "account": 0,
+     "sales": 0,
+     "billing": 0,
+     "feedback": 0,
+     "shipping": 1
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r7\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "bc7d6a489a2e8f18aeba02c5b17c85c05784a76598d3842ff06de8ad52aafe46": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Thank you for the detailed report. We've reproduced the bug and a patch is scheduled for Friday.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.103Z"
+  },
+  "be1104d16365b62b134c13b895a1e1d9305d379fe358baf58021705571e26d42": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.14
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Not our problem. Contact the carrier.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.218Z"
+  },
+  "c01d20c29d52a471889b08e2a790c0f54c689cb923cf9514d6c70c5b608285af": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the subject line matches what the body says"
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Thanks for flagging the double charge. I've refunded the duplicate pay…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.098Z"
+  },
+  "c0db77b4cf4055b0d30c1bbeac05b824cff5dec75969d7c6c906908eb56f086e": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.79
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": is polite and professional"
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Refunded to card 4111 1111 1111 1111 (exp 04/28) for John Q. Public, 1…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.408Z"
+  },
+  "c39b7f2027f20f64c0494495e359ec50dfa016c3912a95e83fb83417bb2ecae7": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the reply acknowledges the customer's specific topic"
+   },
+   "statePreview": "{\"customer\":\"refund\",\"reply\":\"We received your message about \\\"refund\\\". A specialist will reply within one business …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.029Z"
+  },
+  "c5a0fede9a346ab3f3560a2f90fa47cdad267d4082fb97a408fd5a6dcaf694d4": {
+   "answer": {
+    "type": "choice",
+    "choice": "sales",
+    "confidence": 1,
+    "probabilities": {
+     "billing": 0,
+     "shipping": 0,
+     "feedback": 0,
+     "sales": 1,
+     "account": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r3\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.121Z"
+  },
+  "c760966a22623efa54b5004fe8cf9b73fc8c9da84c667e2ea603de3153a4387a": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the star rating is consistent with the sentiment of the text"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":1,\"text\":\"Garbage. Whoever designed this should be fired and the company sued.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.832Z"
+  },
+  "ca9dd480bcaa3142507fe5fdbc6426a3dcf71418a32d32593092160b14495587": {
+   "answer": {
+    "type": "choice",
+    "choice": "decline",
+    "confidence": 0.91,
+    "probabilities": {
+     "decline": 0.94,
+     "escalate": 0,
+     "answer": 0.06
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding the field \"body\": primary intent",
+    "criteria": {
+     "answer": null,
+     "escalate": null,
+     "decline": null
+    }
+   },
+   "statePreview": "{\"subject\":\"Welcome to the newsletter\",\"body\":\"Sorry, we can't refund this order because it was delivered and signed …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.522Z"
+  },
+  "ccd3c53110690e692b5a582be1a084c028bd283d7a746d1a89145889b1523825": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": contains personally identifiable information such as a full card number, password, or home address"
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Refunded to card 4111 1111 1111 1111 (exp 04/28) for John Q. Public, 1…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.408Z"
+  },
+  "cce1b0d071605960bbb823dd57a6e7b81f4aa030cd65fd768c4e9fc619d57b52": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.81
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the subject line matches what the body says"
+   },
+   "statePreview": "{\"subject\":\"Refund\",\"body\":\"As I already said, refunds take time. Read the policy before emailing again.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.282Z"
+  },
+  "cd81e10c5161e5546fcfa328b96455c3ecf7c88b276b7515117cb233d1a80d47": {
+   "answer": {
+    "type": "choice",
+    "choice": "billing",
+    "confidence": 0.68,
+    "probabilities": {
+     "billing": 0.75,
+     "shipping": 0,
+     "feedback": 0,
+     "sales": 0,
+     "account": 0.25
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r0\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.121Z"
+  },
+  "d03e8f6b8a72f41004458ae1b815dbcf7470e058198d864526a059800be1e402": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.76
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is abusive, threatening, or a personal attack"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":1,\"text\":\"Garbage. Whoever designed this should be fired and the company sued.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.832Z"
+  },
+  "d1e6fc0b0b3863e3d085b42cc9cfcd4161b666fdd0ffcde0b450e686b81cfe53": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.95
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Sorry for the delay here. I've applied a credit for the affected month.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.007Z"
+  },
+  "d2732dcffdbe17d8b8e353aeeeb1919e24fc791f1cdfe4c9abd9c06e7d98d565": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the star rating is consistent with the sentiment of the text"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Light, grippy, and the toe box finally fits wide feet. Two months in, n…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.664Z"
+  },
+  "d5099bdf087c64128bf58a0878cc09a54ef04f878a5191714cf8b985b15601e4": {
+   "answer": {
+    "type": "choice",
+    "choice": "answer",
+    "confidence": 0.99,
+    "probabilities": {
+     "answer": 0.99,
+     "decline": 0.01,
+     "escalate": 0
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding the field \"body\": primary intent",
+    "criteria": {
+     "answer": null,
+     "escalate": null,
+     "decline": null
+    }
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Refunded to card 4111 1111 1111 1111 (exp 04/28) for John Q. Public, 1…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.408Z"
+  },
+  "d62661ad1bd5ead3e5583a66de9c8740d481cfee1f5ae3d35343949d07849946": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": is polite and professional"
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Thanks for flagging the double charge. I've refunded the duplicate pay…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.098Z"
+  },
+  "d812a2aa725e1de53ffc9f71281217fb9f77ae73a3a4a37e6462e494a710fed3": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.05
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r3\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.660Z"
+  },
+  "d824ed9c81b5fcfcc472c198234f03437722eb9d79a2e47e1583dfe04fec225d": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.02
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": is spam or advertises another seller or discount code"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":3,\"text\":\"It's a shoe. It has laces. Fine I guess.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.176Z"
+  },
+  "d832ad1a14149fe385c74d76ea4e997e6efdfad675b72217b871a95fc6dd3a67": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.94
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "the subject line matches what the body says"
+   },
+   "statePreview": "{\"subject\":\"Your refund is on its way\",\"body\":\"Refunded to card 4111 1111 1111 1111 (exp 04/28) for John Q. Public, 1…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.408Z"
+  },
+  "da77b1608909424465a67a88e30ee6be03741265aad2bc693d254a7791e9ee83": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.02
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"body\": contains personally identifiable information such as a full card number, password, or home address"
+   },
+   "statePreview": "{\"subject\":\"Welcome to the newsletter\",\"body\":\"Sorry, we can't refund this order because it was delivered and signed …",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.522Z"
+  },
+  "dc30a4c42db53ff9f12675d296527856144ba5abc8c05933c2f3efa21e2d1297": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r0\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.660Z"
+  },
+  "dca518f5c2fbe06e277d60257ba6bca7071740f898c0d28a963a71fcbea52346": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.12
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": describes actual experience with the product rather than generic praise or hype"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":5,\"text\":\"Best. Shoe. Ever. Buy it now, trust me, five stars, amazing, wow.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:08.441Z"
+  },
+  "e16c257ce28b309981ea1e009ff60857b8a86b0df7553a43ef8891f883744784": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.09
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Fine. Refunded. Don't buy from us again.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.451Z"
+  },
+  "e5ff68fca6c0148f47f03ec5aa901ca6781bb01f8589408223ad9af46bb6d534": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.01
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r1\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Please cancel my subscription at the end of this billing cycle.\"},{\"id\":\"r1\",\"text\":\"Pass…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.660Z"
+  },
+  "e8fc1da82f5227426ed91f21d32e0d9e8b421aeb1aa73560b70d514d9c1a1cfc": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.97
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r4\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "eca925d7691ec3b40c0e8b54680301df0b261adf17fcf2b4ff10af2ee22cdcf8": {
+   "answer": {
+    "type": "choice",
+    "choice": "shipping",
+    "confidence": 0.99,
+    "probabilities": {
+     "account": 0,
+     "feedback": 0.01,
+     "billing": 0,
+     "sales": 0,
+     "shipping": 0.99
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding row \"r4\": What kind of request is this?",
+    "criteria": {
+     "shipping": null,
+     "billing": null,
+     "account": null,
+     "feedback": null,
+     "sales": null
+    }
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:13.135Z"
+  },
+  "ed8855f65591c8d9291012ecaca0f9f1582528bf47deb1bed173fdf5eb3a8261": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Appreciate your patience. The fix is deployed and your account is unlocked.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.951Z"
+  },
+  "f232bf56a03667165c5c25ea340638437eb082b439cbeb1160697272aa94e2cb": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding row \"r0\": mentions a shipping delay"
+   },
+   "statePreview": "{\"rows\":[{\"id\":\"r0\",\"text\":\"Order #4471 was supposed to arrive Tuesday and the tracking page still says 'label create…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:12.651Z"
+  },
+  "f3555483325f4623bfaf85ce319dfcfda594a47cef83927a6b955d3f0cce8a72": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.91
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "I'll look into it.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.577Z"
+  },
+  "f478e7303bec1615ac598731418474967aa47b6d4a60d23368186d8cafb69c2d": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.05
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "As I already told you, refunds take time. Stop asking.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:10.188Z"
+  },
+  "f56e379048af2ffbe1040ed1cc742ad56b25a52bd4082b3a9244148ca2347725": {
+   "answer": {
+    "type": "choice",
+    "choice": "decline",
+    "confidence": 0.35,
+    "probabilities": {
+     "answer": 0.43,
+     "decline": 0.56,
+     "escalate": 0.01
+    }
+   },
+   "question": {
+    "type": "choice",
+    "instructions": "Regarding the field \"body\": primary intent",
+    "criteria": {
+     "answer": null,
+     "escalate": null,
+     "decline": null
+    }
+   },
+   "statePreview": "{\"subject\":\"Refund\",\"body\":\"As I already said, refunds take time. Read the policy before emailing again.\"}",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.282Z"
+  },
+  "f7d9d107414c2754d3398ea046956a061fe9210e823ecb7070bf8e306e25afce": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Happy to help. Could you send the order number so I can look this up?",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.835Z"
+  },
+  "fb28b6281663033e60440241388b5cebd7e6ece0842e2963a810fd00069105a4": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.98
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "is polite and professional"
+   },
+   "statePreview": "Thanks for reaching out! I've refunded the duplicate charge; it should appear within 3 business days.",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:09.686Z"
+  },
+  "ffecef96767bf02fb73ec8f453ba20a9176d10a2f79ad66a946f18720490530c": {
+   "answer": {
+    "type": "noul",
+    "noul": 0.51
+   },
+   "question": {
+    "type": "noul",
+    "instructions": "Regarding the field \"text\": describes actual experience with the product rather than generic praise or hype"
+   },
+   "statePreview": "{\"product\":\"Trail Runner 3\",\"stars\":4,\"text\":\"Great shoe. Use code SAVE20 at cheapshoes.example for 20% off, way bett…",
+   "model": "jev-1.13.0",
+   "recordedAt": "2026-09-17T17:48:07.983Z"
+  }
+ }
+}
