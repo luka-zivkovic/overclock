@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Bench"
+  short_description: "Dry-run a model API prompt and tool design under caps"
+  default_prompt: "Use $api-bench to simulate how the application would call the model API with this prompt and tool set."

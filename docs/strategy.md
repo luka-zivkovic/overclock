@@ -82,6 +82,35 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   before treating that provider as supported. Only after that, consider persistent threads,
   background jobs, dirty-worktree snapshots, or full handoff.
 
+### api-bench — BUILD, v0.1.0 published (2026-09-19)
+- **Demand:** direct maintainer request to simulate, from inside Claude Code, how an
+  application would use Claude (or any model) through the API, and the follow-up
+  question of whether built-in subagents already do this. They do not: subagents are
+  same-harness fan-out with Claude Code's tools and auth, not an application's request
+  shape, and they cannot target another provider.
+- **Grounding:** three readings existed. Headless `claude -p` simulation of Claude Code
+  itself already lives in `qa/run_evals.sh` and `qa/trigger_battery.py` as repo tooling;
+  cross-provider collaboration is `agent-bridge`; the Claude Agent SDK is Claude Code's
+  loop as a library and belongs to apps that want that harness. None of them prototype
+  an app's own Messages API call (system prompt, tools, tool-result loop, stop reasons,
+  usage). That gap is the skill.
+- **Product shape:** one independently installable `api-bench` plugin with one skill and
+  a dependency-free helper. A JSON spec carries prompt, seed messages, tool schemas,
+  stub results, scripted follow-ups, and a required budget; the helper runs the loop
+  against the Claude Messages API or an OpenAI-compatible endpoint, records the exact
+  transcript, and compares runs. Mock replay covers wiring and no-network cases.
+- **Boundaries:** current-conversation go-ahead before the first live request, credentials
+  only from the environment and redacted from artifacts, caps refused when absent, run
+  output kept out of version control, and no application code edits as part of a bench.
+  Collision check: `agent-bridge` owns delegation to another harness, `local-eval-stack`
+  owns evaluating skills and sessions, and the bundled `claude-api` reference answers
+  documentation questions without a run.
+- **Evidence tier:** `objective` for the helper (deterministic tests over spec validation,
+  loop mechanics, budget stops, provider request shapes, redaction, and output-directory
+  safety); `rubric` for the skill via five committed live-eval cases and a routing battery
+  against the agent-bridge, eval-stack, and critical-thinking stack. Live results are not
+  yet recorded; run the suites before treating routing thresholds as met.
+
 ### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a
   persona + precedent-PR + embeddings stack; plus an earlier pass). That *is* the

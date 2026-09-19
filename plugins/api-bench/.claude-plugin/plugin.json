@@ -1,0 +1,19 @@
+{
+  "name": "api-bench",
+  "displayName": "API Bench",
+  "description": "Dry-run how an application would call the Claude Messages API or an OpenAI-compatible endpoint before writing the app. One JSON spec carries the system prompt, seed messages, tool schemas, stubbed tool results, and hard request, token, and dollar caps; the helper runs the tool-use loop, records the exact transcript, and compares variants. Credentials stay in the environment, mock runs need no network, and nothing is committed or edited.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "api",
+    "simulation",
+    "prompt-design",
+    "tool-use",
+    "claude",
+    "openai-compatible",
+    "prototyping"
+  ]
+}

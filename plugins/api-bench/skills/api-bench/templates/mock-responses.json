@@ -1,0 +1,38 @@
+{
+  "responses": [
+    {
+      "id": "msg_mock_1",
+      "type": "message",
+      "role": "assistant",
+      "model": "claude-opus-5",
+      "stop_reason": "tool_use",
+      "content": [
+        {"type": "text", "text": "Let me look up the account first."},
+        {"type": "tool_use", "id": "toolu_mock_1", "name": "lookup_customer", "input": {"email": "ada@example.com"}}
+      ],
+      "usage": {"input_tokens": 420, "output_tokens": 60}
+    },
+    {
+      "id": "msg_mock_2",
+      "type": "message",
+      "role": "assistant",
+      "model": "claude-opus-5",
+      "stop_reason": "tool_use",
+      "content": [
+        {"type": "tool_use", "id": "toolu_mock_2", "name": "list_charges", "input": {"customer_id": "cus_123", "month": "2026-08"}}
+      ],
+      "usage": {"input_tokens": 530, "output_tokens": 45}
+    },
+    {
+      "id": "msg_mock_3",
+      "type": "message",
+      "role": "assistant",
+      "model": "claude-opus-5",
+      "stop_reason": "end_turn",
+      "content": [
+        {"type": "text", "text": "Invoice inv_0812 has two successful charges of $49.00 each, so the customer was charged twice. Refund charge ch_2 and confirm with Ada by email."}
+      ],
+      "usage": {"input_tokens": 640, "output_tokens": 70}
+    }
+  ]
+}

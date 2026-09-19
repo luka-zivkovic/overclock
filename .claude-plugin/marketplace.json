@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.21",
+      "version": "0.1.22",
       "category": "development",
       "keywords": [
         "setup",
@@ -191,6 +191,22 @@
         "coeval",
         "ironside",
         "casefile"
+      ]
+    },
+    {
+      "name": "api-bench",
+      "source": "./plugins/api-bench",
+      "description": "Dry-run how an application would call the Claude Messages API or an OpenAI-compatible endpoint before writing the app. One JSON spec carries the system prompt, seed messages, tool schemas, stubbed tool results, and hard request, token, and dollar caps; the helper runs the tool-use loop, records the exact transcript, and compares variants. Credentials stay in the environment, mock runs need no network, and nothing is committed or edited.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "api",
+        "simulation",
+        "prompt-design",
+        "tool-use",
+        "claude",
+        "openai-compatible",
+        "prototyping"
       ]
     }
   ]
