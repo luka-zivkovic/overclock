@@ -1,6 +1,9 @@
 import json
+import os
 import shlex
+import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,6 +13,33 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 class EvalHarnessHardeningTests(unittest.TestCase):
+    def test_real_target_extractor_retains_visible_events_and_requires_completion(self):
+        source = (REPO / "qa/run_evals.sh").read_text()
+        code = source.split('    PYTHONPATH="$QA" python3 - "$OUT" <<\'PY\'\n', 1)[1].split('\nPY\n', 1)[0]
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp)
+            records = [
+                {"type": "assistant", "message": {"content": [{"type": "text", "text": "Extra preamble."}]}},
+                {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Read", "input": {"file_path": "saved.md"}}]}},
+                {"type": "user", "message": {"content": [{"type": "tool_result", "content": "saved", "tool_use_id": "read-1"}]}},
+                {"type": "result", "subtype": "success", "result": "Six-line brief.", "total_cost_usd": 0.125},
+            ]
+            for complete in (True, False):
+                records[-1]["subtype"] = "success" if complete else "error_max_turns"
+                (out / "stdout.jsonl").write_text("\n".join(json.dumps(row) for row in records))
+                result = subprocess.run([sys.executable, "-", str(out)], input=code,
+                    env={**os.environ, "PYTHONPATH": str(REPO / "qa")}, capture_output=True, text=True)
+                if complete:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    events = json.loads((out / "turn-events.json").read_text())
+                    self.assertEqual(events[0]["content"]["text"], "Extra preamble.")
+                    self.assertEqual(events[2]["content"]["type"], "tool_result")
+                    self.assertEqual(json.loads((out / "runner-metrics.json").read_text())["total_cost_usd"], 0.125)
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("evaluated turn did not complete", result.stderr)
+        self.assertIn("(out / 'turn-events.json').read_text", source)
+
     def test_setup_failures_leave_artifacts_and_do_not_skip_later_cells(self):
         # Execute the runner's real setup block, replacing only the paid CLI with a protocol stub.
         source = (REPO / "qa/run_evals.sh").read_text()
@@ -212,6 +242,77 @@ class LiveEvalWorkflowTests(unittest.TestCase):
         self.assertIn("routing_samples:", self.source)
         self.assertIn("default: 1", self.source)
         self.assertIn('requires confirm_all=true', self.source)
+
+    def test_compare_dispatch_executes_and_propagates_the_real_gate(self):
+        block = self.source.split("          run_suite() {", 1)[1].split(
+            '          if [[ "$TARGET"', 1)[0]
+        function = "run_suite() {" + block
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "qa").mkdir()
+            (root / "qa/run_value_evals.sh").write_text('echo "PAIRED:$*"\nexit 7\n')
+            (root / "qa/run_evals.sh").write_text('echo "ORDINARY:$*"\nexit 0\n')
+            for enabled, expected, status in (("true", "PAIRED", 7), ("false", "ORDINARY", 0)):
+                result = subprocess.run(["bash", "-c", f"COMPARE_BASELINE={enabled}\n" + function +
+                                         "\nrun_suite session-memory/session-handoff"],
+                                        cwd=root, capture_output=True, text=True)
+                self.assertEqual(result.returncode, status, result.stderr)
+                self.assertEqual(result.stdout.strip(), f"{expected}:session-memory/session-handoff")
+
+    def test_partial_value_run_is_rejected_before_model_execution(self):
+        result = subprocess.run(["bash", "qa/run_value_evals.sh", "session-memory/session-handoff"],
+                                cwd=REPO, env={**os.environ, "EVAL_ONLY": "7"},
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("full suite", result.stderr)
+
+    def test_missing_gate_is_rejected_before_model_execution(self):
+        result = subprocess.run(["bash", "qa/run_value_evals.sh", "overclock-setup/setup"],
+                                cwd=REPO, env={**os.environ, "EVAL_ONLY": ""},
+                                capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing value_gate", result.stderr)
+        self.assertNotIn("live evals require", result.stderr)
+
+    def test_value_wrapper_preserves_failures_and_pairs_both_arms(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            qa = root / "qa"
+            qa.mkdir()
+            # Use the real shell wrapper and schema validator; replace only the
+            # paid runner and comparator process to exercise orchestration.
+            for source in (REPO / "qa").glob("*.py"):
+                if not source.name.startswith("test_"):
+                    shutil.copy2(source, qa / source.name)
+            shutil.copy2(REPO / "qa/run_value_evals.sh", qa / "run_value_evals.sh")
+            suite = qa / "evals/demo/example.evals.json"
+            suite.parent.mkdir(parents=True)
+            suite.write_text(json.dumps({"skill_name": "example", "invocation": "explicit",
+                "install_modes": ["skill"], "value_gate": {},
+                "evals": [{"prompt": "Do the task.", "expectations": ["Correct result."]}]}))
+            (qa / "run_evals.sh").write_text(
+                'echo "RUN:$BASELINE:$EVAL_PAIR_ID:$EVAL_MODEL:$EVAL_EFFORT"\n'
+                '[ "$BASELINE" != 1 ] || exit "$STUB_BASELINE_STATUS"\n')
+            (qa / "check_eval_value.py").write_text(
+                'import os, sys\n'
+                'def value_thresholds(data): return data["value_gate"]\n'
+                'if __name__ == "__main__":\n'
+                '    print("COMPARE:" + sys.argv[sys.argv.index("--pair-id") + 1])\n'
+                '    sys.exit(int(os.environ["STUB_COMPARE_STATUS"]))\n')
+            for baseline_status, compare_status in ((7, 0), (0, 1), (0, 0)):
+                result = subprocess.run(["bash", "qa/run_value_evals.sh", "demo/example"],
+                    cwd=root, env={**os.environ, "EVAL_ONLY": "", "EVAL_INSTALL_MODE": "",
+                        "EVAL_MODEL": "test-model", "EVAL_EFFORT": "medium",
+                        "STUB_BASELINE_STATUS": str(baseline_status),
+                        "STUB_COMPARE_STATUS": str(compare_status)}, capture_output=True, text=True)
+                self.assertEqual(result.returncode, baseline_status or compare_status, result.stderr)
+                lines = [line.split(":") for line in result.stdout.splitlines()]
+                self.assertEqual(len(lines), 3, result.stdout)
+                self.assertEqual([lines[0][:2], lines[1][:2], lines[2][:1]],
+                                 [["RUN", "1"], ["RUN", "0"], ["COMPARE"]])
+                self.assertEqual(lines[0][2], lines[1][2])
+                self.assertEqual(lines[1][2], lines[2][1])
+                self.assertEqual(lines[0][3:], ["test-model", "medium"])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+{
+  "skill": "skill-scenario-author",
+  "install_modes": [
+    "skill"
+  ],
+  "evidence_tier": "rubric",
+  "cases": [
+    {
+      "id": "author-conversation",
+      "prompt": "Use the supplied session-handoff contract and this repository's eval conventions to add a regression case for a user changing their mind after the resume brief. Write only the eval and fixture files in the provided scratch copy.",
+      "expectations": [
+        "Uses the actual native eval and fixture interfaces.",
+        "The authored case declares two real native turns and includes target-only installation coverage.",
+        "The expected outcome follows the supplied contract and lets a later explicit user direction supersede an older saved decision.",
+        "Provides a permitted useful-work control alongside forbidden writes.",
+        "Does not edit the target skill or claim an unrun model evaluation passed."
+      ]
+    },
+    {
+      "id": "ordinary-unit-test-negative",
+      "prompt": "Write a unit test for this application's add(a, b) function. There is no agent skill involved.",
+      "expectations": [
+        "Does not invoke the scenario-author workflow or introduce agent eval machinery."
+      ]
+    }
+  ]
+}

@@ -314,7 +314,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 135 declared live cases | 20 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 138 declared live cases | 20 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 
