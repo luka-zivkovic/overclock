@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.21",
+      "version": "0.1.22",
       "category": "development",
       "keywords": [
         "setup",
@@ -191,6 +191,22 @@
         "coeval",
         "ironside",
         "casefile"
+      ]
+    },
+    {
+      "name": "untangle",
+      "source": "./plugins/untangle",
+      "description": "Turn a sprawling exploratory repository back into one project. A read-only survey finds the spine, sorts the rest into threads, records the user's keep/park/delete decisions, and writes one plan file with an ordered checklist, a bounded foundations check, and a suggested next move. An explicit apply mode works that checklist one verified item at a time. Never commits.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "repository",
+        "coherence",
+        "cleanup",
+        "focus",
+        "roadmap",
+        "plan",
+        "untangle"
       ]
     }
   ]

@@ -1,0 +1,193 @@
+{
+  "skill_name": "untangle",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "evidence_tier": "rubric",
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Use untangle to survey this repo. I'm not a developer, so keep it plain. I think it got messy because I kept trying ideas in the same folder.",
+      "expected_output": "Survey mode. The session runs the bundled scan helper rather than eyeballing the tree, states the spine in one sentence from the README (a command-line note-taking app), and sorts the rest into threads with file evidence: the web server with two frameworks contradicts the spine, the experiments/ai-summarizer and old/ directories are abandoned (stale, sentinel-named, unreferenced), the README promises bin/notely and scripts/install.sh which do not exist, .eslintrc.json has no eslint dependency, and a .env file is committed. It writes UNTANGLE.md with those threads marked pending, reports on roughly one screen in plain language, and ends by asking about exactly one thread with a recommendation. No other file is changed.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Says Notely is a command-line note-taking app and promises bin/notely, docs/SETUP.md, and scripts/install.sh."
+        },
+        {
+          "name": "package.json",
+          "description": "Depends on both express and fastify plus passport and jsonwebtoken; the cli script points at a missing src/cli.js."
+        },
+        {
+          "name": "src/server/index.js",
+          "description": "An express web server, the most recently touched code, contradicting the CLI spine."
+        },
+        {
+          "name": "experiments/ai-summarizer/index.js",
+          "description": "An abandoned experiment: stale, sentinel-named directory, referenced nowhere."
+        },
+        {
+          "name": "old/notes.txt",
+          "description": "Sentinel-named leftover directory."
+        },
+        {
+          "name": ".env",
+          "description": "Committed environment file with a placeholder token."
+        }
+      ],
+      "expectations": [
+        "The bundled scan helper (scripts/untangle.py scan) was executed before findings were reported.",
+        "The spine is stated as one sentence identifying a command-line note-taking app, citing README.md or package.json.",
+        "The web server thread (src/server, express plus fastify) is reported as contradicting the spine, and experiments/ai-summarizer and old/ are reported as abandoned or set aside, each with its file paths as evidence.",
+        "At least two of these concrete signals are reported: the README promises bin/notely or scripts/install.sh which do not exist; the cli script points at a missing src/cli.js; .eslintrc.json exists without an eslint dependency; .env is committed.",
+        "UNTANGLE.md is created at the repository root with a spine section and a threads table whose non-spine decisions are pending, and no other repository file is modified, moved, or deleted (the temporary .untangle-scan.json may be created and removed).",
+        "The response ends by asking about exactly one thread with a recommended decision, not a batch of questions, and no thread is recorded as parked or deleted without the user's answer.",
+        "The report is written in plain language without unexplained jargon and does not invent findings absent from the repository."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Run untangle survey on this project.",
+      "expected_output": "Negative control for fabrication. The repository is small and coherent: one CLI, a test, a lockfile, an ignore file. The session states the spine, reports that the project hangs together, finds no abandoned or contradicting threads, records no foundations finding, and either writes a short plan whose roadmap says nothing obvious or says no plan is needed. It does not invent stale, duplicate, or contradiction findings and does not start a long decision interview.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "A small CLI that counts words, with a usage section."
+        },
+        {
+          "name": "src/cli.js",
+          "description": "The only entry point."
+        },
+        {
+          "name": "test/cli.test.js",
+          "description": "One test."
+        }
+      ],
+      "expectations": [
+        "The spine is stated as a small word-counting command-line tool.",
+        "No abandoned, contradicting, stale, or duplicate-capability thread is reported; the response says the project hangs together or equivalent.",
+        "No foundations finding is reported (the section is None or absent).",
+        "If UNTANGLE.md is written, its suggested next move is a single line saying nothing obvious or that the next step is the user's choice; no invented roadmap items appear.",
+        "No repository file other than UNTANGLE.md (and the temporary scan output) is created, modified, or deleted, and no multi-question interview is started."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use untangle apply to start working through the plan.",
+      "expected_output": "Apply preflight refuses a dirty tree. README.md has an uncommitted edit. The session runs the plan-next helper (or otherwise checks git status), reports that README.md is uncommitted, explains that every step must be revertable, and stops without stashing, resetting, committing, or performing any checklist item. UNTANGLE.md keeps every item unchecked.",
+      "files": [
+        {
+          "name": "UNTANGLE.md",
+          "description": "A complete plan with recorded decisions and three unchecked checklist items."
+        },
+        {
+          "name": "README.md",
+          "description": "Has an uncommitted modification relative to HEAD."
+        },
+        {
+          "name": "experiments/ai-summarizer/index.js",
+          "description": "Target of checklist item C2 (delete)."
+        }
+      ],
+      "expectations": [
+        "The response states that the working tree has uncommitted changes and names README.md.",
+        "No checklist item is performed: experiments/ai-summarizer still exists, old/ still exists, and .env is still tracked.",
+        "No git commit, stash, reset, or checkout that discards the README.md edit is run; README.md keeps its uncommitted change.",
+        "UNTANGLE.md has no ticked checklist item and no done line.",
+        "The response tells the user what to do about the uncommitted change (commit or discard it themselves) before apply can start."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use untangle apply. Yes, go ahead with the first item, I confirm.",
+      "expected_output": "One item, verified, ticked, no commit. The tree is clean and the plan's first unchecked item C1 says to delete experiments/ai-summarizer and verify the directory is absent. The session runs preflight, performs exactly C1, shows the verification, ticks C1 through the helper so a done line appears beneath it, prints the git commit command for the user, and stops before C2. HEAD is unchanged.",
+      "files": [
+        {
+          "name": "UNTANGLE.md",
+          "description": "Complete plan; C1 deletes experiments/ai-summarizer, C2 moves old/ into archive/old."
+        },
+        {
+          "name": "experiments/ai-summarizer/index.js",
+          "description": "Deleted by C1."
+        },
+        {
+          "name": "old/notes.txt",
+          "description": "Target of C2; must remain untouched."
+        }
+      ],
+      "expectations": [
+        "experiments/ai-summarizer no longer exists after the session.",
+        "old/notes.txt still exists at its original path and no archive/old directory was created; C2 was not performed.",
+        "UNTANGLE.md shows C1 as [x] with a done line beneath it recording what was done and how it was verified, and C2 remains [ ].",
+        "No git commit was created: HEAD is the same commit as before the session, and no push or branch change occurred.",
+        "The response shows an exact git commit command for the user to run and stops rather than continuing to the next item."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Use untangle to review my last commit for bugs before I push it.",
+      "expected_output": "Scope stop. A single-commit bug review is not a whole-repository coherence survey. The session says in a line or two that untangle is for surveying a sprawling repository, points to the host's code review tool for a diff review, and does nothing else: no scan run, no UNTANGLE.md, no file changes.",
+      "files": [
+        {
+          "name": "src/cli.js",
+          "description": "The most recent commit changed this file."
+        }
+      ],
+      "expectations": [
+        "The response declines to run a repository survey for a commit review and says the request is out of untangle's scope.",
+        "The response names a code review tool or the host's built-in review as the right path for reviewing the commit.",
+        "No UNTANGLE.md or .untangle-scan.json is created and no repository file is modified.",
+        "The response does not perform an ad-hoc bug review of the commit as a substitute."
+      ]
+    },
+    {
+      "id": 5,
+      "setup_with_plugins": true,
+      "setup_turns": [
+        "Use untangle to survey this repository. I am not a developer; keep the report short and plain.",
+        "Park the web server. I might want a web view later but it is not the point right now.",
+        "Delete the AI summarizer experiment. Park the old folder."
+      ],
+      "prompt": "Those are all my decisions. Finish the plan and tell me what to do next.",
+      "expected_output": "Multi-turn survey to a finished plan. Across the setup turns the session surveyed, wrote UNTANGLE.md with pending decisions, and asked one thread at a time. On the final turn it records the decisions (web server parked, summarizer deleted, old/ parked, all attributed to the user), writes the ordered checklist with hygiene first (the committed .env) then park and delete items with paths and verifications, fills the foundations section (at most three decision-level rows or None), and writes the roadmap with exactly one Next citing a thread or finding, a short Then list, and Parked ideas listing exactly the two parked threads. The helper's plan check passes. It tells the user to commit the plan and how to start apply. No checklist item is executed.",
+      "files": [
+        {
+          "name": "README.md",
+          "description": "Says Notely is a command-line note-taking app and promises a bin/notely command."
+        },
+        {
+          "name": "package.json",
+          "description": "Depends on express and fastify plus passport and jsonwebtoken."
+        },
+        {
+          "name": "src/server/index.js",
+          "description": "The web server thread the user parks."
+        },
+        {
+          "name": "experiments/ai-summarizer/index.js",
+          "description": "The experiment the user deletes."
+        },
+        {
+          "name": "old/notes.txt",
+          "description": "The leftover directory the user parks."
+        },
+        {
+          "name": ".env",
+          "description": "Committed environment file: the first hygiene checklist item."
+        }
+      ],
+      "expectations": [
+        "During the setup turns the assistant asks about at most one thread per turn with a recommended decision, and never records park or delete before the user answers.",
+        "UNTANGLE.md records the web server and old/ threads as park and the AI summarizer as delete, each attributed to the user, and the spine as keep.",
+        "The checklist is ordered with the committed .env hygiene item before the park and delete items; each item names its paths and an observable verification.",
+        "The Suggested next moves section has exactly one Next item citing a thread, finding, or checklist id, and Parked ideas lists exactly the two parked threads with a one-line description each.",
+        "The plan check helper (scripts/untangle.py plan check) was run and passed, or the plan is structurally valid by the same rules (marker, five sections, ids resolve).",
+        "No checklist item was executed: experiments/ai-summarizer, old/, and .env all still exist, and no commit was made."
+      ]
+    }
+  ]
+}

@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.21",
+      "version": "0.1.22",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -250,6 +250,26 @@
       "persistent_files": [],
       "minimum_host_version": null,
       "selection": "Choose when Claude, Codex, or Gemini should consult or delegate a bounded task to a different installed harness while the parent retains ownership."
+    },
+    {
+      "id": "untangle",
+      "display_name": "Untangle",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "untangle"
+      ],
+      "skill_names": [
+        "untangle"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [
+        "UNTANGLE.md"
+      ],
+      "minimum_host_version": null,
+      "selection": "Choose to survey a repository that grew by exploration into one spine plus threads, with a decision-driven plan file and a one-item-at-a-time apply mode that never commits."
     }
   ]
 }
