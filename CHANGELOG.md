@@ -71,6 +71,10 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Explicit apply mode works the checklist one verified item at a time: it refuses a
   dirty tree or pending decisions, touches only the item's paths, ticks the item
   with a done line, prints the commit command, and stops. It never commits.
+- The scan separates documentation paths that are missing from ones cited relative
+  to a package, skips URL routes, reports developer home paths embedded in docs,
+  and treats workspace-member READMEs as package descriptions rather than a
+  second project README. Findings from a first run on a real monorepo.
 - Deterministic helper covers scan, plan check, apply preflight, and tick; unit
   tests pin the planted-signal recall, the no-write scan boundary, secret
   non-disclosure, plan structure rules, and the dirty-tree refusal. Live cases

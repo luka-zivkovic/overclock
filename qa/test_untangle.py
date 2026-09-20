@@ -261,6 +261,58 @@ class ScanTest(unittest.TestCase):
             self.assertTrue((root / ".untangle-scan.json").is_file())
 
 
+    def test_doc_paths_distinguish_missing_from_package_relative_and_routes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "mono"
+            build_clean(root)
+            write(root, "packages/app/package.json", '{"name":"app"}\n')
+            write(root, "packages/app/README.md", "# app\n\nThe app package, a workspace member.\n")
+            write(root, "packages/app/src/util.js", "exports.x = 1;\n")
+            write(
+                root,
+                "docs/guide.md",
+                "See `src/util.js` and `src/gone.js`. Webhooks arrive at `/webhooks/ghl`.\n"
+                "The design files live in `/Users/dev/store/website`.\n",
+            )
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "docs", date="2026-06-02T00:00:00")
+            data = json.loads(run("scan", "--root", str(root)).stdout)
+            missing = data["doc_paths_missing"]["items"]
+            self.assertEqual(missing, [{"doc": "docs/guide.md", "path": "src/gone.js", "confidence": "high"}])
+            elsewhere = data["doc_paths_resolve_elsewhere"]["items"]
+            self.assertEqual(elsewhere, [{"doc": "docs/guide.md", "path": "src/util.js", "matches": ["packages/app/src/util.js"]}])
+            self.assertEqual(data["developer_home_paths"]["items"], [{"doc": "docs/guide.md", "path": "/Users/dev"}])
+            self.assertEqual(data["multiple_readmes"], [])
+            self.assertEqual(data["nested_readmes"], ["packages/app/README.md"])
+
+    def test_readme_purpose_skips_html_and_images_and_language_mix_uses_a_ratio(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "html"
+            build_clean(root)
+            write(
+                root,
+                "README.md",
+                '<p align="center"><img src="x.png"></p>\n\n<h1 align="center">Tidy</h1>\n\n'
+                "![screenshot](docs/shot.png)\n\n"
+                "Tidy is a small command-line tool that counts the words in a file.\n\n## Development\n\nRun `pnpm test`.\n",
+            )
+            for index in range(60):
+                write(root, f"src/mod{index}.ts", "export const v = 1;\n")
+            for index in range(3):
+                write(root, f"tools/tool{index}.mjs", "console.log(1);\n")
+            data = json.loads(run("scan", "--root", str(root)).stdout)
+            self.assertEqual(
+                data["purpose_sources"][0]["first_paragraph"],
+                "Tidy is a small command-line tool that counts the words in a file.",
+            )
+            self.assertTrue(data["hygiene"]["readme_has_run_section"])
+            self.assertFalse(data["language_mix"]["mixed_js_ts"])
+            for index in range(3, 12):
+                write(root, f"tools/tool{index}.mjs", "console.log(1);\n")
+            data = json.loads(run("scan", "--root", str(root)).stdout)
+            self.assertTrue(data["language_mix"]["mixed_js_ts"])
+
+
 class PlanTest(unittest.TestCase):
     def test_template_and_sample_plan_parse(self) -> None:
         template = (SKILL_DIR / "templates/plan.md").read_text(encoding="utf-8")

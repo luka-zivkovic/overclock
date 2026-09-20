@@ -17,7 +17,10 @@
 | `language_mix` | JavaScript and TypeScript side by side in volume | Often a half-finished migration. |
 | `tool_config_without_dependency` | A config file for a tool the manifest does not install | The tool was tried and dropped, or never wired. |
 | `script_targets_missing` | Manifest scripts pointing at files that do not exist | The README or scripts promise something that is gone. |
-| `doc_paths_missing` | Paths cited in markdown that do not resolve | Documentation drift, or a promise never built. |
+| `doc_paths_missing` | Paths cited in markdown that resolve nowhere; `confidence` is high when the path has a file extension | Documentation drift, or a promise never built. |
+| `doc_paths_resolve_elsewhere` | Paths cited relative to a package rather than the root | Readable only with context; not drift. |
+| `developer_home_paths` | `/Users/<name>` or `/home/<name>` embedded in docs | A machine-specific path in shared docs; always a hygiene item. |
+| `nested_readmes` | READMEs inside workspace members or deeper directories | Package descriptions, not a second project README. |
 | `env_vars` | Variables read in code but absent from any `.env.example` or README | Undocumented requirements; a non-developer cannot run this. |
 | `todos` | TODO, FIXME, HACK, XXX counts per file | Where intent was left unfinished. |
 | `hygiene` | Ignore file, lockfile, tests, README run section, committed `.env`, secret-looking content | The first checklist items. A secret hit reports only the path, never the value. |

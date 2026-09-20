@@ -133,8 +133,12 @@ COMMITTED_ENV_NAMES = {".env", ".env.local", ".env.production", ".env.developmen
 TEST_DIR_NAMES = {"test", "tests", "__tests__", "spec", "specs", "e2e"}
 TEST_FILE_RE = re.compile(r"(\.test\.|\.spec\.|_test\.|^test_)")
 RUN_HEADING_RE = re.compile(
-    r"^#{1,6}\s.*(install|usage|getting started|quick ?start|run|setup|how to)", re.IGNORECASE | re.MULTILINE
+    r"^#{1,6}\s.*(install|usage|getting started|quick ?start|run|setup|how to|develop|build|commands|contribut)",
+    re.IGNORECASE | re.MULTILINE,
 )
+README_RE = re.compile(r"^readme(\.(md|markdown|rst|txt))?$", re.IGNORECASE)
+HOME_PATH_RE = re.compile(r"(?<![\w])(/Users/[A-Za-z0-9._-]+|/home/[A-Za-z0-9._-]+)(?=/|\b)")
+HTML_TAG_RE = re.compile(r"<[^>]+>")
 THREAD_ROLES = {"spine", "supporting", "side-quest", "abandoned", "contradicting"}
 THREAD_DECISIONS = {"keep", "park", "delete", "merge", "pending"}
 
@@ -358,7 +362,14 @@ def scan(root: Path, stale_days: int) -> dict:
 
     # Purpose sources -----------------------------------------------------------------
     manifests = load_manifest_deps(root)
-    readmes = sorted(r for r in relatives if r.split("/")[-1].lower().startswith("readme"))
+    all_readmes = sorted(r for r in relatives if README_RE.match(r.split("/")[-1]))
+    # Purpose comes from the root README and any README one level down that is not a
+    # workspace member's own README (a package README describes the package, not the project).
+    manifest_dirs = {r.rsplit("/", 1)[0] for r in relatives if "/" in r and r.split("/")[-1] in MANIFESTS}
+    readmes = [
+        r for r in all_readmes
+        if r.count("/") == 0 or (r.count("/") == 1 and r.rsplit("/", 1)[0] not in manifest_dirs)
+    ]
     purpose_sources = []
     for name in readmes:
         text = contents.get(name)
@@ -366,9 +377,9 @@ def scan(root: Path, stale_days: int) -> dict:
             continue
         first_heading = next((line.strip("# ").strip() for line in text.splitlines() if line.startswith("#")), None)
         first_paragraph = None
-        for block in re.split(r"\n\s*\n", text):
+        for block in re.split(r"\n\s*\n", HTML_TAG_RE.sub(" ", text)):
             stripped = block.strip()
-            if stripped and not stripped.startswith(("#", "<", "[!", "|", "```", "-", "*")):
+            if stripped and not stripped.startswith(("#", "!", "[!", "|", "```", "-", "*", "[")) and len(stripped.split()) >= 6:
                 first_paragraph = " ".join(stripped.split())[:400]
                 break
         purpose_sources.append({"path": name, "title": first_heading, "first_paragraph": first_paragraph})
@@ -381,6 +392,7 @@ def scan(root: Path, stale_days: int) -> dict:
     inventory["purpose_sources"] = purpose_sources
     inventory["manifests"] = sorted(r for r in relatives if r in MANIFESTS)
     inventory["multiple_readmes"] = readmes if len(readmes) > 1 else []
+    inventory["nested_readmes"] = [r for r in all_readmes if r not in readmes]
 
     # Git activity ---------------------------------------------------------------------
     activity = git_activity(root, files)
@@ -419,7 +431,8 @@ def scan(root: Path, stale_days: int) -> dict:
         "javascript": len(js),
         "typescript": len(ts),
         "python": sum(r.endswith(".py") for r in relatives),
-        "mixed_js_ts": bool(js) and bool(ts) and min(len(js), len(ts)) >= 3,
+        "mixed_js_ts": bool(js) and bool(ts) and min(len(js), len(ts)) >= 3
+        and min(len(js), len(ts)) / max(len(js), len(ts)) >= 0.15,
     }
 
     # Duplicate capabilities -----------------------------------------------------------
@@ -474,15 +487,19 @@ def scan(root: Path, stale_days: int) -> dict:
 
     # Documentation paths that do not resolve -----------------------------------------
     missing_doc_paths = []
+    resolves_elsewhere = []
+    home_paths = []
     existing = set(relatives) | {d for r in relatives for d in _ancestors(r)}
     for name, text in contents.items():
         if not name.endswith((".md", ".mdx", ".rst", ".txt")):
             continue
+        for match in HOME_PATH_RE.finditer(text):
+            home_paths.append({"doc": name, "path": match.group(1)})
         base = Path(name).parent
         for match in DOC_PATH_RE.finditer(text):
             target = (match.group(1) or match.group(2) or "").strip()
-            if not target or target.startswith(("http", "$", "<", "{")) or "*" in target:
-                continue
+            if not target or target.startswith(("http", "$", "<", "{", "/", "~")) or "*" in target:
+                continue  # a leading slash is a URL route or an absolute path, not a repo file
             if target.endswith("/"):
                 target = target[:-1]
             candidates = {target, (base / target).as_posix() if str(base) != "." else target}
@@ -491,8 +508,20 @@ def scan(root: Path, stale_days: int) -> dict:
                 continue
             if not re.search(r"[./]", target) or target.count("/") == 0 and "." not in target:
                 continue
-            missing_doc_paths.append({"doc": name, "path": target})
+            elsewhere = sorted(r for r in existing if r.endswith("/" + target))
+            if elsewhere:
+                resolves_elsewhere.append({"doc": name, "path": target, "matches": elsewhere[:3]})
+                continue
+            has_extension = "." in target.split("/")[-1]
+            missing_doc_paths.append(
+                {"doc": name, "path": target, "confidence": "high" if has_extension else "low"}
+            )
     inventory["doc_paths_missing"] = cap(_dedupe(missing_doc_paths))
+    inventory["doc_paths_resolve_elsewhere"] = {
+        "note": "cited relative to a package, not the root; a reader cannot resolve them without context",
+        **cap(_dedupe(resolves_elsewhere)),
+    }
+    inventory["developer_home_paths"] = cap(_dedupe(home_paths), 50)
 
     # Environment variables --------------------------------------------------------------
     referenced: dict[str, set[str]] = {}
@@ -586,7 +615,7 @@ def _dedupe(items: list[dict]) -> list[dict]:
     seen: set[tuple] = set()
     out = []
     for item in items:
-        key = tuple(sorted(item.items()))
+        key = json.dumps(item, sort_keys=True)
         if key in seen:
             continue
         seen.add(key)
