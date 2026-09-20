@@ -1,0 +1,85 @@
+{
+  "date": "2026-09-11",
+  "status": "insufficient_live_evidence",
+  "source_baseline": "f70e83d9216a57e1bfd7eecb2270fe2b933f99e8",
+  "evidence_tiers": {
+    "infrastructure": "objective",
+    "behavior_and_authoring": "rubric"
+  },
+  "live_evaluation": {
+    "status": "not_run",
+    "completed_pairs": 0,
+    "target_calls": 0,
+    "setup_or_simulator_calls": 0,
+    "judge_calls": 0,
+    "separately_invoked_proposer_or_reviewer_calls": 0,
+    "reason": "The isolated runner lacks ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN; host OAuth/keychain credentials remain excluded.",
+    "preflight_command": "bash qa/run_evals.sh session-memory/session-handoff",
+    "preflight_exit_code": 1
+  },
+  "budget": {
+    "currency": "USD",
+    "approved_external_limit": 20,
+    "new_external_provider_spend": 0,
+    "existing_codex_harness_cost": null,
+    "existing_codex_harness_cost_note": "Not exposed; not counted as a measured zero-cost API run."
+  },
+  "planned_native_pair": {
+    "cases": 11,
+    "install_modes": [
+      "skill",
+      "plugin"
+    ],
+    "evaluated_calls": 44,
+    "judge_calls": 44,
+    "setup_calls": 12,
+    "total_calls_before_retries": 100,
+    "aggregate_billing_cap_implemented": false
+  },
+  "validation": {
+    "unit_tests": {
+      "command": "python3 -m unittest discover -s qa -p 'test_*.py'",
+      "passed": 401,
+      "failed": 0
+    },
+    "shipped_skill_validation": {
+      "passed": 18,
+      "failed": 0
+    },
+    "skill_audit": {
+      "pass": 18,
+      "warn": 0,
+      "fail": 0
+    },
+    "shared_files": "pass",
+    "doc_claims": "pass",
+    "setup_catalog": "pass",
+    "version_bump_check": "pass_no_plugin_content_changed",
+    "candidate_skill_validation": "pass",
+    "candidate_claude_plugin_validation": "pass",
+    "shell_syntax": "pass",
+    "git_diff_check": "pass"
+  },
+  "authoring": {
+    "positive_forward_uses": 1,
+    "usable_cases_integrated": [
+      10
+    ],
+    "native_behavior_runs": 0,
+    "native_routing_runs": 0,
+    "negative_control_runs": 0,
+    "baseline_authoring_comparison": "not_run"
+  },
+  "independent_review": {
+    "mechanism": "separate Codex subagent, current harness",
+    "findings": 1,
+    "resolved": 1,
+    "finding": "Intermediate assistant text was omitted from judge context.",
+    "verification": "Both setup and evaluated turns preserve ordered visible prose and tools. Original preamble reproducer now yields distinct context; 45 targeted tests passed; no remaining findings."
+  },
+  "shipped_skill_change": null,
+  "improvement_claim": null,
+  "scenario_dependency_added": false,
+  "gepa_optimization_run": false,
+  "harness_sha256": "072f3d583c540e07f61b738b70bc61048fac442ca6ff7ee1dd1a68791e0aabcd"
+}

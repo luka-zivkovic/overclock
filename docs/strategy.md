@@ -345,6 +345,25 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   effect and worked examples in instructions steer precedent choice. Still `subjective`; live
   suites still unrun.
 
+### skill-scenario-author — INTERNAL PROTOTYPE, publication deferred (2026-09-11)
+
+- **Demand:** direct maintainer request to use our own skills to improve Overclock's
+  skill-development process after auditing agent-evaluation frameworks.
+- **Scope:** turn a supplied skill contract or observed failure into native
+  conversation cases, synthetic fixtures and discriminating controls. It does not
+  patch the target skill, install an eval stack, adjudicate results or run paid evals.
+  Those boundaries distinguish it from `skill-maintenance` and `local-eval-stack`.
+- **Evidence:** one independent forward-use exercise produced the user-reversal
+  case now in the `session-handoff` suite. Objective fixture, contract and harness
+  checks pass. Native behavior, implicit routing and baseline authoring benefit
+  remain unmeasured because isolated provider credentials are unavailable.
+- **Decision:** keep the candidate under
+  `qa/experiments/skill-improvement-pilot/`, outside published plugins. Fixed native
+  continuation already covers this pilot; add LangWatch Scenario only for a
+  demonstrated branching or intermediate-observation need. Defer GEPA until the
+  comparison yields valid live evidence. See the experiment record for acceptance
+  criteria and limitations; scaffolding alone does not justify publication.
+
 ## Groundings performed (reference)
 
 - **Ultraplan** (Claude Code, ~2026): hands planning to a cloud Opus 4.6 web session;

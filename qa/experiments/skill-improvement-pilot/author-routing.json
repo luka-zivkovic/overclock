@@ -1,0 +1,51 @@
+{
+  "skill": "skill-scenario-author",
+  "plugin": "skill-scenario-author",
+  "install_modes": [
+    "skill"
+  ],
+  "forbidden_skills": [
+    "skill-maintenance",
+    "local-eval-stack"
+  ],
+  "thresholds": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "specificity": 1.0
+  },
+  "detector": {
+    "type": "skill_tool"
+  },
+  "should_trigger": [
+    {
+      "prompt": "Turn this skill failure into a conversation regression test.",
+      "allowed_skills": [
+        "skill-scenario-author"
+      ]
+    },
+    {
+      "prompt": "Write executable positive and negative eval cases for this skill contract.",
+      "allowed_skills": [
+        "skill-scenario-author"
+      ]
+    }
+  ],
+  "should_not": [
+    {
+      "prompt": "Write an ordinary unit test for add(a, b).",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Set up my local Ironside and Coeval stack.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Patch this judged skill using its Coeval findings.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Brainstorm new skill ideas.",
+      "allowed_skills": []
+    }
+  ]
+}

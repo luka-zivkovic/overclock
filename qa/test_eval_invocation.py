@@ -7,10 +7,33 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from eval_invocation import command_name, explicit_prompt, invocation_evidence, setup_turn_record, record_setup_failure
+from eval_invocation import command_name, explicit_prompt, invocation_evidence, setup_turn_record, record_setup_failure, completed_turn
 
 
 class EvalInvocationTests(unittest.TestCase):
+    def test_visible_preamble_is_preserved_for_setup_and_evaluated_turns(self) -> None:
+        result = {"type": "result", "subtype": "success", "result": "Goal: resume\nPlan status: ready"}
+        preamble = {"type": "text", "text": "I will inspect your handoff first."}
+        call = {"type": "tool_use", "id": "read-1", "name": "Read", "input": {"file_path": "HANDOFF.md"}}
+        with tempfile.TemporaryDirectory() as temp:
+            stream = Path(temp) / "stdout.jsonl"
+            stream.write_text(json.dumps(result))
+            _, good_context = setup_turn_record(stream, "Resume.")
+            records = [
+                {"type": "assistant", "message": {"content": [
+                    {"type": "thinking", "thinking": "private reasoning canary"}, preamble, call]}},
+                {"type": "assistant", "message": {"content": [{"type": "text", "text": result["result"]}]}},
+                result,
+            ]
+            stream.write_text("\n".join(json.dumps(record) for record in records))
+            _, bad_context = setup_turn_record(stream, "Resume.")
+            _, events = completed_turn(stream, "evaluated")
+        self.assertNotEqual(good_context, bad_context)
+        self.assertIn(preamble["text"], bad_context)
+        self.assertNotIn("private reasoning canary", bad_context)
+        self.assertEqual([row["content"]["type"] for row in events], ["text", "tool_use", "text"])
+        self.assertEqual(events[0]["content"], preamble)
+
     def test_failed_setup_accounting_tolerates_malformed_metrics_without_a_grade(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             out = Path(temp)

@@ -7,11 +7,90 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_eval_value import compare
+from check_eval_value import compare, value_thresholds
 from eval_provenance import record
+from eval_runtime import harness_hash
 
 
 class EvalValueGateTests(unittest.TestCase):
+    def paired_control(self, root, modes=("plugin",)):
+        eval_root = root / "evals"
+        suite = eval_root / "demo/example.evals.json"
+        suite.parent.mkdir(parents=True)
+        case = {"prompt": "exercise the workflow", "expectations": ["x", "y", "z"]}
+        suite.write_text(json.dumps({"skill_name": "example", "install_modes": list(modes),
+                                    "value_gate": {}, "evals": [case]}))
+        plugins = self.write_plugin(root)
+        results = root / "results"
+        for mode in modes:
+            provenance = record(pair_id="pair", variant="skill", plugin="demo", skill="example",
+                                suite=suite, case=case, index=0, plugin_root=plugins, install_mode=mode)
+            for variant, passed in (("skill", 3), ("baseline", 2)):
+                suffix = "-baseline" if variant == "baseline" else ""
+                self.write_grade(results / f"demo-example-{mode}{suffix}-eval-0", passed,
+                                 {**provenance, "variant": variant})
+        return results, suite, eval_root, plugins
+
+    def test_rejects_boolean_thresholds(self):
+        with self.assertRaises(ValueError):
+            value_thresholds({"value_gate": {"min_case_wins": True}})
+
+    def test_equal_counts_do_not_hide_a_regressed_expectation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            args = self.paired_control(Path(temp))
+            results, suite, eval_root, plugins = args
+            grade_path = results / "demo-example-plugin-eval-0/grading.json"
+            grade = json.loads(grade_path.read_text())
+            grade["verdicts"][0]["verdict"] = "FAIL"
+            grade["passed"] = 2
+            grade_path.write_text(json.dumps(grade))
+            summary, failures = compare(results, "demo", "example", suite, eval_root, plugin_root=plugins)
+            self.assertEqual(summary["total_expectation_lift"], 0)
+            self.assertEqual(summary["rows"][0]["regressed_expectations"], ["x"])
+            self.assertTrue(any("case losses" in item for item in failures))
+
+    def test_plugin_win_cannot_mask_no_standalone_benefit(self):
+        with tempfile.TemporaryDirectory() as temp:
+            results, suite, eval_root, plugins = self.paired_control(Path(temp), ("skill", "plugin"))
+            baseline = results / "demo-example-skill-baseline-eval-0/grading.json"
+            (results / "demo-example-skill-eval-0/grading.json").write_bytes(baseline.read_bytes())
+            summary, failures = compare(results, "demo", "example", suite, eval_root, plugin_root=plugins)
+            self.assertEqual(summary["case_wins"], 1)
+            self.assertTrue(any("skill: case wins" in item for item in failures))
+
+    def test_rejects_tampered_counts_and_expectation_labels(self):
+        for mutation in ("counts", "labels", "boolean"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temp:
+                results, suite, eval_root, plugins = self.paired_control(Path(temp))
+                path = results / "demo-example-plugin-eval-0/grading.json"
+                grade = json.loads(path.read_text())
+                if mutation == "counts":
+                    grade["passed"] = 2
+                elif mutation == "labels":
+                    grade["verdicts"][0]["expectation"] = "invented criterion"
+                else:
+                    grade["passed"] = True
+                path.write_text(json.dumps(grade))
+                _, failures = compare(results, "demo", "example", suite, eval_root, plugin_root=plugins)
+                self.assertTrue(failures)
+
+    def test_rejects_changed_runtime_and_unverified_invocation(self):
+        for mutation in ("model", "harness", "invocation", "missing"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temp:
+                results, suite, eval_root, plugins = self.paired_control(Path(temp))
+                directory = results / "demo-example-plugin-eval-0"
+                if mutation == "invocation":
+                    (directory / "invocation.json").write_text('{"verified":false}')
+                elif mutation == "missing":
+                    (directory / "runtime.json").unlink()
+                else:
+                    path = directory / "runtime.json"
+                    runtime = json.loads(path.read_text())
+                    runtime["eval_model" if mutation == "model" else "harness_sha256"] = "changed"
+                    path.write_text(json.dumps(runtime))
+                _, failures = compare(results, "demo", "example", suite, eval_root, plugin_root=plugins)
+                self.assertTrue(failures)
+
     def write_grade(
         self,
         path: Path,
@@ -21,13 +100,21 @@ class EvalValueGateTests(unittest.TestCase):
     ) -> None:
         path.mkdir(parents=True)
         (path / "grading.json").write_text(
-            json.dumps({"passed": passed, "total": total, "verdicts": []}),
+            json.dumps({"passed": passed, "total": total, "verdicts": [
+                {"expectation": "xyz"[i], "verdict": "PASS" if i < passed else "FAIL",
+                 "why": "synthetic control"} for i in range(total)
+            ]}),
             encoding="utf-8",
         )
         (path / "provenance.json").write_text(
             json.dumps(provenance),
             encoding="utf-8",
         )
+        (path / "runtime.json").write_text(json.dumps(dict(
+            schema_version=1, claude_version="test-cli", eval_model="test-model",
+            eval_effort="medium", judge_model="test-judge", allowed_tools="Read",
+            available_tools="Read", harness_sha256=harness_hash())))
+        (path / "invocation.json").write_text('{"verified":true}')
 
     def write_plugin(self, root: Path) -> Path:
         plugin_root = root / "plugins"
