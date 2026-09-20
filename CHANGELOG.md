@@ -39,8 +39,8 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Allow offered constraints tagged `accepts:` so a self-imposed limit that makes the wall
   disappear is presented as a trade the user can refuse, and close with **The stack**, one
   composition naming its accepted constraint, target number, and biggest risk.
-- Ship a standalone moves catalog with cross-field precedents, including the Crash Bandicoot
-  arbitrages that motivated the revision; implicit routing with concrete anti-triggers; a
+- Ship a standalone moves catalog with cross-field precedents that are explicitly not a source
+  list for grounding; implicit routing with concrete anti-triggers; a
   routing battery in target-only and critical-thinking/groundwork stack modes; and two prompts
   run under both the draft and revised skill.
 - Evidence tier is subjective: author-run examples check the requested output contract, without

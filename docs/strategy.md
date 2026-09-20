@@ -339,7 +339,11 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   body. Rerunning the two prompts met the pre-registered signal (an idea per prompt that names
   the wall and exploits an inventory fact) but with assumed inventories and a model change
   between rounds; the honest reading is leverage over surprise, recorded in
-  `qa/experiments/lateral-engineering/README.md`. Still `subjective`; live suites still unrun.
+  `qa/experiments/lateral-engineering/README.md`. A third round removed the Crash Bandicoot story
+  from the skill body after 4 of 10 revised-round ideas cited it as grounding; with the story
+  gone the arbitrage ideas survived and 0 of 11 ideas cited it, so the principle carries the
+  effect and worked examples in instructions steer precedent choice. Still `subjective`; live
+  suites still unrun.
 
 ## Groundings performed (reference)
 

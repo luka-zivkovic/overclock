@@ -154,3 +154,38 @@ as an anti-trigger. The battery gained one positive (a wall-and-trade prompt), o
 standard-options walkthrough), and a `stack` mode with `critical-thinking` and `groundwork`, the
 nearest neighbours for "reframe", "stress-test", and "walk me through", so a critique or
 elicitation prompt must route to the sibling and never here. Live routing remains unmeasured.
+
+## De-anchoring round (2026-09-20)
+
+**Finding.** The revision's body opened with the Crash Bandicoot story and cited its tricks in
+two more places, and the Arbitrage family used Crash as the anchor precedent for every move. The
+v2 outputs show the effect: 4 of 10 ideas cite Crash, Naughty Dog, GOOL, or "on rails" as their
+grounding, against 0 of 10 in the draft outputs. A worked example in the instructions had become
+the model's default precedent, which both steers ideation toward that story's shape and inflates
+the grounding signal, since citing the skill's own example is not independent grounding.
+
+**Change.** The story is gone from `SKILL.md`; the body keeps only the abstract principle, an
+arbitrage between a wall and a surplus, and the leading word is "arbitrage". In the catalog,
+Crash is one precedent among three or four per Arbitrage move rather than the frame, and a rule
+at the top of the catalog says its precedents illustrate moves and are not a source list. Step 4
+of the skill repeats that rule. Body size is ~2076 estimated tokens.
+
+**Rerun.** Same two prompts, fresh blind draws (`operated by someone who can't code`;
+`buildable with 1995 technology`), same assumed inventories. Outputs:
+[game-harness-v3.md](game-harness-v3.md) and [trace-annotation-v3.md](trace-annotation-v3.md).
+Anchor leakage is 0 of 11 ideas. The arbitrage ideas survived the removal: Sample Thousands,
+Ship One, Distil One Game Family, Humans Grade The Judge, Disagreement Is The Queue, and Label
+Once, Replay Forever are all present with the same mechanism and now carry precedents from their
+own fields (best-of-N with a verifier, PuzzleScript, acceptance sampling, query-by-committee,
+standard-cell libraries). That is the evidence the framing works without the story. Two entries
+are new under the fresh oblique draws: Repair By Playing, Not Editing makes the non-coding player
+the repair oracle, and Sample Like A Pollster fixes human effort per release at a constant sample
+size, which re-derives the draft's Retire Questions Before Traces from a different lens and is
+recorded as such rather than as a new idea.
+
+**Judgment.** The pre-registered pass signal still holds on v3 for both prompts, with the same
+caveats as v2: assumed inventories, author-run, and a model change between v1 and v3. The
+comparison that matters for the maintainer is v2 against v3: same skill procedure, same author,
+same day, story present versus absent. The arbitrage ideas are unchanged and the citations moved
+from the skill's example to independent precedents, so the story was steering the grounding, not
+producing the ideas.

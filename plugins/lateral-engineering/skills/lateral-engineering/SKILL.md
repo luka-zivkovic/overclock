@@ -8,8 +8,7 @@ description: "Generate creative, out-of-the-box, lateral, non-obvious approaches
 Escape the median answer deliberately. Assume the user knows the standard solution; produce
 alternatives that change what needs solving rather than decorate it. The ideas worth having are
 arbitrages: a wall the conventional design cannot pass, paid for with a surplus it never uses.
-Naughty Dog fit 8 to 16 MB levels into the PlayStation's 2 MB by spending idle CD bandwidth and
-overnight workstation time; find the user's version of that trade. This is an advisory pass:
+Find the user's version of that trade in the user's own situation. This is an advisory pass:
 proposing an experiment does not authorize running it, editing files, provisioning anything, or
 committing. If the request falls outside the description, handle it normally without ceremony.
 
@@ -65,9 +64,10 @@ family:
 - **Arbitrage:** spend an inventoried surplus to buy relief on the wall; specialise to the
   instance; trade a negotiable freedom for a guarantee.
 
-You may propose a constraint the user did not state when accepting it makes the wall disappear,
-the way a camera on rails made precomputed visibility possible. Tag it `· accepts:` so the user
-sees the trade; it is an offer, not a discovered requirement.
+You may propose a constraint the user did not state when accepting it makes the wall disappear.
+Tag it `· accepts:` so the user sees the trade; it is an offer, not a discovered requirement. The
+catalog's precedents illustrate moves; cite one as an idea's grounding only when its mechanism
+genuinely matches, and prefer a precedent from the user's own field or an experiment.
 
 Add one candidate under an oblique constraint drawn blindly from the ten in the catalog before
 judging relevance; if a random tool is available use it, otherwise choose before matching and
@@ -88,9 +88,9 @@ named real person, and argue against each candidate:
 - Can it be grounded in a precedent from any field, a first-principles argument, or a cheap
   experiment with an observable pass/fail signal?
 
-A familiar ingredient pushed to a degree nobody does acquits: precompute everything, page
-continuously, generate a compiler per problem. A novel-sounding idea that leaves the wall alone
-convicts. If fewer than three survive, return to step 2; the missing input is usually a surplus
+A familiar ingredient pushed to a degree nobody does acquits: precompute everything that is
+fixed, run the cheap thing a thousand times, build a tool instead of a feature. A novel-sounding
+idea that leaves the wall alone convicts. If fewer than three survive, return to step 2; the missing input is usually a surplus
 or a negotiable freedom. Keep a brief internal record of cuts so the filter is substantive. If the
 user has seen a previous round, prosecute those ideas too and name the convicted ones in **The
 stack** without reprinting them.

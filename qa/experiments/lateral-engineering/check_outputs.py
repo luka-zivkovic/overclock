@@ -83,7 +83,11 @@ def check(path: Path) -> dict:
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent
-    names = ("game-harness.md", "trace-annotation.md", "game-harness-v2.md", "trace-annotation-v2.md")
+    names = (
+        "game-harness.md", "trace-annotation.md",
+        "game-harness-v2.md", "trace-annotation-v2.md",
+        "game-harness-v3.md", "trace-annotation-v3.md",
+    )
     results = [check(root / name) for name in names if (root / name).exists()]
     assert sum(result["untested"] for result in results) >= 1
     for result in results:

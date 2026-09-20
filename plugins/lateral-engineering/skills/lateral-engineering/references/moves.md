@@ -4,7 +4,10 @@ Use precedents to make each move concrete, not to require that the proposed idea
 exists. The best output may apply a move somewhere it has not been applied before.
 These are analogies for transformations, not claims that the systems are interchangeable
 or that every idea descended historically from its neighbor. Transfer the mechanism,
-name the assumption it breaks, and account for the new cost.
+name the assumption it breaks, and account for the new cost. Precedents here are not a source
+list: an idea's grounding must come from the user's problem, a field that genuinely shares the
+mechanism, or a cheap experiment. Citing a catalog example because it is in the catalog is not
+grounding.
 
 ## Remove
 
@@ -73,7 +76,7 @@ Assume the bad event happens frequently and design useful progress around it.
 
 ### Exceed the rated limit, then measure
 Treat a vendor rating, quota, or house rule as a claim about the limit, not the limit.
-- **Precedents:** Sony rated the PlayStation CD drive for 70,000 reads; Naughty Dog estimated about 120,000 per playthrough and shipped, with Sony's producer saying "let's not mention that to anyone" ([Gavin](https://all-things-andy-gavin.com/2011/02/06/making-crash-bandicoot-part-5/)); rate limits that are policy rather than capacity; timeouts set by habit. This is a risk the user decides, never a recommendation to hide.
+- **Precedents:** overclocking runs silicon past the vendor's rating and keeps the setting that survives a stability test; rate limits that are policy rather than capacity; timeouts and pool sizes set by habit and never remeasured; Sony rated the PlayStation CD drive for 70,000 reads and Crash Bandicoot shipped at an estimated 120,000 per playthrough ([Gavin](https://all-things-andy-gavin.com/2011/02/06/making-crash-bandicoot-part-5/)). This is a risk the user decides, never a recommendation to hide.
 - **Ask:** Which limit here is a rating, what cheap test would reveal the real one, and who bears the cost if the rating was right?
 
 ### Make the expense the architecture
@@ -101,29 +104,27 @@ Change what can be deployed, moved, owned, or discarded independently.
 ## Arbitrage
 
 Every move above changes the shape of a design. Arbitrage changes what pays for it: a surplus
-the conventional design never uses buys relief on the wall it cannot pass. Naughty Dog's Crash
-Bandicoot is the worked example. The wall was 2 MB of RAM against 8 to 16 MB levels and a
-polygon budget; the surplus was idle CD bandwidth and SGI workstations that could grind all
-night. Every famous trick in that game is one of the four moves below.
+the conventional design never uses buys relief on the wall it cannot pass. The four moves below
+are where the inventory's surplus, fixed facts, and negotiable freedoms turn into ideas.
 
 ### Spend the surplus axis
 Convert something abundant on one axis into relief on the scarce one, at a degree nobody does.
-- **Precedents:** Crash streamed 64 KB pages at 300 KB/s so the disc acted as RAM, keeping about 1.2 MB resident ([Gavin](https://all-things-andy-gavin.com/2011/03/28/crash-bandicoot-teaching-an-old-dog-new-bits-part-3/)); it precomputed visibility offline so no more than 800 visible polygons were ever sorted at runtime, "with no runtime cost" ([Gavin](https://all-things-andy-gavin.com/2011/02/04/making-crash-bandicoot-part-3/)); speculative decoding spends cheap draft compute to buy latency; materialized views spend storage to buy reads.
+- **Precedents:** speculative decoding spends cheap draft compute to buy latency; best-of-N sampling with a verifier spends inference to buy accuracy; CDN edge caches spend storage near users to buy backbone bandwidth; Crash Bandicoot streamed 64 KB pages off the CD so the disc acted as RAM and precomputed visibility offline so at most 800 polygons were ever sorted at runtime ([Gavin](https://all-things-andy-gavin.com/2011/02/04/making-crash-bandicoot-part-3/)).
 - **Ask:** What do we have far too much of, and what would spending all of it buy on the wall?
 
 ### Newly free
 Find a step still priced as expensive because the design was set before it became cheap.
-- **Precedents:** a per-problem language was a heroic effort when Naughty Dog wrote GOOL, a Lisp with state machines and dynamic loading, and is now a generated artifact; Crash 2's disc layout tool tried parameter sets automatically and kept the best, which was once a workstation-days search and is now a loop; one model call per record, per test, or per build step used to be a budget line and is now noise.
+- **Precedents:** coverage-guided fuzzing moved from research clusters to every CI run; a full rebuild or full test suite per commit became normal once remote caches made it cheap; one model call per record, per test, or per build step used to be a budget line and is now noise; a per-problem language was once a heroic effort and is now a generated artifact.
 - **Ask:** Which step in the conventional design assumes a cost that no longer exists?
 
 ### Specialise the instance
 Reject the general solution's cost when the specific case does not carry it.
-- **Precedents:** MIT's Media Lab told Naughty Dog real-time collision "demanded a Cray Supercomputer"; the general problem did, but their instance with a fixed camera path and known geometry did not, so they wrote their own ([Gavin](https://all-things-andy-gavin.com/2011/02/07/making-crash-bandicoot-part-6/)); a perfect hash beats a hash table when the key set is closed; a compiled decision tree beats a rules engine when the rules are known at build time.
+- **Precedents:** a perfect hash beats a hash table when the key set is closed; a compiled decision tree beats a rules engine when the rules are known at build time; a single-writer design skips the locking a general database needs; Naughty Dog were told real-time collision needed a Cray, which was true of the general problem and false of their instance with a fixed camera path ([Gavin](https://all-things-andy-gavin.com/2011/02/07/making-crash-bandicoot-part-6/)).
 - **Ask:** What does the general solution assume that is false here, and what becomes trivial once we admit it?
 
 ### Trade a freedom for a guarantee
 Accept a product constraint the user did not ask for when it turns a runtime problem into an offline one.
-- **Precedents:** Crash put the camera on rails, so every camera position was known and visibility could be precomputed per position; the constraint was the enabler, not a compromise; fixed-size records make random access free; a closed vocabulary makes exact search possible; an append-only log makes replay trivial.
+- **Precedents:** fixed-size records make random access free; a closed vocabulary makes exact search possible; an append-only log makes replay trivial; Rust gives up unrestricted aliasing to get memory safety without a collector; a camera on rails let Crash Bandicoot precompute visibility per position, the constraint being the enabler rather than a compromise.
 - **Ask:** Which freedom, if given up, makes the wall disappear, and would the user take that trade if it were offered plainly? Tag the offer `· accepts:`.
 
 ## Deliberately worse
