@@ -22,14 +22,16 @@
         }
       ],
       "expectations": [
-        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
-        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
-        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, then a Wall line naming the one quantitative limit the conventional answer cannot pass, marked assumed when the prompt gave no number; hard constraints are preserved rather than silently removed.",
+        "An Inventory line records surplus, fixed, ratings, and negotiable freedoms from the prompt or as labelled working assumptions; missing items are marked unknown rather than invented.",
+        "The assumption list contains 5–8 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4–6 ranked reframings with 3–5 word names and explicit breaks labels that map to different assumptions; each entry has 2–4 explanatory sentences that state a concrete cost and what the idea does to the wall, plus exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one reframing is an arbitrage that spends a surplus named in the inventory, specialises to a fixed fact of this situation, or accepts a self-imposed constraint tagged accepts:, and it could not have been written from a generic version of the prompt.",
         "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
-        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
-        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, caches at several layers, or a technology name such as 'use an LLM' as the idea; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The stack composes one or two reframings, names the constraint it accepts, the number it reaches on the wall, and the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
         "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
-        "Keep the stated 4B capability constraint, distinguish generalizing to unfamiliar rules from memorizing 2048/minesweeper, and include an Untested grounding with a cheap concrete experiment and an observable pass/fail signal. Do not invent Gemma performance measurements or verified model specifications."
+        "Keep the stated 4B capability constraint as fixed, distinguish generalizing to unfamiliar rules from memorizing 2048/minesweeper, and include an Untested grounding with a cheap concrete experiment and an observable pass/fail signal. Do not invent Gemma performance measurements or verified model specifications."
       ]
     },
     {
@@ -43,12 +45,14 @@
         }
       ],
       "expectations": [
-        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
-        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
-        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, then a Wall line naming the one quantitative limit the conventional answer cannot pass, marked assumed when the prompt gave no number; hard constraints are preserved rather than silently removed.",
+        "An Inventory line records surplus, fixed, ratings, and negotiable freedoms from the prompt or as labelled working assumptions; missing items are marked unknown rather than invented.",
+        "The assumption list contains 5–8 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4–6 ranked reframings with 3–5 word names and explicit breaks labels that map to different assumptions; each entry has 2–4 explanatory sentences that state a concrete cost and what the idea does to the wall, plus exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one reframing is an arbitrage that spends a surplus named in the inventory, specialises to a fixed fact of this situation, or accepts a self-imposed constraint tagged accepts:, and it could not have been written from a generic version of the prompt.",
         "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
-        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
-        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, caches at several layers, or a technology name such as 'use an LLM' as the idea; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The stack composes one or two reframings, names the constraint it accepts, the number it reaches on the wall, and the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
         "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
         "Consider whether every trace needs a human label and whether the needed output is labels or a reliable evaluation decision. Do not assert universal review requirements are removable if they are actual contractual obligations."
       ]
@@ -64,14 +68,16 @@
         }
       ],
       "expectations": [
-        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
-        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
-        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, then a Wall line naming the one quantitative limit the conventional answer cannot pass, marked assumed when the prompt gave no number; hard constraints are preserved rather than silently removed.",
+        "An Inventory line records surplus, fixed, ratings, and negotiable freedoms from the prompt or as labelled working assumptions; missing items are marked unknown rather than invented.",
+        "The assumption list contains 5–8 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4–6 ranked reframings with 3–5 word names and explicit breaks labels that map to different assumptions; each entry has 2–4 explanatory sentences that state a concrete cost and what the idea does to the wall, plus exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one reframing is an arbitrage that spends a surplus named in the inventory, specialises to a fixed fact of this situation, or accepts a self-imposed constraint tagged accepts:, and it could not have been written from a generic version of the prompt.",
         "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
-        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
-        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, caches at several layers, or a technology name such as 'use an LLM' as the idea; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The stack composes one or two reframings, names the constraint it accepts, the number it reaches on the wall, and the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
         "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
-        "The core briefly identifies at least one convicted prior idea and its familiar pattern, and the new spine moves beyond it without reprinting the previous conventional solutions."
+        "The stack briefly identifies at least one convicted prior idea and its familiar pattern, and the new spine moves beyond it without reprinting the previous conventional solutions."
       ]
     },
     {
@@ -100,14 +106,16 @@
         }
       ],
       "expectations": [
-        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, and preserves hard constraints in the proposed solutions rather than silently removing them.",
-        "The assumption list contains 5\u20138 short declarative assumptions, not generic questions or asserted new user requirements.",
-        "There are 4\u20136 ranked reframings with 3\u20135 word names and explicit breaks labels that map to different assumptions; each entry has 2\u20134 explanatory sentences with a concrete cost and exactly one Grounding line using Precedent, Argument, or Untested.",
+        "The response starts with a one-line Goal that expresses the outcome without implementation nouns, then a Wall line naming the one quantitative limit the conventional answer cannot pass, marked assumed when the prompt gave no number; hard constraints are preserved rather than silently removed.",
+        "An Inventory line records surplus, fixed, ratings, and negotiable freedoms from the prompt or as labelled working assumptions; missing items are marked unknown rather than invented.",
+        "The assumption list contains 5–8 short declarative assumptions, not generic questions or asserted new user requirements.",
+        "There are 4–6 ranked reframings with 3–5 word names and explicit breaks labels that map to different assumptions; each entry has 2–4 explanatory sentences that state a concrete cost and what the idea does to the wall, plus exactly one Grounding line using Precedent, Argument, or Untested.",
+        "At least one reframing is an arbitrage that spends a surplus named in the inventory, specialises to a fixed fact of this situation, or accepts a self-imposed constraint tagged accepts:, and it could not have been written from a generic version of the prompt.",
         "At least one surviving idea has an oblique tag containing one of the ten catalog constraints and its mechanism meaningfully reflects that constraint, rather than merely appending the words.",
-        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, or caches at several layers; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
-        "The core names one or two ideas forming a practical spine, explains their fit, and identifies the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
+        "The ideas change different assumptions rather than offering library swaps, generic queues, more retries, caches at several layers, or a technology name such as 'use an LLM' as the idea; uncertain precedents are qualified, and proposed experiments are not reported as completed.",
+        "The stack composes one or two reframings, names the constraint it accepts, the number it reaches on the wall, and the single biggest risk. The conventional draft and private reasoning/prosecution transcript are not printed.",
         "The workspace remains unchanged, no implementation or experiment is executed, and nothing is committed.",
-        "Ask only one or two sharp constraint questions while still providing a usable first pass with explicit working assumptions. Do not fabricate budget, latency, deployment, or model facts and do not stop at a long intake questionnaire."
+        "Ask only one or two sharp questions for the wall and inventory while still providing a usable first pass with explicit working assumptions. Do not fabricate budget, latency, deployment, or model facts and do not stop at a long intake questionnaire."
       ]
     }
   ]

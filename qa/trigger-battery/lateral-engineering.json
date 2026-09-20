@@ -1,14 +1,15 @@
 {
   "skill": "lateral-engineering",
   "install_modes": [
-    "skill"
+    "skill",
+    "stack"
   ],
   "thresholds": {
     "precision": 0.9,
     "recall": 0.9,
     "specificity": 0.9
   },
-  "note": "Subjective quality change; routing measurements are separate. Closed-world ownership: only lateral-engineering on positives and no skill on target-only negatives. No external composition is declared.",
+  "note": "Subjective quality change; routing measurements are separate. Target-only skill mode is a closed world: only lateral-engineering on positives and no skill on negatives. Stack mode adds critical-thinking and groundwork, the nearest neighbours for 'reframe', 'stress-test', and 'walk me through', so a critique or elicitation prompt must route to that sibling and never to lateral-engineering.",
   "should_trigger": [
     {
       "prompt": "Don't give me the usual architecture for our agent fleet. Find non-obvious alternatives.",
@@ -69,6 +70,12 @@
       "allowed_skills": [
         "lateral-engineering"
       ]
+    },
+    {
+      "prompt": "Here is our wall: 2 GB of embeddings have to fit on a 512 MB edge box. Don't give me quantization-and-prune; what could we trade to make the problem disappear?",
+      "allowed_skills": [
+        "lateral-engineering"
+      ]
     }
   ],
   "should_not": [
@@ -110,15 +117,35 @@
     },
     {
       "prompt": "Critique the evidence behind this latency claim; do not propose alternative architectures.",
-      "allowed_skills": []
+      "allowed_skills": [
+        "critical-thinking"
+      ]
     },
     {
       "prompt": "Interview me about requirements for our new feature.",
-      "allowed_skills": []
+      "allowed_skills": [
+        "groundwork"
+      ]
     },
     {
       "prompt": "Create and maintain a living feature dossier for team invitations.",
       "allowed_skills": []
+    },
+    {
+      "prompt": "Our event ingestion service keeps needing more coordination. Walk me through the standard options and recommend one.",
+      "allowed_skills": []
     }
-  ]
+  ],
+  "plugin": "lateral-engineering",
+  "plugins": [
+    "lateral-engineering",
+    "critical-thinking",
+    "groundwork"
+  ],
+  "forbidden_skills": [
+    "critical-thinking",
+    "independent-research",
+    "groundwork"
+  ],
+  "samples": 3
 }

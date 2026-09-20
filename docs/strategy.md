@@ -330,6 +330,16 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   target-only routing battery cover creative requests, reruns, thin input, and anti-triggers.
   No baseline lift or live routing success is claimed; isolated live runs require credentials
   unavailable during authoring. Structural checks do not establish creative quality.
+- **Arbitrage revision (2026-09-20), pre-release:** a critical-thinking pass against how Naughty
+  Dog solved Crash Bandicoot's PlayStation limits found the draft could not have produced those
+  ideas: it took only the prompt, had no numeric wall, no inventory of surplus or fixed facts,
+  forbade self-imposed constraints, and convicted ideas for familiarity rather than for leaving
+  the wall untouched. The revision adds a Wall line, an Inventory step, an Arbitrage move family
+  with an `accepts:` tag, wall-and-cost prosecution, and a deeper closing stack, at a smaller
+  body. Rerunning the two prompts met the pre-registered signal (an idea per prompt that names
+  the wall and exploits an inventory fact) but with assumed inventories and a model change
+  between rounds; the honest reading is leverage over surprise, recorded in
+  `qa/experiments/lateral-engineering/README.md`. Still `subjective`; live suites still unrun.
 
 ## Groundings performed (reference)
 

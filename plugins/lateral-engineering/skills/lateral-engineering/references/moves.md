@@ -71,6 +71,11 @@ Assume the bad event happens frequently and design useful progress around it.
 - **Precedents:** MapReduce retries work after worker failure; Bitcoin reaches agreement despite competing participants through costly proof of work; CRDTs tolerate concurrent updates under their merge rules; circuit breakers contain repeated dependency failure.
 - **Ask:** If this failed ten times more often, what architecture would become simpler than prevention?
 
+### Exceed the rated limit, then measure
+Treat a vendor rating, quota, or house rule as a claim about the limit, not the limit.
+- **Precedents:** Sony rated the PlayStation CD drive for 70,000 reads; Naughty Dog estimated about 120,000 per playthrough and shipped, with Sony's producer saying "let's not mention that to anyone" ([Gavin](https://all-things-andy-gavin.com/2011/02/06/making-crash-bandicoot-part-5/)); rate limits that are policy rather than capacity; timeouts set by habit. This is a risk the user decides, never a recommendation to hide.
+- **Ask:** Which limit here is a rating, what cheap test would reveal the real one, and who bears the cost if the rating was right?
+
 ### Make the expense the architecture
 Make an apparent inefficiency the isolation boundary, product feature, or operating model.
 - **Precedents:** per-tenant databases spend database count on isolation; Bitcoin spends computation on consensus participation; AWS exposes infrastructure capacity as rentable services; llama.cpp makes commodity/local execution a design center.
@@ -93,6 +98,34 @@ Change what can be deployed, moved, owned, or discarded independently.
 - **Precedents:** SQLite deploys with the application; per-tenant databases give tenants distinct operational boundaries; Borg/Kubernetes schedule groups of processes; local-first applications put useful state on each device.
 - **Ask:** What would become replaceable if the deployment boundary followed failure, ownership, or the customer instead of the codebase?
 
+## Arbitrage
+
+Every move above changes the shape of a design. Arbitrage changes what pays for it: a surplus
+the conventional design never uses buys relief on the wall it cannot pass. Naughty Dog's Crash
+Bandicoot is the worked example. The wall was 2 MB of RAM against 8 to 16 MB levels and a
+polygon budget; the surplus was idle CD bandwidth and SGI workstations that could grind all
+night. Every famous trick in that game is one of the four moves below.
+
+### Spend the surplus axis
+Convert something abundant on one axis into relief on the scarce one, at a degree nobody does.
+- **Precedents:** Crash streamed 64 KB pages at 300 KB/s so the disc acted as RAM, keeping about 1.2 MB resident ([Gavin](https://all-things-andy-gavin.com/2011/03/28/crash-bandicoot-teaching-an-old-dog-new-bits-part-3/)); it precomputed visibility offline so no more than 800 visible polygons were ever sorted at runtime, "with no runtime cost" ([Gavin](https://all-things-andy-gavin.com/2011/02/04/making-crash-bandicoot-part-3/)); speculative decoding spends cheap draft compute to buy latency; materialized views spend storage to buy reads.
+- **Ask:** What do we have far too much of, and what would spending all of it buy on the wall?
+
+### Newly free
+Find a step still priced as expensive because the design was set before it became cheap.
+- **Precedents:** a per-problem language was a heroic effort when Naughty Dog wrote GOOL, a Lisp with state machines and dynamic loading, and is now a generated artifact; Crash 2's disc layout tool tried parameter sets automatically and kept the best, which was once a workstation-days search and is now a loop; one model call per record, per test, or per build step used to be a budget line and is now noise.
+- **Ask:** Which step in the conventional design assumes a cost that no longer exists?
+
+### Specialise the instance
+Reject the general solution's cost when the specific case does not carry it.
+- **Precedents:** MIT's Media Lab told Naughty Dog real-time collision "demanded a Cray Supercomputer"; the general problem did, but their instance with a fixed camera path and known geometry did not, so they wrote their own ([Gavin](https://all-things-andy-gavin.com/2011/02/07/making-crash-bandicoot-part-6/)); a perfect hash beats a hash table when the key set is closed; a compiled decision tree beats a rules engine when the rules are known at build time.
+- **Ask:** What does the general solution assume that is false here, and what becomes trivial once we admit it?
+
+### Trade a freedom for a guarantee
+Accept a product constraint the user did not ask for when it turns a runtime problem into an offline one.
+- **Precedents:** Crash put the camera on rails, so every camera position was known and visibility could be precomputed per position; the constraint was the enabler, not a compromise; fixed-size records make random access free; a closed vocabulary makes exact search possible; an append-only log makes replay trivial.
+- **Ask:** Which freedom, if given up, makes the wall disappear, and would the user take that trade if it were offered plainly? Tag the offer `· accepts:`.
+
 ## Deliberately worse
 
 ### Worsen the proxy
@@ -106,6 +139,15 @@ Deliberately degrade a local measure when doing so improves the outcome that mat
 Turn infrastructure, operational knowledge, or a supporting artifact into something others can consume.
 - **Precedents:** AWS sells infrastructure primitives as services; Kubernetes exposes ideas informed by Google's Borg experience; SQLite makes an embedded database broadly reusable; the [Michelin Guide](https://www.michelin.com/en/media/magazine/explore-guide-michelin) makes motoring information a useful product alongside tires.
 - **Ask:** Which internal capability is more valuable than the workflow it currently serves, and who else could use it directly?
+
+## Oblique constraints
+
+Draw one of these blindly before generating, as a creative lens rather than a requirement:
+
+must work offline · buildable with 1995 technology · operated by someone who can't code ·
+must get better as it fails more · runs on the smallest machine in the building ·
+survives the team being fired · explainable in one sentence to a child · costs zero at rest ·
+reversible at any point · what you'd build if you had to demo tomorrow
 
 ## Change the success metric
 

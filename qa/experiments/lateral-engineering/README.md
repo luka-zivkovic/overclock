@@ -1,5 +1,11 @@
 # Lateral engineering author-run verification
 
+Two rounds are recorded. The **0.1.0 draft** round (2026-09-05) is below under "Draft round".
+The **arbitrage revision** round (2026-09-20) reran the same two prompts under the revised skill;
+see "Revision round" at the end. Both are `subjective` tier author-run evidence.
+
+## Draft round
+
 - **Date:** 2026-09-05.
 - **Evidence tier:** `subjective`. These are the author's requested self-runs and qualitative
   review, not independent model grading, measured novelty, or evidence of baseline improvement.
@@ -94,3 +100,57 @@ under `lateral-engineering/`. Its CRC check and byte-for-byte comparison with so
 [source-record.json](source-record.json) pins the tested source and example hashes. The
 PR branch contains only Lateral Engineering and its required publication/evaluation integration;
 unrelated Feature Dossier work remains outside this branch.
+
+## Revision round (2026-09-20)
+
+**Why the skill changed.** A critical-thinking pass compared the draft procedure with how Naughty
+Dog solved Crash Bandicoot's PlayStation constraints: camera on rails so visibility could be
+precomputed offline, a virtual-memory scheme streaming 64 KB pages off the CD, a disc-layout
+search tool, a domain language, crates added in a Saturday to fill empty levels. Every one of
+those ideas was an arbitrage between a numeric wall and a surplus the standard design ignored,
+and most came from facts specific to that machine. The draft skill received only the prompt, had
+no wall, no inventory, forbade self-imposed constraints, and convicted ideas for being familiar
+rather than for leaving the wall untouched. The revision adds a **Wall** line, an **Inventory**
+step (surplus, fixed, ratings, negotiable freedoms), an **Arbitrage** move family with an
+`accepts:` tag for offered constraints, a prosecution test based on wall movement and cost
+instead of "would a senior engineer say this in ten minutes", and a deeper **The stack** closer.
+Body size fell from ~2204 to ~2061 estimated tokens.
+
+**Rerun protocol.** Same two prompts, oblique constraints drawn with `secrets.choice` before
+generation (`explainable in one sentence to a child`; `reversible at any point`), inventory values
+supplied as labelled working assumptions because no user was present. Outputs:
+[game-harness-v2.md](game-harness-v2.md) and [trace-annotation-v2.md](trace-annotation-v2.md).
+`check_outputs.py` accepts both skeletons and passes on all four files.
+
+**Pre-registered pass signal.** At least one idea per prompt that names the wall, exploits a
+stated inventory fact, and could not have been written from the prompt alone.
+
+**Side by side, author judgment.**
+
+| Prompt | Same idea re-anchored | New in v2 | Dropped from v1 |
+|---|---|---|---|
+| Game harness | Checks Before Code ≈ v1 Semantic Windtunnel; Distil One Game Family ≈ v1 Generalization Frontier | Sample Thousands, Ship One (spends the surplus, carries the k experiment); Cache The Model's Knowledge (newly free frontier model at design time); Grade By Play, Not Code | Dormant Repair Capsules; Grow A Failure Alphabet |
+| Trace annotation | Judge State, Not Narrative ≈ v1 Spend Judgment At Authoring; Reviewers Write Checks ≈ v1 Let Reviewers Rewrite Outcomes | Humans Grade The Judge (spends judge tokens, moves the wall to task-type count); Disagreement Is The Queue; Label Once, Replay Forever | Retire Questions Before Traces; Keep Disagreement As Structure |
+
+- The pass signal is met for both prompts, with the caveat that the inventory was assumed by the
+  author rather than supplied by a user, so "not writable from the prompt alone" is weaker than
+  it would be with a real inventory.
+- Every v2 entry states what it does to the wall; no v1 entry did. Two v2 entries per prompt
+  carry an `accepts:` trade the user can refuse.
+- The revision is not uniformly more inventive. v1's Dormant Repair Capsules and Retire
+  Questions Before Traces were more surprising than anything in v2, and v2's Humans Grade The
+  Judge and Disagreement Is The Queue are close to known practice in model evaluation. Under
+  the draft's ten-minute test they would have been convicted; under the revised test they acquit
+  because they move the assumed wall by roughly 85 percent. That trade, leverage over surprise,
+  is the deliberate change, and whether it is the right trade for a given user is a preference,
+  not something these runs can settle.
+- Confound: v1 was produced by a Codex session and v2 by a Claude session, so model and skill
+  changed together. A clean comparison needs the same model on both skill versions, which the
+  committed live suite provides once credentials are available.
+
+**Routing.** The description now triggers on "what could we trade" and on the user *saying* a
+design is stuck rather than the model judging it so, and adds "a walkthrough of standard options"
+as an anti-trigger. The battery gained one positive (a wall-and-trade prompt), one negative (a
+standard-options walkthrough), and a `stack` mode with `critical-thinking` and `groundwork`, the
+nearest neighbours for "reframe", "stress-test", and "walk me through", so a critique or
+elicitation prompt must route to the sibling and never here. Live routing remains unmeasured.

@@ -31,11 +31,18 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 ## lateral-engineering
 
 ### 0.1.0 — 2026-09-05 (initial release)
-- Add an advisory skill for unconventional engineering alternatives: mechanism-free goals,
-  hidden assumptions, six move families, an arbitrary oblique constraint, and prosecution of
-  conventional candidates before ranking 4–6 grounded reframings with explicit tradeoffs.
-- Ship a standalone moves catalog with cross-field precedents, implicit routing with concrete
-  anti-triggers, two requested author-run examples, and behavioral/routing controls.
+- Add an advisory skill for unconventional engineering alternatives: a mechanism-free goal and
+  a numeric wall, an inventory of the situation's surplus, fixed facts, rated limits, and
+  negotiable freedoms, hidden assumptions, seven move families including Arbitrage, an arbitrary
+  oblique constraint, and prosecution by wall movement and cost before ranking 4–6 grounded
+  reframings that each state their cost and their effect on the wall.
+- Allow offered constraints tagged `accepts:` so a self-imposed limit that makes the wall
+  disappear is presented as a trade the user can refuse, and close with **The stack**, one
+  composition naming its accepted constraint, target number, and biggest risk.
+- Ship a standalone moves catalog with cross-field precedents, including the Crash Bandicoot
+  arbitrages that motivated the revision; implicit routing with concrete anti-triggers; a
+  routing battery in target-only and critical-thinking/groundwork stack modes; and two prompts
+  run under both the draft and revised skill.
 - Evidence tier is subjective: author-run examples check the requested output contract, without
   claiming measured creativity gains or successful live routing.
 
