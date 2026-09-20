@@ -31,7 +31,6 @@ from typing import Any, Callable
 PROVIDERS = ("anthropic", "openai-compatible")
 ANTHROPIC_BASE_URL = "https://api.anthropic.com"
 ANTHROPIC_VERSION = "2023-06-01"
-ANTHROPIC_OAUTH_BETA = "oauth-2025-04-20"
 DEFAULT_TIMEOUT_SECONDS = 600
 MAX_TIMEOUT_SECONDS = 3600
 DEFAULT_MAX_TURNS = 8
@@ -267,6 +266,25 @@ def load_spec(path: Path) -> tuple[dict[str, Any], str]:
 # ---------------------------------------------------------------------- credentials
 
 
+def confirm_credential_env(spec: dict[str, Any], confirmed: str | None) -> None:
+    """A non-default credential variable named by the spec must be repeated on the command line.
+
+    A spec is data the user may not have written. Without this gate a spec could name any
+    secret-looking variable and have it sent as a bearer token to any https ``base_url``. The
+    run command therefore refuses to read a spec-chosen variable unless ``--credential-env`` names
+    the same variable, which puts the choice in the conversation where the user can see it.
+    """
+    override = spec.get("api_key_env")
+    if override and confirmed != override:
+        raise BenchError(
+            "missing_credentials",
+            f"spec names the non-default credential variable {override}; rerun with "
+            f"--credential-env {override} to confirm it may be sent to {spec['base_url']}",
+        )
+    if confirmed and not override:
+        raise BenchError("invalid_spec", f"--credential-env {confirmed} given but the spec sets no api_key_env")
+
+
 def resolve_credential(spec: dict[str, Any], environ: dict[str, str]) -> tuple[str, str]:
     """Return (scheme, secret). Scheme is ``api-key`` or ``bearer``."""
     override = spec.get("api_key_env")
@@ -361,7 +379,6 @@ class Transport:
                 headers["x-api-key"] = secret
             else:
                 headers["authorization"] = f"Bearer {secret}"
-                headers["anthropic-beta"] = ANTHROPIC_OAUTH_BETA
         else:
             headers["authorization"] = f"Bearer {secret}"
         return headers
@@ -897,7 +914,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     timeout = args.timeout_seconds
     _require(1 <= timeout <= MAX_TIMEOUT_SECONDS, f"--timeout-seconds must be from 1 to {MAX_TIMEOUT_SECONDS}")
     mock = load_mock(args.mock) if args.mock else None
-    credential = None if mock is not None else resolve_credential(spec, dict(os.environ))
+    credential = None
+    if mock is None:
+        confirm_credential_env(spec, args.credential_env)
+        credential = resolve_credential(spec, dict(os.environ))
     out = prepare_out_dir(args.out, args.force)
     transport = Transport(spec, credential=credential, timeout=timeout, mock=mock)
     summary = run_bench(spec, digest, out, transport=transport)
@@ -929,6 +949,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--max-turns", type=int)
     run.add_argument("--max-requests", type=int)
     run.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
+    run.add_argument(
+        "--credential-env",
+        help="repeat the spec's non-default api_key_env to confirm that variable may be sent to base_url",
+    )
     run.add_argument("--force", action="store_true", help="allow writing into a non-empty output directory")
     run.set_defaults(func=cmd_run)
 

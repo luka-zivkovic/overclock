@@ -312,13 +312,13 @@ class LiveTransportTest(unittest.TestCase):
         self.assertIn("[redacted-credential]", summary["final_text"])
         self.assertNotIn("headers", json.dumps(events))
 
-    def test_bearer_token_uses_oauth_beta_header(self) -> None:
+    def test_bearer_token_is_sent_plain(self) -> None:
         post = FakePost([(200, {}, response("end_turn", [{"type": "text", "text": "ok"}]))])
-        self.run_live(base_spec(), post, ("bearer", "oauth-token"))
+        self.run_live(base_spec(), post, ("bearer", "gateway-token"))
         headers = post.calls[0][1]
-        self.assertEqual(headers["authorization"], "Bearer oauth-token")
-        self.assertEqual(headers["anthropic-beta"], bench.ANTHROPIC_OAUTH_BETA)
+        self.assertEqual(headers["authorization"], "Bearer gateway-token")
         self.assertNotIn("x-api-key", headers)
+        self.assertNotIn("anthropic-beta", headers)
 
     def test_retry_once_on_rate_limit_then_succeed(self) -> None:
         post = FakePost([
@@ -484,6 +484,28 @@ class CompareAndCliTest(unittest.TestCase):
         self.assertEqual(json.loads(err)["status"], "missing_credentials")
         self.assertFalse((self.root / "live").exists())
 
+    def test_spec_chosen_credential_variable_needs_command_line_confirmation(self) -> None:
+        """A spec must not be able to pick which secret is sent to its endpoint on its own."""
+        spec = base_spec(provider="openai-compatible", base_url="http://127.0.0.1:9/v1", api_key_env="AWS_SECRET_ACCESS_KEY")
+        path = self.root / "exfil.json"
+        path.write_text(json.dumps(spec))
+        env = {"AWS_SECRET_ACCESS_KEY": "aws-secret", "OPENAI_API_KEY": "o"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            code, _, err = self.invoke("run", "--spec", str(path), "--out", str(self.root / "no-flag"))
+            self.assertEqual((code, json.loads(err)["status"]), (1, "missing_credentials"))
+            self.assertIn("--credential-env AWS_SECRET_ACCESS_KEY", json.loads(err)["message"])
+            code, _, err = self.invoke("run", "--spec", str(path), "--out", str(self.root / "wrong-flag"), "--credential-env", "OPENAI_API_KEY")
+            self.assertEqual((code, json.loads(err)["status"]), (1, "missing_credentials"))
+            self.assertFalse((self.root / "no-flag").exists())
+            self.assertFalse((self.root / "wrong-flag").exists())
+            # The matching flag passes the gate; the unreachable loopback endpoint then fails as a provider error.
+            code, out, _ = self.invoke("run", "--spec", str(path), "--out", str(self.root / "confirmed"), "--credential-env", "AWS_SECRET_ACCESS_KEY", "--timeout-seconds", "1")
+            self.assertEqual((code, json.loads(out)["status"]), (2, "provider_error"))
+            self.assertNotIn("aws-secret", (self.root / "confirmed" / "transcript.jsonl").read_text())
+            # The flag without a spec-level api_key_env is a contradiction, not a silent override.
+            code, _, err = self.invoke("run", "--spec", str(self.spec_path), "--out", str(self.root / "stray"), "--credential-env", "OPENAI_API_KEY")
+            self.assertEqual((code, json.loads(err)["status"]), (1, "invalid_spec"))
+
     def test_invalid_spec_exits_one_with_json_on_stderr(self) -> None:
         bad = self.root / "bad.json"
         bad.write_text("{not json")
@@ -502,7 +524,7 @@ class CompareAndCliTest(unittest.TestCase):
         summary = json.loads(out)
         self.assertEqual(summary["tool_sequence"], ["lookup_customer", "list_charges"])
         self.assertEqual(summary["missing_stubs"], [])
-        self.assertIsNotNone(summary["estimated_usd"])
+        self.assertIsNone(summary["estimated_usd"], "the bundled template must not ship a price table")
 
 
 if __name__ == "__main__":

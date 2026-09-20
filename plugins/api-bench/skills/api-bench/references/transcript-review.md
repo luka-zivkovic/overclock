@@ -21,8 +21,8 @@ context for that. Then open `transcript.jsonl` and quote the lines that support 
    several `tool_use` blocks shows a parallel call. Check that dependencies hold (lookup before
    list) and that the app's loop can honor parallel calls in one message.
 5. **Refusals and stop details.** A `refusal` status records `stop_details` on the `response`
-   event. Report the category verbatim; do not rephrase the prompt to route around a safety
-   decision without telling the user.
+   event. Report the category verbatim. Tell the user before any prompt change that would route
+   around a safety decision, and let them decide whether to make it.
 6. **Usage.** Compare `usage.input_tokens` across turns: a growing prefix is expected, but a jump
    after a tool result means a large stub. `cache_read_input_tokens` of zero across a multi-turn
    live run means nothing is being cached yet; that is a design note for the app, not a bench

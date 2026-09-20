@@ -18,7 +18,11 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   answered them, and usage per turn in `transcript.jsonl`, plus a `summary.json`
   with totals, tool order, missing stubs, and a dollar estimate when the spec
   supplies current prices. Credentials come only from the environment, are never
-  logged, and are redacted wherever their value would appear.
+  logged, and are redacted wherever their value would appear. A spec that names a
+  non-default `api_key_env` is honored only when the run command repeats it as
+  `--credential-env`, so a spec cannot choose on its own which secret is sent to its
+  endpoint, and the skill quotes the endpoint host and credential variable before
+  asking for the go-ahead.
 - `validate` checks a spec offline, `--mock` replays canned responses with no
   network or credential, and `compare` diffs two run summaries. The skill asks
   for the user's go-ahead before the first live request in a conversation and

@@ -21,7 +21,7 @@
     "recall": 0.8,
     "specificity": 0.9
   },
-  "note": "Routing battery for api-bench. It should fire when the user wants to simulate, dry-run, prototype, or compare how an application would call a model API with a prompt and tool set, including against an OpenAI-compatible endpoint. It must stay silent for delegation to another coding harness, evaluation of Claude Code skills or sessions, built-in subagents, documentation questions about the API, and ordinary code changes that happen to contain an API call.",
+  "note": "Routing battery for api-bench. It should fire when the user wants an actual transcript of how an application would call a model API with a prompt and tool set, including against an OpenAI-compatible endpoint. It must stay silent for delegation to another coding harness, evaluation of Claude Code skills or sessions, built-in subagents, documentation questions about the API, predictions that reasoning about the schemas can answer without a run, and ordinary code changes that happen to contain an API call.",
   "should_trigger": [
     "Before I write the support bot, simulate how Claude would use these three tools with this system prompt through the API and show me the transcript.",
     "Dry-run my Messages API request design: here is the system prompt and the tool schemas; stub the tool results and tell me what the model does with them.",
@@ -69,6 +69,10 @@
     },
     {
       "prompt": "Rename the tool from get_user to lookup_customer everywhere in src/tools.py.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Looking at these two tool schemas, which one would Claude probably call first for a billing question, and why?",
       "allowed_skills": []
     }
   ]

@@ -1,6 +1,6 @@
 ---
 name: api-bench
-description: "Dry-run how an application would call a model API before writing the app: send a system prompt, seed messages, tool definitions, and stubbed tool results through a bounded, budget-capped tool-use loop against the Claude Messages API or an OpenAI-compatible endpoint, then review the exact transcript. Use when the user wants to prototype, simulate, dry-run, or bench an API prompt or tool design, see what Claude or another model would do with a tool set, compare two prompt variants, or check a request shape before it goes into code. Do not use to delegate work to another coding harness, to evaluate Claude Code skills or sessions, to spawn subagents, to answer API questions that documentation already settles, or for ordinary code changes that name no model call."
+description: "Dry-run how an application would call a model API before writing the app: send a system prompt, seed messages, tool definitions, and stubbed tool results through a bounded, budget-capped tool-use loop against the Claude Messages API or an OpenAI-compatible endpoint, then review the exact transcript. Use when the user wants an actual transcript: to prototype, simulate, dry-run, or bench an API prompt or tool design, see what Claude or another model actually does with a tool set, compare two prompt variants on real runs, or check a request shape before it goes into code. Do not use to delegate work to another coding harness, to evaluate Claude Code skills or sessions, to spawn subagents, to answer API questions that documentation already settles, to predict what a model would do when reasoning about the schemas answers it, or for ordinary code changes that name no model call."
 ---
 
 # API Bench
@@ -16,11 +16,16 @@ user directories or plugin caches to discover it.
 ## Boundaries
 
 - A live run sends the spec's prompts, tool schemas, and stub results to an external provider and
-  spends money. Before the first live request in a conversation, state the provider, model,
-  request cap, and token or dollar cap, and get the user's go-ahead. A mock run needs no consent.
+  spends money. Before the first live request in a conversation, run `validate` and quote its
+  `endpoint` and `credential_source` to the user together with the model, request cap, and token
+  or dollar cap, then get the user's go-ahead. The host in `endpoint` is where the credential
+  goes; a spec the user did not write can point it anywhere. A mock run needs no consent.
 - Credentials come only from the environment (`ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`,
   `OPENAI_API_KEY`, or the spec's `api_key_env`). Never put a key in a spec, a command argument,
   or a transcript, and never print one. If no credential is present, run with `--mock` or stop.
+- A spec that names its own `api_key_env` is asking for a specific secret. The helper refuses to
+  read it unless the run command repeats the name as `--credential-env <NAME>`; add that flag only
+  after the user has seen which variable and which endpoint are involved.
 - Every run needs a `budget.max_requests`; unbounded runs are refused. Keep first runs small:
   one seed conversation, a handful of turns, a low request cap.
 - Write run output only to a fresh scratch directory outside version control. Do not commit

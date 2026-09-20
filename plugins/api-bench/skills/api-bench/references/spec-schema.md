@@ -11,7 +11,7 @@ limit. Paths in this document are relative to the skill directory.
 | `provider` | no | `anthropic` (default) or `openai-compatible`. |
 | `model` | yes | Model identifier sent verbatim. Use the exact current ID from the provider's model list. |
 | `base_url` | anthropic: no; openai-compatible: yes | Absolute URL. Must be `https` unless the host is loopback (`localhost`, `127.0.0.1`, `::1`) for a local server. No query or fragment. For `anthropic` it defaults to `https://api.anthropic.com` and the helper posts to `/v1/messages`; for `openai-compatible` the helper posts to `<base_url>/chat/completions`, so include any `/v1` prefix the server expects. |
-| `api_key_env` | no | Name of the environment variable holding the credential, when it is not the default. Anthropic defaults to `ANTHROPIC_API_KEY`, then `ANTHROPIC_AUTH_TOKEN` (sent as a bearer token with the OAuth beta header). OpenAI-compatible defaults to `OPENAI_API_KEY`. |
+| `api_key_env` | no | Name of the environment variable holding the credential, when it is not the default. Anthropic defaults to `ANTHROPIC_API_KEY`, then `ANTHROPIC_AUTH_TOKEN` (sent as a plain bearer token, for gateways that accept one). OpenAI-compatible defaults to `OPENAI_API_KEY`. A live `run` honors a non-default name only when the command repeats it as `--credential-env <NAME>`; otherwise it stops with `missing_credentials`. This keeps a spec from quietly choosing which secret is sent to its `base_url`. |
 
 ## Conversation
 
@@ -70,8 +70,10 @@ tool. Stub results longer than 64 KB are truncated with a marker.
 
 `pricing` is optional and holds USD per million tokens: `input_per_mtok` and `output_per_mtok`
 are required together; `cache_read_per_mtok` and `cache_write_per_mtok` default to the input
-price. The helper ships no price table. Copy current prices from the provider on the day of the
-run and say in the report that `estimated_usd` is an estimate from those numbers.
+price. Neither the helper nor the bundled template ships a price; copy current prices from the
+provider on the day of the run, for example
+`"pricing": {"input_per_mtok": 3, "output_per_mtok": 15, "cache_read_per_mtok": 0.3}`, and say
+in the report that `estimated_usd` is an estimate from those numbers.
 
 `notes` is free text for the reader and is never sent to the provider.
 

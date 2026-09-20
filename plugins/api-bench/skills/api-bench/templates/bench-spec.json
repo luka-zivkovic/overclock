@@ -59,14 +59,7 @@
   "effort": "medium",
   "budget": {
     "max_requests": 6,
-    "max_total_tokens": 40000,
-    "max_usd": 0.50
+    "max_total_tokens": 40000
   },
-  "pricing": {
-    "input_per_mtok": 5.0,
-    "output_per_mtok": 25.0,
-    "cache_read_per_mtok": 0.5,
-    "cache_write_per_mtok": 6.25
-  },
-  "notes": "Pricing values are copied from the provider's current price list on the day of the run; update them before trusting estimated_usd."
+  "notes": "No pricing is shipped. To get estimated_usd and a max_usd cap, add a pricing object with the provider's current per-million-token prices (see references/spec-schema.md) and then budget.max_usd."
 }
