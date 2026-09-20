@@ -1,0 +1,79 @@
+{
+  "skill": "api-bench",
+  "plugin": "api-bench",
+  "install_modes": ["skill", "stack"],
+  "plugins": [
+    "api-bench",
+    "agent-bridge",
+    "eval-stack",
+    "critical-thinking"
+  ],
+  "forbidden_skills": [
+    "agent-bridge",
+    "local-eval-stack",
+    "skill-maintenance",
+    "critical-thinking",
+    "independent-research"
+  ],
+  "samples": 3,
+  "thresholds": {
+    "precision": 0.9,
+    "recall": 0.8,
+    "specificity": 0.9
+  },
+  "note": "Routing battery for api-bench. It should fire when the user wants an actual transcript of how an application would call a model API with a prompt and tool set, including against an OpenAI-compatible endpoint. It must stay silent for delegation to another coding harness, evaluation of Claude Code skills or sessions, built-in subagents, documentation questions about the API, predictions that reasoning about the schemas can answer without a run, and ordinary code changes that happen to contain an API call.",
+  "should_trigger": [
+    "Before I write the support bot, simulate how Claude would use these three tools with this system prompt through the API and show me the transcript.",
+    "Dry-run my Messages API request design: here is the system prompt and the tool schemas; stub the tool results and tell me what the model does with them.",
+    "Bench two variants of this extraction prompt against claude-sonnet-5 with a small request cap and tell me which one calls fewer tools.",
+    "I have a local Ollama server on localhost. Prototype how my agent loop would drive it through the OpenAI-compatible endpoint with these two function tools.",
+    "Run a mock of the tool-use loop for this spec with canned responses so I can check the request shape and tool-result plumbing before touching the app.",
+    "Use api-bench on bench/spec.json and review the transcript for schema mismatches in the tool inputs."
+  ],
+  "should_not": [
+    {
+      "prompt": "Implement the retry helper in src/http.ts and run the existing tests.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Use Codex as a read-only second reviewer for this authentication diff; I authorize sharing the diff with Codex.",
+      "allowed_skills": ["agent-bridge"]
+    },
+    {
+      "prompt": "Set up Ironside and Coeval locally so I can judge my skill's real Claude Code sessions.",
+      "allowed_skills": ["local-eval-stack"]
+    },
+    {
+      "prompt": "Stress-test my plan to move billing to event sourcing before we commit to it.",
+      "allowed_skills": ["critical-thinking"]
+    },
+    {
+      "prompt": "Use a built-in subagent to explore the repository in parallel while you write the tests.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "From the documentation, what does the stop_reason field mean and which values can it take?",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Add error handling around the messages.create call in app/client.py.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "What is the current price per million tokens for Claude Opus 5?",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Write three behavioral eval prompts for this new skill and add them to qa/evals.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Rename the tool from get_user to lookup_customer everywhere in src/tools.py.",
+      "allowed_skills": []
+    },
+    {
+      "prompt": "Looking at these two tool schemas, which one would Claude probably call first for a billing question, and why?",
+      "allowed_skills": []
+    }
+  ]
+}

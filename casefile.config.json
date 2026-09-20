@@ -18,6 +18,11 @@
     },
     {
       "ruleId": "capability/network-call",
+      "path": "plugins/api-bench/skills/api-bench/scripts/api_bench.py",
+      "reason": "intended capability: the helper's only job is to POST a bench spec to the Claude Messages API or an OpenAI-compatible endpoint; the endpoint is https-only outside loopback, the credential comes only from the environment, and --mock runs make no network call"
+    },
+    {
+      "ruleId": "capability/network-call",
       "path": "qa/fixtures/"
     },
     {

@@ -1311,6 +1311,186 @@ def build_skill_maintenance(root: Path) -> None:
     init_repo(work, "skill maintenance fixture 3")
 
 
+def build_lateral_engineering(root: Path) -> None:
+    for index in range(5):
+        work = root / "lateral-engineering" / f"eval-{index}"
+        write(work, "README.md", "# Advisory fixture\n\nNo implementation work is requested.\n")
+        init_repo(work, f"lateral engineering advisory fixture {index}")
+
+
+def _bench_tool(name: str, description: str, properties: dict, required: list[str]) -> dict:
+    return {
+        "name": name,
+        "description": description,
+        "input_schema": {
+            "type": "object",
+            "properties": properties,
+            "required": required,
+            "additionalProperties": False,
+        },
+    }
+
+
+def _bench_response(stop_reason: str, content: list[dict], input_tokens: int, output_tokens: int) -> dict:
+    return {
+        "id": f"msg_fixture_{input_tokens}",
+        "type": "message",
+        "role": "assistant",
+        "model": "claude-sonnet-5",
+        "stop_reason": stop_reason,
+        "content": content,
+        "usage": {"input_tokens": input_tokens, "output_tokens": output_tokens},
+    }
+
+
+def build_api_bench(root: Path) -> None:
+    base = root / "api-bench"
+    lookup = _bench_tool(
+        "lookup_customer",
+        "Fetch a customer record by email address.",
+        {"email": {"type": "string"}},
+        ["email"],
+    )
+    charges = _bench_tool(
+        "list_charges",
+        "List charges for a customer id within a month (YYYY-MM).",
+        {"customer_id": {"type": "string"}, "month": {"type": "string"}},
+        ["customer_id", "month"],
+    )
+    orders = _bench_tool(
+        "search_orders",
+        "Search orders for a customer id.",
+        {"customer_id": {"type": "string"}},
+        ["customer_id"],
+    )
+    lookup_stub = {
+        "cases": [
+            {
+                "when": {"email": "ada@example.com"},
+                "result": {"customer_id": "cus_123", "plan": "team", "status": "active"},
+            }
+        ],
+        "error": "customer not found",
+    }
+    charges_stub = {
+        "result": [
+            {"charge_id": "ch_1", "invoice": "inv_0812", "amount_cents": 4900},
+            {"charge_id": "ch_2", "invoice": "inv_0812", "amount_cents": 4900},
+        ]
+    }
+    question = "Customer ada@example.com says her August invoice was charged twice. What should we do?"
+
+    def spec(name: str, system: str, tools: list[dict], stubs: dict, budget: dict) -> str:
+        return json.dumps(
+            {
+                "name": name,
+                "provider": "anthropic",
+                "model": "claude-sonnet-5",
+                "system": system,
+                "messages": [{"role": "user", "content": question}],
+                "tools": tools,
+                "tool_results": stubs,
+                "max_turns": 6,
+                "max_tokens": 1024,
+                "budget": budget,
+            },
+            indent=2,
+        ) + "\n"
+
+    def mock(responses: list[dict]) -> str:
+        return json.dumps({"responses": responses}, indent=2) + "\n"
+
+    lookup_call = {
+        "type": "tool_use", "id": "toolu_f1", "name": "lookup_customer",
+        "input": {"email": "ada@example.com"},
+    }
+    charges_call = {
+        "type": "tool_use", "id": "toolu_f2", "name": "list_charges",
+        "input": {"customer_id": "cus_123", "month": "2026-08"},
+    }
+    orders_call = {
+        "type": "tool_use", "id": "toolu_f3", "name": "search_orders",
+        "input": {"customer_id": "cus_123"},
+    }
+    final_long = {
+        "type": "text",
+        "text": "Invoice inv_0812 carries two successful charges of $49.00, so Ada was charged twice. Refund ch_2 and confirm by email.",
+    }
+    final_short = {"type": "text", "text": "Ada was charged twice on inv_0812; refund ch_2."}
+
+    triage_system = "You are the triage assistant for a support desk. Look up the customer, then check charges before answering. Reply in at most three sentences."
+
+    # eval-0: mock wiring run with one unstubbed tool.
+    work = base / "eval-0"
+    write(work, "bench/spec.json", spec(
+        "triage-wiring", triage_system, [lookup, orders], {"lookup_customer": lookup_stub},
+        {"max_requests": 5},
+    ))
+    write(work, "bench/mock.json", mock([
+        _bench_response("tool_use", [{"type": "text", "text": "Looking up the account."}, lookup_call], 300, 40),
+        _bench_response("tool_use", [orders_call], 380, 30),
+        _bench_response("end_turn", [final_long], 460, 60),
+    ]))
+
+    # eval-1: live run with explicit caps.
+    work = base / "eval-1"
+    write(work, "bench/spec.json", spec(
+        "triage-live", triage_system, [lookup, charges],
+        {"lookup_customer": lookup_stub, "list_charges": charges_stub},
+        {"max_requests": 4, "max_total_tokens": 20000},
+    ))
+
+    # eval-2: compare two prompt variants with canned responses.
+    work = base / "eval-2"
+    write(work, "bench/spec-a.json", spec(
+        "triage-variant-a", triage_system, [lookup, charges],
+        {"lookup_customer": lookup_stub, "list_charges": charges_stub},
+        {"max_requests": 5},
+    ))
+    write(work, "bench/spec-b.json", spec(
+        "triage-variant-b",
+        "You are the triage assistant for a support desk. One lookup_customer call returns everything you need; do not call other tools. Reply in one sentence.",
+        [lookup, charges],
+        {"lookup_customer": lookup_stub, "list_charges": charges_stub},
+        {"max_requests": 5},
+    ))
+    write(work, "bench/mock-a.json", mock([
+        _bench_response("tool_use", [lookup_call], 300, 40),
+        _bench_response("tool_use", [charges_call], 380, 35),
+        _bench_response("end_turn", [final_long], 470, 60),
+    ]))
+    write(work, "bench/mock-b.json", mock([
+        _bench_response("tool_use", [lookup_call], 310, 30),
+        _bench_response("end_turn", [final_short], 390, 20),
+    ]))
+
+    # eval-3: refuse an unbounded live run.
+    work = base / "eval-3"
+    write(work, "bench/spec.json", spec(
+        "triage-bounded", triage_system, [lookup], {"lookup_customer": lookup_stub},
+        {"max_requests": 3},
+    ))
+
+    # eval-4: negative control, an ordinary code change containing an API call.
+    work = base / "eval-4"
+    write(
+        work,
+        "app/client.py",
+        "import anthropic\n\n"
+        "client = anthropic.Anthropic()\n\n\n"
+        "def triage(question: str) -> str:\n"
+        "    response = client.messages.create(\n"
+        "        model=\"claude-opus-5\",\n"
+        "        max_tokens=1024,\n"
+        "        messages=[{\"role\": \"user\", \"content\": question}],\n"
+        "    )\n"
+        "    return \"\".join(block.text for block in response.content if block.type == \"text\")\n",
+    )
+
+    for index in range(5):
+        init_repo(base / f"eval-{index}", f"api bench fixture {index}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build deterministic supplemental live-eval fixtures."
@@ -1330,6 +1510,8 @@ def main() -> int:
     build_solutions(root)
     build_eval_stack(root)
     build_skill_maintenance(root)
+    build_api_bench(root)
+    build_lateral_engineering(root)
     return 0
 
 

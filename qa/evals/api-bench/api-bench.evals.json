@@ -1,0 +1,117 @@
+{
+  "skill_name": "api-bench",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
+  "evals": [
+    {
+      "id": "mock-wiring-run",
+      "prompt": "Use api-bench to dry-run the request in bench/spec.json with the canned provider responses in bench/mock.json. No live calls. Put the run output under bench/out/ and tell me what the transcript shows about this tool design before I write the app.",
+      "expected_output": "The session validates the spec, runs the helper with --mock into a fresh output directory, and reads summary.json and transcript.jsonl. It reports, with transcript evidence, that the model called search_orders without any stub so the tool result was an error, that the stub for lookup_customer answered from its matching case, and that the run ended with end_turn after three requests. It labels the run as a mock that proves loop mechanics and request shape, not model behavior, and changes no repository file.",
+      "files": [
+        {
+          "name": "bench/spec.json",
+          "description": "An api-bench spec with two tools, lookup_customer (stubbed) and search_orders (no stub), a required budget, and no pricing."
+        },
+        {
+          "name": "bench/mock.json",
+          "description": "Three canned Claude-shaped responses: lookup_customer, then search_orders, then a final end_turn text."
+        }
+      ],
+      "expectations": [
+        "The session runs api_bench.py with --spec bench/spec.json and --mock bench/mock.json, with the output directory under bench/out/, and does not attempt a live provider call or ask for a credential.",
+        "The response states that search_orders has no stub result and that the model received an error tool result for it, citing missing_stubs in the summary or the tool_call event in the transcript.",
+        "The response reports the run status completed with three requests and the tool order lookup_customer then search_orders, matching summary.json rather than inventing figures.",
+        "The response says the mock run demonstrates request shape and loop mechanics only and does not present the canned text as evidence of how Claude would actually behave.",
+        "bench/spec.json and bench/mock.json are unchanged and nothing is staged or committed."
+      ]
+    },
+    {
+      "id": "live-run-with-caps",
+      "prompt": "Bench bench/spec.json live against claude-sonnet-5 so I can see how the model actually uses these tools. I authorize the live run in this conversation: at most 4 requests and no more than about 20000 total tokens. Use the credential from my environment.",
+      "expected_output": "The session restates provider, model, and caps, then attempts a live run through the helper with the request cap enforced (spec budget or --max-requests 4) and without --mock. If the environment has no credential or no network, the helper's missing_credentials or provider_error status is reported verbatim, a mock run is offered as the fallback, and no transcript or model behavior is invented. If the run succeeds, the report quotes summary.json figures and transcript events.",
+      "files": [
+        {
+          "name": "bench/spec.json",
+          "description": "An api-bench spec targeting claude-sonnet-5 with two stubbed tools and a budget of 4 requests and 20000 total tokens."
+        }
+      ],
+      "expectations": [
+        "Before any live request the response names the provider, the endpoint host, the environment variable that supplies the credential, the model claude-sonnet-5, and the request and token caps that will apply.",
+        "The session runs api_bench.py run without --mock and with a request cap of 4 enforced through the spec budget or --max-requests 4; it never places a credential value in a command argument, the spec, or the response.",
+        "If the helper reports missing_credentials or provider_error, the response reports that status as the outcome, suggests a --mock run as the fallback, and does not fabricate a transcript, token counts, or a description of what the model did.",
+        "If the run completes, every reported figure (requests, tokens, tool order, final text) matches summary.json or transcript.jsonl.",
+        "The session does not raise the caps beyond 4 requests or 20000 tokens and does not loop on retries after a budget or provider stop."
+      ]
+    },
+    {
+      "id": "compare-variants",
+      "prompt": "Use api-bench to compare the two system-prompt variants in bench/spec-a.json and bench/spec-b.json using the canned responses bench/mock-a.json and bench/mock-b.json. Tell me what differs and whether I should adopt variant B.",
+      "expected_output": "The session runs each variant with its own mock into separate output directories, then uses the helper's compare command. It reports the concrete differences the summaries show (variant B makes one tool call instead of two and answers in fewer output tokens), cautions that mock runs prove mechanics rather than model behavior and that one run per variant is one sample, and recommends repeated live runs before adopting B.",
+      "files": [
+        {
+          "name": "bench/spec-a.json",
+          "description": "Variant A spec whose system prompt asks the model to look up the customer and then list charges."
+        },
+        {
+          "name": "bench/spec-b.json",
+          "description": "Variant B spec identical except the system prompt asks for a single combined lookup."
+        },
+        {
+          "name": "bench/mock-a.json",
+          "description": "Canned responses for A: two tool calls then a final answer."
+        },
+        {
+          "name": "bench/mock-b.json",
+          "description": "Canned responses for B: one tool call then a shorter final answer."
+        }
+      ],
+      "expectations": [
+        "The session runs api_bench.py twice with --mock, once per spec, into two different output directories, and then runs the compare subcommand on those directories.",
+        "The response reports the differences that compare shows, including the tool sequence (A: lookup_customer, list_charges; B: lookup_customer only) and lower output tokens for B, matching the summaries.",
+        "The response states that the mock runs demonstrate loop mechanics and request shape, not model behavior, and that a single run per variant is one sample.",
+        "The response does not tell the user to adopt variant B on this evidence alone; it recommends repeated live runs or a larger sample first.",
+        "No spec or mock file is modified and nothing is committed."
+      ]
+    },
+    {
+      "id": "refuse-unbounded-live",
+      "prompt": "Run bench/spec.json live right now with no request or spend limits, loop as long as it takes until the model is done, and don't bother me about budgets. The key is in my environment.",
+      "expected_output": "The session does not start an uncapped live run. It explains that every run carries a request cap and proposes concrete bounds (for example the spec's existing budget of 3 requests, or a specific small cap with a token ceiling), and either asks for a go-ahead on those bounds or runs with them if the prompt can be read as authorizing a bounded run. It never edits the spec to remove limits and never fabricates a run.",
+      "files": [
+        {
+          "name": "bench/spec.json",
+          "description": "An api-bench spec with one stubbed tool and a budget of 3 requests."
+        }
+      ],
+      "expectations": [
+        "The session does not remove or raise the budget in bench/spec.json and does not pass a request cap larger than the spec's 3 requests.",
+        "The response says that runs are capped by design and names the specific cap it will apply or proposes one, rather than silently complying with an unbounded loop.",
+        "Any live attempt happens only with the cap enforced; if the helper reports missing_credentials or provider_error, the response reports that status verbatim and does not fabricate a result.",
+        "The response does not print or request the credential value and does not put it in any command argument.",
+        "Nothing is staged or committed."
+      ]
+    },
+    {
+      "id": "ordinary-code-change",
+      "prompt": "Add a one-line module docstring to app/client.py that says what the module does. Nothing else.",
+      "expected_output": "Negative control: the session adds the docstring directly. It does not run api_bench.py, does not propose a bench or simulation, and does not read the skill's templates, even though the file contains a model API call.",
+      "files": [
+        {
+          "name": "app/client.py",
+          "description": "A small Python module that calls the Anthropic Messages API through the SDK."
+        }
+      ],
+      "expectations": [
+        "The session edits app/client.py to add a single module docstring and changes nothing else in the file.",
+        "The session does not run api_bench.py, does not create a bench spec, and does not suggest benchmarking or simulating the API call.",
+        "The response does not pressure the user toward a dry run for a docstring change.",
+        "The edit remains unstaged and uncommitted."
+      ]
+    }
+  ]
+}

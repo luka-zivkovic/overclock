@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - agent-bridge/agent-bridge
+          - api-bench/api-bench
           - critical-thinking/critical-thinking
           - critical-thinking/independent-research
           - debugging-discipline/debugging-discipline
@@ -18,6 +19,7 @@ on:
           - eval-stack/local-eval-stack
           - eval-stack/skill-maintenance
           - groundwork/groundwork
+          - lateral-engineering/lateral-engineering
           - learning-loop/lessons-learned
           - natural-writing/natural-writing
           - overclock-setup/setup
@@ -150,6 +152,7 @@ jobs:
             all)
               run_suite \
                 agent-bridge/agent-bridge \
+                api-bench/api-bench \
                 critical-thinking/critical-thinking \
                 critical-thinking/independent-research \
                 debugging-discipline/debugging-discipline \
@@ -158,6 +161,7 @@ jobs:
                 eval-stack/local-eval-stack \
                 eval-stack/skill-maintenance \
                 groundwork/groundwork \
+                lateral-engineering/lateral-engineering \
                 learning-loop/lessons-learned \
                 natural-writing/natural-writing \
                 overclock-setup/setup \
@@ -216,11 +220,13 @@ jobs:
             all)
               run_batteries \
                 agent-bridge \
+                api-bench \
                 critical-thinking \
                 debugging-discipline \
                 git-archaeologist \
                 local-eval-stack \
                 groundwork \
+                lateral-engineering \
                 independent-research \
                 learning-loop-lessons-learned \
                 lessons-learned \
@@ -245,6 +251,7 @@ jobs:
               run_batteries lessons-learned session-handoff solutions
               ;;
             agent-bridge/agent-bridge) run_batteries agent-bridge ;;
+            api-bench/api-bench) run_batteries api-bench ;;
             critical-thinking/critical-thinking) run_batteries critical-thinking ;;
             critical-thinking/independent-research) run_batteries independent-research ;;
             debugging-discipline/debugging-discipline) run_batteries debugging-discipline ;;
@@ -253,6 +260,7 @@ jobs:
             eval-stack/local-eval-stack) run_batteries local-eval-stack ;;
             eval-stack/skill-maintenance) run_batteries skill-maintenance ;;
             groundwork/groundwork) run_batteries groundwork ;;
+            lateral-engineering/lateral-engineering) run_batteries lateral-engineering ;;
             learning-loop/lessons-learned) run_batteries learning-loop-lessons-learned ;;
             natural-writing/natural-writing) run_batteries natural-writing ;;
             pr-feedback/resolve-pr-feedback) run_batteries resolve-pr-feedback ;;

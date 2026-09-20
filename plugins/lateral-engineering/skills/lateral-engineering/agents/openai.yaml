@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lateral Engineering"
+  short_description: "Reframe engineering problems beyond the usual answer"
+  default_prompt: "Use $lateral-engineering to find non-obvious engineering approaches that break different assumptions and state their costs."

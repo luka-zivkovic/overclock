@@ -1,0 +1,42 @@
+{
+  "skill": "lateral-engineering",
+  "version": "0.1.0",
+  "evidence_tier": "subjective",
+  "date": "2026-09-20",
+  "execution": "author-session self-runs; no isolated or independent grading. v1 outputs by the Codex authoring session on 2026-09-05; v2 (anchored) and v3 (de-anchored) outputs by a Claude session on 2026-09-20 with inventory values supplied as labelled working assumptions, so model and author differ between v1 and the later rounds.",
+  "source_sha256": {
+    "SKILL.md": "2c5ef2d1ec5b0029ebfe1bfac8070544d193a14f6c967c5c64603a6559263761",
+    "agents/openai.yaml": "47d3f6b26efbe86fec4afa720f376b1d73c642bee652919a6ff3dbe718041d6e",
+    "references/moves.md": "01c833a44740249884e0a0fbb4eb6903e6a7106efd36cef002ccf23fb250ea42"
+  },
+  "examples": {
+    "game-harness.md": "6383ce1c38d5e8f8ec55272f0d22c6c71f687ca4e1edb896ce5aee0f59bab42d",
+    "trace-annotation.md": "3f957deabf1cf22a97bc60e81506c5066161e3573a6c8e9583a49f24e359f326",
+    "game-harness-v2.md": "c7decc8570320065427453e4e3ff35133d69cd2c64cf2f14beb9c049317e9fac",
+    "trace-annotation-v2.md": "04e6f427183e2eec856ec1fa7cfecc09b1084377fbabbbdc55c11de0a0090f13",
+    "game-harness-v3.md": "82fe418ecda39ecd9728205c3e005a0988276e6b0cd6b3bd294d897e80963045",
+    "trace-annotation-v3.md": "e50838d6a0fd8549934881b2d7afd65024173b6a50fc73bebfc3e30c5e190bd1"
+  },
+  "live_behavior": "not run: required explicit API credentials absent",
+  "live_routing": "not run: required explicit API credentials absent",
+  "pr_validation": {
+    "base_commit": "f70e83d9216a57e1bfd7eecb2270fe2b933f99e8",
+    "unit_tests": 417,
+    "unit_test_result": "pass",
+    "skill_distributions": 20,
+    "maintainer_checks": "pass",
+    "casefile_scan": "pass (0 critical, 0 warning)",
+    "claude_plugin_validation": "pass (marketplace, lateral-engineering, api-bench, overclock-setup)",
+    "isolated_marketplace_smoke": "not rerun in the revision session; passed on the 0.1.0 draft"
+  },
+  "revision": "arbitrage revision (wall, inventory, Arbitrage family, leverage prosecution, The stack), then de-anchored: the Crash Bandicoot story removed from the skill body and reduced to one precedent among several per catalog move",
+  "anchor_leakage": {
+    "description": "ideas whose grounding cites Crash Bandicoot, Naughty Dog, GOOL, or 'on rails', out of ideas in the file",
+    "game-harness.md": "0/5",
+    "trace-annotation.md": "0/5",
+    "game-harness-v2.md": "3/5",
+    "trace-annotation-v2.md": "1/5",
+    "game-harness-v3.md": "0/5",
+    "trace-annotation-v3.md": "0/6"
+  }
+}

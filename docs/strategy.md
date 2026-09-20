@@ -82,6 +82,35 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   before treating that provider as supported. Only after that, consider persistent threads,
   background jobs, dirty-worktree snapshots, or full handoff.
 
+### api-bench — BUILD, v0.1.0 published (2026-09-19)
+- **Demand:** direct maintainer request to simulate, from inside Claude Code, how an
+  application would use Claude (or any model) through the API, and the follow-up
+  question of whether built-in subagents already do this. They do not: subagents are
+  same-harness fan-out with Claude Code's tools and auth, not an application's request
+  shape, and they cannot target another provider.
+- **Grounding:** three readings existed. Headless `claude -p` simulation of Claude Code
+  itself already lives in `qa/run_evals.sh` and `qa/trigger_battery.py` as repo tooling;
+  cross-provider collaboration is `agent-bridge`; the Claude Agent SDK is Claude Code's
+  loop as a library and belongs to apps that want that harness. None of them prototype
+  an app's own Messages API call (system prompt, tools, tool-result loop, stop reasons,
+  usage). That gap is the skill.
+- **Product shape:** one independently installable `api-bench` plugin with one skill and
+  a dependency-free helper. A JSON spec carries prompt, seed messages, tool schemas,
+  stub results, scripted follow-ups, and a required budget; the helper runs the loop
+  against the Claude Messages API or an OpenAI-compatible endpoint, records the exact
+  transcript, and compares runs. Mock replay covers wiring and no-network cases.
+- **Boundaries:** current-conversation go-ahead before the first live request, credentials
+  only from the environment and redacted from artifacts, caps refused when absent, run
+  output kept out of version control, and no application code edits as part of a bench.
+  Collision check: `agent-bridge` owns delegation to another harness, `local-eval-stack`
+  owns evaluating skills and sessions, and the bundled `claude-api` reference answers
+  documentation questions without a run.
+- **Evidence tier:** `objective` for the helper (deterministic tests over spec validation,
+  loop mechanics, budget stops, provider request shapes, redaction, and output-directory
+  safety); `rubric` for the skill via five committed live-eval cases and a routing battery
+  against the agent-bridge, eval-stack, and critical-thinking stack. Live results are not
+  yet recorded; run the suites before treating routing thresholds as met.
+
 ### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a
   persona + precedent-PR + embeddings stack; plus an earlier pass). That *is* the
@@ -284,6 +313,37 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   multi-file refactor → Ultraplan") rather than reimplementing them. Small skill.
   Build only if the right-sizing decision itself proves a recurring pain. Parked
   pending that evidence.
+
+### lateral-engineering — BUILD, v0.1 authored (2026-09-05)
+- **Demand:** direct maintainer request for a reusable procedure that escapes conventional
+  engineering answers when creative alternatives are wanted.
+- **Grounding:** expose hidden assumptions through a private conventional draft; apply six move
+  families plus an arbitrary constraint; prosecute conventional candidates before presenting
+  distinct, grounded alternatives. The catalog transfers mechanisms across fields rather than
+  treating precedent as a prerequisite for an idea.
+- **Boundary:** owns deliberate engineering ideation, not general critique (`critical-thinking`),
+  requirements elicitation (`groundwork`), debugging, implementation, or safe production advice.
+  One standalone skill, no hooks, no sibling dependencies, no writes, no auto-commit, and no
+  automatic execution of experiments.
+- **Evidence:** tier `subjective`. The two requested author-run examples and qualitative review
+  notes live in `qa/experiments/lateral-engineering/`; five committed behavioral cases and a
+  target-only routing battery cover creative requests, reruns, thin input, and anti-triggers.
+  No baseline lift or live routing success is claimed; isolated live runs require credentials
+  unavailable during authoring. Structural checks do not establish creative quality.
+- **Arbitrage revision (2026-09-20), pre-release:** a critical-thinking pass against how Naughty
+  Dog solved Crash Bandicoot's PlayStation limits found the draft could not have produced those
+  ideas: it took only the prompt, had no numeric wall, no inventory of surplus or fixed facts,
+  forbade self-imposed constraints, and convicted ideas for familiarity rather than for leaving
+  the wall untouched. The revision adds a Wall line, an Inventory step, an Arbitrage move family
+  with an `accepts:` tag, wall-and-cost prosecution, and a deeper closing stack, at a smaller
+  body. Rerunning the two prompts met the pre-registered signal (an idea per prompt that names
+  the wall and exploits an inventory fact) but with assumed inventories and a model change
+  between rounds; the honest reading is leverage over surprise, recorded in
+  `qa/experiments/lateral-engineering/README.md`. A third round removed the Crash Bandicoot story
+  from the skill body after 4 of 10 revised-round ideas cited it as grounding; with the story
+  gone the arbitrage ideas survived and 0 of 11 ideas cited it, so the principle carries the
+  effect and worked examples in instructions steer precedent choice. Still `subjective`; live
+  suites still unrun.
 
 ## Groundings performed (reference)
 

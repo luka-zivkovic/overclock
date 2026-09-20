@@ -3,6 +3,49 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## api-bench
+
+### 0.1.0 — 2026-09-19 (initial release)
+- New plugin. `$api-bench` dry-runs how an application would call a model API
+  before the app exists: one JSON spec carries the system prompt, seed messages,
+  tool schemas, stubbed tool results, scripted follow-up turns, and a required
+  budget (request cap plus optional token and dollar caps). The helper runs the
+  tool-use loop against the Claude Messages API or an OpenAI-compatible chat
+  endpoint, returns every parallel tool result in one message, passes assistant
+  content back unchanged, and stops at the first budget, truncation, refusal,
+  provider, or protocol boundary with a named status.
+- Record the exact request bodies, raw responses, tool calls with the stub that
+  answered them, and usage per turn in `transcript.jsonl`, plus a `summary.json`
+  with totals, tool order, missing stubs, and a dollar estimate when the spec
+  supplies current prices. Credentials come only from the environment, are never
+  logged, and are redacted wherever their value would appear. A spec that names a
+  non-default `api_key_env` is honored only when the run command repeats it as
+  `--credential-env`, so a spec cannot choose on its own which secret is sent to its
+  endpoint, and the skill quotes the endpoint host and credential variable before
+  asking for the go-ahead.
+- `validate` checks a spec offline, `--mock` replays canned responses with no
+  network or credential, and `compare` diffs two run summaries. The skill asks
+  for the user's go-ahead before the first live request in a conversation and
+  never edits application code or commits run output.
+
+## lateral-engineering
+
+### 0.1.0 — 2026-09-05 (initial release)
+- Add an advisory skill for unconventional engineering alternatives: a mechanism-free goal and
+  a numeric wall, an inventory of the situation's surplus, fixed facts, rated limits, and
+  negotiable freedoms, hidden assumptions, seven move families including Arbitrage, an arbitrary
+  oblique constraint, and prosecution by wall movement and cost before ranking 4–6 grounded
+  reframings that each state their cost and their effect on the wall.
+- Allow offered constraints tagged `accepts:` so a self-imposed limit that makes the wall
+  disappear is presented as a trade the user can refuse, and close with **The stack**, one
+  composition naming its accepted constraint, target number, and biggest risk.
+- Ship a standalone moves catalog with cross-field precedents that are explicitly not a source
+  list for grounding; implicit routing with concrete anti-triggers; a
+  routing battery in target-only and critical-thinking/groundwork stack modes; and two prompts
+  run under both the draft and revised skill.
+- Evidence tier is subjective: author-run examples check the requested output contract, without
+  claiming measured creativity gains or successful live routing.
+
 ## eval-stack
 
 ### 0.2.2 — 2026-09-11
@@ -294,6 +337,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.23 — 2026-09-20
+- Add Lateral Engineering 0.1.0 to the report-only capability catalog, separating creative
+  engineering alternatives from production guidance and routine implementation.
+
+### 0.1.22 — 2026-09-19
+- Catalog `api-bench` 0.1.0 as a published package.
 
 ### 0.1.21 — 2026-09-11
 - Synchronize the report-only catalog with Eval Stack 0.2.2 and Session Memory 1.1.2.
