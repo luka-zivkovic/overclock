@@ -313,6 +313,63 @@ class ScanTest(unittest.TestCase):
             self.assertTrue(data["language_mix"]["mixed_js_ts"])
 
 
+    def test_branches_sentinels_service_homes_and_direction_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "eras"
+            build_clean(root)
+            write(root, "src/backup.ts", "export const backup = 1;\n")
+            write(root, "src/migrations/users-v33.ts", "export const up = 1;\n")
+            write(root, "src/notes-old.js", "// leftover\n")
+            write(root, "public/icons/AppIcon-1.png", "png\n")
+            write(root, "docs/roadmap-handoff.md", "# Handoff\n\nRun from `/home/node/.app` or `/Users/dev/src`.\n"
+                  "Content type is `application/json`; weights are `20/20/60`.\n")
+            write(root, "docs/plans/2026-01-01-big-plan.md", "# Big plan\n\nDo everything.\n")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "add eras fixture", date="2026-06-03T00:00:00")
+            git(root, "checkout", "-qb", "feature/unmerged")
+            write(root, "src/extra.js", "// unmerged work\n")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "feat: unmerged work", date="2026-06-04T00:00:00")
+            git(root, "checkout", "-q", "main")
+            git(root, "checkout", "-qb", "fix/squashed")
+            write(root, "src/fix.js", "// fix\n")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "fix: squashed change", date="2026-06-05T00:00:00")
+            git(root, "checkout", "-q", "main")
+            write(root, "src/fix.js", "// fix\n")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "fix: squashed change", date="2026-06-06T00:00:00")
+
+            data = json.loads(run("scan", "--root", str(root)).stdout)
+            self.assertEqual(data["sentinel_names"]["items"], ["src/notes-old.js"])
+            self.assertEqual(data["developer_home_paths"]["items"], [{"doc": "docs/roadmap-handoff.md", "path": "/Users/dev"}])
+            self.assertEqual(data["doc_paths_missing"]["items"], [])
+            branches = {item["name"]: item for item in data["branches"]["items"]}
+            self.assertEqual(set(branches), {"feature/unmerged", "fix/squashed"})
+            self.assertFalse(branches["feature/unmerged"]["merged_by_ancestry"])
+            self.assertFalse(branches["feature/unmerged"]["tip_subject_in_head_history"])
+            self.assertTrue(branches["fix/squashed"]["tip_subject_in_head_history"])
+            self.assertEqual(data["branches"]["unmerged_total"], 1)
+            self.assertEqual(
+                [item["path"] for item in data["direction_documents"]["items"]],
+                ["docs/plans/2026-01-01-big-plan.md", "docs/roadmap-handoff.md"],
+            )
+
+    def test_activity_goes_two_levels_below_each_workspace_member(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "mono"
+            build_clean(root)
+            write(root, "apps/server/package.json", '{"name":"server"}\n')
+            write(root, "apps/server/src/lib/deep/thing.ts", "export const t = 1;\n")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "add server", date="2026-06-07T00:00:00")
+            data = json.loads(run("scan", "--root", str(root)).stdout)
+            paths = {item["path"] for item in data["directory_activity"]["items"]}
+            self.assertIn("apps/server/src", paths)
+            self.assertIn("apps/server/src/lib", paths)
+            self.assertNotIn("apps/server/src/lib/deep", paths)
+
+
 class PlanTest(unittest.TestCase):
     def test_template_and_sample_plan_parse(self) -> None:
         template = (SKILL_DIR / "templates/plan.md").read_text(encoding="utf-8")

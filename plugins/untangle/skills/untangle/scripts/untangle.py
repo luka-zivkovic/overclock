@@ -59,9 +59,27 @@ SOURCE_SUFFIXES = {
 SENTINEL_RE = re.compile(
     r"^(old|new|backup|bak|final|copy|tmp|temp|scratch|experiments?|playground|"
     r"sandbox|archive|legacy|deprecated|wip|draft|untitled|test\d+|v\d+|.*[-_](old|new|"
-    r"backup|bak|final|copy|tmp|temp|v\d+|\d+))$",
+    r"backup|bak|final|copy|tmp|temp|v\d+))$",
     re.IGNORECASE,
 )
+# A file named backup.ts or sandbox.ts is a feature module; only an explicit copy or leftover
+# suffix marks a file as set aside.
+FILE_SENTINEL_RE = re.compile(
+    r"^.+(\.bak|\.orig|[-_. ](old|backup|copy|final|tmp|temp|wip|draft)|\(\d+\)| copy( \d+)?)$",
+    re.IGNORECASE,
+)
+ASSET_DIRS = {"icons", "assets", "images", "img", "fonts", "static", "public", "media"}
+DIRECTION_DOC_RE = re.compile(
+    r"(?<![A-Za-z])(roadmap|handoff|hand-off|strategy|charter|product|vision|plan|plans|batches|"
+    r"ledger|decisions?|adr|backlog|todo|next-steps|milestones?)(?![A-Za-z])", re.IGNORECASE
+)
+PR_SUFFIX_RE = re.compile(r"\s*\(#(\d+)\)\s*$")
+BRANCH_PR_RE = re.compile(r"(?:^|/)pr-(\d+)(?:-|$)")
+SERVICE_HOMES = {
+    "node", "app", "runner", "ubuntu", "deploy", "git", "www-data", "user", "admin", "docker",
+    "ec2-user", "pi", "vagrant", "root", "ci", "circleci", "jenkins", "worker",
+}
+MIME_RE = re.compile(r"^(application|text|image|audio|video|multipart|font|model|message)/[A-Za-z0-9.+*-]+$")
 ENTRY_RE = re.compile(r"^(main|index|app|server|cli|run|start)\.(js|ts|mjs|cjs|py|go|rb)$")
 TODO_RE = re.compile(r"\b(TODO|FIXME|HACK|XXX)\b")
 NODE_ENV_RE = re.compile(r"process\.env\.([A-Z][A-Z0-9_]+)")
@@ -227,7 +245,7 @@ def parse_iso_date(value: str) -> dt.date | None:
         return None
 
 
-def git_activity(root: Path, files: list[Path]) -> dict:
+def git_activity(root: Path, files: list[Path], anchors: set[str] | None = None) -> dict:
     """Per-directory last-commit dates and commit counts, measured against HEAD's date."""
     result = {"available": False}
     head_date_raw = git(root, "log", "-1", "--format=%cs")
@@ -249,9 +267,7 @@ def git_activity(root: Path, files: list[Path]) -> dict:
         if not line.strip() or current_date is None:
             continue
         parts = line.strip().split("/")
-        keys = {parts[0]}
-        if len(parts) > 2:
-            keys.add("/".join(parts[:2]))
+        keys = {"/".join(parts[:depth]) for depth in range(1, min(len(parts), 5))}
         keys.add(line.strip())
         for key in keys:
             commit_counts[key] = commit_counts.get(key, 0) + 1
@@ -259,13 +275,22 @@ def git_activity(root: Path, files: list[Path]) -> dict:
                 last_seen[key] = current_date
     directories = []
     seen_dirs: set[str] = set()
+    anchor_depths = {0}
+    for anchor in anchors or set():
+        anchor_depths.add(len(anchor.split("/")))
+    anchor_set = set(anchors or set())
     for path in files:
         relative = rel(path, root)
         parts = relative.split("/")
         if len(parts) < 2:
             continue
-        for depth in (1, 2):
-            if len(parts) <= depth:
+        wanted: set[int] = {1, 2}
+        for depth in range(1, len(parts)):
+            prefix = "/".join(parts[:depth])
+            if prefix in anchor_set:
+                wanted.update({depth + 1, depth + 2})
+        for depth in sorted(wanted):
+            if len(parts) <= depth or depth > 4:
                 continue
             key = "/".join(parts[:depth])
             if key in seen_dirs:
@@ -293,6 +318,62 @@ def git_activity(root: Path, files: list[Path]) -> dict:
         }
     )
     return result
+
+
+def git_branches(root: Path, head_date_raw: str | None) -> dict:
+    """Every other branch: tip date, merge state by ancestry, and whether its tip subject
+    already appears in HEAD's history (a squash merge leaves no ancestry)."""
+    listing = git(
+        root, "for-each-ref",
+        "--format=%(refname)%09%(refname:short)%09%(committerdate:short)%09%(subject)",
+        "refs/heads", "refs/remotes",
+    )
+    if listing is None:
+        return {"available": False}
+    current = (git(root, "rev-parse", "--abbrev-ref", "HEAD") or "").strip()
+    head_log = (git(root, "log", "--format=%s", "-n", "5000") or "").splitlines()
+    head_subjects = {PR_SUFFIX_RE.sub("", line).strip() for line in head_log}
+    head_pr_numbers = {match.group(1) for line in head_log for match in [PR_SUFFIX_RE.search(line)] if match}
+    head_date = parse_iso_date(head_date_raw) if head_date_raw else None
+    seen_tips: set[str] = set()
+    items = []
+    for line in listing.splitlines():
+        parts = line.split("\t", 3)
+        if len(parts) != 4:
+            continue
+        full, name, date_raw, subject = parts
+        short = name.split("/", 1)[1] if name.startswith(("origin/", "upstream/")) else name
+        if full.endswith("/HEAD") or short in {current, "main", "master"} or name == current:
+            continue
+        tip = (git(root, "rev-parse", name) or "").strip()
+        if not tip or tip in seen_tips:
+            continue
+        seen_tips.add(tip)
+        ancestor = git(root, "merge-base", "--is-ancestor", name, "HEAD") is not None
+        tip_date = parse_iso_date(date_raw)
+        items.append(
+            {
+                "name": name,
+                "tip_date": date_raw,
+                "age_days": (head_date - tip_date).days if head_date and tip_date else None,
+                "merged_by_ancestry": ancestor,
+                "tip_subject_in_head_history": (
+                    PR_SUFFIX_RE.sub("", subject).strip() in head_subjects
+                    or bool(BRANCH_PR_RE.search(name) and BRANCH_PR_RE.search(name).group(1) in head_pr_numbers)
+                ),
+                "subject": subject[:120],
+            }
+        )
+        if len(items) >= 100:
+            break
+    items.sort(key=lambda item: item["name"])
+    unmerged = [i for i in items if not i["merged_by_ancestry"] and not i["tip_subject_in_head_history"]]
+    return {
+        "available": True,
+        "note": "age is measured from HEAD's commit date; a negative age means the branch is newer than HEAD",
+        "unmerged_total": len(unmerged),
+        **cap(items, 100),
+    }
 
 
 def load_manifest_deps(root: Path) -> dict[str, dict]:
@@ -395,7 +476,8 @@ def scan(root: Path, stale_days: int) -> dict:
     inventory["nested_readmes"] = [r for r in all_readmes if r not in readmes]
 
     # Git activity ---------------------------------------------------------------------
-    activity = git_activity(root, files)
+    manifest_dirs = {r.rsplit("/", 1)[0] for r in relatives if "/" in r and r.split("/")[-1] in MANIFESTS}
+    activity = git_activity(root, files, manifest_dirs)
     inventory["git"] = {k: v for k, v in activity.items() if k != "directories"}
     directories = activity.get("directories", [])
     stale = [
@@ -411,9 +493,12 @@ def scan(root: Path, stale_days: int) -> dict:
             "/".join(r.split("/")[: i + 1])
             for r in relatives
             for i, part in enumerate(r.split("/")[:-1])
-            if SENTINEL_RE.match(part)
+            if SENTINEL_RE.match(part) and not (set(r.split("/")[:i]) & ASSET_DIRS)
         }
-        | {r for r in relatives if SENTINEL_RE.match(Path(r).stem)}
+        | {
+            r for r in relatives
+            if FILE_SENTINEL_RE.match(Path(r).stem) and not (set(r.split("/")[:-1]) & ASSET_DIRS)
+        }
     )
     inventory["sentinel_names"] = cap(sentinel)
 
@@ -494,6 +579,8 @@ def scan(root: Path, stale_days: int) -> dict:
         if not name.endswith((".md", ".mdx", ".rst", ".txt")):
             continue
         for match in HOME_PATH_RE.finditer(text):
+            if match.group(1).split("/")[-1].lower() in SERVICE_HOMES:
+                continue
             home_paths.append({"doc": name, "path": match.group(1)})
         base = Path(name).parent
         for match in DOC_PATH_RE.finditer(text):
@@ -502,6 +589,8 @@ def scan(root: Path, stale_days: int) -> dict:
                 continue  # a leading slash is a URL route or an absolute path, not a repo file
             if target.endswith("/"):
                 target = target[:-1]
+            if MIME_RE.match(target) or all(seg.isdigit() for seg in target.split("/")):
+                continue
             candidates = {target, (base / target).as_posix() if str(base) != "." else target}
             normalized = {os.path.normpath(c).replace("\\", "/") for c in candidates}
             if any(n in existing for n in normalized):
@@ -577,6 +666,24 @@ def scan(root: Path, stale_days: int) -> dict:
     inventory["unreferenced_top_level_directories"] = {
         "note": "heuristic: the directory name appears in no file outside itself",
         "items": unreferenced,
+    }
+
+    # Branches ------------------------------------------------------------------------
+    inventory["branches"] = git_branches(root, activity.get("head_date"))
+
+    # Direction documents -------------------------------------------------------------
+    direction = []
+    for name, text in contents.items():
+        if not name.endswith((".md", ".mdx", ".rst", ".txt")) or name.count("/") > 3:
+            continue
+        stem = name.split("/")[-1].rsplit(".", 1)[0]
+        parent_parts = name.split("/")[:-1]
+        if DIRECTION_DOC_RE.search(stem) or any(DIRECTION_DOC_RE.fullmatch(p) for p in parent_parts):
+            title = next((line.strip("# ").strip() for line in text.splitlines() if line.startswith("#")), None)
+            direction.append({"path": name, "title": title})
+    inventory["direction_documents"] = {
+        "note": "roadmaps, handoffs, plans, decisions: more than one that do not link to each other is a finding",
+        **cap(sorted(direction, key=lambda item: item["path"]), 100),
     }
 
     # Hygiene -------------------------------------------------------------------------

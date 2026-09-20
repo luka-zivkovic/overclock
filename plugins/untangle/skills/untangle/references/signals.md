@@ -10,7 +10,9 @@
 | `purpose_sources` | README title and first paragraph, manifest descriptions, CLAUDE.md or AGENTS.md openers | Raw material for the spine sentence. Disagreement between them is itself a finding. |
 | `directory_activity` | Last commit date, age in days measured from HEAD's date, and commit count per directory (two levels deep) | Age alone means nothing. Stable finished code is old too. |
 | `stale_directories` | Directories older than the threshold (default 90 days) | Candidate abandoned threads only when combined with another signal below. |
-| `sentinel_names` | Names like `old`, `new`, `backup`, `final`, `experiments`, `v2`, `test2`, `scratch` | Strong signal that a thread was set aside without a decision. |
+| `sentinel_names` | Directories named like `old`, `new`, `backup`, `final`, `experiments`, `v2`, `test2`, `scratch`, and files with a leftover suffix such as `-old`, `-copy`, `.bak`, `(1)` | Strong signal that a thread was set aside without a decision. A module named `backup.ts` is a feature, not a sentinel. |
+| `branches` | Every other branch with tip date, age from HEAD, ancestry merge state, and whether its tip subject already appears in HEAD's history (a squash merge leaves no ancestry) | Old unmerged branches are threads the tree does not show; a branch newer than HEAD is work that never landed. |
+| `direction_documents` | Roadmaps, handoffs, plans, decisions, charters found by name | More than one that do not link to each other is a contradiction finding. |
 | `unreferenced_top_level_directories` | Top-level directories whose name appears in no file outside themselves | Heuristic. Nothing imports, documents, or scripts them. |
 | `entry_points` | Files named main, index, app, server, cli, run, or start near the root | More than one usually means more than one project. |
 | `duplicate_capabilities` | Two libraries doing the same job in one manifest, two lockfiles, two Python manifests, multiple entry points | Contradiction candidates: the project could not decide. |

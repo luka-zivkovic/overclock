@@ -75,6 +75,11 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   to a package, skips URL routes, reports developer home paths embedded in docs,
   and treats workspace-member READMEs as package descriptions rather than a
   second project README. Findings from a first run on a real monorepo.
+- A second real run on a multi-era monorepo added a branch inventory (tip age, ancestry,
+  and squash-merge detection), a direction-documents list (roadmaps, handoffs, plans),
+  activity two levels below each workspace member, and narrowed sentinel matching to
+  directories plus files with explicit leftover suffixes. Container home paths, MIME
+  types, and numeric ratios no longer count as documentation drift.
 - Deterministic helper covers scan, plan check, apply preflight, and tick; unit
   tests pin the planted-signal recall, the no-write scan boundary, secret
   non-disclosure, plan structure rules, and the dirty-tree refusal. Live cases
