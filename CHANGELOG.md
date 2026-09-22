@@ -48,6 +48,12 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## eval-stack
 
+### 0.2.3 — 2026-09-22
+- Correct the Coeval and Ironside setup references: both projects are now MIT-licensed (the
+  previous "source-available" and "Sustainable Use License" wording was stale).
+- Note in the Coeval setup reference that Dailies (npm `dailies`) can consume Coeval assessment
+  receipts for release gating, which stays outside this skill's scope.
+
 ### 0.2.2 — 2026-09-11
 - Redact sensitive structured values before serialization, including nested/escaped JSON and
   passwords containing spaces, across both importers and the pi tracer. Redact pi error messages
@@ -337,6 +343,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.24 — 2026-09-22
+- Synchronize the report-only catalog with Eval Stack 0.2.3.
 
 ### 0.1.23 — 2026-09-20
 - Add Lateral Engineering 0.1.0 to the report-only capability catalog, separating creative

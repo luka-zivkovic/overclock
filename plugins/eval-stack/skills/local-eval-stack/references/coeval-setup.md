@@ -1,7 +1,7 @@
 # coeval — governed judging setup
 
-Repo: https://github.com/luka-zivkovic/coeval (source-available; internal/
-personal use permitted). Requires Node ≥24, pnpm ≥10.33, Docker.
+Repo: https://github.com/luka-zivkovic/coeval (MIT-licensed). Requires
+Node ≥24, pnpm ≥10.33, Docker.
 
 ## Stand up
 
@@ -69,3 +69,7 @@ node skills/coeval-audit/scripts/coeval-submit.mjs submit runs.jsonl \
 Content-hash idempotency: unchanged lines reuse verdicts (no re-spend).
 Adjudication (exceptions → golden set) is dashboard-only, by design: the
 human is the point.
+
+Release gating is outside this skill's scope: Dailies (npm `dailies`) can
+consume Coeval's assessment receipts as evidence for a promote/block release
+decision under your own policy.
