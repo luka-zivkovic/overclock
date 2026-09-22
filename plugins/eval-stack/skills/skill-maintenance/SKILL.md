@@ -1,6 +1,6 @@
 ---
 name: skill-maintenance
-description: "Maintain a judged agent skill from its coeval evidence: pull findings (recurring failure clusters, human override reasons, golden deltas) via the coeval MCP tools or findings CLI, translate them into ONE bounded SKILL.md patch on a workshop copy, co-evolve the judge's rubric through coeval's guarded flow when an invariant moves, validate pre-merge with a casefile scan plus golden re-runs and a gate check, and open a PR citing the findings. Use when someone asks to improve, patch, or maintain a skill based on its eval findings, apply coeval findings to a skill, or run the skill-maintenance loop. Do NOT use when the target skill has no findings (no findings = no patch — never invent improvements), for authoring a new skill or a first rubric, for standing up ironside/coeval/casefile (that is local-eval-stack), to adjudicate verdicts (human-only in the coeval dashboard, no tool by design), or to weaken a rubric, probe, or test so a patch passes — that corrupts the bench. Never auto-merge — the human merges, always."
+description: "Maintain a judged agent skill from its rubrist evidence: pull findings (recurring failure clusters, human override reasons, golden deltas) via the rubrist MCP tools or findings CLI, translate them into ONE bounded SKILL.md patch on a workshop copy, co-evolve the judge's rubric through rubrist's guarded flow when an invariant moves, validate pre-merge with a casefile scan plus golden re-runs and a gate check, and open a PR citing the findings. Use when someone asks to improve, patch, or maintain a skill based on its eval findings, apply rubrist findings to a skill, or run the skill-maintenance loop. Do NOT use when the target skill has no findings (no findings = no patch — never invent improvements), for authoring a new skill or a first rubric, for standing up ironside/rubrist/casefile (that is local-eval-stack), to adjudicate verdicts (human-only in the rubrist dashboard, no tool by design), or to weaken a rubric, probe, or test so a patch passes — that corrupts the bench. Never auto-merge — the human merges, always."
 ---
 
 # Skill maintenance
@@ -14,7 +14,7 @@ and run the expensive validation at the wrong time.
 
 ## Phases (in order; stop the pass wherever the evidence runs out)
 
-1. **Pull findings** for the target skill from its coeval bench project:
+1. **Pull findings** for the target skill from its rubrist bench project:
    MCP tools `get_project`, `get_findings`, `get_cases`, `get_golden`
    (`submit_runs` and `run_gate_check` come later), or the findings CLI.
    No findings → report that and stop. An empty pass is a correct pass.
@@ -26,7 +26,7 @@ and run the expensive validation at the wrong time.
 3. **Rubric co-evolution check.** Diff the patch against the judging
    skill's rubric probes. If an invariant moved, the judge still enforces
    yesterday's contract and will fail future runs for obeying the new
-   skill — propose the paired rubric edit through coeval's guarded flow
+   skill — propose the paired rubric edit through rubrist's guarded flow
    (new version → regression vs golden → block-on-flip). Skill and judge
    move together, or the bench silently measures the previous version.
 4. **Validate pre-merge (the expensive half — requires executing the
@@ -48,7 +48,7 @@ and run the expensive validation at the wrong time.
   regression; loosening a probe to green a patch corrupts the bench.
 - **Never auto-merge.** The loop's terminal output is an open PR.
 - **Never adjudicate.** There is no adjudication tool, by design;
-  exceptions are decided by the human in the coeval dashboard.
+  exceptions are decided by the human in the rubrist dashboard.
 - **One bounded patch per pass, never a rewrite.** Remaining clusters
   wait for the next pass; a rewrite needs its own evidence plan.
 

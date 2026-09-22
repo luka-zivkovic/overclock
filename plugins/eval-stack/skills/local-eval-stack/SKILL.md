@@ -1,12 +1,12 @@
 ---
 name: local-eval-stack
-description: "Stand up a local, self-hosted evaluation stack for agent skills and sessions: ironside (trace store) via docker compose, coeval (governed LLM judging with human adjudication) via docker + dev servers, headless bootstrap of judge projects with calibrated rubrics, a pi session tracer that tags skill usage, and casefile scanning of the skills being judged. Use when someone wants to self-host agent evals locally, trace pi/agent sessions to their own machine, judge a skill's real runs with a governed rubric, or asks to set up ironside/coeval/the eval stack. Do NOT use for writing eval content or rubric doctrine (see the evidence-tiers doc in overclock), for CI gating of an existing coeval instance (coeval's gate.mjs docs cover that), for hosted/SaaS eval platforms, or for production multi-user deployments — this skill's scope is one developer's machine."
+description: "Stand up a local, self-hosted evaluation stack for agent skills and sessions: ironside (trace store) via docker compose, rubrist (governed LLM judging with human adjudication) via docker + dev servers, headless bootstrap of judge projects with calibrated rubrics, a pi session tracer that tags skill usage, and casefile scanning of the skills being judged. Use when someone wants to self-host agent evals locally, trace pi/agent sessions to their own machine, judge a skill's real runs with a governed rubric, or asks to set up ironside/rubrist/the eval stack. Do NOT use for writing eval content or rubric doctrine (see the evidence-tiers doc in overclock), for CI gating of an existing rubrist instance (rubrist's gate.mjs docs cover that), for hosted/SaaS eval platforms, or for production multi-user deployments — this skill's scope is one developer's machine."
 ---
 
 # Local eval stack
 
 Set up the parts of the local evaluation loop the user needs: recorded work
-in Ironside, focused checks and human review in Coeval, and Casefile inspection
+in Ironside, focused checks and human review in Rubrist, and Casefile inspection
 when skills are under evaluation. Services are local, but model-based judging
 can send example content to an external provider; an explicit mock is only a
 wiring check. Installation may also need network access.
@@ -37,7 +37,7 @@ chosen. Ask one decision at a time; read-only prerequisite checks can proceed
 while a goal is unresolved, but do not inspect session contents yet.
 
 Summarize the chosen scope and success check before mutations. Inspection-only
-work can stop at a useful Ironside trace without Coeval, judging, or a Casefile
+work can stop at a useful Ironside trace without Rubrist, judging, or a Casefile
 scan. If the user explicitly requested all components, preserve that choice.
 
 ## Keep capture and evaluation scoped
@@ -75,9 +75,9 @@ exact commands, the failure modes, and the order-sensitive steps.
    import post-hoc from their on-disk logs with the same mapping
    (`scripts/import-claude-session.mjs`, `scripts/import-codex-session.mjs`)
    → `references/importing-claude-codex.md`
-3. **coeval** — judging. Postgres in docker, api+web dev servers, headless
+3. **rubrist** — judging. Postgres in docker, api+web dev servers, headless
    bootstrap of one bench project per judged skill.
-   → `references/coeval-setup.md`
+   → `references/rubrist-setup.md`
 4. **Judges** — for an evaluation goal, agree on one observable criterion and
    start with a small development batch before independent human validation.
    For skill judging, use the skill's contract and relevant positive, failure,
@@ -88,7 +88,7 @@ exact commands, the failure modes, and the order-sensitive steps.
 
 ## Non-negotiable gotchas (learned the hard way)
 
-- Coeval judging **costs real tokens per verdict**. Pin a mid-tier judge
+- Rubrist judging **costs real tokens per verdict**. Pin a mid-tier judge
   model; never connect an auto-judging tracer integration to a project
   whose volume you haven't estimated.
 - Keep development feedback separate from independent human validation.
