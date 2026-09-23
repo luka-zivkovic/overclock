@@ -2,7 +2,7 @@
 
 ## Rubric = the skill's contract as probes
 
-One judging skill per coeval project, one project per judged skill. Derive
+One judging skill per rubrist project, one project per judged skill. Derive
 the rubric from the skill's SKILL.md invariants (and its eval suite if it
 has one), structured as:
 
@@ -16,7 +16,7 @@ has one), structured as:
 4. `AMBIGUOUS if:` the skill's anti-trigger cases, with the instruction
    spelled out: *return the verdict `ambiguous`, do NOT return pass*.
    Caveat: binary verdict kinds may coerce to pass/fail depending on
-   coeval version (see coeval#172) — adjudicate anti-trigger verdicts by
+   rubrist version (see rubrist#172) — adjudicate anti-trigger verdicts by
    hand regardless.
 5. A calibration note: verdicts are opinions until a golden set exists.
 

@@ -1,0 +1,6 @@
+{
+  "name": "skill-scenario-author",
+  "version": "0.0.0",
+  "author": {"name": "Luka Zivkovic"},
+  "description": "Internal, unshipped conversation-eval authoring prototype."
+}

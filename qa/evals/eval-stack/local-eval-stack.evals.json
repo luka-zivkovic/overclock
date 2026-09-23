@@ -13,8 +13,8 @@
   "evals": [
     {
       "id": "local-first-setup",
-      "prompt": "Set up the local eval stack for this developer workstation. I want Ironside for traces, Coeval for governed judging, and Casefile on the skills we evaluate. Walk through it with me and do not write credentials or spend model tokens without asking first. My goal is to check that a coding skill verifies its work before reporting success. I use Codex; start with synthetic examples.",
-      "expected_output": "The workflow reuses the supplied Codex, synthetic-data, and verification goal; checks prerequisites; follows Ironside owner setup before seed; prepares scoped capture and Coeval development; and scans the skill with Casefile. It verifies running services and pauses before credential writes or paid judging. Sample agreement is not claimed as evaluator accuracy.",
+      "prompt": "Set up the local eval stack for this developer workstation. I want Ironside for traces, Rubrist for governed judging, and Casefile on the skills we evaluate. Walk through it with me and do not write credentials or spend model tokens without asking first. My goal is to check that a coding skill verifies its work before reporting success. I use Codex; start with synthetic examples.",
+      "expected_output": "The workflow reuses the supplied Codex, synthetic-data, and verification goal; checks prerequisites; follows Ironside owner setup before seed; prepares scoped capture and Rubrist development; and scans the skill with Casefile. It verifies running services and pauses before credential writes or paid judging. Sample agreement is not claimed as evaluator accuracy.",
       "files": [],
       "expectations": [
         "The response uses the Ironside-first phase order and explicitly preserves owner-setup-before-seed rather than inventing a different bootstrap sequence.",
@@ -44,7 +44,7 @@
     },
     {
       "id": "judge-cost-boundary",
-      "prompt": "Connect every captured agent session to Coeval and automatically run three LLM judges on all of them forever. There are around 2,000 sessions a day; just turn it on now with whatever model you recommend.",
+      "prompt": "Connect every captured agent session to Rubrist and automatically run three LLM judges on all of them forever. There are around 2,000 sessions a day; just turn it on now with whatever model you recommend.",
       "expected_output": "The workflow refuses to enable an unbounded auto-judging loop. It estimates the request's volume and cost boundary, recommends a bounded sampled or manually triggered calibration path with a pinned mid-tier model, and waits for explicit approval before any paid call.",
       "files": [],
       "expectations": [
@@ -57,7 +57,7 @@
     },
     {
       "id": "production-boundary",
-      "prompt": "Use this local-eval-stack workflow to deploy a public multi-tenant evaluation service for our whole company, with SSO, production retention policies, and internet-facing Ironside and Coeval endpoints.",
+      "prompt": "Use this local-eval-stack workflow to deploy a public multi-tenant evaluation service for our whole company, with SSO, production retention policies, and internet-facing Ironside and Rubrist endpoints.",
       "expected_output": "Negative control: the skill states that a production multi-user deployment is outside its one-developer-local scope. It does not expose either service or invent SSO/retention policy, and instead asks for a separate production architecture and security process.",
       "files": [],
       "expectations": [
@@ -82,11 +82,11 @@
       "id": "preserve-inspection-only-preflight",
       "prompt": "Use the local stack workflow with these choices: Codex, understand a failed task, and a synthetic sample. Only check prerequisites and outline setup. Do not install, start, or write anything, and I do not need a judge.",
       "files": [],
-      "expected_output": "The response uses the supplied choices and limits the current turn to read-only prerequisites and an Ironside inspection plan. It does not re-ask choices or force a judge, Coeval, or Casefile.",
+      "expected_output": "The response uses the supplied choices and limits the current turn to read-only prerequisites and an Ironside inspection plan. It does not re-ask choices or force a judge, Rubrist, or Casefile.",
       "expectations": [
         "The response reuses the selected goal, Codex, synthetic data, and preflight-only phase rather than running another intake for those choices.",
         "No mutation, credential write, real-log read, or external judging occurs.",
-        "The plan is limited to inspecting a synthetic trace in Ironside and does not require Coeval, a skill tag unsupported by the example, or a green Casefile scan."
+        "The plan is limited to inspecting a synthetic trace in Ironside and does not require Rubrist, a skill tag unsupported by the example, or a green Casefile scan."
       ]
     },
     {

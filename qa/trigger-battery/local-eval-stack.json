@@ -8,14 +8,14 @@
     "recall": 0.8,
     "specificity": 0.9
   },
-  "note": "Routes requests to self-host the Ironside + Coeval evaluation loop, capture local agent sessions, or bootstrap governed local judging. It must stay out of generic eval writing, existing-instance CI gates, hosted platforms, observability-only work, and production multi-user deployments.",
+  "note": "Routes requests to self-host the Ironside + Rubrist evaluation loop, capture local agent sessions, or bootstrap governed local judging. It must stay out of generic eval writing, existing-instance CI gates, hosted platforms, observability-only work, and production multi-user deployments.",
   "should_trigger": [
-    "Help me self-host the full local agent evaluation stack with Ironside traces, Coeval judging, and Casefile scans.",
-    "Set up Ironside and Coeval on my workstation so I can capture skill runs and adjudicate judged results locally.",
+    "Help me self-host the full local agent evaluation stack with Ironside traces, Rubrist judging, and Casefile scans.",
+    "Set up Ironside and Rubrist on my workstation so I can capture skill runs and adjudicate judged results locally.",
     "Import my latest Codex and Claude Code sessions into a local Ironside instance and tag which skills were used.",
-    "Wire this pi agent to my own Ironside trace store, then help me create a calibrated Coeval judge for its sessions.",
+    "Wire this pi agent to my own Ironside trace store, then help me create a calibrated Rubrist judge for its sessions.",
     "I want a governed, local-first evaluation loop for agent skills with human adjudication and golden sets.",
-    "Bootstrap one local Coeval bench project per skill and verify captured Ironside traces before judging them."
+    "Bootstrap one local Rubrist bench project per skill and verify captured Ironside traces before judging them."
   ],
   "should_not": [
     {
@@ -23,7 +23,7 @@
       "allowed_skills": []
     },
     {
-      "prompt": "Add a Coeval gate to CI; our Coeval instance and judge projects are already running.",
+      "prompt": "Add a Rubrist gate to CI; our Rubrist instance and judge projects are already running.",
       "allowed_skills": []
     },
     {
@@ -31,7 +31,7 @@
       "allowed_skills": []
     },
     {
-      "prompt": "Deploy Ironside and Coeval as a public multi-tenant company service with SSO.",
+      "prompt": "Deploy Ironside and Rubrist as a public multi-tenant company service with SSO.",
       "allowed_skills": []
     },
     {
@@ -51,7 +51,7 @@
       "allowed_skills": []
     },
     {
-      "prompt": "Fold last month's coeval override reasons back into the judged natural-writing skill and open the patch PR.",
+      "prompt": "Fold last month's rubrist override reasons back into the judged natural-writing skill and open the patch PR.",
       "allowed_skills": ["skill-maintenance"]
     }
   ]

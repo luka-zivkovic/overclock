@@ -1,6 +1,6 @@
 {
   "name": "overclock",
-  "description": "Overclock \u2014 Claude Code plugins that run your model past spec.",
+  "description": "Overclock — Claude Code plugins that run your model past spec.",
   "owner": {
     "name": "Luka Zivkovic"
   },
@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.22",
+      "version": "0.1.26",
       "category": "development",
       "keywords": [
         "setup",
@@ -180,17 +180,47 @@
     {
       "name": "eval-stack",
       "source": "./plugins/eval-stack",
-      "description": "Self-host a local, governed evaluation stack for agent skills: ironside trace store, coeval judged evaluation with human adjudication, Claude Code and Codex session importers, a pi tracer that tags skill usage, casefile scanning, and a findings-driven skill-maintenance loop with golden-gate validation and human merges.",
-      "version": "0.2.2",
+      "description": "Self-host a local, governed evaluation stack for agent skills: ironside trace store, rubrist judged evaluation with human adjudication, Claude Code and Codex session importers, a pi tracer that tags skill usage, casefile scanning, and a findings-driven skill-maintenance loop with golden-gate validation and human merges.",
+      "version": "0.2.4",
       "category": "development",
       "keywords": [
         "evals",
         "self-hosted",
         "tracing",
         "llm-judge",
-        "coeval",
+        "rubrist",
         "ironside",
         "casefile"
+      ]
+    },
+    {
+      "name": "api-bench",
+      "source": "./plugins/api-bench",
+      "description": "Dry-run how an application would call the Claude Messages API or an OpenAI-compatible endpoint before writing the app. One JSON spec carries the system prompt, seed messages, tool schemas, stubbed tool results, and hard request, token, and dollar caps; the helper runs the tool-use loop, records the exact transcript, and compares variants. Credentials stay in the environment, mock runs need no network, and nothing is committed or edited.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "api",
+        "simulation",
+        "prompt-design",
+        "tool-use",
+        "claude",
+        "openai-compatible",
+        "prototyping"
+      ]
+    },
+    {
+      "name": "lateral-engineering",
+      "source": "./plugins/lateral-engineering",
+      "description": "Generate non-obvious engineering approaches by exposing assumptions, applying lateral moves, and prosecuting conventional candidates before ranking grounded alternatives with explicit costs.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "engineering",
+        "architecture",
+        "creative",
+        "lateral-thinking",
+        "reframing"
       ]
     },
     {

@@ -49,10 +49,10 @@ def _skill_selection(block: dict) -> str | None:
     return None
 
 
-def setup_turn_record(stdout_jsonl: Path, prompt: str) -> tuple[dict, str]:
-    """Retain setup actions and results so the judge can assess the whole conversation."""
+def completed_turn(stdout_jsonl: Path, label: str) -> tuple[dict, list[dict]]:
+    """Keep visible prose and tool events in order, excluding private reasoning."""
     result = None
-    tool_events: list[dict] = []
+    events: list[dict] = []
     for line in stdout_jsonl.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -60,15 +60,27 @@ def setup_turn_record(stdout_jsonl: Path, prompt: str) -> tuple[dict, str]:
         if event.get("type") == "result":
             result = event
         elif event.get("type") in {"assistant", "user"}:
-            tool_events.extend(
-                block for block in event.get("message", {}).get("content", [])
-                if isinstance(block, dict) and block.get("type") in {"tool_use", "tool_result"}
-            )
+            role = event["type"]
+            content = event.get("message", {}).get("content", [])
+            if isinstance(content, str):
+                content = [{"type": "text", "text": content}]
+            for block in content:
+                if isinstance(block, dict) and (
+                    block.get("type") in {"tool_use", "tool_result"}
+                    or (role == "assistant" and block.get("type") == "text")
+                ):
+                    events.append({"role": role, "content": block})
     if result is None or result.get("is_error") or result.get("subtype") != "success":
-        raise ValueError("setup turn did not complete successfully")
+        raise ValueError(f"{label} turn did not complete successfully")
+    return result, events
+
+
+def setup_turn_record(stdout_jsonl: Path, prompt: str) -> tuple[dict, str]:
+    """Retain setup actions and results so the judge can assess the whole conversation."""
+    result, events = completed_turn(stdout_jsonl, "setup")
     context = (
-        f"USER:\n{prompt}\n\nSETUP TOOL EVENTS:\n{json.dumps(tool_events)}\n\n"
-        f"ASSISTANT:\n{result.get('result', '')}\n"
+        f"USER:\n{prompt}\n\nSETUP ORDERED VISIBLE EVENTS:\n{json.dumps(events)}\n\n"
+        f"FINAL RESULT (summary, not an additional message):\n{result.get('result', '')}\n"
     )
     return result, context
 

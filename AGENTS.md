@@ -81,7 +81,13 @@ python3 tools/check_doc_claims.py
 python3 tools/check_setup_catalog.py
 python3 -m unittest discover -s qa -p 'test_*.py'
 python3 tools/check_version_bump.py --base origin/master
+npx casefile@0.2.1 scan . --config casefile.config.json --fail-on warning --no-store
 ```
+
+The casefile scan is what CI's `scan` job runs; it fails on any warning, so a new bundled
+script that legitimately needs a flagged capability needs an ignore entry with a reason in
+`casefile.config.json`. Run it on a clean tree (or `git archive`) so `__pycache__` does not
+count as bundled binaries.
 
 When plugin manifests or marketplace metadata change, also run `claude plugin validate .` and
 validate each affected plugin directory when the Claude CLI is available.

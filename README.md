@@ -54,6 +54,7 @@ installs, removes, enables, disables, or edits anything.
 | **overclock-setup** | A safe, explicit recommendation for the rest of the toolkit | `/plugin install overclock-setup@overclock` |
 | **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
+| **lateral-engineering** | Non-obvious engineering alternatives with broken assumptions, costs, and grounding | `/plugin install lateral-engineering@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **groundwork** | A one-question-at-a-time interview that ends at a confirmed decision brief | `/plugin install groundwork@overclock` |
 | **project-vocabulary** | One ubiquitous language per project, applied in conversation with approval-gated writes | `/plugin install project-vocabulary@overclock` |
@@ -64,6 +65,7 @@ installs, removes, enables, disables, or edits anything.
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
 | **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
+| **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
 
 > [!IMPORTANT]
 > Install **either** `session-memory` or `learning-loop`, not both. They intentionally share the
@@ -151,16 +153,16 @@ test from test-discipline, while trivial causes fast-path out with no ceremony.
 
 `eval-stack` connects the rest of the public toolchain into one local workflow: Ironside stores
 traces, bundled importers capture Claude Code and Codex sessions, a pi extension traces live work,
-Coeval runs calibrated judges with human adjudication, and Casefile scans the skills under test.
+Rubrist runs calibrated judges with human adjudication, and Casefile scans the skills under test.
 Session reads of `SKILL.md` become `skill:` trace tags, so evaluations can be grounded in actual
 usage instead of hand-written demos.
 
 The workflow is intentionally scoped to one developer's machine. It verifies running services,
 keeps ingest credentials write-scoped, and stops before writing secrets or spending judge-model
 tokens. Production multi-user hosting, hosted eval platforms, rubric-only work, and CI gating for an
-already-running Coeval instance remain separate concerns.
+already-running Rubrist instance remain separate concerns.
 
-A second skill, `skill-maintenance`, closes the loop: it pulls a judged skill's Coeval findings,
+A second skill, `skill-maintenance`, closes the loop: it pulls a judged skill's Rubrist findings,
 drafts one bounded workshop-copy patch, co-evolves the judge's rubric through the guarded flow when
 an invariant moves, validates against the golden gate, and opens a PR. Findings inform, humans
 merge, gates verify — no findings means no patch.
@@ -221,6 +223,23 @@ process, and only an allowlisted, provider-scoped environment is forwarded to th
 secrets never leave the parent. Current-conversation authorization to share scoped context with an
 external provider, and inspection of every hunk before applying, remain the parent agent's
 obligations — the bridge enforces isolation and scope, not consent.
+
+</details>
+
+<details>
+<summary><strong>api-bench</strong> — see the transcript before you write the app</summary>
+
+`api-bench` simulates how an application would drive a model API. A JSON spec holds the system
+prompt, seed messages, tool schemas, stubbed tool results, scripted follow-up turns, and a required
+budget; the helper runs the tool-use loop against the Claude Messages API or an OpenAI-compatible
+chat endpoint and records every request body, raw response, tool call, and usage figure to a
+transcript. `validate` checks a spec offline, `--mock` replays canned responses with no network or
+credential, and `compare` diffs two runs so a prompt or tool-schema change is judged on evidence.
+
+Credentials come only from the environment and are redacted from every artifact. Runs stop at the
+first request, token, or dollar cap, at a truncated or refused response, or at a provider error,
+each with a named status. The skill asks before the first live request in a conversation, keeps
+output in a scratch directory, and never edits application code or commits a transcript.
 
 </details>
 
@@ -317,7 +336,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 131 declared live cases | 19 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 
