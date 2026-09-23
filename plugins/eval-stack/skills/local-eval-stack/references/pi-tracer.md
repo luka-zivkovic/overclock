@@ -43,5 +43,5 @@ logs via the bundled importers (`scripts/import-claude-session.mjs`,
 `scripts/import-codex-session.mjs`) — same envelope, same redaction and
 truncation rules, idempotent re-runs, with hook recipes for automatic
 capture. → `references/importing-claude-codex.md`. For skill-run capture
-into coeval specifically, coeval's bundled `coeval-audit` skill capture
+into rubrist specifically, rubrist's bundled `rubrist-audit` skill capture
 hook (per-repo opt-in) still applies to Claude Code.

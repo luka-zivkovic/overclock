@@ -1,15 +1,15 @@
 # The maintenance loop, step by step
 
-Target: one judged skill (e.g. natural-writing) that already has a coeval
+Target: one judged skill (e.g. natural-writing) that already has a rubrist
 bench project — one project per judged skill. If the bench does not exist
 yet, standing it up is local-eval-stack's territory (its judge-authoring
 reference), not this loop's.
 
-## 0. Connect to coeval
+## 0. Connect to rubrist
 
-MCP (preferred where the harness supports it): coeval's MCP server (in
-the coeval repo under tools/mcp/) is a thin wrapper over the HTTP API —
-one config line, authenticated with a project-scoped `coeval_sk_` key,
+MCP (preferred where the harness supports it): rubrist's MCP server (in
+the rubrist repo under tools/mcp/) is a thin wrapper over the HTTP API —
+one config line, authenticated with a project-scoped `rubrist_sk_` key,
 same protocol against localhost or a hosted instance. The tools:
 
 | Tool | Use in this loop |
@@ -24,13 +24,13 @@ same protocol against localhost or a hosted instance. The tools:
 There is deliberately **no adjudicate tool**: adjudication (exception →
 golden) is dashboard-only, because the human is the point.
 
-CLI fallback (works everywhere): the findings command in the coeval-audit
-script family, run from a coeval checkout:
+CLI fallback (works everywhere): the findings command in the rubrist-audit
+script family, run from a rubrist checkout:
 
 ```bash
-node skills/coeval-audit/scripts/coeval-submit.mjs check --env-var COEVAL_API_KEY_<PROJECT>
-(script paths and flags live in the coeval repo — verify against your coeval checkout; they are not drift-checked from here)     # connectivity
-node skills/coeval-audit/scripts/coeval-submit.mjs findings --env-var COEVAL_API_KEY_<PROJECT>  # the findings export
+node skills/rubrist-audit/scripts/rubrist-submit.mjs check --env-var RUBRIST_API_KEY_<PROJECT>
+(script paths and flags live in the rubrist repo — verify against your rubrist checkout; they are not drift-checked from here)     # connectivity
+node skills/rubrist-audit/scripts/rubrist-submit.mjs findings --env-var RUBRIST_API_KEY_<PROJECT>  # the findings export
 ```
 
 ## 1. Pull findings
@@ -70,7 +70,7 @@ Fetch the active rubric version (`get_project`). For every probe, ask:
 does the patch change the invariant this probe checks? If yes:
 
 1. Draft the paired probe edit alongside the skill patch.
-2. Propose it through coeval's guarded rubric flow: create a NEW rubric
+2. Propose it through rubrist's guarded rubric flow: create a NEW rubric
    version — never edit the active version in place — then regression vs
    the golden set; any golden flip blocks activation until the human
    adjudicates it.
@@ -96,7 +96,7 @@ All of this happens for the PR, before any merge:
 4. `submit_runs` with a small fresh corpus (non-golden inputs) so the
    next maintenance pass has findings about THIS version.
 5. Record the evidence-tier block (rubric tier, per overclock's
-   skill-authoring notes): coeval revision, project, golden-set size,
+   skill-authoring notes): rubrist revision, project, golden-set size,
    baseline/candidate revisions, gate result.
 
 ## 5. The PR

@@ -40,7 +40,7 @@
       "allowed_skills": ["agent-bridge"]
     },
     {
-      "prompt": "Set up Ironside and Coeval locally so I can judge my skill's real Claude Code sessions.",
+      "prompt": "Set up Ironside and Rubrist locally so I can judge my skill's real Claude Code sessions.",
       "allowed_skills": ["local-eval-stack"]
     },
     {

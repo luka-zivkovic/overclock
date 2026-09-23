@@ -35,7 +35,7 @@ These were scoped, read-only spot checks rather than runs of the live harness.
   the response preserved those choices, checked prerequisites without mutation,
   and outlined an Ironside-only inspection. It reported Docker and restricted
   system checks as unverified rather than claiming setup was complete. It did
-  not require Coeval or a judge, or inspect existing session contents.
+  not require Rubrist or a judge, or inspect existing session contents.
 
 Both responses were consistent with the intended intake and scope behavior.
 They do not establish reliability across tasks, routing accuracy, or an

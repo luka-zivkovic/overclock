@@ -1,7 +1,7 @@
 # ironside — trace store setup
 
-Repo: https://github.com/luka-zivkovic/ironside (self-hosting is free under
-its Sustainable Use License). Requires Docker; ~2GB RAM headroom
+Repo: https://github.com/luka-zivkovic/ironside (MIT-licensed). Requires
+Docker; ~2GB RAM headroom
 (ClickHouse is the heavy tenant).
 
 ## Stand up

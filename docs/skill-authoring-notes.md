@@ -124,10 +124,10 @@ Rules of thumb:
 - A tier belongs to a change, not to the skill body. Do not infer it from words such as `test`,
   `schema`, or `git` in `SKILL.md`.
 - Rubric evidence may use Overclock's committed live-eval or experiment harness. When using
-  Coeval, follow the pinned
-  [evidence-tier recipe](https://github.com/luka-zivkovic/coeval/blob/b7161e253be162a2e2c310e6a779475b2003868d/docs/evidence-tier-gating.md)
-  and record the Coeval revision, project, golden-set size, baseline/candidate revisions, and gate
-  result. The recipe's `tools/ci/gate.mjs` path is relative to a Coeval checkout, not this repo.
+  Rubrist, follow the pinned
+  [evidence-tier recipe](https://github.com/luka-zivkovic/rubrist/blob/b7161e253be162a2e2c310e6a779475b2003868d/docs/evidence-tier-gating.md)
+  and record the Rubrist revision, project, golden-set size, baseline/candidate revisions, and gate
+  result. The recipe's `tools/ci/gate.mjs` path is relative to a Rubrist checkout, not this repo.
   Fewer than roughly ten human-adjudicated golden cases is wiring evidence, not quality evidence.
 - `Subjective` means only that no scored improvement gate is honest. Behavioral changes still need
   the committed live-eval case or existing-case rationale required by `AGENTS.md`, and routing

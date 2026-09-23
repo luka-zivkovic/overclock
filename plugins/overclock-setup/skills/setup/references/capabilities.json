@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.23",
+      "version": "0.1.25",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -192,7 +192,7 @@
     {
       "id": "eval-stack",
       "display_name": "Eval Stack",
-      "version": "0.2.2",
+      "version": "0.2.4",
       "publication_status": "published",
       "provides": [
         "local-agent-evaluation",
@@ -210,7 +210,7 @@
         "~/.pi/agent/ironside-tracer.json"
       ],
       "minimum_host_version": null,
-      "selection": "Choose to self-host Ironside and Coeval locally, capture agent sessions, calibrate governed judges, scan evaluated skills with Casefile, and run the findings-driven maintenance loop on judged skills."
+      "selection": "Choose to self-host Ironside and Rubrist locally, capture agent sessions, calibrate governed judges, scan evaluated skills with Casefile, and run the findings-driven maintenance loop on judged skills."
     },
     {
       "id": "pr-feedback",

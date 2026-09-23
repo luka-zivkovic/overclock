@@ -152,16 +152,16 @@ test from test-discipline, while trivial causes fast-path out with no ceremony.
 
 `eval-stack` connects the rest of the public toolchain into one local workflow: Ironside stores
 traces, bundled importers capture Claude Code and Codex sessions, a pi extension traces live work,
-Coeval runs calibrated judges with human adjudication, and Casefile scans the skills under test.
+Rubrist runs calibrated judges with human adjudication, and Casefile scans the skills under test.
 Session reads of `SKILL.md` become `skill:` trace tags, so evaluations can be grounded in actual
 usage instead of hand-written demos.
 
 The workflow is intentionally scoped to one developer's machine. It verifies running services,
 keeps ingest credentials write-scoped, and stops before writing secrets or spending judge-model
 tokens. Production multi-user hosting, hosted eval platforms, rubric-only work, and CI gating for an
-already-running Coeval instance remain separate concerns.
+already-running Rubrist instance remain separate concerns.
 
-A second skill, `skill-maintenance`, closes the loop: it pulls a judged skill's Coeval findings,
+A second skill, `skill-maintenance`, closes the loop: it pulls a judged skill's Rubrist findings,
 drafts one bounded workshop-copy patch, co-evolves the judge's rubric through the guarded flow when
 an invariant moves, validates against the golden gate, and opens a PR. Findings inform, humans
 merge, gates verify — no findings means no patch.
