@@ -1,0 +1,19 @@
+{
+  "name": "untangle",
+  "displayName": "Untangle",
+  "description": "Turn a sprawling exploratory repository back into one project. A read-only survey finds the spine, sorts the rest into threads, records the user's keep/park/delete decisions, and writes one plan file with an ordered checklist, a bounded foundations check, and a suggested next move. An explicit apply mode works that checklist one verified item at a time. Never commits.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "repository",
+    "coherence",
+    "cleanup",
+    "focus",
+    "roadmap",
+    "plan",
+    "untangle"
+  ]
+}

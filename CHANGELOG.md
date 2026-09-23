@@ -109,6 +109,41 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   paid judge calls; it never silently turns calibration into an unbounded
   auto-judging job.
 
+## untangle
+
+### 0.1.0 — 2026-09-20 (initial release)
+- New plugin: a user-invoked survey for repositories that grew by exploration. It
+  finds the spine (what the project is trying to be), runs a deterministic scan for
+  coherence signals (stale and sentinel-named directories, unreferenced directories,
+  duplicate capabilities, tool configs without the tool, missing script and doc
+  targets, undocumented environment variables, committed env files, secret-looking
+  content), and sorts the rest into threads: supporting, side quest, abandoned, or
+  contradicting. Every thread cites file evidence.
+- Writes one plan file, `UNTANGLE.md`: spine, threads with decisions, an ordered
+  checklist with observable verifications, a foundations check capped at three
+  decision-level findings about the spine, and suggested next moves (exactly one
+  Next, at most four Then, and every parked thread under Parked ideas). Decisions
+  to park, delete, or merge are asked one thread at a time and recorded to the user.
+- Explicit apply mode works the checklist one verified item at a time: it refuses a
+  dirty tree or pending decisions, touches only the item's paths, ticks the item
+  with a done line, prints the commit command, and stops. It never commits.
+- The scan separates documentation paths that are missing from ones cited relative
+  to a package, skips URL routes, reports developer home paths embedded in docs,
+  and treats workspace-member READMEs as package descriptions rather than a
+  second project README. Findings from a first run on a real monorepo.
+- A second real run on a multi-era monorepo added a branch inventory (tip age, ancestry,
+  and squash-merge detection), a direction-documents list (roadmaps, handoffs, plans),
+  activity two levels below each workspace member, and narrowed sentinel matching to
+  directories plus files with explicit leftover suffixes. Container home paths, MIME
+  types, and numeric ratios no longer count as documentation drift.
+- Deterministic helper covers scan, plan check, apply preflight, and tick; unit
+  tests pin the planted-signal recall, the no-write scan boundary, secret
+  non-disclosure, plan structure rules, and the dirty-tree refusal. Live cases
+  cover a planted-sprawl survey, a clean-repository fabrication control, the
+  dirty-tree refusal, one-item apply without commit, a scope stop, and a
+  multi-turn survey to a finished plan. Evidence tier: rubric for behavior;
+  objective for the helper boundaries.
+
 ## agent-bridge
 
 ### 0.1.2 — 2026-08-16
@@ -350,6 +385,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.26 — 2026-09-23
+- Catalog the new `untangle` plugin (0.1.0) with its persistent `UNTANGLE.md` plan file.
 
 ### 0.1.25 — 2026-09-22
 - Synchronize the report-only catalog with Eval Stack 0.2.4 (Coeval renamed to Rubrist).

@@ -82,6 +82,43 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   before treating that provider as supported. Only after that, consider persistent threads,
   background jobs, dirty-worktree snapshots, or full handoff.
 
+### untangle — BUILD, v0.1.0 published (2026-09-20)
+- **Demand:** direct maintainer request on behalf of a named non-developer user whose
+  repositories grow by exploration: many ideas tried in one folder, a project that reads as
+  coherent but carries stale threads, contradictions, and no clear direction. A concrete named use
+  satisfies principle 4.
+- **Grounding:** nothing in the kit owns whole-repository coherence. `/simplify` and `/code-review`
+  are diff-scoped, critical-thinking judges one decision, project-vocabulary covers terminology.
+  The unbuilt codebase-design survey (external-eval-2026-07-19-1945.md, BUILD-IN-OVERCLOCK) audits
+  module depth; untangle audits intent and direction. Different axes, no collision; they may share
+  survey scaffolding later. Three ledger traps shaped the design: dead-code and unused-dependency
+  detection stays with knip/depcheck/vulture (delete-safety-sweep KILL), documentation drift stays
+  at cheap path checks rather than executing the README (stale-doc-to-reality-diff KILL), and long
+  generic finding lists are treated as a failed result.
+- **Product shape:** one user-invoked skill, two explicit modes. `survey` finds the spine first,
+  runs a deterministic scan, clusters signals into threads (spine, supporting, side-quest,
+  abandoned, contradicting) with cited evidence, asks keep/park/delete decisions one thread at a
+  time, and writes `UNTANGLE.md`: threads with decisions, an ordered checklist with observable
+  verifications, a foundations check capped at three decision-level findings about the spine, and
+  a suggested next move (one Next, at most four Then, every parked thread under Parked ideas).
+  `apply` works the checklist one verified item at a time, ticks it with a done line, prints the
+  commit command, and stops. Neither mode commits; apply refuses a dirty tree.
+- **Fences that keep it right-sized:** quality review of the spine is decision-level only and
+  capped at three; line-level quality is a checklist handoff to the host's review tool. Roadmap
+  items must cite a thread, finding, or checklist id, so generic "add tests, add CI" advice cannot
+  appear. Stale age alone never means abandoned. A coherent repository yields a short "hangs
+  together" result. The roadmap is a one-shot suggestion derived from survey evidence, not the
+  maintained planning artifact that parked roadmap-anchor and the unbuilt wayfinder/to-tickets
+  verdicts cover.
+- **Evidence:** deterministic tests pin planted-signal recall, the read-only scan boundary, secret
+  non-disclosure, plan structure rules, and the dirty-tree refusal (objective). Six live cases cover
+  a planted-sprawl survey, a clean-repository fabrication control, the dirty-tree refusal, one-item
+  apply without commit, a scope stop, and a multi-turn survey to a finished plan (rubric). No
+  routing battery: the skill is user-invoked.
+- **Next:** observe real use on the motivating repositories. Candidate follow-ups, none authorized
+  yet: per-item confirmed commits in apply for non-developers, and sharing scan scaffolding with the
+  architecture survey if that candidate is built.
+
 ### api-bench — BUILD, v0.1.0 published (2026-09-19)
 - **Demand:** direct maintainer request to simulate, from inside Claude Code, how an
   application would use Claude (or any model) through the API, and the follow-up

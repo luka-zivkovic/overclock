@@ -1322,6 +1322,169 @@ def build_skill_maintenance(root: Path) -> None:
     init_repo(work, "skill maintenance fixture 3")
 
 
+UNTANGLE_PLAN = """# Untangle plan
+
+<!-- untangle-plan: v1 -->
+
+## 1. Spine
+
+Notely is a command-line note-taking app that keeps notes as plain text.
+
+Source: README.md, package.json
+
+## 2. Threads
+
+| ID | Thread | Role | Evidence | Decision | Decided by |
+|----|--------|------|----------|----------|------------|
+| T1 | Command-line notes | spine | README.md, package.json scripts.cli | keep | survey |
+| T2 | Web server (express and fastify) | contradicting | src/server, package.json dependencies | park | user |
+| T3 | AI summarizer experiment | abandoned | experiments/ai-summarizer, stale and unreferenced | delete | user |
+| T4 | Old notes directory | abandoned | old/, sentinel name | park | user |
+
+## 3. Checklist
+
+- [ ] C1 (T3) Delete the AI summarizer experiment | paths: experiments/ai-summarizer | verify: experiments/ai-summarizer no longer exists
+- [ ] C2 (T4) Move old/ into archive/old | paths: old, archive/old | verify: old/ is gone and archive/old/notes.txt exists
+- [ ] C3 (H1) Stop tracking the committed .env file | paths: .env, .gitignore | verify: git ls-files does not list .env
+- [ ] C4 (T2) Move the web server into archive/server | paths: src/server, archive/server | verify: src/server is gone and archive/server/index.js exists
+
+## 4. Foundations
+
+| ID | Finding | Evidence | Cost of keeping | Cost of changing now | Cost of changing later |
+|----|---------|----------|-----------------|----------------------|------------------------|
+
+None.
+
+## 5. Suggested next moves
+
+### Next
+
+- N1 (T1) Build the bin/notely command the README promises
+
+### Then
+
+- N2 (C3) Add a .env.example listing SYNC_TOKEN and JWT_SECRET
+
+### Parked ideas
+
+- T2: A web view of the notes folder
+- T4: Whatever lived in old/ before the rewrite
+"""
+
+
+def build_untangle_sprawl(work: Path) -> None:
+    write(
+        work,
+        "README.md",
+        "# Notely\n\nNotely is a command-line note-taking app that keeps notes as plain text "
+        "and syncs a folder.\n\n## Usage\n\nRun `bin/notely add \"text\"` to add a note. "
+        "See `docs/SETUP.md` and `scripts/install.sh`.\n",
+    )
+    write(
+        work,
+        "package.json",
+        json.dumps(
+            {
+                "name": "notely",
+                "description": "Command-line notes",
+                "scripts": {"start": "node src/server/index.js", "cli": "node src/cli.js"},
+                "dependencies": {
+                    "express": "^4",
+                    "fastify": "^4",
+                    "passport": "^0.7",
+                    "jsonwebtoken": "^9",
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(work, ".eslintrc.json", '{"extends": "eslint:recommended"}\n')
+    write(
+        work,
+        "src/server/index.js",
+        'const express = require("express");\nconst app = express();\n'
+        'app.get("/notes", (_req, res) => res.json([]));\n'
+        "app.listen(process.env.PORT, () => console.log(process.env.SYNC_TOKEN));\n",
+    )
+    write(work, "src/auth/passport.js", 'module.exports = require("passport");\n// TODO wire sessions\n')
+    write(
+        work,
+        "src/auth/jwt.js",
+        'const jwt = require("jsonwebtoken");\n'
+        "module.exports = token => jwt.verify(token, process.env.JWT_SECRET);\n",
+    )
+    write(work, "src/notes.js", 'const fs = require("fs");\nexports.add = text => fs.appendFileSync("notes.txt", text + "\\n");\n')
+    write(work, "docs/SETUP.md", "See `src/missing/file.js` for details.\n")
+    write(work, ".env", "SYNC_TOKEN=placeholder\n")
+    write(work, "experiments/ai-summarizer/index.js", 'console.log("summarize notes with an LLM");\n')
+    write(work, "old/notes.txt", "old stuff from the first attempt\n")
+    env = dict(os.environ)
+    env.update(
+        {
+            "GIT_AUTHOR_NAME": "fixture",
+            "GIT_AUTHOR_EMAIL": "fixture@example.com",
+            "GIT_COMMITTER_NAME": "fixture",
+            "GIT_COMMITTER_EMAIL": "fixture@example.com",
+        }
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=work, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=work, check=True)
+    old = {**env, "GIT_AUTHOR_DATE": "2026-01-10T00:00:00", "GIT_COMMITTER_DATE": "2026-01-10T00:00:00"}
+    subprocess.run(["git", "commit", "-qm", "initial sprawl"], cwd=work, check=True, env=old)
+    with (work / "src/server/index.js").open("a", encoding="utf-8") as handle:
+        handle.write("// keep serving\n")
+    subprocess.run(["git", "add", "-A"], cwd=work, check=True)
+    new = {**env, "GIT_AUTHOR_DATE": "2026-06-01T00:00:00", "GIT_COMMITTER_DATE": "2026-06-01T00:00:00"}
+    subprocess.run(["git", "commit", "-qm", "server work"], cwd=work, check=True, env=new)
+
+
+def build_untangle_clean(work: Path) -> None:
+    write(work, "README.md", "# Tidy\n\nA small command-line tool that counts words in a file.\n\n## Usage\n\nRun `node src/cli.js <file>`.\n")
+    write(
+        work,
+        "package.json",
+        '{"name": "tidy", "private": true, "scripts": {"test": "node test/cli.test.js"}, "dependencies": {}}\n',
+    )
+    write(work, "package-lock.json", '{"name": "tidy", "lockfileVersion": 3, "packages": {}}\n')
+    write(work, ".gitignore", "node_modules\n.env\n")
+    write(work, "src/cli.js", 'const { count } = require("./count");\nconsole.log(count(require("fs").readFileSync(process.argv[2], "utf8")));\n')
+    write(work, "src/count.js", "exports.count = text => text.trim().split(/\\s+/).filter(Boolean).length;\n")
+    write(work, "test/cli.test.js", 'require("assert").equal(require("../src/count").count("a b c"), 3);\n')
+
+
+def build_untangle(root: Path) -> None:
+    base = root / "untangle"
+
+    for index in (0, 5):
+        build_untangle_sprawl(base / f"eval-{index}")
+
+    work = base / "eval-1"
+    build_untangle_clean(work)
+    init_repo(work, "tidy baseline")
+
+    work = base / "eval-2"
+    build_untangle_sprawl(work)
+    write(work, "UNTANGLE.md", UNTANGLE_PLAN)
+    subprocess.run(["git", "add", "-A"], cwd=work, check=True)
+    subprocess.run(["git", "commit", "-qm", "add untangle plan"], cwd=work, check=True)
+    with (work / "README.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nUncommitted note added after the plan.\n")
+
+    work = base / "eval-3"
+    build_untangle_sprawl(work)
+    write(work, "UNTANGLE.md", UNTANGLE_PLAN)
+    subprocess.run(["git", "add", "-A"], cwd=work, check=True)
+    subprocess.run(["git", "commit", "-qm", "add untangle plan"], cwd=work, check=True)
+
+    work = base / "eval-4"
+    build_untangle_clean(work)
+    init_repo(work, "tidy baseline")
+    write(work, "src/cli.js", 'const { count } = require("./count");\nconst file = process.argv[2];\nconsole.log(count(require("fs").readFileSync(file, "utf8")));\n')
+    subprocess.run(["git", "add", "-A"], cwd=work, check=True)
+    subprocess.run(["git", "commit", "-qm", "read the file argument once"], cwd=work, check=True)
+
+
 def build_lateral_engineering(root: Path) -> None:
     for index in range(5):
         work = root / "lateral-engineering" / f"eval-{index}"
@@ -1521,6 +1684,7 @@ def main() -> int:
     build_solutions(root)
     build_eval_stack(root)
     build_skill_maintenance(root)
+    build_untangle(root)
     build_api_bench(root)
     build_lateral_engineering(root)
     return 0

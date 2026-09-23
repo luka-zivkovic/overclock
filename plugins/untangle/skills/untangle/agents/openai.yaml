@@ -1,0 +1,6 @@
+interface:
+  display_name: "Untangle"
+  short_description: "Find a sprawling repo's spine and plan the cleanup"
+  default_prompt: "Use $untangle to survey this repository, sort its work into a spine and stray threads, and write the UNTANGLE.md plan for me to decide on."
+policy:
+  allow_implicit_invocation: false

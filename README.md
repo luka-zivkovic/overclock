@@ -63,6 +63,7 @@ installs, removes, enables, disables, or edits anything.
 | **eval-stack** | A self-hosted loop from agent traces to governed, human-adjudicated evaluation | `/plugin install eval-stack@overclock` |
 | **natural-writing** | Voice-preserving long-form prose with a plainspoken fallback style | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
+| **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 | **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
 
@@ -296,6 +297,27 @@ Claude-specific. Other provider adapters belong in separate changes rather than 
 
 </details>
 
+<details>
+<summary><strong>untangle</strong> — one project again, not five experiments in a folder</summary>
+
+`untangle` is for a repository that grew by exploration: ideas tried in place, half-finished
+threads, a README that promises one thing while the newest code does another. Survey mode finds
+the spine (what the project is trying to be), runs a deterministic scan for coherence signals, and
+sorts everything else into supporting work, side quests, abandoned threads, and threads that
+contradict the spine. Every thread cites its files; the scan is read-only.
+
+The result is one plan file, `UNTANGLE.md`: the spine, the threads with keep/park/delete decisions
+asked one at a time and recorded to the user, an ordered checklist with observable verifications,
+a foundations check capped at three decision-level findings about the spine, and a suggested next
+move with every parked idea kept where it can be found again. Apply mode works the checklist one
+verified item at a time, ticks it with a done line, prints the commit command, and stops. It never
+commits, and it refuses a dirty tree so every step stays revertable.
+
+It is user-invoked and out of scope for a diff, a pull request, one file, a bug, or line-level
+code quality; those stay with the host's review tools.
+
+</details>
+
 ## Hooks and trust
 
 Only the two memory packages ship SessionStart hooks:
@@ -314,7 +336,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 138 declared live cases | 20 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 
