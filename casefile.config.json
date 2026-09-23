@@ -82,6 +82,16 @@
       "ruleId": "capability/write-outside-artifact",
       "path": "plugins/eval-stack/skills/local-eval-stack/scripts/import-codex-session.mjs",
       "reason": "false positive: flagged line is the skill-detection comment/regex mentioning /skills/<name>/SKILL.md; the importer only reads a rollout and its config, and writes nothing to disk"
+    },
+    {
+      "ruleId": "capability/secret-env-read",
+      "path": "qa/fixtures/additional.py",
+      "reason": "fixture content: writes a planted sprawl repo whose JavaScript reads process.env.SYNC_TOKEN so untangle can be tested on secret non-disclosure; the Python code reads no environment secret"
+    },
+    {
+      "ruleId": "capability/secret-env-read",
+      "path": "qa/test_untangle.py",
+      "reason": "fixture content: writes a planted sprawl repo whose JavaScript reads process.env.SYNC_TOKEN so untangle can be tested on secret non-disclosure; the Python code reads no environment secret"
     }
   ]
 }
