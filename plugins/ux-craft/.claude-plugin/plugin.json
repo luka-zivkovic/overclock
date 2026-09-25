@@ -1,0 +1,21 @@
+{
+  "name": "ux-craft",
+  "displayName": "UX Craft",
+  "description": "Decide how an application's pages, flows, and names should work before styling them. page-structure picks the layout, zones, hierarchy, action placement, and states for one page; user-flow designs the step sequence, confirmations, exits, and post-submit path for one task; ui-naming keeps labels, buttons, navigation, errors, and terminology consistent, with a read-only drift scanner. All three read and extend a project-level UX.md so decisions persist.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ux",
+    "layout",
+    "page-structure",
+    "user-flow",
+    "information-architecture",
+    "microcopy",
+    "naming",
+    "labels",
+    "heuristics"
+  ]
+}

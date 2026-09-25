@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Naming"
+  short_description: "Keep labels, buttons, and terms consistent"
+  default_prompt: "Use $ui-naming to propose consistent names for this feature's labels, buttons, navigation, and errors, and to record the glossary in UX.md."

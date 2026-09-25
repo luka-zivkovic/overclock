@@ -1,0 +1,4 @@
+interface:
+  display_name: "Page Structure"
+  short_description: "Choose a page's layout, zones, and action placement"
+  default_prompt: "Use $page-structure to turn this page's job into a blueprint with archetype, layout, zones, action placement, hierarchy, and states."
