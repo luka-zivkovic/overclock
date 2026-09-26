@@ -20,9 +20,11 @@ procedure.
 
 If `UX.md` exists at the project root, read it first: Platform, Casing, Button order, Verb
 vocabulary, and Glossary are settled decisions. Extend them; do not re-argue a recorded term
-unless the user asks. If a design system content guide, `DESIGN.md`, or i18n source of truth
-exists, it outranks the defaults in `references/`. Without any, assume a web application and
-sentence case, and say so.
+unless the user asks. If a design system content guide, `DESIGN.md`, product-language contract,
+or i18n source of truth exists, it outranks the defaults in `references/`. Without any, assume a
+React + shadcn/ui web app and sentence case, and say so. When the project's vocabulary lives in
+another document, copy its terms and rejected synonyms into the `UX.md` glossary (with the user's
+approval) so the scanner can enforce them.
 
 ## 1. Inventory the concepts and actions
 
@@ -61,15 +63,42 @@ When a codebase is present and the user asks for a check, a glossary, or consist
 bundled scanner by absolute path (resolve the skill directory from the host's skill context):
 
 ```bash
-python3 /absolute/path/to/ui-naming/scripts/scan_labels.py PATH [--format md|json] [--exclude GLOB ...]
+python3 /absolute/path/to/ui-naming/scripts/scan_labels.py PATH [--format md|json] [--ux UX.md] \
+  [--prop NAME ...] [--term CANONICAL=REJECTED,REJECTED ...] [--exclude GLOB ...]
 ```
 
-It reads UI strings from JSX/TSX, Vue, Svelte, HTML, and i18n JSON/YAML files, and reports:
-synonym clusters (delete/remove/trash), generic labels (OK, Submit, Click here), mixed casing
-among button-like labels, banned words in error-like strings, trailing punctuation on labels, and
-the string inventory. It never edits files and makes no network requests. Treat its report as
-evidence to read, not a verdict: a synonym cluster is only drift if the words name the same
-action.
+It reads UI strings from JSX/TSX with a brace-aware parser, and it reads Vue, Svelte, HTML, and
+i18n JSON/YAML files. It sees:
+
+- labels behind inline handlers (`onClick={() => …}`);
+- labels next to icon children;
+- both branches of ternary labels;
+- object-literal nav configs (the shadcn sidebar block's `{ title, url }`);
+- destructured prop defaults;
+- sonner toasts;
+- zod and react-hook-form messages.
+
+It classifies each string by shadcn role: action, link, nav, title, description, field, error,
+status, or option.
+
+It reads the nearest `UX.md` automatically. The Glossary's *Rejected synonyms* become the
+project's own drift check, which catches domain drift such as "Skill" where the product says
+"Check" that no generic synonym list can. The Casing line sets the casing policy. Scanner ›
+Label props adds project props such as `eyebrow`.
+
+It reports:
+
+- rejected terms;
+- generic labels (OK, Submit, Click here);
+- verb and noun synonym clusters;
+- casing deviations from the policy;
+- banned words in error-like strings, including zod messages and `toast.error`;
+- exclamation marks and trailing periods;
+- the navigation labels, to compare against breadcrumbs and page titles.
+
+It never edits files and makes no network requests. Treat its report as evidence to read, not a
+verdict: a synonym cluster is only drift if the words name the same action, and a rejected term
+may be correct on a technical surface the glossary exempts.
 
 ## 4. Deliver the proposal
 

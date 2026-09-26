@@ -21,6 +21,11 @@ If `UX.md` exists at the project root, read its Platform, Button order, Glossary
 sections first. A flow already named there is extended, not redesigned, unless the user asks. Use
 the glossary's terms for objects and actions throughout the spec.
 
+In a shadcn/ui app (`components.json` or `components/ui/`), specify each decision with the
+component that implements it: `AlertDialog`, sonner Undo, `Dialog`, `Sheet`, or `Drawer`, and
+react-hook-form plus zod timing. `references/decisions.md` › In shadcn apps holds that mapping,
+and skipping it yields specs that name behaviours the component library already fixes.
+
 ## 1. Frame the task
 
 Fill five lines from the prompt, asking in one short block for anything missing rather than
@@ -39,7 +44,7 @@ guessing silently:
 
 Read `references/patterns.md` before sequencing; it holds the reference shapes for the common
 tasks (create, edit, delete, invite, signup and sign-in, onboarding, checkout and wizard, search
-and filter, bulk action, import, settings change), and starting from the pattern avoids
+and filter, bulk action, import, settings change, triage a queue), and starting from the pattern avoids
 re-deriving a shape users already know. Then:
 
 - Remove every input the system can default or derive (Tesler: complexity that stays lives with

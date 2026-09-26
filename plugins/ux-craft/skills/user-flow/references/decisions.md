@@ -75,6 +75,20 @@ see what is ahead. Steps completed are revisitable from the review step.
 - First item ever: the destination's populated state, with a one-line orientation if the area is
   new to them.
 
+## In shadcn apps
+
+| Decision | Component and wiring |
+|---|---|
+| Irreversible confirmation | `AlertDialog`. The title asks the question with the object named. `AlertDialogAction` carries the specific verb, styled with `buttonVariants({ variant: "destructive" })` when it destroys. `AlertDialogCancel` reads "Cancel". |
+| Reversible action | Act immediately, then show a `sonner` toast with an Undo action: `toast("Project archived", { action: { label: "Undo", onClick: restore } })`. Also change the page in place, for example by removing the row. |
+| Short create or edit that keeps context | `Dialog` on desktop. Side-by-side editing uses `Sheet`. On phones, use `Drawer` or a full page. |
+| Validation timing | react-hook-form with zod. The default `mode: "onSubmit"` with `reValidateMode: "onChange"` matches the rules above: errors appear on submit and clear as the user fixes them. Use `mode: "onTouched"` for long forms. Never validate on every keystroke before the first submit. |
+| Error summary | On submit failure, render the errors from `form.formState.errors` in an `Alert` above the form, each linking to its field. Move focus with `form.setFocus`. `FormMessage` shows the same words inline. |
+| Progress on the trigger | While `form.formState.isSubmitting` is true, disable the button and show a `Spinner` with "Saving…". |
+| Completion | Land where the flow says (`patterns.md`) and show the change in place. A toast alone is not the confirmation. |
+
 Sources: NN/g (confirmation dialogs, slips, user mistakes, user control and freedom, Cancel vs
 Close, response-time limits, progress indicators, errors in forms), GOV.UK (structuring forms,
-question pages, error summary), Wroblewski, Laws of UX (Tesler, Doherty, Zeigarnik).
+question pages, error summary), Wroblewski, Laws of UX (Tesler, Doherty, Zeigarnik); shadcn/ui
+documentation (AlertDialog, Dialog, Sheet, Drawer, Form, Sonner, Spinner); react-hook-form
+`useForm` documentation (mode, reValidateMode, setFocus).

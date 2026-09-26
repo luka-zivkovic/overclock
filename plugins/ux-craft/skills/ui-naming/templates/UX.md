@@ -2,13 +2,15 @@
 
 Settled decisions for this application's interface. The `page-structure`, `user-flow`, and
 `ui-naming` skills read this file before applying defaults; a decision recorded here is not
-re-argued. Keep it short and factual; one line per decision.
+re-argued. Keep it short and factual; one line per decision. The label scanner reads the
+Glossary, Casing, and Scanner sections directly.
 
 ## Platform
 
 - Primary platform: web
-- Frameworks and design system: (fill in)
-- Component library: (fill in)
+- Frameworks and design system: React + shadcn/ui (Radix, Tailwind, lucide icons)
+- Filled (primary) button variant: default (confirm in components/ui/button.tsx)
+- Toasts: sonner · Confirmations: AlertDialog · Forms: react-hook-form + zod
 
 ## Casing
 
@@ -40,6 +42,10 @@ re-argued. Keep it short and factual; one line per decision.
 
 ## Glossary
 
+The scanner reports every interface string that uses a rejected synonym. Separate synonyms with
+commas. A parenthetical note, such as "(Technical view only)", is ignored by the scanner and kept
+for people.
+
 | Term | Meaning | Rejected synonyms |
 |---|---|---|
 | (term) | (one line) | (words not to use) |
@@ -49,3 +55,8 @@ re-argued. Keep it short and factual; one line per decision.
 | Flow | Entry points | Steps | Landing |
 |---|---|---|---|
 | (name) | (where it starts) | (step names) | (where it ends) |
+
+## Scanner
+
+- Label props: (component props that carry interface text, e.g. eyebrow, subtitle)
+- Exclude: (globs for generated or fixture files)

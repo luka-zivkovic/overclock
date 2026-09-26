@@ -100,6 +100,31 @@ auto-save with a per-row "Saved" state. Dangerous settings (visibility, billing,
 their own confirmation. One save model per app, recorded in `UX.md`.
 Trap: mixing auto-save and explicit Save on one page.
 
+## Triage a queue (review items one by one)
+
+Entry: the queue list's header primary action ("Review 7 items"), or a count on a dashboard that
+links to the list. Start from the first unreviewed item, or from the one the user picked.
+Steps:
+
+1. Show one item at a time with everything the decision needs on screen, and step context
+   ("3 of 7").
+2. Offer one decision per item, with the usual choice as the primary. Rarer choices sit apart,
+   and a choice that changes shared or permanent records is separated or confirmed.
+3. After a decision, advance to the next item automatically and offer Undo for the last
+   decision.
+4. Skip and Defer keep the item in the queue.
+5. Pause and exit keeps the position, so returning resumes there.
+6. Land on a summary: how many were decided, skipped, and still waiting, plus the next action.
+
+Decisions:
+
+- Keyboard shortcuts for the decisions when the work is repetitive. Show them on the buttons.
+- Each item has its own URL, so a colleague can open the same one.
+- A filter or category that scoped the queue stays visible while stepping through it.
+
+Trap: a detail page with no way to reach the next item, which makes every decision a round trip
+to the list; or decisions with no undo, which makes speed dangerous.
+
 ## Permission or eligibility gate
 
 Check as early as the flow honestly can and show the gate before the user enters data. When the
@@ -107,5 +132,5 @@ gate fails mid-flow, keep the entered data and say what unlocks it.
 
 Sources: GOV.UK Service Manual (form structure, question pages), NN/g (onboarding tutorials,
 mobile onboarding, confirmation dialogs, user control and freedom, slips and mistakes, progress
-indicators), Wroblewski Web Form Design, Krug, Laws of UX (Tesler, Zeigarnik), Apple HIG and
-Material 3 pattern guidance.
+indicators, flexibility and efficiency of use), Wroblewski Web Form Design, Krug, Laws of UX
+(Tesler, Zeigarnik), Apple HIG and Material 3 pattern guidance.

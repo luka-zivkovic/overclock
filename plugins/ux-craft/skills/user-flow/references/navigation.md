@@ -23,6 +23,17 @@
 - **Consistency across the app.** Same term, same place, same icon for the same action
   everywhere; a user who learned it on one page has learned it on all.
 
+## In shadcn apps
+
+- Each flow screen shows its location with `Breadcrumb`. Parent levels use `BreadcrumbLink`, and
+  `BreadcrumbPage` shows the current screen with the same words as its `h1`. The sidebar marks the
+  owning section with `SidebarMenuButton isActive`, so a detail page highlights its parent list.
+- Every routed screen sets its document title (`<title>` in React 19, `metadata` in Next.js),
+  so the browser history reads as the flow.
+- A flow that returns somewhere carries that place in the URL (`?from=exceptions`) or in router
+  state with a fallback. Its Back link names the destination ("Back to Exceptions"), never just
+  "Back".
+
 Sources: Rosenfeld, Morville and Arango, Information Architecture for the Web and Beyond; NN/g
 (3 IA mistakes, format-based navigation, breadcrumbs, "You are here", progressive disclosure,
 card sorting and tree testing, consistency and standards); Laws of UX (Jakob, Hick, Miller).

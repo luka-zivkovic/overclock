@@ -1,6 +1,6 @@
 ---
 name: page-structure
-description: "Decide how one application page or screen is structured before it is styled: its archetype (list, detail, form, dashboard, settings, wizard step, empty state), layout pattern, zones, where the primary and destructive actions sit, visual hierarchy, and the empty/loading/error states. Use when the user asks how to structure, lay out, organize, or arrange a page, screen, panel, or modal, says 'what layout should this be', 'where should this button go', 'this page feels cluttered', or is about to build a new page and has not decided its shape. Do NOT use for colour, typography, spacing values, animation, or visual polish (that is styling work), for a single element's wording (ui-naming), for multi-screen sequencing (user-flow), for marketing or landing pages, or for a page whose structure the user has already specified and just wants implemented."
+description: "Decide how one application page, screen, or the app shell is structured before it is styled, or review the structure of one that exists: its archetype (list, detail, form, dashboard, settings, wizard step, empty state, app shell), layout pattern, zones, where the primary and destructive actions sit, visual hierarchy, the empty/loading/error states, and how it stacks on phones. Tuned for React + shadcn/ui apps. Use when the user asks how to structure, lay out, organize, or arrange a page, screen, panel, or modal, says 'what layout should this be', 'where should this button go', 'this page feels cluttered', asks to audit or review an existing page's or the app's layout ('audit the dashboard', 'review our app layout'), or is about to build a new page and has not decided its shape. Do NOT use for colour, typography, spacing values, animation, or visual polish (that is styling work), for a single element's wording (ui-naming), for multi-screen sequencing (user-flow), for marketing or landing pages, or for a page whose structure the user has already specified and just wants implemented."
 argument-hint: "[page or screen] [--platform web|ios|android|desktop]"
 ---
 
@@ -22,6 +22,17 @@ sections override every default below; a page that belongs to a named flow inher
 step context. If a design system, `DESIGN.md`, or component library is present, its components
 are the vocabulary for the blueprint. Without either, assume a web application and say so.
 
+When the project has `components.json` or `components/ui/`, it is a shadcn/ui app. Read
+`references/shadcn.md`: it maps each zone to shadcn components, gives the Tailwind responsive
+rules, and explains why a stock `CardTitle` is not a heading. Then open
+`components/ui/button.tsx` and note which variant is the filled one. Projects rename variants,
+and counting the wrong variant miscounts every page's primary action.
+
+If the user asks to review or audit screens that already exist, follow `references/review.md`
+instead of writing a blank-slate blueprint. It holds the render-and-measure checks, the
+code-only checks (dead state branches, missing data shown as zero, mislabelled counts), and the
+finding format. Its deliverable ends with this skill's blueprint for the fixed page.
+
 ## 1. Name the page's job
 
 Write one line: "On this page the user **[does X]** so that **[Y]**." One page, one job. If the
@@ -29,9 +40,13 @@ line needs "and", the page is two pages or a page with a secondary zone, and the
 must say which.
 
 Then pick the archetype from `references/archetypes.md`; it holds the default blueprint for each
-archetype (list, detail, form, dashboard, settings, wizard step, empty or first-run), and skipping
-it produces layouts invented per page instead of the pattern users already know. State the
-archetype and, if the page blends two, which one leads.
+archetype (list, detail, form, dashboard, settings, wizard step, empty or first-run, app shell),
+and skipping it produces layouts invented per page instead of the pattern users already know.
+State the archetype and, if the page blends two, which one leads.
+
+If the page changes with the user's state (a day-0 checklist that becomes a dashboard), name the
+states from the data conditions that switch them and follow `archetypes.md` › Pages that change
+with state. Each state gets its own blueprint under one stable title.
 
 ## 2. Inventory everything the page must carry
 
@@ -61,7 +76,9 @@ two-column sidebar for everything. Decide:
 - the content shape that justified it (how many items, how many attributes compared, whether
   items are homogeneous, whether the user edits or reads);
 - how it collapses on a narrow viewport (which zone stacks first, which controls move to a
-  sheet or menu).
+  sheet or menu). In Tailwind that means a single-column base with breakpoints that add columns,
+  and action rows that wrap (`shadcn.md` › Responsive rules). A three-column grid with no base
+  style clips its buttons at 390 px.
 
 ## 4. Assign zones and place actions
 
@@ -78,8 +95,9 @@ it mixes conventions that users read as inconsistency. The rules that hold every
   (a danger section, an overflow menu, the far side of an action bar) and read as different.
 - Related controls share a container; a label sits closer to its own field than to the next
   field; identical-looking controls behave identically.
-- Location is visible: page title matches the navigation label that led here, and a breadcrumb
-  or active nav state shows where this page sits.
+- Location is visible: the active nav item, the breadcrumb's current page, the page's single
+  `h1`, and the document title use the same words, so the user can always see where this page
+  sits.
 
 ## 5. Set the hierarchy
 
@@ -105,10 +123,17 @@ Return, in this order:
 5. The states table (zone, empty, loading, partial, error).
 6. Open questions: anything you assumed that the user should confirm, in one short block.
 
-Completion check: the wireframe shows every element from the inventory once; exactly one
-primary action appears; every data zone has all five states; no rule is asserted without a
-reference section behind it. If the user then asks you to build it, implement the blueprint with
-the project's existing components and keep the zone names as component or section names.
+Completion check:
+
+- the wireframe shows every element from the inventory once;
+- exactly one primary action appears per state;
+- the narrow layout keeps that action fully visible;
+- the location quartet agrees;
+- every data zone has all five states;
+- no rule is asserted without a reference section behind it.
+
+If the user then asks you to build it, implement the blueprint with the project's existing
+components and keep the zone names as component or section names.
 
 ## Handoffs
 

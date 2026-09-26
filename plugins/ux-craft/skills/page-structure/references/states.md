@@ -24,6 +24,13 @@ blank table with no next step.
   or a change on the page). Silent success reads as failure.
 - The states table in the blueprint lists these five per data zone. A zone whose states are
   "same as the list above" may say so once.
+- A value that has not loaded is not zero. Show a skeleton or "—" until data arrives. `?? 0` on
+  a count reports "nothing waiting" when the truth is "unknown".
+- Decide which component owns each state. When a layout renders its own loading or error UI while
+  data is missing, the page's loading and error branches never run. Keep the state in one place.
+- In shadcn: `Skeleton` for loading shapes, `Spinner` inside the triggering `Button` (disabled,
+  with "Saving…"), `Empty` for empty states, and `Alert variant="destructive"` with a Retry button
+  for errors (`shadcn.md`).
 
 Sources: Scott Hurff, the UI stack; NN/g on empty states, skeleton screens, progress
 indicators, response-time limits, and visibility of system status; Laws of UX, Doherty threshold.

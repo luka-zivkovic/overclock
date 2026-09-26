@@ -55,6 +55,19 @@ primary. Status badges sit beside the title, not beside the actions.
 One inline action per row at most (usually open or the most common verb). The rest in a row
 overflow menu. Bulk actions appear in the toolbar only once items are selected.
 
+## In shadcn apps
+
+- "Filled" means the variant `components/ui/button.tsx` styles with a solid background. That is
+  `default` in stock shadcn, but projects rename it (`shadcn.md`). One filled button per page
+  state. Secondary actions use `outline` or `ghost`.
+- Header actions sit at the trailing end of the page header row, after the `h1`, as a
+  `flex flex-wrap` group so they drop below the title on phones instead of squeezing it.
+- Row actions go in a `DropdownMenu` on a ghost icon button (`MoreHorizontal` plus a `sr-only`
+  label). Destructive items come last with `variant="destructive"` and open an `AlertDialog`.
+- A consequential action that writes outside the app, such as a sign-off that starts syncing to
+  another system, is not a ghost button beside the primary. Separate it, and confirm it with an
+  `AlertDialog` that names the effect.
+
 ## Sticky action bars
 
 Use when the form is longer than one screen and has a single Save. The bar shows only Cancel and

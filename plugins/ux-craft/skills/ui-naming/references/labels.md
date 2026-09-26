@@ -86,6 +86,24 @@ record the alternative in `UX.md`.
 - Icon-only controls always carry a text name (tooltip plus accessible name) equal to the label
   they would have as a text button. (WCAG; Apple HIG; Material)
 
+## In shadcn apps
+
+- An icon-only `Button size="icon"` carries a `<span className="sr-only">` naming the action,
+  the shadcn convention. A `SidebarMenuButton` in an icon-collapsible sidebar sets `tooltip` to
+  the same words as its label.
+- A `DropdownMenuItem` names an action with a verb (Rename…, Duplicate, Delete project).
+  Destructive items use `variant="destructive"`, come last, and open an `AlertDialog` whose
+  `AlertDialogAction` repeats the item's verb.
+- `BreadcrumbPage`, the page `h1`, and the `SidebarMenuButton` that leads there use the same
+  words. The scanner's navigation list makes this comparable.
+- `FormMessage` shows the text of the zod schema's messages, so error wording lives in the
+  schema (`z.string().email("Enter an email address like name@example.com")`). Review schemas
+  with `errors.md`, not just JSX.
+- sonner toasts state what happened in the past tense ("Project deleted"). `toast.error` follows
+  `errors.md`. A toast with an Undo action uses the label "Undo".
+- `Empty` states: `EmptyTitle` names what the area holds, `EmptyDescription` says why it is
+  empty, and the one `Button` in `EmptyContent` names the first task.
+
 ## Terminology
 
 - One term per concept, recorded in the glossary with its rejected synonyms. Common collisions:

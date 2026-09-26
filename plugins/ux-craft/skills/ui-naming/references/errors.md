@@ -37,6 +37,14 @@ error-message guidelines and scoring rubric)
 - Validate on submit or on blur; never on each keystroke for text fields.
 - Page-level failures (a fetch failed) show what failed, what loaded, and Retry.
 
+## Where error text lives in React apps
+
+Form errors are written in validation schemas, not in JSX. In zod, messages are the string
+arguments (`.min(1, "Enter a project name")`) or `message` keys. react-hook-form adds `setError`
+and `rules`. Server errors are mapped in the data layer. Review all three places. A schema full
+of "Invalid" defeats every well-written `FormMessage`. Map raw API errors, such as a status code
+or an exception message, to a sentence from the table above before they reach the screen.
+
 ## Warnings and destructive confirmations
 
 - Warn before, not after: "This removes 14 documents. This can't be undone."

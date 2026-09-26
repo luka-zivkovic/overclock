@@ -71,7 +71,10 @@ Job: notice what needs attention, then go there.
 
 - One dominant tile or list; a dashboard with eight equal tiles has no hierarchy.
 - Every tile links to the page where the user acts on it.
-- No primary action button unless the dashboard is also the launch point for one task.
+- No primary action button unless the dashboard is also the launch point for one task. When it
+  is, that one action sits in the top zone, never in the last card.
+- Show each fact once. A count in a tile, a sentence, a table header, and a badge on one page is
+  four chances to disagree.
 
 ## Settings
 
@@ -116,6 +119,54 @@ Job: understand what this area is for and take the first step.
 ```
 
 - One primary action, never a tour of features.
+
+## App shell (the frame every page shares)
+
+Job: always show where the user is and which scope they are in, and reach any destination in one
+move.
+
+```
+[ Sidebar                    | Header: [≡] Project / Section / Page         [global action] ]
+[  scope switcher (project)  |---------------------------------------------------------------]
+[  nav groups → items        | h1 = nav label   · status badge          [page actions]        ]
+[  …                         | page content (one max width per archetype)                     ]
+[  account · theme · sign out|                                                                ]
+```
+
+- The location quartet agrees on every route: active nav item, breadcrumb current page, `h1`,
+  and document title use the same words. A route with no nav entry (a detail page) shows its
+  parent in the breadcrumb and highlights that parent in the nav.
+- Scope that changes every page's data (workspace, project, environment) sits in the sidebar
+  header or as a breadcrumb segment. Keep it out of a cluster of header stats and badges.
+- Navigation is grouped by one scheme: user task or object type. Mixing sequence numbers with
+  other groupings reads as a broken sequence. A qualifier every item in a group shares goes on
+  the group, not on each item.
+- The header carries location and at most one global action, such as "New …" or "Import …".
+  Counts and stats belong on the pages that explain them. A display or density setting belongs
+  in the account menu, next to theme, not as a pill that looks like a button.
+- Account, theme, and sign out live together in the sidebar footer's user menu.
+- Shell-level states are designed like any zone (`states.md`). Loading shows a skeleton, never
+  zeros; signed-out returns to sign-in and keeps the route; a failed request says what failed.
+- Narrow widths: the sidebar becomes a sheet behind a menu button; the header keeps the menu
+  button and the breadcrumb on one row and drops stats first.
+
+## Pages that change with state
+
+Some pages switch archetype as the user's data grows: a dashboard that is a first-run checklist
+on day 0, a provisional summary after the first import, and a full dashboard later.
+
+- Write one blueprint per state and name the state that selects each.
+- Keep the `h1` and the location the same in every state. The state goes in the eyebrow or the
+  lead sentence ("New project · no runs yet").
+- Each state has exactly one primary action. The next state's actions stay hidden until the
+  state arrives.
+- Tell a journey one way. If the nav, the page, and a checklist all show progress, they use the
+  same step names and numbers. Keep a one-time setup sequence apart from an ongoing work loop,
+  and never show two numbered sequences on one screen.
+- A setup checklist leaves once it is complete, or collapses to a one-line receipt. Finished work
+  must not keep the top of the page.
+- A one-time secret, such as an API key shown once, is the first zone in its state at every
+  width until it is saved or dismissed.
 
 ## Modal or drawer (sub-page)
 
