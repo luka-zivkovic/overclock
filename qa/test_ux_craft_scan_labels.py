@@ -118,6 +118,66 @@ VUE = """<template>
 
 I18N = """{"deleteButton": "Remove", "title": "Project settings"}"""
 
+FILLER_PAGE = """export function About() {
+  return (
+    <Card>
+      <CardTitle>Todo list</CardTitle>
+      <CardDescription>Lorem ipsum dolor sit amet.</CardDescription>
+      <p>TODO: explain the limits</p>
+      <p>Headline goes here</p>
+      <Input placeholder="Your title here" />
+      <span>Date: TBD</span>
+    </Card>
+  );
+}
+"""
+
+# The shape project-vocabulary writes to CONCEPTS.md.
+CONCEPTS_MD = """# Concepts
+
+## Workspace
+The billing and permission boundary. Not the same as a Project.
+Aliases: formerly "Team", "Org".
+
+## Account [Billing]
+The legal customer responsible for invoices.
+
+## Flagged ambiguities
+- "Member": sometimes a User in a Workspace.
+Aliases: "Seat"
+"""
+
+CONTEXT_MD = """# Glossary
+
+**Project**:
+A top-level design workspace.
+_Avoid_: repo, folder
+
+**Artifact**: A generated file.
+_Avoid_: none
+
+**Normal Artifact**:
+A saved design output.
+_Avoid_: live artifact
+
+**Live Artifact**:
+A refreshable design output.
+_Avoid_: normal artifact
+"""
+
+TEAM_PAGE = """export function TeamPage() {
+  return (
+    <div>
+      <h1>Team settings</h1>
+      <Button>Open Workspace settings</Button>
+      <Button>Open folder</Button>
+      <p>Seat limits</p>
+      <p>Live artifact preview</p>
+    </div>
+  );
+}
+"""
+
 
 def write(root: Path, relative: str, text: str) -> None:
     path = root / relative
@@ -265,7 +325,8 @@ class ScanLabelsTest(unittest.TestCase):
             with contextlib.redirect_stdout(md):
                 self.assertEqual(scan_labels.main([str(self.root)]), 0)
         self.assertEqual(tree_digest(self.root), before)
-        self.assertIn("## Rejected terms (UX.md glossary)", md.getvalue())
+        self.assertIn("## Rejected terms (project glossary)", md.getvalue())
+        self.assertIn("- **Check** (UX.md) ←", md.getvalue())
 
     def test_shipped_ux_template_parses_as_empty_settings(self) -> None:
         template = (SKILL_DIR / "templates/UX.md").read_text(encoding="utf-8")
@@ -274,6 +335,44 @@ class ScanLabelsTest(unittest.TestCase):
         self.assertEqual(parsed["props"], set())
         self.assertEqual(parsed["excludes"], [])
         self.assertEqual(parsed["casing"], "sentence")
+
+    def test_filler_copy_is_reported_but_hints_and_names_are_not(self) -> None:
+        write(self.root, "src/app/about.tsx", FILLER_PAGE)
+        filler = texts(scan(self.root)["filler"])
+        self.assertIn("Lorem ipsum dolor sit amet.", filler)
+        self.assertIn("TODO: explain the limits", filler)
+        self.assertIn("Headline goes here", filler)
+        for fine in ("Todo list", "Your title here", "Date: TBD"):
+            self.assertNotIn(fine, filler)  # a name, a placeholder hint, a deliberate TBD
+        self.assertEqual(self.report["filler"], [])
+
+    def test_concepts_md_aliases_become_rejected_terms(self) -> None:
+        write(self.root, "CONCEPTS.md", CONCEPTS_MD)
+        write(self.root, "src/app/team.tsx", TEAM_PAGE)
+        report = scan(self.root)
+        self.assertIn("Team settings", texts(report["rejected"]["Workspace"]["Team"]))
+        self.assertEqual(report["glossary_sources"]["Workspace"], ["CONCEPTS.md"])
+        self.assertEqual(report["glossary_sources"]["Check"], ["UX.md"])
+        # Flagged ambiguities are open questions, not settled terms.
+        self.assertNotIn("Seat limits", [s["text"] for c in report["rejected"].values()
+                                         for items in c.values() for s in items])
+        # A domain glossary names concepts; it does not make them capitalized in UI copy.
+        self.assertIn("Open Workspace settings", texts(report["casing"]["deviations"]))
+
+    def test_context_md_avoid_lines_become_rejected_terms(self) -> None:
+        write(self.root, "CONTEXT.md", CONTEXT_MD)
+        write(self.root, "src/app/team.tsx", TEAM_PAGE)
+        report = scan(self.root)
+        self.assertIn("Open folder", texts(report["rejected"]["Project"]["folder"]))
+        self.assertEqual(report["glossary_sources"]["Project"], ["CONTEXT.md"])
+        self.assertNotIn("Artifact", report["glossary_sources"])  # "_Avoid_: none" adds nothing
+        # Mutual "don't confuse" entries: a word that is itself a glossary term is not drift.
+        self.assertNotIn("Normal Artifact", report["rejected"])
+        self.assertNotIn("Live Artifact", report["rejected"])
+
+    def test_project_vocabulary_template_adds_no_terms(self) -> None:
+        template = REPO / "plugins/project-vocabulary/skills/project-vocabulary/templates/concepts.md"
+        self.assertEqual(scan_labels.parse_concepts(template.read_text(encoding="utf-8")), {})
 
     def test_missing_explicit_ux_file_is_an_error(self) -> None:
         err = io.StringIO()

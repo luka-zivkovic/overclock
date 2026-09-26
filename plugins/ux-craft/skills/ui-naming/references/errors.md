@@ -18,6 +18,13 @@ Templates that satisfy this (GOV.UK error-message grammar):
 | Action failed | "[Thing] couldn't be [verb]. [What to do]" | Changes couldn't be saved. Check your connection and try again |
 | Permission | "You don't have access to [thing]. [Who can help]" | You don't have access to billing. Ask an owner to change your role |
 
+When the validator knows which rule failed, name that rule. "Phone number is too short" helps
+more than "Enter a valid phone number". Write one message per rule for fields that fail in
+several ways, such as email, phone, card number, and postcode.
+
+When retrying cannot help, the "what to do" names the fix, not "try again": Sign in, Open
+settings, or who to ask.
+
 ## Words to avoid in errors
 
 please, sorry, oops, invalid, illegal, forbidden, error occurred, something went wrong (alone),
@@ -65,4 +72,5 @@ or an exception message, to a sentence from the table above before they reach th
 Sources: GOV.UK Design System (Error message, Error summary); NN/g (Error-message guidelines,
 Error messages scoring rubric, 10 guidelines for reporting errors in forms, visibility of
 system status); WCAG 2.2 (1.4.1 Use of colour, 3.3.1 Error identification, 3.3.3 Error
-suggestion); Microsoft Writing Style Guide on error messages.
+suggestion); Microsoft Writing Style Guide on error messages; Baymard Institute (adaptive error
+messages in inline form validation).

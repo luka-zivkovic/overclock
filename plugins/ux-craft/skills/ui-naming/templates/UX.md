@@ -44,7 +44,8 @@ Glossary, Casing, and Scanner sections directly.
 
 The scanner reports every interface string that uses a rejected synonym. Separate synonyms with
 commas. A parenthetical note, such as "(Technical view only)", is ignored by the scanner and kept
-for people.
+for people. The scanner also reads the retired terms in `CONCEPTS.md` and `CONTEXT.md` when they
+exist, so list here only the words that matter for interface copy.
 
 | Term | Meaning | Rejected synonyms |
 |---|---|---|

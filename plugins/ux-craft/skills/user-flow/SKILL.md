@@ -69,7 +69,9 @@ states (ideal, empty, loading, partial, error) where the step shows data.
 Apply the rules in `references/decisions.md`: reversible actions get undo, irreversible ones get
 a confirmation that names the object and count, routine actions get neither, and every action
 over a second long gets visible progress and a visible completion. Write the exact decision per
-consequential action in the spec.
+consequential action in the spec. For each step that can fail, say where the error shows and
+what recovers from it (`decisions.md` › Errors and recovery): a failure the flow can foresee is
+prevented before the action, and Retry is offered only when retrying can work.
 
 ## 5. Design the landing
 

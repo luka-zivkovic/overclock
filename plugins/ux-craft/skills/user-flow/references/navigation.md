@@ -12,6 +12,11 @@
   the destination through sign-in.
 - **Everything shareable has a URL.** Detail pages, filtered lists, and wizard steps that a user
   may return to each get a route. Browser Back moves one step, never out of the flow.
+- **The URL holds the view.** Search, filters, sort order, the open tab, and the page number
+  live in the URL. Refresh, Back, and a shared link then return the same view.
+- **Navigation is a link.** Anything that takes the user to another page is a link, so it opens
+  in a new tab, shows its address, and can be copied. Buttons act on the page; they do not
+  navigate.
 - **Seven is a smell, not a law.** More than about seven peer items in one menu means the items
   need grouping first. Group, then count groups; test the tree with real tasks when the
   hierarchy is unclear (card sorting to build it, tree testing to check it).
@@ -33,7 +38,14 @@
 - A flow that returns somewhere carries that place in the URL (`?from=exceptions`) or in router
   state with a fallback. Its Back link names the destination ("Back to Exceptions"), never just
   "Back".
+- A control that goes to another page is `<Button asChild><Link …>`, never
+  `<Button onClick={() => navigate(…)}>`. Router state still travels with `Link`. A new tab
+  loses router state, so put what the destination needs in the URL.
+- Keep the view in search params: `useSearchParams` in React Router, `searchParams` in Next.js,
+  or a helper such as nuqs.
 
 Sources: Rosenfeld, Morville and Arango, Information Architecture for the Web and Beyond; NN/g
 (3 IA mistakes, format-based navigation, breadcrumbs, "You are here", progressive disclosure,
-card sorting and tree testing, consistency and standards); Laws of UX (Jakob, Hick, Miller).
+card sorting and tree testing, consistency and standards); Laws of UX (Jakob, Hick, Miller);
+Vercel Web Interface Guidelines (navigation and state); WAI-ARIA Authoring Practices (Link and
+Button patterns).

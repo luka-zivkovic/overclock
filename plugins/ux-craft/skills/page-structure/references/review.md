@@ -20,6 +20,8 @@ Read:
 - the layout components (shell, sidebar, header, breadcrumb resolver);
 - the page and the components it renders;
 - `components/ui/button.tsx`, to learn which variant is filled (`shadcn.md`);
+- the component inventory: what `components/ui/` holds and which Radix packages are imported
+  (`shadcn.md` › Take inventory first);
 - `UX.md` and any product-language or design doc the project treats as authoritative.
 
 Then render the page. Run the app locally and capture it at 1440×900 and 390×844 for each state
@@ -30,7 +32,8 @@ JSON in `page.route` to change only the fields that select the state. Say in the
 those values are synthetic.
 
 Render the loading, error, and signed-out states the same way: delay the request, return a 500,
-return a 401.
+return a 401. Then render edge content: a 200-character title, missing optional fields, one row,
+and many rows.
 
 ## 3. Measure, do not eyeball
 
@@ -39,7 +42,8 @@ Take these checks from the rendered page:
 | Check | How | Finding when |
 |---|---|---|
 | Horizontal overflow | `document.documentElement.scrollWidth > clientWidth` at 390 px | Any overflow |
-| Clipped controls | A button whose box exceeds an `overflow: hidden` ancestor | Any clipped action, above all the primary |
+| Clipped controls | A control whose box exceeds an `overflow: hidden` or `clip` ancestor | Any clipped action, above all the primary |
+| Behind a scroll | A control outside the visible box of an `overflow: auto` or `scroll` ancestor at 390 px | Key content or actions sit behind a scroll with no visible cue. Report it as hidden until scrolled, not as clipped: it is reachable, so it usually rates lower |
 | Filled buttons per state | Count visible elements styled as the filled variant | Not exactly one per state (zero is fine only when the state has no task) |
 | Primary above the fold | The filled button's top edge versus the viewport height | The state's one task starts below the fold |
 | Headings | `document.querySelectorAll("h1")` | Not exactly one `h1`, or its text is not the nav label |
@@ -59,6 +63,19 @@ Take these checks from the rendered page:
 - **Breadcrumb resolution.** Prefix matching that lets `/a` shadow `/a/b`; routes with no crumb;
   crumbs that are not links.
 - **Fixed grids and non-wrapping rows.** The patterns in `shadcn.md` › Responsive rules.
+- **Navigation that is not a link.** `onClick={() => navigate(…)}` or `router.push` on a
+  `Button` renders a `<button>` with no `href`, so it cannot open in a new tab or be copied as a
+  link. Use `<Button asChild><Link …>` (`shadcn.md` › Zone → component). A clickable table row
+  needs a real link inside it, such as on its title, or keyboard and new-tab users cannot open
+  it.
+- **Page state outside the URL.** Tabs, filters, sort order, and page numbers held in
+  `useState` are lost on refresh, on Back, and in a shared link (`archetypes.md` › List).
+- **Waits with no end.** A request with no timeout, or a loading branch that can never become
+  the error branch.
+- **Errors shown as empty.** A `catch` that sets an empty list, so a failed load renders the
+  empty state.
+- **Nested landmarks.** shadcn's `SidebarInset` already renders `<main>`. A page inside it must
+  not render another `<main>`.
 - **Repeated facts.** The same count or action offered in several zones of one page.
 - **Vocabulary.** Run the `ui-naming` scanner when it is available. When it is not, grep for the
   glossary's rejected synonyms.
@@ -73,10 +90,15 @@ Give each finding a stable ID (S1… for the shell, P1… for the page) and thes
   - **3** is a likely wrong turn, a lost location, or a hidden or clipped primary action;
   - **2** slows, repeats, or muddles, and the user recovers;
   - **1** is cosmetic.
+- **Frequency**: when analytics or error logs exist, how often the problem happens and over what
+  period. Otherwise say that the severity was judged without frequency data.
+- **Effort**: quick (one file, under an hour), medium, or large (several files or a shared
+  component). Within one severity, quick fixes go first in the top-findings table.
 - **Evidence**: `file:line` plus the rendered measurement or screenshot state. Mark anything
   inferred rather than observed as an assumption.
 - **Rule**: the reference and section it breaks (`archetypes.md` › Dashboard). No rule, no finding.
-- **Proposal** and **status**:
+- **Proposal** and **status**. The proposal names each component as installed, to add, or the
+  project's own (`shadcn.md` › Take inventory first). The status is one of:
   - *fix* when no product decision is needed;
   - *decide* when the user must choose;
   - *keep* for what holds up.
@@ -98,4 +120,6 @@ claims. When the user wants a record, write it where they say, or propose
 
 Sources: NN/g, How to conduct a heuristic evaluation, and Severity ratings for usability problems;
 WCAG 2.2 (2.4.2 Page titled, 1.3.1 Info and relationships, 2.5.8 Target size minimum); Hurff, the
-UI stack.
+UI stack; Vercel Web Interface Guidelines (navigation and state); WAI-ARIA Authoring Practices
+(Link and Button patterns); Open Design's critique template and implementation audit
+(nexu-io/open-design).

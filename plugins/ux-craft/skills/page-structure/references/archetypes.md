@@ -18,7 +18,10 @@ Job: find one item, or act on several.
 - Table when users compare three or more attributes per item, or sort and filter on them;
   cards when items are visual or heterogeneous and comparison is secondary; a plain list when
   one attribute identifies the item.
-- Row-level actions: one inline primary (open) and the rest in a row overflow menu.
+- Row-level actions: one inline primary (open) and the rest in a row overflow menu. Opening a
+  row is a link, so it works in a new tab.
+- Search, filters, sort, and the page number live in the URL, so refresh, Back, and a shared
+  link return the same view. The same holds for the active tab on a detail page.
 - Bulk actions appear only after selection and replace, not crowd, the toolbar.
 - Empty state carries the "New <object>" action and one line on what the list will hold.
 

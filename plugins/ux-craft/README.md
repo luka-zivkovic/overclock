@@ -15,7 +15,12 @@ scope; use `impeccable`, `frontend-design`, or an accessibility auditor for thos
 All three read `UX.md` at the project root first (platform, casing, button order, verb
 vocabulary, glossary, flows) and fall back to cited literature defaults where it is silent.
 `ui-naming` owns writing `UX.md`, on request only. The scanner reads the glossary's rejected
-synonyms, so the project's own vocabulary becomes a mechanical check.
+synonyms, so the project's own vocabulary becomes a mechanical check. It also reads the retired
+terms in a `CONCEPTS.md` kept by `project-vocabulary`, or in a `CONTEXT.md`, when either exists.
+
+For projects that use only part of shadcn, the skills name each component as installed, to add,
+or the project's own. Their default is to take dialogs, sheets, menus, tooltips, tabs, and
+toasts from shadcn rather than build them by hand.
 
 Install locally without the marketplace:
 

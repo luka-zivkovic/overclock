@@ -24,9 +24,11 @@ are the vocabulary for the blueprint. Without either, assume a web application a
 
 When the project has `components.json` or `components/ui/`, it is a shadcn/ui app. Read
 `references/shadcn.md`: it maps each zone to shadcn components, gives the Tailwind responsive
-rules, and explains why a stock `CardTitle` is not a heading. Then open
-`components/ui/button.tsx` and note which variant is the filled one. Projects rename variants,
-and counting the wrong variant miscounts every page's primary action.
+rules, and explains why a stock `CardTitle` is not a heading. Take its inventory first. Many
+projects install only a few components, so name each one in the blueprint as installed, to add,
+or the project's own. Then open `components/ui/button.tsx` and note which variant is the filled
+one. Projects rename variants, and counting the wrong variant miscounts every page's primary
+action.
 
 If the user asks to review or audit screens that already exist, follow `references/review.md`
 instead of writing a blank-slate blueprint. It holds the render-and-measure checks, the
@@ -108,9 +110,9 @@ carry meaning; users scan the first two words. Everything not in that order is q
 ## 6. Design the states
 
 For every zone that shows data, define the five states from `references/states.md` (ideal,
-empty, loading, partial, error); it also carries the rules for what an empty state must contain
-and when to use a skeleton versus a spinner. A blueprint without states ships an empty table with
-no next step.
+empty, loading, partial, error). It also carries the three kinds of empty, when to use a
+skeleton versus a spinner, where an error shows, and the edge content each zone must survive. A
+blueprint without states ships an empty table with no next step.
 
 ## 7. Deliver the blueprint
 

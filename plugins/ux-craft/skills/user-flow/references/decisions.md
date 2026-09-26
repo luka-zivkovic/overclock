@@ -60,6 +60,33 @@ one time it matters (NN/g confirmation dialogs; slips versus mistakes).
   saved state, the banner. A toast alone is weak because it can be missed; pair it with an
   in-place change.
 
+## Errors and recovery
+
+- **Prevent what you can foresee.** When the system can tell before an action that it will fail
+  (no permission, missing setup, a quota reached), say so at the trigger, with the fix. Do not
+  let the user submit into a known failure.
+- **Recover quietly when the system can.** Retry a transient failure (a dropped connection, a
+  rate limit with a known reset) automatically once or twice before showing an error. If the
+  retry takes more than a moment, say "Retrying…".
+- **A long wait says what it is waiting on.** Past about 10 seconds, show what is still in
+  progress and for how long, with a way to stop. Report a timeout only when it is reached.
+- **Offer Retry only when retrying can work.** When the cause needs the user (signed out, no
+  permission, a quota reached), offer the action that fixes it: Sign in, Open settings, or
+  Upgrade. For invalid input, point to the field.
+- **Offer an action the viewer can take.** When only someone else can fix the cause, name who
+  ("Ask a workspace owner to raise the limit") instead of a button that fails for this user.
+- **One way forward.** An error offers one primary action and at most one secondary.
+- **The error's surface matches its scope:**
+
+| Scope | Where it shows |
+|---|---|
+| One field | Under the field, and in the form's error summary |
+| One section of a page | Inside that section, with Retry; the rest of the page keeps working |
+| The whole page | In place of the page's content, keeping the header and navigation |
+| The account or the connection (signed out, offline, plan changed) | A banner above every page until it clears |
+| Work at risk, or the action cannot proceed | A dialog |
+| A small failure of a background action | A toast, with the page showing the unchanged state |
+
 ## Progress indication
 
 Three or more steps: show step context (Step 2 of 4, or a labelled progress bar) and let the user
@@ -85,10 +112,13 @@ see what is ahead. Steps completed are revisitable from the review step.
 | Validation timing | react-hook-form with zod. The default `mode: "onSubmit"` with `reValidateMode: "onChange"` matches the rules above: errors appear on submit and clear as the user fixes them. Use `mode: "onTouched"` for long forms. Never validate on every keystroke before the first submit. |
 | Error summary | On submit failure, render the errors from `form.formState.errors` in an `Alert` above the form, each linking to its field. Move focus with `form.setFocus`. `FormMessage` shows the same words inline. |
 | Progress on the trigger | While `form.formState.isSubmitting` is true, disable the button and show a `Spinner` with "Saving…". |
+| Error by scope | A field: `FormMessage`, plus `form.setError` for errors the server returns. A section: `Alert variant="destructive"` with a Retry `Button` inside the section. The page: its error state in place of the content. The account or connection: a banner in the root layout. Work at risk: `AlertDialog`. A small background failure: `toast.error`. |
 | Completion | Land where the flow says (`patterns.md`) and show the change in place. A toast alone is not the confirmation. |
 
 Sources: NN/g (confirmation dialogs, slips, user mistakes, user control and freedom, Cancel vs
-Close, response-time limits, progress indicators, errors in forms), GOV.UK (structuring forms,
-question pages, error summary), Wroblewski, Laws of UX (Tesler, Doherty, Zeigarnik); shadcn/ui
-documentation (AlertDialog, Dialog, Sheet, Drawer, Form, Sonner, Spinner); react-hook-form
-`useForm` documentation (mode, reValidateMode, setFocus).
+Close, response-time limits, progress indicators, errors in forms, error prevention), GOV.UK
+(structuring forms, question pages, error summary), Wroblewski, Laws of UX (Tesler, Zeigarnik);
+shadcn/ui documentation (AlertDialog, Alert, Dialog, Sheet, Drawer, Form, Sonner, Spinner);
+react-hook-form `useForm` documentation (mode, reValidateMode, setError, setFocus); Open
+Design's run-error design, which sets the principles of preventing, recovering, and retrying
+only when it helps (nexu-io/open-design, `docs/design/run-errors`).

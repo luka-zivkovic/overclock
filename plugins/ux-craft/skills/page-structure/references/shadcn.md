@@ -6,6 +6,30 @@ and `card.tsx`. Name zones with these components so a blueprint can be built wit
 The project's own `components/ui/` files win over this list: shadcn components are copied into the
 app and are often edited.
 
+## Take inventory first
+
+A `components.json` does not mean the components exist. Many projects install a handful and
+build the rest by hand. Before naming components in a blueprint or a review:
+
+- List `components/ui/`. Only those components are installed.
+- Check which Radix packages the code imports, not just which `package.json` lists. Unused
+  dependencies are common.
+- Note the project's own component folder (for example `components/<app>/`) and what it covers:
+  page headers, empty states, callouts, stat tiles.
+
+Then mark every component a proposal names:
+
+- *installed*: already in `components/ui/`;
+- *add*: `npx shadcn add <name>`, then restyle it to the project's tokens;
+- *the project's own*: an existing component that already does the job.
+
+When the project uses only a few shadcn components, recommend a middle path. Take behavior
+from shadcn's components, which build on Radix, vaul, cmdk, and sonner, because focus, keyboard,
+and dismissal are hard to get right: `Dialog`, `AlertDialog`, `Sheet`, `Drawer`, `DropdownMenu`,
+`Popover`, `Tooltip`, `Tabs`, `ToggleGroup`, `Select`, `Command`, and `Sonner`. Keep
+presentation that is specific to the product in its own components. Never propose a new
+hand-built dialog, menu, or tooltip.
+
 ## Read the project's variants before counting primaries
 
 Stock `button.tsx` defines `default` (filled, the primary), `destructive`, `outline`, `secondary`,
@@ -27,6 +51,7 @@ Open `components/ui/button.tsx`, find the `cva` variant whose classes set a soli
 | Status beside the title | `Badge` | Not a card chip far from the title |
 | Primary content | `Card`, `Table` or a TanStack `DataTable`, `Tabs` | `Tabs` only for independent sections (see `layouts.md`) |
 | Row and overflow actions | `DropdownMenu` on a ghost icon `Button` with `MoreHorizontal` and a `sr-only` label | Destructive items last, `variant="destructive"` |
+| Anything that goes to another page | `<Button asChild><Link …>` with the router's `Link` | Never `onClick={() => navigate(…)}`: a `<button>` cannot open in a new tab or be copied as a link |
 | Destructive confirmation | `AlertDialog` (`AlertDialogAction` with the specific verb, `AlertDialogCancel`) | Never `Dialog` with OK |
 | Short task that keeps context | `Dialog`; side editing `Sheet`; phones `Drawer` | A dialog with tabs or scrolling is a page |
 | Empty state | `Empty` (`EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`, `EmptyContent`) | One primary action inside `EmptyContent` |
@@ -60,7 +85,10 @@ Open `components/ui/button.tsx`, find the `cva` variant whose classes set a soli
   `handle` read by the layout.
 - Markdown rendered inside a page (for example with `react-markdown`) must not introduce an `h1`.
   Map Markdown headings to `h3` or lower.
+- `SidebarInset` renders `<main>`. A page inside it must not add another `<main>`: use a `div`
+  or `section`.
 
 Sources: shadcn/ui documentation (components, blocks `sidebar-07`, theming, `components.json`);
 Radix Primitives documentation; Tailwind CSS responsive design; React 19 `<title>` support; WCAG
-2.2 (2.4.2 Page titled, 1.3.1 Info and relationships, 2.5.8 Target size).
+2.2 (2.4.2 Page titled, 1.3.1 Info and relationships, 2.5.8 Target size); Vercel Web Interface
+Guidelines (links for navigation).

@@ -3,8 +3,10 @@
 
 Walks a project, extracts user-facing strings, and reports:
 
-- terms the project's UX.md glossary rejects (its "Rejected synonyms" column);
+- terms the project's glossaries reject: UX.md's "Rejected synonyms" column, the "Aliases:"
+  lines of a CONCEPTS.md kept by project-vocabulary, and the "_Avoid_:" lines of a CONTEXT.md;
 - generic labels (OK, Submit, Click here);
+- filler copy that should not ship (lorem ipsum, "text goes here", TODO and FIXME markers);
 - verb and noun synonym clusters;
 - casing against the recorded policy;
 - banned words in error-like strings, exclamation marks, and trailing periods on labels;
@@ -160,6 +162,12 @@ BANNED_ERROR_WORDS = [
     "an error has occurred", "something went wrong", "unexpected error", "fatal", "exception",
     "null", "undefined", "failed to",
 ]
+# Copy that is a stand-in, not a decision. TBD is left out: "Date: TBD" is often deliberate.
+FILLER_RE = re.compile(r"\blorem ipsum\b|\bdolor sit amet\b|\b(?:dummy|filler) (?:text|copy|content)\b", re.I)
+# "Title goes here" is filler in shipped copy but a normal hint inside an input placeholder.
+STUB_RE = re.compile(r"\b(?:text|copy|content|title|headline|description) goes here\b"
+                     r"|\byour (?:text|copy|content|title|headline) here\b", re.I)
+MARKER_RE = re.compile(r"(?<![\w-])(?:TODO|FIXME)(?![\w-])")
 
 PLACEHOLDER = "‹x›"
 CODE_LIKE = re.compile(
@@ -950,14 +958,18 @@ def walk(root: str, excludes: list[str], max_bytes: int, extra_props: set[str]) 
 # ---------------------------------------------------------------------------
 # UX.md: glossary rejected synonyms, casing policy, scanner props
 
-def find_ux(start: Path) -> Path | None:
+def find_up(start: Path, name: str) -> Path | None:
     directory = start if start.is_dir() else start.parent
     for candidate in [directory, *directory.parents]:
-        if (candidate / "UX.md").is_file():
-            return candidate / "UX.md"
+        if (candidate / name).is_file():
+            return candidate / name
         if (candidate / ".git").exists():
             break
     return None
+
+
+def find_ux(start: Path) -> Path | None:
+    return find_up(start, "UX.md")
 
 
 def ux_sections(text: str) -> dict[str, list[str]]:
@@ -1026,6 +1038,77 @@ def parse_ux(text: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Domain glossaries: CONCEPTS.md (project-vocabulary) and CONTEXT.md
+
+QUOTED = re.compile(r"[\"“”]([^\"“”]{1,60})[\"“”]")
+NOT_A_TERM = {"", "none", "n/a", "-", "—"}
+
+
+def unfenced(text: str) -> list[str]:
+    lines, fenced = [], False
+    for line in text.splitlines():
+        if re.match(r"^\s*(```|~~~)", line):
+            fenced = not fenced
+        elif not fenced:
+            lines.append(line)
+    return lines
+
+
+def alias_terms(value: str, term: str) -> list[str]:
+    out: list[str] = []
+    for part in QUOTED.findall(value) or re.split(r"[,;/]", value):
+        part = re.sub(r"^\s*(?:formerly|previously|also|aka|was|or)\b", "", part.strip(), flags=re.I)
+        part = part.strip().strip(".`*_ ")
+        if part.lower() not in NOT_A_TERM and part.lower() != term.lower() and part not in out:
+            out.append(part)
+    return out
+
+
+def parse_concepts(text: str) -> dict[str, list[str]]:
+    """Retired aliases from project-vocabulary's CONCEPTS.md: "## Term [context]" then "Aliases:"."""
+    glossary: dict[str, list[str]] = {}
+    term = None
+    for line in unfenced(text):
+        heading = re.match(r"^##\s+(.+?)\s*$", line)
+        if heading:
+            name = re.sub(r"\s*\[[^\]]*\]\s*$", "", heading.group(1)).strip()
+            term = None if "<" in name or name.lower().startswith("flagged ambiguit") else name
+            continue
+        alias = re.match(r"^\s*Aliases?\s*:\s*(.+)$", line, re.I)
+        if term and alias and "<" not in alias.group(1):
+            glossary.setdefault(term, []).extend(alias_terms(alias.group(1), term))
+    return {t: v for t, v in glossary.items() if v}
+
+
+def parse_context(text: str) -> dict[str, list[str]]:
+    """Avoided words from a CONTEXT.md glossary: "**Term**:" then "_Avoid_: a, b"."""
+    glossary: dict[str, list[str]] = {}
+    term = None
+    for line in unfenced(text):
+        head = re.match(r"^\s*\*\*([^*]+?)\*\*\s*:", line)
+        if head:
+            term = head.group(1).strip()
+            continue
+        avoid = re.match(r"^\s*[_*]Avoid[_*]\s*:\s*(.+)$", line, re.I)
+        if term and avoid:
+            words = [w for w in split_terms(avoid.group(1)) if w.lower() not in NOT_A_TERM | {term.lower()}]
+            glossary.setdefault(term, []).extend(words)
+    return {t: v for t, v in glossary.items() if v}
+
+
+def merge_glossary(glossary: dict[str, list[str]], sources: dict[str, list[str]],
+                   entries: dict[str, list[str]], source: str) -> None:
+    for canonical, words in entries.items():
+        key = next((k for k in glossary if k.lower() == canonical.lower()), canonical)
+        known = glossary.setdefault(key, [])
+        for word in words:
+            if word.lower() not in {k.lower() for k in known}:
+                known.append(word)
+        if source not in sources.setdefault(key, []):
+            sources[key].append(source)
+
+
+# ---------------------------------------------------------------------------
 # Analysis
 
 def casing_of(text: str, proper: set[str]) -> str:
@@ -1055,7 +1138,14 @@ def word_span(term: str, text: str) -> list[tuple[int, int]]:
     return [(m.start(), m.end()) for m in re.finditer(pattern, text, re.I)]
 
 
-def analyze(strings: list[UIString], glossary: dict[str, list[str]], casing_policy: str | None) -> dict:
+def is_filler(s: UIString) -> bool:
+    if FILLER_RE.search(s.text) or MARKER_RE.search(s.text):
+        return True
+    return s.context != "placeholder" and bool(STUB_RE.search(s.text))
+
+
+def analyze(strings: list[UIString], glossary: dict[str, list[str]], casing_policy: str | None,
+            proper_terms: set[str] | None = None) -> dict:
     labels = [s for s in strings if s.role in LABEL_ROLES and short(s.text, 8)]
     actions = [s for s in strings if s.role in ACTIONABLE_ROLES]
     generic, review = [], []
@@ -1085,22 +1175,27 @@ def analyze(strings: list[UIString], glossary: dict[str, list[str]], casing_poli
                     break
 
     rejected: dict[str, dict[str, list[UIString]]] = defaultdict(lambda: defaultdict(list))
+    terms = {c.lower() for c in glossary}
     for canonical, synonyms in glossary.items():
         seen: set[int] = set()
         # Longest synonym first, so "Golden set" claims a string before "golden" does.
         for synonym in sorted(synonyms, key=len, reverse=True):
+            if synonym.lower() in terms:
+                continue  # "don't confuse with Live Artifact" is not a ban on the term Live Artifact
             for index, s in enumerate(strings):
                 if index in seen:
                     continue
                 spans = word_span(synonym, s.text)
-                own = word_span(canonical, s.text)
-                # "Review guide" is not drift from "guide": skip matches inside the canonical term.
-                keep = [sp for sp in spans if not any(c[0] <= sp[0] and sp[1] <= c[1] for c in own)]
+                covered = [c for term in glossary for c in word_span(term, s.text)]
+                # "Review guide" is not drift from "guide": skip matches inside any glossary term.
+                keep = [sp for sp in spans if not any(c[0] <= sp[0] and sp[1] <= c[1] for c in covered)]
                 if keep:
                     rejected[canonical][synonym].append(s)
                     seen.add(index)
 
-    proper = {w for term in glossary for w in term.split() if w[:1].isupper()}
+    # Words the UI capitalizes on purpose. Domain glossaries name concepts but do not set casing.
+    proper = {w for term in (glossary if proper_terms is None else proper_terms)
+              for w in term.split() if w[:1].isupper()}
     policy = casing_policy or "sentence"
     counts: dict[str, int] = defaultdict(int)
     deviations = []
@@ -1121,6 +1216,7 @@ def analyze(strings: list[UIString], glossary: dict[str, list[str]], casing_poli
         hits = [w for w in BANNED_ERROR_WORDS if word_span(w, s.text)]
         if hits:
             banned.append((s, hits))
+    filler = [s for s in strings if is_filler(s)]
     exclamations = [s for s in strings if "!" in s.text.replace("!=", "")]
     trailing = [s for s in labels if short(s.text, 4) and s.text.endswith(".") and not s.text.endswith("..")]
     navigation = [s for s in strings if s.role == "nav"]
@@ -1133,6 +1229,7 @@ def analyze(strings: list[UIString], glossary: dict[str, list[str]], casing_poli
         "labels": labels,
         "generic": generic,
         "review": review,
+        "filler": filler,
         "drift_verbs": {c: v for c, v in verb_clusters.items() if len(v) >= 2},
         "drift_nouns": {c: v for c, v in noun_clusters.items() if len(v) >= 2},
         "rejected": {c: dict(v) for c, v in rejected.items()},
@@ -1158,11 +1255,13 @@ def render_md(root: str, r: dict, policy_note: str) -> str:
                  "clusters are evidence, not verdicts.")
     lines.append(f"Policy: {policy_note}")
     lines.append("")
-    lines.append("## Rejected terms (UX.md glossary)")
+    lines.append("## Rejected terms (project glossary)")
+    sources = r.get("glossary_sources", {})
     if not r["rejected"]:
-        lines.append("None." if policy_note.startswith("UX.md") else "No glossary: add UX.md or pass --term.")
+        lines.append("None." if sources else "No glossary: add UX.md or CONCEPTS.md, or pass --term.")
     for canonical, synonyms in r["rejected"].items():
-        lines.append(f"- **{canonical}** ← " + ", ".join(f"`{t}` ×{len(v)}" for t, v in synonyms.items()))
+        origin = f" ({', '.join(sources[canonical])})" if sources.get(canonical) else ""
+        lines.append(f"- **{canonical}**{origin} ← " + ", ".join(f"`{t}` ×{len(v)}" for t, v in synonyms.items()))
         for t, v in synonyms.items():
             for s in v[:6]:
                 lines.append(f"  - `{s.text}` at {loc(s)} ({s.role})")
@@ -1179,6 +1278,14 @@ def render_md(root: str, r: dict, policy_note: str) -> str:
         lines.append("Review (fine on wizard steps, wrong on committing actions):")
         for s in r["review"]:
             lines.append(f"- `{s.text}` at {loc(s)} ({s.role}: {s.context})")
+    lines.append("")
+    lines.append("## Filler copy (stand-in text that should not ship)")
+    if not r["filler"]:
+        lines.append("None.")
+    for s in r["filler"][:20]:
+        lines.append(f"- `{s.text}` at {loc(s)} ({s.role}: {s.context})")
+    if len(r["filler"]) > 20:
+        lines.append(f"- … {len(r['filler']) - 20} more")
     lines.append("")
     lines.append("## Verb clusters (same action, different words?)")
     if not r["drift_verbs"]:
@@ -1250,9 +1357,11 @@ def render_json(root: str, r: dict, policy_note: str) -> str:
         "root": root,
         "policy": policy_note,
         "counts": {"strings": len(r["inventory"]), "labels": len(r["labels"]), "roles": r["roles"]},
+        "glossary_sources": r.get("glossary_sources", {}),
         "rejected": {c: {t: ser(v) for t, v in terms.items()} for c, terms in r["rejected"].items()},
         "generic": ser(r["generic"]),
         "review": ser(r["review"]),
+        "filler": ser(r["filler"]),
         "drift_verbs": {c: {t: ser(v) for t, v in terms.items()} for c, terms in r["drift_verbs"].items()},
         "drift_nouns": {c: {t: ser(v) for t, v in terms.items()} for c, terms in r["drift_nouns"].items()},
         "casing": {"policy": r["casing"]["policy"], "counts": r["casing"]["counts"],
@@ -1289,20 +1398,34 @@ def main(argv: list[str] | None = None) -> int:
             print(f"UX.md not found: {ux_path}", file=sys.stderr)
             return 2
         ux = parse_ux(ux_path.read_text(encoding="utf-8", errors="ignore"))
-    glossary = dict(ux["glossary"])
+    glossary: dict[str, list[str]] = {}
+    sources: dict[str, list[str]] = {}
+    merge_glossary(glossary, sources, ux["glossary"], "UX.md")
+    term_entries: dict[str, list[str]] = {}
     for entry in args.term:
         canonical, _, rejected = entry.partition("=")
         if canonical.strip() and rejected.strip():
-            glossary.setdefault(canonical.strip(), [])
-            glossary[canonical.strip()].extend(split_terms(rejected))
+            term_entries.setdefault(canonical.strip(), []).extend(split_terms(rejected))
+    merge_glossary(glossary, sources, term_entries, "--term")
+    proper_terms = set(glossary)
+    domain_notes = []
+    for name, parse in (("CONCEPTS.md", parse_concepts), ("CONTEXT.md", parse_context)):
+        path = find_up(Path(root), name)
+        if path is not None:
+            entries = parse(path.read_text(encoding="utf-8", errors="ignore"))
+            merge_glossary(glossary, sources, entries, name)
+            domain_notes.append(f"{name} at {path} (terms with retired words: {len(entries)})")
     props = set(args.prop) | set(ux["props"])
     strings = walk(root, DEFAULT_EXCLUDES + ux["excludes"] + args.exclude, args.max_file_kb * 1024, props)
-    report = analyze(strings, glossary, ux["casing"])
+    report = analyze(strings, glossary, ux["casing"], proper_terms)
+    report["glossary_sources"] = sources
     if ux_path is not None:
         policy_note = (f"UX.md at {ux_path} (glossary terms: {len(ux['glossary'])}; casing: "
                        f"{(ux['casing'] or 'sentence') + ' case'}{'' if ux['casing'] else ' (default)'})")
     else:
-        policy_note = "no UX.md found; defaults: sentence case, no glossary"
+        policy_note = "no UX.md found; defaults: sentence case"
+    for note in domain_notes:
+        policy_note += f"; {note}"
     if args.term:
         policy_note += f"; --term entries: {len(args.term)}"
     print(render_md(root, report, policy_note) if args.format == "md" else render_json(root, report, policy_note))

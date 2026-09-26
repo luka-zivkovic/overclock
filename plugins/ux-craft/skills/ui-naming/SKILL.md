@@ -22,9 +22,10 @@ If `UX.md` exists at the project root, read it first: Platform, Casing, Button o
 vocabulary, and Glossary are settled decisions. Extend them; do not re-argue a recorded term
 unless the user asks. If a design system content guide, `DESIGN.md`, product-language contract,
 or i18n source of truth exists, it outranks the defaults in `references/`. Without any, assume a
-React + shadcn/ui web app and sentence case, and say so. When the project's vocabulary lives in
-another document, copy its terms and rejected synonyms into the `UX.md` glossary (with the user's
-approval) so the scanner can enforce them.
+React + shadcn/ui web app and sentence case, and say so. The scanner reads a `CONCEPTS.md` or
+`CONTEXT.md` glossary directly. When the project's vocabulary lives in any other document, copy
+its terms and rejected synonyms into the `UX.md` glossary (with the user's approval) so the
+scanner can enforce them.
 
 ## 1. Inventory the concepts and actions
 
@@ -86,10 +87,16 @@ project's own drift check, which catches domain drift such as "Skill" where the 
 "Check" that no generic synonym list can. The Casing line sets the casing policy. Scanner ›
 Label props adds project props such as `eyebrow`.
 
+It also reads domain glossaries when they exist: the `Aliases:` lines of a `CONCEPTS.md`, which
+the `project-vocabulary` plugin keeps, and the `_Avoid_:` lines of a `CONTEXT.md`. Each rejected
+term in the report names its source. Only `UX.md` sets casing, and a word that is itself a
+glossary term is never reported as drift.
+
 It reports:
 
 - rejected terms;
 - generic labels (OK, Submit, Click here);
+- filler copy: lorem ipsum, "Title goes here", and TODO or FIXME markers in shipped strings;
 - verb and noun synonym clusters;
 - casing deviations from the policy;
 - banned words in error-like strings, including zod messages and `toast.error`;
