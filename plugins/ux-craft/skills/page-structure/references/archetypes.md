@@ -1,0 +1,128 @@
+# Page archetypes and their default blueprints
+
+Pick the archetype first; the default blueprint is the starting point users already expect
+(Jakob's law: they spend most of their time on other products). Deviate only for a stated reason.
+
+## List (collection, index)
+
+Job: find one item, or act on several.
+
+```
+[ Breadcrumb / section nav                                     ]
+[ Title            [secondary]  [ Primary: New <object> ]      ]
+[ Search  Filters  Sort                     Bulk actions (hidden until selection) ]
+[ Table or cards ................................................ ]
+[ Pagination / load more                                        ]
+```
+
+- Table when users compare three or more attributes per item, or sort and filter on them;
+  cards when items are visual or heterogeneous and comparison is secondary; a plain list when
+  one attribute identifies the item.
+- Row-level actions: one inline primary (open) and the rest in a row overflow menu.
+- Bulk actions appear only after selection and replace, not crowd, the toolbar.
+- Empty state carries the "New <object>" action and one line on what the list will hold.
+
+## Detail (one object)
+
+Job: understand one thing and act on it.
+
+```
+[ Breadcrumb: Section / Parent / This object                   ]
+[ Title + status badge        [secondary] [ Primary action ]    ]
+[ Key facts strip (3-5 attributes)                              ]
+[ Main content sections (tabs if > 4 sections) | Aside: metadata, related, activity ]
+[ Danger zone (separated, at the end)                           ]
+```
+
+- The primary action is the object's most common next step (Edit, Approve, Send), not Delete.
+- Metadata and related items go in the aside; on narrow viewports the aside stacks below.
+- Delete and other irreversible actions sit in a separated end zone or an overflow menu.
+
+## Form (create or edit)
+
+Job: provide information correctly, once.
+
+```
+[ Title: New <object> / Edit <object>                          ]
+[ Single column of fields, grouped under short headings         ]
+[   Label above field, help text below, error below that        ]
+[ Advanced or optional group (collapsed)                        ]
+[ [ Cancel ]  [ Primary: Save / Create <object> ]  (platform order, see placement.md) ]
+```
+
+- Single column, fields in the order a person would naturally answer.
+- Labels above fields; placeholder text never carries required information.
+- Required versus optional marking follows one policy per app, recorded in `UX.md`.
+- Long forms with independent parts become a wizard (one thing per step) or grouped sections
+  with a sticky action bar; never a two-column field grid.
+- Errors: inline next to the field plus a summary at the top with focus moved to it; user input is
+  preserved.
+
+## Dashboard (overview)
+
+Job: notice what needs attention, then go there.
+
+```
+[ Title + time range / scope selector                           ]
+[ Headline metrics row (3-5 tiles, one dominant)                ]
+[ Attention list: what needs action now                         ]
+[ Charts / breakdowns grid                                      ]
+```
+
+- One dominant tile or list; a dashboard with eight equal tiles has no hierarchy.
+- Every tile links to the page where the user acts on it.
+- No primary action button unless the dashboard is also the launch point for one task.
+
+## Settings
+
+Job: change a preference and be sure it took.
+
+```
+[ Settings nav (sidebar or tabs if > 6 groups; single page with headings otherwise) ]
+[ Group heading + one-line description                          ]
+[   Setting row: label, control, help                            ]
+[ Save behaviour: per-section Save, or auto-save with visible "Saved" state ]
+[ Danger zone: delete account, reset (separated, last)          ]
+```
+
+- Group by user goal (Notifications, Security, Billing), not by internal module.
+- Pick one save model per app: explicit Save per section, or auto-save with per-row confirmation.
+  Never mix within a page.
+
+## Wizard step (one thing per page)
+
+Job: answer one question and move on.
+
+```
+[ Step context: "Step 2 of 4 · Payment" or a progress bar       ]
+[ One question or one group of tightly related fields           ]
+[ Help text for this step only                                  ]
+[ [ Back ]                              [ Primary: Continue ]    ]
+```
+
+- Back never loses entered data.
+- The final step is a review of everything entered with edit links, then a primary that names
+  the outcome (Place order, Create workspace), not Finish.
+
+## Empty or first-run
+
+Job: understand what this area is for and take the first step.
+
+```
+[ Illustration or icon (optional)                               ]
+[ One-line what this holds + one line why it is empty            ]
+[ [ Primary: the first task ]                                   ]
+[ Link to docs / import / example (optional, secondary)          ]
+```
+
+- One primary action, never a tour of features.
+
+## Modal or drawer (sub-page)
+
+Use for a short task that must not lose the parent's context: confirm, quick create, a single
+field edit. The structure is a mini form: title naming the task, the fields, then Cancel and a
+specific primary (Delete project, Invite). A modal with tabs or scrolling is a page.
+
+Sources: NN/g visual hierarchy and empty-state guidance, GOV.UK question pages and form structure,
+Material 3 and Apple HIG component guidance, Refactoring UI on hierarchy. See the planning record
+in `docs/brainstorm/ux-skill-planning-2026-09-25.md` for the full citation list.

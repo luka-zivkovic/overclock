@@ -1,0 +1,4 @@
+interface:
+  display_name: "User Flow"
+  short_description: "Design a task's steps, confirmations, and exits"
+  default_prompt: "Use $user-flow to design this task as an ordered flow with inputs per step, validation timing, confirm-or-undo decisions, exits, and the post-submit path."
