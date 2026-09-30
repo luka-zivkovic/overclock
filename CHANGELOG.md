@@ -3,6 +3,32 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## moonshot
+
+### 0.1.0 — 2026-09-30 (initial release)
+- New plugin. `/moonshot` makes the model take a real stab at a problem that looks out of reach
+  instead of explaining why it is hard. It treats the model's doubt as a prior learned from text,
+  not a measurement of the attempt, and shows a frame before working: the full target, one line on
+  the odds, a check fixed before the first attempt, partial wins worth having if the target falls,
+  a budget, and a crux-first first move.
+- The attack keeps going past failed approaches: sweep then dig, change the problem rather than the
+  target, keep an attack log, and turn "this is too hard" into a named obstruction. `/moonshot` with
+  no problem, or with "keep going", resumes a stalled attempt from its most promising unexplored line.
+- Every claim is verified before it is reported, by the fixed check plus an independent second
+  method, and labelled verified, partly verified, unverified, or refuted. The attempt stops only for
+  verified success, a shown impossibility or infeasibility, a spent budget, a guardrail, or the
+  user; the report gives the result, evidence, attack log, and next shot.
+- Hard limits: the check stays fixed (no editing tests, hardcoding, or skipping), guardrails such as
+  permissions, sandboxes, and credentials are never routed around even when the user asks, scratch
+  work is never committed, and the report stays sober. A linked reference covers long runs: a notes
+  file that survives context limits, parallel lines, referee subagents, and keep-going loops.
+- Evidence: six committed live cases (an open problem, a test suite with one achievable and one
+  infeasible target, a keep-going resume after a failed naive search, a provably impossible target,
+  a network guardrail with a partial download, and a routine-work control) with deterministic
+  unchanged-file checks and a paired value gate against plain encouragement. Not yet run live.
+  Motivated by Anthropic's Riemann zeta research note, where messages such as "keep going" helped
+  Claude past initial skepticism while heavy verification kept the result honest.
+
 ## api-bench
 
 ### 0.1.0 — 2026-09-19 (initial release)
@@ -385,6 +411,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.27 — 2026-09-30
+- Catalog the new `moonshot` plugin (0.1.0): user-invoked, no hooks, no persistent files.
 
 ### 0.1.26 — 2026-09-23
 - Catalog the new `untangle` plugin (0.1.0) with its persistent `UNTANGLE.md` plan file.

@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -307,6 +307,24 @@
       ],
       "minimum_host_version": null,
       "selection": "Choose to survey a repository that grew by exploration into one spine plus threads, with a decision-driven plan file and a one-item-at-a-time apply mode that never commits."
+    },
+    {
+      "id": "moonshot",
+      "display_name": "Moonshot",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "moonshot"
+      ],
+      "skill_names": [
+        "moonshot"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose to have the model take a real, budgeted, verified attempt at a problem that looks out of reach instead of explaining why it is hard; user-invoked, and never a license to edit the check or cross permissions."
     }
   ]
 }

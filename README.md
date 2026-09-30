@@ -55,6 +55,7 @@ installs, removes, enables, disables, or edits anything.
 | **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
 | **lateral-engineering** | Non-obvious engineering alternatives with broken assumptions, costs, and grounding | `/plugin install lateral-engineering@overclock` |
+| **moonshot** | A real, budgeted, verified attempt at a problem that looks out of reach, plus a keep-going mode | `/plugin install moonshot@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **groundwork** | A one-question-at-a-time interview that ends at a confirmed decision brief | `/plugin install groundwork@overclock` |
 | **project-vocabulary** | One ubiquitous language per project, applied in conversation with approval-gated writes | `/plugin install project-vocabulary@overclock` |
@@ -318,6 +319,29 @@ code quality; those stay with the host's review tools.
 
 </details>
 
+<details>
+<summary><strong>moonshot</strong> — take the shot, then check it</summary>
+
+`/moonshot` is for problems that look out of reach: an open question, an improbable target, a task
+you expect to fail. Models tend to meet those with a careful explanation of why they are hard. This
+skill treats that doubt as a prior learned from text, not a measurement of the attempt, and makes
+the attempt instead. It shows a frame first (the full target, one line on the odds, a check fixed
+before any work, partial wins worth having if the target falls, a budget, and the crux to attack
+first), then keeps going past failed approaches, logging each one and turning "too hard" into a
+named obstruction. `/moonshot` alone, or `/moonshot keep going`, resumes a stalled attempt from its
+most promising unexplored line.
+
+Ambition sets how hard it tries; evidence alone sets what it claims. Every result goes through the
+fixed check and an independent second method before it is reported, and the attempt stops only for
+verified success, a shown impossibility, a spent budget, a guardrail, or you. It never edits tests
+or checkers to pass, never routes around permissions or sandboxes even when asked to find a way,
+and never commits. The idea comes from Anthropic's
+[Riemann zeta research note](https://www.anthropic.com/research/riemann-zeta), where messages such
+as "keep going" and "believe in yourself" helped Claude past its initial skepticism, and extensive
+verification stood behind the result.
+
+</details>
+
 ## Hooks and trust
 
 Only the two memory packages ship SessionStart hooks:
@@ -336,7 +360,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 150 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

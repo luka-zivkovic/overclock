@@ -401,6 +401,49 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   comparison yields valid live evidence. See the experiment record for acceptance
   criteria and limitations; scaffolding alone does not justify publication.
 
+### moonshot — BUILD, v0.1.0 authored (2026-09-30)
+- **Demand:** direct maintainer request, after reading Anthropic's
+  [Riemann zeta research note](https://www.anthropic.com/research/riemann-zeta), for a skill that
+  encourages a model to attempt problems that look improbable, and to run experiments with it. The
+  note reports that the human's input was mostly encouragement ("keep going", "believe in
+  yourself"), which seemed to help Claude past initial skepticism that it could make meaningful
+  progress. A direct request satisfies principle 4.
+- **Grounding:** the note pairs that encouragement with extensive verification (numerical checks
+  against known zeros, subagents refereeing each other, an independent re-proof, a Lean
+  formalization, expert review), so the transferable lesson is ambition in effort plus strictness
+  in claims, not "everything is possible". A literal version would feed the known failure modes of
+  pressure to succeed: overclaiming, editing or special-casing the check, sunk-cost looping on a
+  shown impossibility, and treating guardrails as obstacles. EmotionPrompt (Li et al. 2023,
+  arXiv:2307.11760) reports that emotional stimuli can change LLM task performance; the Ralph
+  Wiggum loop (Geoffrey Huntley; Anthropic's `ralph-wiggum` plugin re-feeds the prompt from a Stop
+  hook) supplies mechanical persistence. Neither supplies a fixed check, stop rules, or honest
+  reporting, and neither is in this kit. No collision: lateral-engineering is advisory ideation,
+  critical-thinking judges reasoning, debugging-discipline owns bug diagnosis, and moonshot is
+  user-invoked, so it never competes for routing.
+- **Product shape:** one user-invoked skill with a start mode and a keep-going resume mode. A
+  frame precedes the work (the target at full size, one odds line, a check fixed before the first
+  attempt, partial wins, a budget, a crux-first move). The attack is crux first, sweep then dig,
+  change the problem rather than the target, an attack log, and named obstructions in place of
+  "too hard". Claims pass the fixed check plus an independent method; five stop rules; a report of
+  result, evidence, attack log, and next shot. A linked reference covers long runs: a notes file,
+  parallel lines, referee subagents, and keep-going loops.
+- **Fences:** the check stays fixed; permissions, sandboxes, and credentials are never routed
+  around even when the user asks; a shown impossibility is separated from low odds and redirects
+  the budget to the nearest achievable target; scratch work is never committed; routine work skips
+  the frame; the report stays sober.
+- **Why user-invoked:** "keep going" is an ordinary continuation phrase in agent sessions, so
+  implicit routing would misfire constantly, and an experiment needs a clean on/off switch.
+  Implicit invocation would need a routing battery with positive and negative controls first.
+- **Evidence tier:** `rubric` for the committed suite: six live cases with deterministic
+  unchanged-file checks and a paired value gate. The baseline arm receives the same prompt text,
+  so the suite compares plain encouragement with the skill; the keep-going case literally pits
+  "keep going" against `/moonshot keep going`. Live results are not recorded (no isolated
+  credentials in the authoring environment), so no lift is claimed. The author-run subagent pilot
+  in `qa/experiments/moonshot/` is `subjective`.
+- **Next:** run `qa/run_value_evals.sh moonshot/moonshot` with credentials, then the three-arm
+  protocol in the experiment record (no encouragement, plain encouragement, skill) on real hard
+  problems, reading overclaim and check-tampering rates before any progress metric.
+
 ## Groundings performed (reference)
 
 - **Ultraplan** (Claude Code, ~2026): hands planning to a cloud Opus 4.6 web session;

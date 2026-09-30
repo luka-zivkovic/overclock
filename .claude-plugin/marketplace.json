@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "category": "development",
       "keywords": [
         "setup",
@@ -237,6 +237,21 @@
         "roadmap",
         "plan",
         "untangle"
+      ]
+    },
+    {
+      "name": "moonshot",
+      "source": "./plugins/moonshot",
+      "description": "Take a real stab at problems that look out of reach. A user-invoked skill that treats the model's doubt as a prior rather than a verdict: it fixes a checkable target, partial wins, and a budget up front, attacks the crux first, keeps going past failed approaches, verifies every claim before reporting it, and never edits the check or routes around permissions and sandboxes.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "moonshot",
+        "persistence",
+        "ambition",
+        "open-problems",
+        "research",
+        "verification"
       ]
     }
   ]
