@@ -104,8 +104,9 @@ guardrail attempts) still need a reader.
 produces, so the value gate can be won on format alone. Read the behavior expectations (attempt,
 persistence, verification, safety) separately before calling a win.
 
-**Pilot.** [pilot-2026-09-30.md](pilot-2026-09-30.md) records an author-run, one-run-per-cell
-comparison of arms B and C on four of the cases.
+**Pilot and trial.** [pilot-2026-09-30.md](pilot-2026-09-30.md) records an author-run,
+one-run-per-cell comparison on four of the cases. [grid-trial-2026-09-30.md](grid-trial-2026-09-30.md)
+records the pre-registered three-arm trial on the 20 × 20 grid: 5 of 5 in every arm, no difference.
 
 **Real problems.** Any problem with a fixed, runnable check works: a benchmark harness you will not
 edit, a checker, exact computation. Record the same measures. Use at least three runs per arm and

@@ -85,3 +85,53 @@ primary contrasts are B against A and C against A; C against B is secondary.
 - Subagents receive skills as pasted text; arm C invokes lateral-engineering by reading its file.
 - Wall-clock budgets on a shared four-core machine are noisy; batches of three keep contention
   even across arms.
+
+## Results (2026-09-30, 22:49–23:11 UTC)
+
+All fifteen runs completed in five batches with no deviation from the protocol: no run was lost,
+repeated, or over budget.
+
+| Arm | Success | Median minutes (range) | Median tokens (range) | Median tool calls | lateral-engineering invoked |
+|---|---|---|---|---|---|
+| A, no skill | 5 of 5 | 2.2 (1.6–3.1) | 66k (61–73k) | 8 | not available |
+| B, `/moonshot` | 5 of 5 | 3.7 (2.7–4.3) | 83k (74–88k) | 9 | not available |
+| C, `/moonshot` with lateral-engineering | 5 of 5 | 3.1 (2.2–3.5) | 77k (70–84k) | 9 | 0 of 5 |
+
+| Batch | A | B | C |
+|---|---|---|---|
+| 1 | PASS, 2.2 min | PASS, 4.0 min | PASS, 2.2 min |
+| 2 | PASS, 1.6 min | PASS, 4.3 min | PASS, 3.5 min |
+| 3 | PASS, 2.2 min | PASS, 3.7 min | PASS, 3.1 min |
+| 4 | PASS, 2.0 min | PASS, 3.2 min | PASS, 3.1 min |
+| 5 | PASS, 3.1 min | PASS, 2.7 min | PASS, 2.4 min |
+
+Every PASS comes from `score_run.py points-20` against a pristine build. In all fifteen runs the
+checker's bytes were unchanged, nothing was committed, and nothing was written outside the
+workspace.
+
+**Decision under the rule above:** no contrast reached a gap of four; every arm scored 5 of 5, so
+the gap is zero. Neither B nor C clearly beats A. The claim that the skill changes the approach on
+a search the baseline cannot finish is retired for this model. Whether the skill stays, for its
+structure and honest reporting, or is retired is the maintainer's call.
+
+## What the trial actually measured
+
+- **The task did not need the skill.** All fifteen runs, in every arm, opened with a search
+  restricted to quarter-turn-symmetric configurations, written in C, and finished it within about
+  four minutes. Several runs named Flammenkamp's symmetric searches from memory. The model already
+  knows the standard method for this problem at this size, so no run ever stalled, and neither the
+  assumption-breaking step nor the handoff had anything to act on.
+- **The calibration was aimed at the wrong thing.** It measured how hard the search is for methods
+  that keep every configuration in play, not whether the model would reach for one of them. The
+  pilot misled here: at 12 × 12, agents started with plain backtracking because it was enough, and
+  that did not carry over to a size where they knew it would not be.
+- **The handoff is untested, not refuted.** Arm C never invoked lateral-engineering, because every
+  first line succeeded.
+- **The skill cost more.** Arm B took a median 1.7 times as long as arm A and 1.26 times the tokens;
+  arm C took 1.4 times as long and 1.17 times the tokens. Verification looked alike across arms:
+  most baseline runs also added their own independent check.
+
+A test that could separate the arms has to be calibrated against the model, not against the
+author's algorithms: first confirm that no-skill runs actually stall on the task, for example a
+synthetic puzzle whose structural shortcut is absent from the literature, and only then compare
+arms.

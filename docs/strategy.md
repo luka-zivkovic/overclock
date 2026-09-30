@@ -454,10 +454,18 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   stop rules used as written, changed the approach style in two single runs, and cost up to 3.6
   times the time where the honest answer was quick. No success-rate difference was observed. See
   `qa/experiments/moonshot/pilot-2026-09-30.md`.
-- **Next:** the one discriminating test: a search the baseline's approach cannot finish within
-  budget (the 14 x 14 grid), at least five runs per arm, success rate as the metric. Then
-  `qa/run_value_evals.sh moonshot/moonshot` with credentials. If the skill does not win the
-  discriminating test, keep it only for its structure and honest reporting, or retire it.
+- **Grid trial (2026-09-30, pre-registered):** three arms (no skill, `/moonshot`, `/moonshot` with
+  lateral-engineering), five runs each on the 20 x 20 grid with a 20-minute one-core budget. Every
+  arm scored 5 of 5: every run opened with a quarter-turn symmetric search, because the model
+  already knows the standard method, so nothing stalled and lateral-engineering was invoked 0 of 5
+  times. The skill arms took 1.4 to 1.7 times as long. Under the pre-registered rule the claim that
+  the skill changes the approach is retired for this model; the handoff is untested, not refuted.
+  The calibration measured search difficulty rather than whether the model knows the trick. See
+  `qa/experiments/moonshot/grid-trial-2026-09-30.md`.
+- **Next:** a maintainer decision: keep moonshot for its frame, stop rules, and honest reporting
+  (and for models or settings where skepticism does appear), or retire it. Any further comparison
+  needs a task calibrated against the model itself: confirm that no-skill runs stall before
+  comparing arms.
 
 ## Groundings performed (reference)
 
