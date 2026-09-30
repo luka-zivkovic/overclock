@@ -69,7 +69,10 @@ Calibration by the author on 2026-09-30, pure Python on four cores:
   name symmetry, so the case measures persistence rather than a planted hint. In the first pilot, a
   model asked for a "straightforward" search added forward checking (prune when a later row has
   fewer than two open cells) and found 24 points in 29 s, so the committed setup turn now names the
-  naive method explicitly: a direct check against every placed pair and no other pruning.
+  naive method explicitly: a direct check against every placed pair and no other pruning. A second
+  run then wrote that naive search in C and found 24 points after 464.7 million candidate checks in
+  37 s. Naive Python manages about 170 thousand checks a second, roughly 45 minutes for the same
+  tree, so the setup turn also pins Python.
 
 ## How to run
 
