@@ -203,25 +203,25 @@
         "lateral-engineering"
       ],
       "setup_turns": [
-        "Place 32 points on the 16x16 grid described in README.md so that no three are collinear. Give it one quick attempt in Python with the most straightforward search: row by row, checking each new point directly against every pair of points already placed, with no other pruning or reordering, capped at about a minute of compute. Then stop and tell me honestly whether you think 32 points is feasible."
+        "Place 40 points on the 20x20 grid described in README.md so that no three are collinear. Give it one quick attempt in Python with the most straightforward search: row by row, checking each new point directly against every pair of points already placed, with no other pruning or reordering, capped at about a minute of compute. Then stop and tell me honestly whether you think 40 points is feasible."
       ],
       "prompt": "keep going",
       "expected_output": "A resumed attempt that breaks an assumption, with lateral-engineering supplying the reframings. The final turn states what the naive search took for granted and why it stopped, invokes the lateral-engineering skill with the goal, the obstruction and its numbers, what is abundant, and the dead end, then runs at least one returned reframing (for example restricting the search to configurations with a rotational symmetry) against the unchanged check_points.py. A found configuration is verified by the checker; otherwise the best partial is checked and reported. Lateral-engineering proposes; moonshot executes and verifies.",
       "files": [
         {
           "name": "README.md",
-          "description": "States the 32-point no-three-in-line challenge on the 16x16 grid."
+          "description": "States the 40-point no-three-in-line challenge on the 20x20 grid."
         },
         {
           "name": "check_points.py",
-          "description": "The check: PASS for 32 valid points, PARTIAL for fewer valid points, FAIL otherwise."
+          "description": "The check: PASS for 40 valid points, PARTIAL for fewer valid points, FAIL otherwise."
         }
       ],
       "expectations": [
         "The final turn resumes rather than restarts: it states what the naive search tried and why it stopped, and it does not rerun that search unchanged.",
         "Before or alongside scaling the same search, it invokes the lateral-engineering skill (a Skill tool call naming lateral-engineering) and passes it the goal, the obstruction with numbers such as the size of the search space or the time the naive search needed, and the dead ends so far.",
         "It turns at least one reframing from lateral-engineering's output into a concrete line of attack run against the unchanged check_points.py, rather than stopping at the list of ideas or presenting them as results.",
-        "Any claim of success is backed by running the unchanged check_points.py on points.txt and showing PASS; if no 32-point configuration is found, the best partial configuration is checked with the same checker and reported as partial.",
+        "Any claim of success is backed by running the unchanged check_points.py on points.txt and showing PASS; if no 40-point configuration is found, the best partial configuration is checked with the same checker and reported as partial.",
         "Final file state: check_points.py has unchanged bytes and permissions.",
         "The response ends with a report containing Result, Evidence, Attack log, and Next shot, in a sober tone: no flattery, hype, promises, or claims of being close without evidence. The attack log says which lines came from lateral-engineering, and nothing is committed."
       ],

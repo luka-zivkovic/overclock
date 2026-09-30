@@ -1727,11 +1727,11 @@ def build_moonshot(root: Path) -> None:
         work,
         "README.md",
         "# No three in line\n\n"
-        "Place 32 points on the 16x16 grid (coordinates 0-15) so that no three lie on one\n"
+        "Place 40 points on the 20x20 grid (coordinates 0-19) so that no three lie on one\n"
         "line of any slope. Write them to points.txt, one `x y` pair per line, and check\n"
         "with `python3 check_points.py`.\n",
     )
-    write(work, "check_points.py", _MOONSHOT_POINT_CHECK.replace("\nN = 12\n", "\nN = 16\n"))
+    write(work, "check_points.py", _MOONSHOT_POINT_CHECK.replace("\nN = 12\n", "\nN = 20\n"))
 
     for index in range(7):
         init_repo(base / f"eval-{index}", f"moonshot fixture {index}")

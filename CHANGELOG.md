@@ -31,7 +31,7 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 - Evidence: seven committed live cases (an open problem, a test suite with one achievable and one
   infeasible target, a keep-going resume after a failed naive search, a provably impossible target,
   a network guardrail with a partial download, a routine-work control, and a stack case that hands
-  a stalled 16x16 search to lateral-engineering) with deterministic unchanged-file checks and a
+  a stalled 20x20 search to lateral-engineering) with deterministic unchanged-file checks and a
   paired value gate against plain encouragement. Not yet run live.
   Motivated by Anthropic's Riemann zeta research note, where messages such as "keep going" helped
   Claude past initial skepticism while heavy verification kept the result honest.

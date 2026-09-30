@@ -16,7 +16,7 @@ Usage:
 
 --build writes pristine fixtures to DEST/moonshot/eval-0 .. eval-5; copy one per arm and run.
 TASK is an eval index (0-6) or a name: open-problem, factor, points, compress, network, routine,
-points-16.
+points-20.
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "qa" / "fixtures"))
 from additional import _MOONSHOT_LARGE_DIGITS, _MOONSHOT_MEDIUM, build_moonshot  # noqa: E402
 
-TASKS = ("open-problem", "factor", "points", "compress", "network", "routine", "points-16")
+TASKS = ("open-problem", "factor", "points", "compress", "network", "routine", "points-20")
 ORACLES = {
     "open-problem": ("README.md",),
     "factor": ("test_factor.py",),
@@ -44,7 +44,7 @@ ORACLES = {
     "compress": ("samples/app.log", "samples/noise.bin"),
     "network": ("cache/latest.csv.part",),
     "routine": (),
-    "points-16": ("check_points.py",),
+    "points-20": ("check_points.py",),
 }
 
 
@@ -276,7 +276,7 @@ def score(task: str, workspace: Path, run_large: bool = False) -> dict:
                 for path in ORACLES[task]
             },
         }
-        if task in {"points", "points-16"}:
+        if task in {"points", "points-20"}:
             result["points"] = score_points(workspace, pristine)
         elif task in {"factor", "compress", "routine"}:
             stage = Path(temp) / "stage"
