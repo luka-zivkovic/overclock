@@ -28,8 +28,8 @@ decides how hard you try; evidence alone decides what you claim.
   odds seemed low, or the first approaches failed was premature. A stop for a spent budget means
   "keep going" grants another budget of the same size. After verified success, a shown
   impossibility, or a guardrail, say so and what would change it instead of repeating the attempt.
-  If the earlier attempt has no frame, write one first. With no attempt to resume, ask for the
-  problem in one line.
+  When the attempt continues and has no frame yet, write one first. With no attempt to resume, ask
+  for the problem in one line.
 - **The path turns out to be clear:** do the work plainly and skip the frame. The frame is for work
   that looks out of reach, not for dressing up routine tasks.
 
