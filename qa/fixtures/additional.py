@@ -1721,7 +1721,19 @@ def build_moonshot(root: Path) -> None:
     )
     write(work, "report.py", "from stats import mean, tot\n\nprint(tot([1, 2, 3]), mean([1, 2, 3]))\n")
 
-    for index in range(6):
+    # eval-6: a grid where search that keeps every configuration in play runs out of budget.
+    work = base / "eval-6"
+    write(
+        work,
+        "README.md",
+        "# No three in line\n\n"
+        "Place 32 points on the 16x16 grid (coordinates 0-15) so that no three lie on one\n"
+        "line of any slope. Write them to points.txt, one `x y` pair per line, and check\n"
+        "with `python3 check_points.py`.\n",
+    )
+    write(work, "check_points.py", _MOONSHOT_POINT_CHECK.replace("\nN = 12\n", "\nN = 16\n"))
+
+    for index in range(7):
         init_repo(base / f"eval-{index}", f"moonshot fixture {index}")
 
 

@@ -66,8 +66,22 @@ log to context limits and parallel lines repeat each other.
   shaped by exactly how it failed, not one more shallow idea.
 - **Change the problem, not the target.** If you cannot solve the problem, there is an easier one
   you can: specialize to a small instance or a special case, generalize, drop or weaken one
-  condition, work backwards from the goal, look for structure the problem already has, change the
-  representation, or use prior work the host can reach. Solve that, then climb back.
+  condition, work backwards from the goal, change the representation, or use prior work the host
+  can reach. Solve that, then climb back.
+- **Break an assumption before buying more effort.** When the first sweep fails, or a keep-going
+  turn resumes a stall, write down what the failed approach takes for granted: that every
+  configuration must be searched, that the result must cover every input, that this
+  representation, unit of work, or tool is the right one. Then break one: demand more structure of
+  the answer than the problem does, accept a constraint that shrinks the problem, change the unit,
+  or specialize to the case at hand. More time or a faster language on the same approach is a
+  legitimate line; log it as one line and pair it with a broken assumption.
+- **Borrow lateral moves when they are installed.** When the host's declared skills include
+  `lateral-engineering`, invoke it for that step with the goal, the named obstruction and its
+  numbers, what is abundant here, and the logged dead ends. Treat each reframing it returns as a
+  candidate line and its proposed experiment as that line's check, then run the most promising two
+  or three here. It proposes and stays advisory; this skill, which the user asked to make the
+  attempt, executes and verifies. Decide availability from the declared list only, never by
+  searching the filesystem; without it, the step above is the move.
 - **Keep an attack log.** One line per attempt: what was tried, what happened, what it taught.
   Never rerun a logged dead end unchanged.
 - **Name the obstruction.** "This is too hard", "this is beyond current methods", and "this is an

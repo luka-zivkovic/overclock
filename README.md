@@ -328,8 +328,10 @@ skill treats that doubt as a prior learned from text, not a measurement of the a
 the attempt instead. It shows a frame first (the full target, one line on the odds, a check fixed
 before any work, partial wins worth having if the target falls, a budget, and the crux to attack
 first), then keeps going past failed approaches, logging each one and turning "too hard" into a
-named obstruction. `/moonshot` alone, or `/moonshot keep going`, resumes a stalled attempt from its
-most promising unexplored line.
+named obstruction. When the first round fails it breaks an assumption of the failed approach before
+buying more effort, and if `lateral-engineering` is installed it hands that step over and runs the
+reframings it gets back against the fixed check. `/moonshot` alone, or `/moonshot keep going`,
+resumes a stalled attempt from its most promising unexplored line.
 
 Ambition sets how hard it tries; evidence alone sets what it claims. Every result goes through the
 fixed check and an independent second method before it is reported, and the attempt stops only for
@@ -360,7 +362,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 150 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 151 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

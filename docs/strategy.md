@@ -424,9 +424,17 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   frame precedes the work (the target at full size, one odds line, a check fixed before the first
   attempt, partial wins, a budget, a crux-first move). The attack is crux first, sweep then dig,
   change the problem rather than the target, an attack log, and named obstructions in place of
-  "too hard". Claims pass the fixed check plus an independent method; five stop rules; a report of
-  result, evidence, attack log, and next shot. A linked reference covers long runs: a notes file,
-  parallel lines, referee subagents, and keep-going loops.
+  "too hard". When the first round fails it breaks an assumption of the failed approach before
+  buying more effort. Claims pass the fixed check plus an independent method; five stop rules; a
+  report of result, evidence, attack log, and next shot. A linked reference covers long runs: a
+  notes file, parallel lines, referee subagents, and keep-going loops.
+- **Composition (2026-09-30):** after the pilot, the only skill-arm differences were broken
+  assumptions (symmetric search, a restricted class of files), which is lateral-engineering's
+  territory, while lateral-engineering never runs its ideas. Moonshot therefore hands its
+  assumption-breaking step to `lateral-engineering` when the host declares it installed, and runs
+  the returned reframings against the fixed check; lateral-engineering proposes, moonshot executes.
+  The handoff is optional, decided from the declared skill list only, with the built-in step as
+  the standalone fallback, and lateral-engineering itself is unchanged.
 - **Fences:** the check stays fixed; permissions, sandboxes, and credentials are never routed
   around even when the user asks; a shown impossibility is separated from low odds and redirects
   the budget to the nearest achievable target; scratch work is never committed; routine work skips

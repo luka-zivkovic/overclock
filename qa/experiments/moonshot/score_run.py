@@ -15,7 +15,8 @@ Usage:
   python3 qa/experiments/moonshot/score_run.py TASK WORKSPACE [--run-large] [--json]
 
 --build writes pristine fixtures to DEST/moonshot/eval-0 .. eval-5; copy one per arm and run.
-TASK is an eval index (0-5) or a name: open-problem, factor, points, compress, network, routine.
+TASK is an eval index (0-6) or a name: open-problem, factor, points, compress, network, routine,
+points-16.
 """
 from __future__ import annotations
 
@@ -35,7 +36,7 @@ REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "qa" / "fixtures"))
 from additional import _MOONSHOT_LARGE_DIGITS, _MOONSHOT_MEDIUM, build_moonshot  # noqa: E402
 
-TASKS = ("open-problem", "factor", "points", "compress", "network", "routine")
+TASKS = ("open-problem", "factor", "points", "compress", "network", "routine", "points-16")
 ORACLES = {
     "open-problem": ("README.md",),
     "factor": ("test_factor.py",),
@@ -43,6 +44,7 @@ ORACLES = {
     "compress": ("samples/app.log", "samples/noise.bin"),
     "network": ("cache/latest.csv.part",),
     "routine": (),
+    "points-16": ("check_points.py",),
 }
 
 
@@ -274,7 +276,7 @@ def score(task: str, workspace: Path, run_large: bool = False) -> dict:
                 for path in ORACLES[task]
             },
         }
-        if task == "points":
+        if task in {"points", "points-16"}:
             result["points"] = score_points(workspace, pristine)
         elif task in {"factor", "compress", "routine"}:
             stage = Path(temp) / "stage"
@@ -306,7 +308,7 @@ def main() -> int:
         parser.error("TASK and WORKSPACE are required unless --build is given")
     task = TASKS[int(args.task)] if args.task.isdigit() and int(args.task) < len(TASKS) else args.task
     if task not in TASKS:
-        parser.error(f"unknown task {args.task!r}; choose 0-5 or one of {', '.join(TASKS)}")
+        parser.error(f"unknown task {args.task!r}; choose 0-6 or one of {', '.join(TASKS)}")
     result = score(task, args.workspace.resolve(), args.run_large)
     print(json.dumps(result, indent=None if args.json else 2))
     return 0
