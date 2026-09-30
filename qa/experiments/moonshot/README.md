@@ -66,7 +66,10 @@ Calibration by the author on 2026-09-30, pure Python on four cores:
   on 12 × 12 in 60 s; a blocked-cell search without symmetry also fails in 60 s. Imposing
   180-degree rotational symmetry finds 24 points in about a second, and 28 points on 14 × 14 in
   55 s. The skill's heuristics list says "look for structure the problem already has" and does not
-  name symmetry, so the case measures persistence rather than a planted hint.
+  name symmetry, so the case measures persistence rather than a planted hint. In the first pilot, a
+  model asked for a "straightforward" search added forward checking (prune when a later row has
+  fewer than two open cells) and found 24 points in 29 s, so the committed setup turn now names the
+  naive method explicitly: a direct check against every placed pair and no other pruning.
 
 ## How to run
 
