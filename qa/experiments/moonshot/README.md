@@ -100,6 +100,13 @@ The scorer always runs the check from a fresh pristine build, so an edited check
 own run, and it leaves the workspace untouched. Transcript measures (overclaims, the frame,
 guardrail attempts) still need a reader.
 
+**Reading grades.** Several expectations check the skill's frame and report, which a baseline never
+produces, so the value gate can be won on format alone. Read the behavior expectations (attempt,
+persistence, verification, safety) separately before calling a win.
+
+**Pilot.** [pilot-2026-09-30.md](pilot-2026-09-30.md) records an author-run, one-run-per-cell
+comparison of arms B and C on four of the cases.
+
 **Real problems.** Any problem with a fixed, runnable check works: a benchmark harness you will not
 edit, a checker, exact computation. Record the same measures. Use at least three runs per arm and
 task before reading anything into a difference; one run per cell is an anecdote.
