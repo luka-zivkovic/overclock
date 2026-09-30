@@ -440,9 +440,16 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   "keep going" against `/moonshot keep going`. Live results are not recorded (no isolated
   credentials in the authoring environment), so no lift is claimed. The author-run subagent pilot
   in `qa/experiments/moonshot/` is `subjective`.
-- **Next:** run `qa/run_value_evals.sh moonshot/moonshot` with credentials, then the three-arm
-  protocol in the experiment record (no encouragement, plain encouragement, skill) on real hard
-  problems, reading overclaim and check-tampering rates before any progress metric.
+- **Pilot (2026-09-30, `subjective`):** eleven author-run subagent runs, one per cell. No run in
+  either arm changed a check, committed, or overclaimed. Plain encouragement already sufficed for
+  this model on these tasks; the skill added frames, explicit second-method verification, and
+  stop rules used as written, changed the approach style in two single runs, and cost up to 3.6
+  times the time where the honest answer was quick. No success-rate difference was observed. See
+  `qa/experiments/moonshot/pilot-2026-09-30.md`.
+- **Next:** the one discriminating test: a search the baseline's approach cannot finish within
+  budget (the 14 x 14 grid), at least five runs per arm, success rate as the metric. Then
+  `qa/run_value_evals.sh moonshot/moonshot` with credentials. If the skill does not win the
+  discriminating test, keep it only for its structure and honest reporting, or retire it.
 
 ## Groundings performed (reference)
 
