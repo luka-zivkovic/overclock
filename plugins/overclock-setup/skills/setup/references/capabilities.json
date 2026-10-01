@@ -324,7 +324,7 @@
       "hooks": [],
       "persistent_files": [],
       "minimum_host_version": null,
-      "selection": "Choose to have the model take a real, budgeted, verified attempt at a problem that looks out of reach instead of explaining why it is hard; user-invoked, and never a license to edit the check or cross permissions."
+      "selection": "Choose to have the model generate out-of-pocket candidates for a problem that looks out of reach or stuck on the usual answer, then give the best bet and the wildest a real, measured try instead of explaining why it is hard; user-invoked, and never a license to edit the check or cross permissions."
     }
   ]
 }

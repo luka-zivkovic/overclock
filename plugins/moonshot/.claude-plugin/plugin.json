@@ -1,7 +1,7 @@
 {
   "name": "moonshot",
   "displayName": "Moonshot",
-  "description": "Take a real stab at problems that look out of reach. A user-invoked skill that treats the model's doubt as a prior rather than a verdict: it fixes a checkable target, partial wins, and a budget up front, attacks the crux first, keeps going past failed approaches, verifies every claim before reporting it, and never edits the check or routes around permissions and sandboxes.",
+  "description": "Take a real stab at problems that look out of reach or stuck on the usual answer. A user-invoked skill that treats doubt as a prior rather than a verdict: it fixes a checkable goal and budget, generates out-of-pocket candidates (unexpected uses of a technology, changed ways of working, broken assumptions) before judging any, gives the best bet and the wildest a real, measured try against the usual way, verifies every claim before reporting it, and never edits the check or routes around permissions, policies, and sandboxes.",
   "version": "0.1.0",
   "author": {
     "name": "Luka Zivkovic"
@@ -11,8 +11,9 @@
     "moonshot",
     "persistence",
     "ambition",
+    "divergent-thinking",
+    "experiments",
     "open-problems",
-    "research",
     "verification"
   ]
 }

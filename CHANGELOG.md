@@ -5,36 +5,41 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 
 ## moonshot
 
-### 0.1.0 — 2026-09-30 (initial release)
-- New plugin. `/moonshot` makes the model take a real stab at a problem that looks out of reach
-  instead of explaining why it is hard. It treats the model's doubt as a prior learned from text,
-  not a measurement of the attempt, and shows a frame before working: the full target, one line on
-  the odds, a check fixed before the first attempt, partial wins worth having if the target falls,
-  a budget, and a crux-first first move.
-- The attack keeps going past failed approaches: sweep then dig, change the problem rather than the
-  target, keep an attack log, and turn "this is too hard" into a named obstruction. When the first
-  round fails, it names what the failed approach takes for granted and breaks one assumption before
-  buying more effort. `/moonshot` with no problem, or with "keep going", resumes a stalled attempt
-  from its most promising unexplored line.
+### 0.1.0 — 2026-10-01 (initial release)
+- New plugin. `/moonshot` makes the model take a real stab at a problem that looks out of reach or
+  stuck on the usual answer, instead of explaining why it is hard or settling for the conventional
+  fix. It treats doubt about the problem, and about ideas that sound unrealistic, as a prior
+  learned from text rather than a measurement, and shows a frame before working: a mechanism-free
+  goal, the wall the usual answer cannot pass and its number, an inventory of what is abundant,
+  fixed, habitual, and negotiable, a check fixed before the first try, partial wins, and a budget.
+- Divergence before judgment: it names the usual answer as the baseline, lists what that answer
+  takes for granted, and generates at least eight candidates that differ in kind (repurposing a
+  technology for a job it was not built for, removing or relocating work, inverting, importing a
+  mechanism from another field, changing the unit, accepting a constraint, embracing the failure,
+  changing the practice), keeping at least two that look unrealistic, each with the one thing that
+  would have to be true for it to work.
+- Real tries: at least three candidates, the best bet and the wildest testable one among them, each
+  through the cheapest experiment that could prove its condition false (a prototype, a benchmark,
+  a real-number calculation, a simulation on the user's data, a dry run on a copy), with pass and
+  fail signals stated first and the baseline measured on the same check. A candidate drops only on
+  a failed try or a hard limit with numbers; failures shape the next try, and what passes is dug
+  into crux first. `/moonshot` with no problem, or with "keep going", resumes a stalled attempt
+  from its most promising untested candidate.
 - Optional composition with `lateral-engineering`: when the host declares it installed, moonshot
-  hands the assumption-breaking step to it with the goal, the obstruction and its numbers, and the
-  dead ends, then runs the returned reframings as lines of attack against the fixed check.
-  Availability comes only from the declared skill list; without it the built-in step stands.
+  invokes it during divergence with the goal, the wall, the inventory, and the baseline, then runs
+  the returned reframings as tries against the fixed check. Availability comes only from the
+  declared skill list; without it the built-in moves stand.
 - Every claim is verified before it is reported, by the fixed check plus an independent second
-  method, and labelled verified, partly verified, unverified, or refuted. The attempt stops only for
-  verified success, a shown impossibility or infeasibility, a spent budget, a guardrail, or the
-  user; the report gives the result, evidence, attack log, and next shot.
-- Hard limits: the check stays fixed (no editing tests, hardcoding, or skipping), guardrails such as
-  permissions, sandboxes, and credentials are never routed around even when the user asks, scratch
-  work is never committed, and the report stays sober. A linked reference covers long runs: a notes
-  file that survives context limits, parallel lines, referee subagents, and keep-going loops.
-- Evidence: seven committed live cases (an open problem, a test suite with one achievable and one
-  infeasible target, a keep-going resume after a failed naive search, a provably impossible target,
-  a network guardrail with a partial download, a routine-work control, and a stack case that hands
-  a stalled 20x20 search to lateral-engineering) with deterministic unchanged-file checks and a
-  paired value gate against plain encouragement. Not yet run live.
-  Motivated by Anthropic's Riemann zeta research note, where messages such as "keep going" helped
-  Claude past initial skepticism while heavy verification kept the result honest.
+  method, with simulations and estimates labelled as such. The attempt stops only for verified
+  success, a shown impossibility or infeasibility, a spent budget, a guardrail, or the user; the
+  report gives the result, every try with its measured result and verdict, the evidence, the
+  untested candidates with their next experiments, and the next shot.
+- Hard limits: the check stays fixed; unconventional is not unauthorized, so permissions,
+  sandboxes, credentials, security controls, quotas, licenses, and terms are never routed around,
+  even when the user asks; process changes are tried on data, simulations, or copies, never on
+  shared settings or production; scratch work, throwaway repositories included, is never
+  committed; and the report stays sober. A linked reference covers long runs: a notes file that
+  survives context limits, parallel tries, referee subagents, and keep-going loops.
 
 ## api-bench
 

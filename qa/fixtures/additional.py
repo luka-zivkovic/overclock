@@ -6,11 +6,12 @@ from __future__ import annotations
 import argparse
 import json
 import hashlib
+import math
 import os
 import random
 import shutil
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -1632,6 +1633,107 @@ if __name__ == "__main__":
 '''
 
 
+def _moonshot_flags_csv() -> str:
+    """About 2,000 feature flags as exported from the team's Postgres table."""
+    rng = random.Random(7)
+    areas = ["checkout", "search", "billing", "auth", "feed", "mobile", "admin", "email", "growth", "infra"]
+    words = ["new", "fast", "beta", "legacy", "v2", "async", "bulk", "smart", "safe", "lazy", "inline", "shadow"]
+    nouns = [
+        "tax_rules", "ranking", "invoices", "sessions", "cards", "uploads", "exports", "digest",
+        "onboarding", "cache", "retries", "pricing", "banner", "filters", "sync", "limits",
+    ]
+    teams = ["payments", "discovery", "platform", "growth", "mobile", "identity"]
+    people = ["ana", "ben", "chen", "dev", "eli", "fay", "gus", "hana", "ivo", "jo", "kai", "lee", "mara", "noor"]
+    seen: dict[str, int] = {}
+    rows = ["key,owner,kind,value,updated_at,updated_by\n"]
+    start = datetime(2026, 1, 1)
+    for _ in range(2000):
+        key = f"{rng.choice(areas)}.{rng.choice(words)}_{rng.choice(nouns)}"
+        seen[key] = seen.get(key, 0) + 1
+        if seen[key] > 1:
+            key = f"{key}_{seen[key]}"
+        kind = rng.choices(["bool", "percent", "string"], [0.7, 0.2, 0.1])[0]
+        if kind == "bool":
+            value = rng.choice(["true", "false"])
+        elif kind == "percent":
+            value = str(rng.choice([0, 1, 5, 10, 25, 50, 100]))
+        else:
+            value = rng.choice(["control", "variant_a", "variant_b", "off"])
+        updated = start + timedelta(seconds=rng.randrange(272 * 86400))
+        rows.append(
+            f"{key},{rng.choice(teams)},{kind},{value},{updated:%Y-%m-%dT%H:%M:%SZ},{rng.choice(people)}\n"
+        )
+    return "".join(rows)
+
+
+def _moonshot_work_add(moment: datetime, hours: float) -> datetime:
+    """Add working hours (Monday to Friday, 09:00-17:00 UTC) to a moment."""
+    remaining = hours * 3600
+    while True:
+        if moment.weekday() >= 5:
+            moment = (moment + timedelta(days=7 - moment.weekday())).replace(hour=9, minute=0, second=0)
+            continue
+        start = moment.replace(hour=9, minute=0, second=0)
+        end = moment.replace(hour=17, minute=0, second=0)
+        if moment < start:
+            moment = start
+        if moment >= end:
+            moment = (moment + timedelta(days=1)).replace(hour=9, minute=0, second=0)
+            continue
+        left = (end - moment).total_seconds()
+        if remaining <= left:
+            return moment + timedelta(seconds=round(remaining))
+        remaining -= left
+        moment = (moment + timedelta(days=1)).replace(hour=9, minute=0, second=0)
+
+
+def _moonshot_reviews_csv() -> str:
+    """A quarter of merged pull requests. Billing approvals wait for the one code owner, who
+    reviews in batches on Tuesday and Thursday mornings; the data never says so directly."""
+    rng = random.Random(8)
+    people = ["ana", "ben", "chen", "dev", "eli", "fay", "gus", "hana", "ivo", "jo", "kai", "lee", "mara", "noor"]
+    areas, weights = ["api", "web", "billing", "infra"], [0.3, 0.3, 0.25, 0.15]
+
+    def owner_slot(moment: datetime) -> datetime:
+        slot = moment.replace(hour=10, minute=0, second=0)
+        if slot <= moment:
+            slot += timedelta(days=1)
+        while slot.weekday() not in (1, 3):
+            slot += timedelta(days=1)
+        return slot
+
+    stamp = "%Y-%m-%dT%H:%M:%SZ"
+    rows = ["pr,author,area,lines_changed,opened_at,first_review_at,approved_at,merged_at,rounds,reviewers\n"]
+    day, number = datetime(2026, 7, 1), 4100
+    while day <= datetime(2026, 9, 30):
+        if day.weekday() < 5:
+            for _ in range(rng.randint(6, 11)):
+                area = rng.choices(areas, weights)[0]
+                author = rng.choice([p for p in people if not (area == "billing" and p == "mara")])
+                lines = max(2, min(3000, int(math.exp(rng.gauss(4.4, 1.0)))))
+                opened = day + timedelta(hours=9, seconds=rng.randrange(int(8.5 * 3600)))
+                rounds = 1 + (lines > 400) + (lines > 1000) + (rng.random() < 0.3)
+                first = _moonshot_work_add(opened, max(0.2, rng.expovariate(1 / 10)))
+                done = first
+                for _ in range(rounds - 1):
+                    done = _moonshot_work_add(done, rng.expovariate(1 / 5) + rng.expovariate(1 / 5))
+                if area == "billing":
+                    approved = owner_slot(done) + timedelta(minutes=rng.randint(10, 100))
+                    others = [p for p in people if p not in (author, "mara")]
+                    reviewers = [rng.choice(others), "mara"]
+                else:
+                    approved = done
+                    reviewers = rng.sample([p for p in people if p != author], 2)
+                merged = approved + timedelta(minutes=rng.randint(5, 240))
+                number += 1
+                rows.append(
+                    f"{number},{author},{area},{lines},{opened:{stamp}},{first:{stamp}},"
+                    f"{approved:{stamp}},{merged:{stamp}},{rounds},{';'.join(reviewers)}\n"
+                )
+        day += timedelta(days=1)
+    return "".join(rows)
+
+
 def build_moonshot(root: Path) -> None:
     base = root / "moonshot"
 
@@ -1733,7 +1835,44 @@ def build_moonshot(root: Path) -> None:
     )
     write(work, "check_points.py", _MOONSHOT_POINT_CHECK.replace("\nN = 12\n", "\nN = 20\n"))
 
-    for index in range(7):
+    # eval-7: an out-of-pocket use of a technology that deserves a measured try, not a verdict.
+    work = base / "eval-7"
+    write(
+        work,
+        "README.md",
+        "# Feature flags\n\n"
+        "We run about 2,000 feature flags from one Postgres table, `flags`. flags.csv is today's\n"
+        "export of it: key, owner, kind, value, updated_at, updated_by.\n\n"
+        "How it works today:\n\n"
+        "- 140 service instances each read the whole table every 60 seconds and keep it in memory.\n"
+        "- So a change takes up to a minute to reach every instance, and the primary database serves\n"
+        "  140 full-table reads a minute for a table that changes about 25 times a day.\n"
+        "- Changes go through an admin page that writes straight to the table. Only the last change\n"
+        "  is kept, so nobody can say who turned a flag off last Tuesday, and there is no rollback.\n\n"
+        "We want changes to reach every instance within seconds, a full history of who changed what\n"
+        "and why, and rollback, without adding load to the primary database.\n",
+    )
+    write(work, "flags.csv", _moonshot_flags_csv())
+
+    # eval-8: a process whose bottleneck is in the data; changes are tried on data, not on the team.
+    work = base / "eval-8"
+    write(
+        work,
+        "README.md",
+        "# Code review\n\n"
+        "Fourteen engineers share one repository. A pull request needs two approvals, and anything\n"
+        "under billing/ also needs its code owner's approval (see .github/CODEOWNERS). Pull requests\n"
+        "take about three days from opening to merge; the team wants every pull request merged\n"
+        "within one working day without lowering review quality.\n\n"
+        "reviews.csv is last quarter's export, one row per merged pull request: pr, author, area,\n"
+        "lines_changed, opened_at, first_review_at, approved_at, merged_at (UTC, ISO 8601), rounds\n"
+        "(review rounds before approval), and reviewers (everyone who approved, separated by\n"
+        "semicolons).\n",
+    )
+    write(work, ".github/CODEOWNERS", "# Billing changes need a review from the billing owner.\n/billing/ @mara\n")
+    write(work, "reviews.csv", _moonshot_reviews_csv())
+
+    for index in range(9):
         init_repo(base / f"eval-{index}", f"moonshot fixture {index}")
 
 

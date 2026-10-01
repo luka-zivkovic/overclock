@@ -1,6 +1,6 @@
 interface:
   display_name: "Moonshot"
-  short_description: "Take a real, verified stab at an improbable problem"
-  default_prompt: "Use $moonshot to take a real stab at this improbable problem, keep going past failed approaches, and verify every claim before reporting it."
+  short_description: "Find and test out-of-pocket ways to crack a hard problem"
+  default_prompt: "Use $moonshot to find unexpected approaches to this hard problem, give the most promising and the wildest a real, measured try, and verify every claim before reporting it."
 policy:
   allow_implicit_invocation: false

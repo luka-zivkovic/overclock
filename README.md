@@ -55,7 +55,7 @@ installs, removes, enables, disables, or edits anything.
 | **session-memory** | Session handoffs, durable lessons, **and** a verified-solutions ledger | `/plugin install session-memory@overclock` |
 | **learning-loop** | Durable lessons without handoffs | `/plugin install learning-loop@overclock` |
 | **lateral-engineering** | Non-obvious engineering alternatives with broken assumptions, costs, and grounding | `/plugin install lateral-engineering@overclock` |
-| **moonshot** | A real, budgeted, verified attempt at a problem that looks out of reach, plus a keep-going mode | `/plugin install moonshot@overclock` |
+| **moonshot** | Out-of-pocket candidates for a hard problem, with the best bet and the wildest given a real, measured try, plus a keep-going mode | `/plugin install moonshot@overclock` |
 | **critical-thinking** | Independent critique and bounded local research | `/plugin install critical-thinking@overclock` |
 | **groundwork** | A one-question-at-a-time interview that ends at a confirmed decision brief | `/plugin install groundwork@overclock` |
 | **project-vocabulary** | One ubiquitous language per project, applied in conversation with approval-gated writes | `/plugin install project-vocabulary@overclock` |
@@ -320,24 +320,35 @@ code quality; those stay with the host's review tools.
 </details>
 
 <details>
-<summary><strong>moonshot</strong> — take the shot, then check it</summary>
+<summary><strong>moonshot</strong> — go wide, try it for real, then check it</summary>
 
-`/moonshot` is for problems that look out of reach: an open question, an improbable target, a task
-you expect to fail. Models tend to meet those with a careful explanation of why they are hard. This
-skill treats that doubt as a prior learned from text, not a measurement of the attempt, and makes
-the attempt instead. It shows a frame first (the full target, one line on the odds, a check fixed
-before any work, partial wins worth having if the target falls, a budget, and the crux to attack
-first), then keeps going past failed approaches, logging each one and turning "too hard" into a
-named obstruction. When the first round fails it breaks an assumption of the failed approach before
-buying more effort, and if `lateral-engineering` is installed it hands that step over and runs the
-reframings it gets back against the fixed check. `/moonshot` alone, or `/moonshot keep going`,
-resumes a stalled attempt from its most promising unexplored line.
+`/moonshot` is for problems that look out of reach or stuck on the usual answer: an open question,
+an improbable target, a task you expect to fail, a way of working that has stopped making sense.
+Models tend to meet those with a careful explanation of why they are hard, or with the
+conventional fix. This skill treats that doubt, and the sense that an idea is unrealistic because
+nobody does it that way, as a prior learned from text rather than a measurement, and makes the
+attempt instead.
 
-Ambition sets how hard it tries; evidence alone sets what it claims. Every result goes through the
-fixed check and an independent second method before it is reported, and the attempt stops only for
-verified success, a shown impossibility, a spent budget, a guardrail, or you. It never edits tests
-or checkers to pass, never routes around permissions or sandboxes even when asked to find a way,
-and never commits. The idea comes from Anthropic's
+It frames the problem first: the goal without a mechanism, the wall the usual answer cannot pass
+and its number, what is abundant, fixed, habitual, or negotiable here, a check fixed before any
+work, partial wins, and a budget. Then it goes wide before judging. It names the usual answer as
+the baseline, lists what that answer takes for granted, and generates at least eight candidates
+that differ in kind: putting a technology to a job it was not built for, moving work to another
+actor or time, importing a mechanism from another field, changing how the team works, and more,
+keeping at least two that look unrealistic. Each candidate gets the one thing that would have to
+be true for it to work, and at least three, the wildest testable one among them, get a real try:
+the cheapest experiment that could prove that condition false, measured against the baseline. If
+`lateral-engineering` is installed, it joins the divergence step and its reframings become tries.
+`/moonshot` alone, or `/moonshot keep going`, resumes a stalled attempt from its most promising
+untested candidate.
+
+Ambition sets how hard and how wide it tries; evidence alone sets what it claims. Every result goes
+through the fixed check and an independent second method before it is reported, simulations are
+labelled as simulations, and the attempt stops only for verified success, a shown impossibility, a
+spent budget, a guardrail, or you. Unconventional is not unauthorized: it never edits tests or
+checkers to pass, never routes around permissions, sandboxes, or policies even when asked to find a
+way, tries process changes on data or copies rather than on shared settings, and never commits.
+The idea comes from Anthropic's
 [Riemann zeta research note](https://www.anthropic.com/research/riemann-zeta), where messages such
 as "keep going" and "believe in yourself" helped Claude past its initial skepticism, and extensive
 verification stood behind the result.
@@ -362,7 +373,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 151 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 153 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

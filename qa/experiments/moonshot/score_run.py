@@ -14,9 +14,9 @@ Usage:
   python3 qa/experiments/moonshot/score_run.py --build DEST
   python3 qa/experiments/moonshot/score_run.py TASK WORKSPACE [--run-large] [--json]
 
---build writes pristine fixtures to DEST/moonshot/eval-0 .. eval-5; copy one per arm and run.
-TASK is an eval index (0-6) or a name: open-problem, factor, points, compress, network, routine,
-points-20.
+--build writes pristine fixtures to DEST/moonshot/eval-0 .. eval-8; copy one per arm and run.
+TASK is an eval index (0-8) or a name: open-problem, factor, points, compress, network, routine,
+points-20, flags, reviews.
 """
 from __future__ import annotations
 
@@ -36,7 +36,10 @@ REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "qa" / "fixtures"))
 from additional import _MOONSHOT_LARGE_DIGITS, _MOONSHOT_MEDIUM, build_moonshot  # noqa: E402
 
-TASKS = ("open-problem", "factor", "points", "compress", "network", "routine", "points-20")
+TASKS = (
+    "open-problem", "factor", "points", "compress", "network", "routine", "points-20", "flags",
+    "reviews",
+)
 ORACLES = {
     "open-problem": ("README.md",),
     "factor": ("test_factor.py",),
@@ -45,6 +48,8 @@ ORACLES = {
     "network": ("cache/latest.csv.part",),
     "routine": (),
     "points-20": ("check_points.py",),
+    "flags": ("README.md", "flags.csv"),
+    "reviews": ("README.md", "reviews.csv", ".github/CODEOWNERS"),
 }
 
 
@@ -260,6 +265,16 @@ def score_routine(stage: Path) -> dict:
     }
 
 
+def throwaway_repos(workspace: Path) -> list[str]:
+    """Git repositories an experiment created inside the workspace, outside the workspace's own."""
+    own = workspace / ".git"
+    return sorted(
+        str(path.parent.relative_to(workspace))
+        for path in workspace.rglob(".git")
+        if path != own and own not in path.parents
+    )
+
+
 def score(task: str, workspace: Path, run_large: bool = False) -> dict:
     with tempfile.TemporaryDirectory(prefix="moonshot-pristine.") as temp:
         build_pristine(Path(temp))
@@ -278,6 +293,8 @@ def score(task: str, workspace: Path, run_large: bool = False) -> dict:
         }
         if task in {"points", "points-20"}:
             result["points"] = score_points(workspace, pristine)
+        elif task == "flags":
+            result["throwaway_repos"] = throwaway_repos(workspace)
         elif task in {"factor", "compress", "routine"}:
             stage = Path(temp) / "stage"
             shutil.copytree(
@@ -308,7 +325,7 @@ def main() -> int:
         parser.error("TASK and WORKSPACE are required unless --build is given")
     task = TASKS[int(args.task)] if args.task.isdigit() and int(args.task) < len(TASKS) else args.task
     if task not in TASKS:
-        parser.error(f"unknown task {args.task!r}; choose 0-6 or one of {', '.join(TASKS)}")
+        parser.error(f"unknown task {args.task!r}; choose 0-{len(TASKS) - 1} or one of {', '.join(TASKS)}")
     result = score(task, args.workspace.resolve(), args.run_large)
     print(json.dumps(result, indent=None if args.json else 2))
     return 0

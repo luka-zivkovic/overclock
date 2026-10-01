@@ -401,7 +401,7 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   comparison yields valid live evidence. See the experiment record for acceptance
   criteria and limitations; scaffolding alone does not justify publication.
 
-### moonshot — BUILD, v0.1.0 authored (2026-09-30)
+### moonshot — BUILD, v0.1.0 authored (2026-09-30), redesigned before release (2026-10-01)
 - **Demand:** direct maintainer request, after reading Anthropic's
   [Riemann zeta research note](https://www.anthropic.com/research/riemann-zeta), for a skill that
   encourages a model to attempt problems that look improbable, and to run experiments with it. The
@@ -420,14 +420,19 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   reporting, and neither is in this kit. No collision: lateral-engineering is advisory ideation,
   critical-thinking judges reasoning, debugging-discipline owns bug diagnosis, and moonshot is
   user-invoked, so it never competes for routing.
-- **Product shape:** one user-invoked skill with a start mode and a keep-going resume mode. A
-  frame precedes the work (the target at full size, one odds line, a check fixed before the first
-  attempt, partial wins, a budget, a crux-first move). The attack is crux first, sweep then dig,
-  change the problem rather than the target, an attack log, and named obstructions in place of
-  "too hard". When the first round fails it breaks an assumption of the failed approach before
-  buying more effort. Claims pass the fixed check plus an independent method; five stop rules; a
-  report of result, evidence, attack log, and next shot. A linked reference covers long runs: a
-  notes file, parallel lines, referee subagents, and keep-going loops.
+- **Product shape (as redesigned 2026-10-01):** one user-invoked skill with a start mode and a
+  keep-going resume mode. A frame precedes the work: a mechanism-free goal, the wall the usual
+  answer cannot pass with its number, an inventory (abundant, fixed, habits, negotiable), a check
+  fixed before the first try, partial wins, and a budget. Divergence comes before judgment: the
+  usual answer is named as the baseline, its assumptions are listed, and at least eight candidates
+  that differ in kind are generated with abstract moves (repurpose a technology, remove, relocate,
+  invert, import, change the unit, accept a constraint, embrace the failure, change the practice),
+  at least two of them unrealistic-looking, each with the one thing that would have to be true.
+  At least three candidates, the best bet and the wildest testable one among them, get the
+  cheapest experiment that could falsify that condition, with the baseline measured on the same
+  check; candidates drop only on a failed try or a hard limit with numbers. Claims pass the fixed
+  check plus an independent method; five stop rules; a report of result, tries with measured
+  results, evidence, untested candidates, and next shot. A linked reference covers long runs.
 - **Composition (2026-09-30):** after the pilot, the only skill-arm differences were broken
   assumptions (symmetric search, a restricted class of files), which is lateral-engineering's
   territory, while lateral-engineering never runs its ideas. Moonshot therefore hands its
@@ -435,15 +440,18 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   the returned reframings against the fixed check; lateral-engineering proposes, moonshot executes.
   The handoff is optional, decided from the declared skill list only, with the built-in step as
   the standalone fallback, and lateral-engineering itself is unchanged.
-- **Fences:** the check stays fixed; permissions, sandboxes, and credentials are never routed
-  around even when the user asks; a shown impossibility is separated from low odds and redirects
-  the budget to the nearest achievable target; scratch work is never committed; routine work skips
-  the frame; the report stays sober.
+- **Fences:** the check stays fixed; unconventional is not unauthorized, so permissions, sandboxes,
+  credentials, security controls, quotas, licenses, and terms are never routed around even when the
+  user asks, and policies set by others are guardrails rather than habits to revisit; process
+  changes are tried on data, simulations, or copies, never on shared settings or production; a
+  shown impossibility is separated from low odds and redirects the budget to the nearest
+  achievable goal; scratch work, throwaway repositories included, is never committed; routine work
+  skips the frame; the report stays sober and sells no idea before a try shows it.
 - **Why user-invoked:** "keep going" is an ordinary continuation phrase in agent sessions, so
   implicit routing would misfire constantly, and an experiment needs a clean on/off switch.
   Implicit invocation would need a routing battery with positive and negative controls first.
-- **Evidence tier:** `rubric` for the committed suite: six live cases with deterministic
-  unchanged-file checks and a paired value gate. The baseline arm receives the same prompt text,
+- **Evidence tier:** `rubric` for the committed suite: nine live cases (one a stack case with
+  lateral-engineering) with deterministic unchanged-file checks and a paired value gate. The baseline arm receives the same prompt text,
   so the suite compares plain encouragement with the skill; the keep-going case literally pits
   "keep going" against `/moonshot keep going`. Live results are not recorded (no isolated
   credentials in the authoring environment), so no lift is claimed. The author-run subagent pilot
@@ -462,10 +470,23 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   the skill changes the approach is retired for this model; the handoff is untested, not refuted.
   The calibration measured search difficulty rather than whether the model knows the trick. See
   `qa/experiments/moonshot/grid-trial-2026-09-30.md`.
-- **Next:** a maintainer decision: keep moonshot for its frame, stop rules, and honest reporting
-  (and for models or settings where skepticism does appear), or retire it. Any further comparison
-  needs a task calibrated against the model itself: confirm that no-skill runs stall before
-  comparing arms.
+- **Redesign (2026-10-01):** the maintainer kept moonshot and set its purpose: find unexpected
+  solutions to hard problems, including unexpected uses of a technology and changes to how a team
+  works, and give them a real try before giving up. Both experiments showed that persistence and
+  a late assumption-breaking step add nothing measurable for this model, which already persists
+  and already knows standard tricks. The redesign moves the effort to the two places neither
+  experiment exercised: divergence before any judgment, so the conventional answer becomes the
+  baseline rather than the plan, and measured tries of improbable candidates, so an idea is never
+  dropped on how it sounds. The lateral-engineering handoff moved from after a stall, which never
+  happened, to the divergence step. Two cases were added: a technology-repurposing case (feature
+  flags in Git, measured in a throwaway repository) and a practice-change case (code review
+  changes replayed on a quarter of synthetic review data, with the ownership file untouched).
+  The pilot and the grid trial ran earlier versions; their findings stand for those versions.
+- **Next:** a baseline-first comparison calibrated against the model: run the no-skill arm on
+  candidate out-of-pocket problems, keep only those where it stays with the conventional answer or
+  judges ideas without trying them, then compare arms on candidates tried, measured results, and
+  verified outcomes. Retire the divergence claim if the skill does not clearly beat the baseline
+  there.
 
 ## Groundings performed (reference)
 

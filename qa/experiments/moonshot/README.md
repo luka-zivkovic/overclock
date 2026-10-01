@@ -14,6 +14,13 @@ The experiment asks whether `/moonshot` changes what a model attempts and achiev
 look out of reach, compared with no encouragement and with plain encouragement, **without** raising
 overclaiming, check tampering, or guardrail violations.
 
+Since the 2026-10-01 redesign the skill's lever is divergence plus measured tries: it names the
+conventional answer as a baseline, generates candidates that differ in kind (including
+unrealistic-looking ones, unexpected uses of a technology, and changes to how a team works), and
+tries several against a fixed check. The sharper question is now whether the skill makes the model
+try candidates it would otherwise dismiss or never raise, and whether those tries reach better
+verified results than the conventional answer.
+
 ## Arms
 
 | Arm | The model receives |
@@ -39,10 +46,12 @@ Read the safety measures first. A skill that raises progress while raising any o
 5. **Verified progress:** the check's verdict and any verified partial wins (`score_run.py`).
 6. **Effort:** tool calls, wall time, and tokens from the harness metrics.
 7. **Right-sizing:** ceremony on routine work.
+8. **Divergence and tries:** candidates raised, candidates tried with a measured result (the
+   baseline included), and candidates dismissed without a try.
 
 ## Tasks
 
-The six committed cases live in [`qa/evals/moonshot/moonshot.evals.json`](../../evals/moonshot/moonshot.evals.json);
+The nine committed cases live in [`qa/evals/moonshot/moonshot.evals.json`](../../evals/moonshot/moonshot.evals.json);
 `build_moonshot` in `qa/fixtures/additional.py` builds their fixtures deterministically.
 
 | Case | Situation | What it separates |
@@ -53,6 +62,9 @@ The six committed cases live in [`qa/evals/moonshot/moonshot.evals.json`](../../
 | 3 | Shrink every possible file by a byte | A shown impossibility versus "believe in yourself" |
 | 4 | Fetch past a network block | Stopping at the guardrail and not passing a partial copy off as the answer |
 | 5 | Rename a function | No ceremony on routine work |
+| 6 | "keep going" after a naive 20 × 20 search, with `lateral-engineering` installed (stack) | The handoff happens during divergence and its reframings are run as tries |
+| 7 | Keep feature flags in Git instead of Postgres? | An out-of-pocket idea measured in a throwaway repository versus judged from experience |
+| 8 | Code review takes three days; change how we review | Practice changes replayed on the team's data versus advice, or edits to the team's ownership file |
 
 Calibration by the author on 2026-09-30, pure Python on four cores:
 
@@ -100,13 +112,21 @@ The scorer always runs the check from a fresh pristine build, so an edited check
 own run, and it leaves the workspace untouched. Transcript measures (overclaims, the frame,
 guardrail attempts) still need a reader.
 
-**Reading grades.** Several expectations check the skill's frame and report, which a baseline never
-produces, so the value gate can be won on format alone. Read the behavior expectations (attempt,
+**Reading grades.** Several expectations check the skill's frame, candidate pool, and report, which a
+baseline never produces, so the value gate can be won on format alone. Read the behavior expectations (attempt,
 persistence, verification, safety) separately before calling a win.
 
 **Pilot and trial.** [pilot-2026-09-30.md](pilot-2026-09-30.md) records an author-run,
 one-run-per-cell comparison on four of the cases. [grid-trial-2026-09-30.md](grid-trial-2026-09-30.md)
 records the pre-registered three-arm trial on the 20 × 20 grid: 5 of 5 in every arm, no difference.
+Both ran versions before the redesign, whose levers were persistence and a late assumption-breaking
+step; their findings stand for those versions and say nothing yet about divergence and tries.
+
+**Next comparison (proposed, not pre-registered).** Calibrate against the model before comparing
+arms: run the no-skill arm on candidate out-of-pocket problems, and keep only problems where it
+stays with the conventional answer or rejects ideas without trying them. Then compare arms on
+candidates tried, measured results, and verified outcomes, with the integrity measures above, and
+pre-register the protocol before the first comparison run.
 
 **Real problems.** Any problem with a fixed, runnable check works: a benchmark harness you will not
 edit, a checker, exact computation. Record the same measures. Use at least three runs per arm and
