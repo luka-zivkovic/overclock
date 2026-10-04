@@ -30,10 +30,18 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   prompts, dropping and counting injected context, tool results, command output, subagent
   transcripts, headless and temp-directory runs, approvals, and in-session retries, and redacts
   secrets before clustering.
-- Clusters carry prompt and session counts, harnesses, projects, date span, verbatim samples
-  spread across sessions, installed skills that match, and the skills that actually ran in those
-  sessions, so an installed skill that never fired is proposed as a trigger fix instead of a new
-  skill.
+- Clustering is cohesive rather than single-link: a prompt joins a cluster only when it is close
+  to one member and to the cluster on average, so one bridging prompt cannot chain unrelated
+  requests, and two requests that open with verbs from different action groups ("fix" versus
+  "explain") never merge. Fragments that formed separately are merged by average linkage.
+- Output separates `clusters` (repeated requests with several shared specifics, at most 12) from
+  `topics` (subjects asked about in different ways, at most 5 with two samples each), so recurring
+  subjects never crowd out repeated requests. Clusters carry prompt and session counts, harnesses,
+  projects, date span, core terms, cohesion, verbatim samples spread across sessions, installed
+  skills that match, and the skills that actually ran in those sessions, so an installed skill
+  that never fired is proposed as a trigger fix instead of a new skill. The installed list is names
+  only, and the report records bytes read and elapsed time.
+- A scaling benchmark with planted ground truth lives in `qa/experiments/skill-scout-bench/`.
 - The skill returns at most five right-sized proposals (skill, command, instruction line, hook, or
   trigger fix), each with a draft name, a description with triggers and anti-triggers, and an
   evidence-cited reason. It never scaffolds or writes anything. Cursor and OpenCode history is out

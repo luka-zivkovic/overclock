@@ -41,16 +41,20 @@ Read [references/forms.md](references/forms.md) before deciding. It maps each ki
 to a skill, a command, an instruction line, a hook, a trigger fix, or nothing, and it lists the
 patterns that look like skills but are not. Skipping it turns every cluster into a skill.
 
-For each cluster, strongest first:
+For each cluster in `clusters`, strongest first:
 
-1. Name the repeated intent in one sentence from its samples. If the samples do not share one
-   intent, drop the cluster.
+1. Name the repeated intent in one sentence from its samples and `core_terms`. If the samples do
+   not share one intent, drop the cluster.
 2. Check `installed_matches` and `skills_used_in_these_sessions`. A match that never ran in those
    sessions is an under-triggering skill: propose a trigger fix, not a new skill. A match that
    did run means the pattern is already covered; skip it.
 3. Choose the form, the scope (user level when the pattern spans projects, that repository when
    it does not), and the invocation (model-invoked only when the trigger is natural and an
    anti-trigger is easy to state).
+
+`topics` are subjects the user keeps returning to with different asks ("fix", "explain", and
+"refactor" the same module). They are context, not repeated requests: never turn one into a
+skill. Mention at most one, in one line, when it suggests project knowledge worth writing down.
 
 ## 3. Propose, then stop
 

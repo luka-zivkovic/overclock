@@ -166,6 +166,27 @@ class UnitTest(unittest.TestCase):
         groups = sorted(sorted(group) for group in skill_scout.cluster(prompts, 0.45))
         self.assertEqual(groups, [[0, 1], [2]])
 
+    def test_different_opening_verbs_do_not_link(self) -> None:
+        texts = ["fix the csv importer behind the proxy", "explain the csv importer behind the proxy",
+                 "fix the csv importer behind the proxy with large files"]
+        prompts = [{"tokens": skill_scout.tokens(text), "action": skill_scout.action(text)} for text in texts]
+        groups = sorted(sorted(group) for group in skill_scout.cluster(prompts, 0.45))
+        self.assertEqual(groups, [[0, 2], [1]])
+        self.assertEqual(skill_scout.action("can you draft the release notes"), "produce")
+        self.assertIsNone(skill_scout.action("release notes please"))
+
+    def test_bridging_prompt_cannot_chain_unrelated_groups(self) -> None:
+        texts = ["alpha bravo charlie delta", "alpha bravo charlie delta echo foxtrot golf hotel",
+                 "echo foxtrot golf hotel"]
+        prompts = [{"tokens": skill_scout.tokens(text)} for text in texts]
+        groups = skill_scout.cluster(prompts, 0.45)
+        self.assertFalse(any(len(group) == 3 for group in groups), groups)
+
+    def test_secret_fragments_never_become_terms(self) -> None:
+        secret = "ghp_" + "Zebra0Fixture0" + "K" * 24
+        words = skill_scout.tokens(skill_scout.redact(f"release notes then push with GITHUB_TOKEN={secret}"))
+        self.assertFalse(any("zebra0" in word for word in words), words)
+
     def test_parse_time_accepts_epoch_and_iso(self) -> None:
         self.assertEqual(skill_scout.parse_time(0).year, 1970)
         self.assertEqual(skill_scout.parse_time("2026-09-01T10:00:00Z"), dt.datetime(2026, 9, 1, 10, tzinfo=dt.timezone.utc))

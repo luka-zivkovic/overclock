@@ -46,6 +46,13 @@ anti-trigger is easy to state; otherwise user-invoked. Long, near-verbatim repea
 (`verbatim: true`, high `median_words`) are the strongest skill signal: the user is pasting
 instructions that should live in a file.
 
+## Topics are not requests
+
+The helper puts clusters held together by one or two shared words, or with low `cohesion`, in
+`topics`: the same module or feature asked about in different ways. A topic never becomes a skill
+by itself. At most, a topic that spans many sessions of one repository suggests that the
+repository's instruction file should explain that area; say so in one line or skip it.
+
 ## 6. Nothing
 
 Drop the cluster when the samples do not share one intent, when it spans fewer than two

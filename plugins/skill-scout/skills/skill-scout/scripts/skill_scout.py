@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -25,7 +26,9 @@ SUPPORTED = ("claude-code", "codex", "pi")
 UNSUPPORTED = {"cursor": "Cursor keeps chats in SQLite", "opencode": "OpenCode splits sessions across many small files"}
 MAX_PROMPT_CHARS = 4_000
 MAX_SAMPLE_CHARS = 300
-MAX_CLUSTERS = 25
+MAX_CLUSTERS = 12
+MAX_TOPICS = 5
+TOPIC_SAMPLES = 2
 MAX_SAMPLES = 5
 MAX_PROMPTS = 6_000
 MAX_TOKENS_PER_PROMPT = 150
@@ -46,6 +49,40 @@ CORRECTION_RE = re.compile(
     r"again[,!.]|actually[, ]|instead[, ]|please don't\b|never\b)",
     re.IGNORECASE,
 )
+# Imperative verbs grouped by intent, read from the first content word of a request. Two requests
+# that open with verbs from different groups ("fix the importer" / "explain the importer") are
+# different asks about one topic, not a repeat. Words that usually open a noun phrase ("release
+# notes", "log file", "cache layer") are deliberately absent.
+ACTION_GROUPS = {
+    "produce": "write draft generate create compose prepare produce summarize summarise outline put",
+    "modify": "update add bump change edit append insert adjust",
+    "fix": "fix repair resolve debug troubleshoot",
+    "explain": "explain describe clarify",
+    "inspect": "review check audit inspect verify assess evaluate",
+    "restructure": "refactor restructure simplify rewrite reorganize reorganise split move rename extract inline",
+    "remove": "delete remove drop deprecate",
+    "integrate": "rebase merge pull sync",
+    "investigate": "investigate diagnose profile trace",
+    "optimize": "optimize optimise",
+    "deploy": "deploy publish ship",
+    "migrate": "migrate port upgrade downgrade",
+    "implement": "implement build",
+    "install": "install configure",
+    "revert": "revert undo",
+    "test": "test",
+    "double": "mock stub",
+    "translate": "translate localize",
+    "convert": "convert",
+    "format": "format lint",
+    "paginate": "paginate",
+    "validate": "validate sanitize",
+    "throttle": "throttle",
+    "retry": "retry",
+    "commit": "commit",
+}
+ACTION_OF = {word: group for group, words in ACTION_GROUPS.items() for word in words.split()}
+FILLERS = set("can could would will you please pls kindly let let's lets now ok okay so then also just hey hi "
+              "help me i i'd we need want to quickly go ahead and".split())
 APPROVAL_RE = re.compile(r"^(?:y|yes|yeah|yep|ok|okay|sure|go|go ahead|continue|proceed|do it|lgtm|thanks|thank you)[.! ]*$", re.I)
 CLAUDE_INJECTED_PREFIXES = (
     "<task-notification", "<agent-message", "<local-command-stdout", "<local-command-stderr",
@@ -358,47 +395,101 @@ def tokens(text: str) -> list[str]:
     return list(seen)
 
 
+def lemma(word: str) -> str:
+    for suffix, replacement in (("ing", ""), ("ing", "e"), ("ied", "y"), ("ed", ""), ("ed", "e"), ("es", ""), ("s", "")):
+        if word.endswith(suffix) and word[: len(word) - len(suffix)] + replacement in ACTION_OF:
+            return word[: len(word) - len(suffix)] + replacement
+    return word
+
+
+def action(text: str) -> str | None:
+    """Intent group of a request's opening verb, after polite fillers; None when it opens otherwise."""
+    for word in re.findall(r"[a-z']+", normalize(text)):
+        if word in FILLERS:
+            continue
+        return ACTION_OF.get(lemma(word))
+    return None
+
+
 def jaccard(left: set, right: set) -> float:
     return len(left & right) / len(left | right) if left or right else 0.0
 
 
-class Union:
-    def __init__(self, size: int) -> None:
-        self.parent = list(range(size))
-
-    def find(self, item: int) -> int:
-        while self.parent[item] != item:
-            self.parent[item] = self.parent[self.parent[item]]
-            item = self.parent[item]
-        return item
-
-    def join(self, left: int, right: int) -> None:
-        self.parent[self.find(left)] = self.find(right)
-
-
 def cluster(prompts: list[dict], threshold: float) -> list[list[int]]:
-    """Single-link clusters over token-set similarity, using an inverted index for candidates."""
+    """Cohesive clusters over token sets, in time order.
+
+    A prompt joins the cluster it matches best only when it is close to at least one member
+    (similarity >= threshold) and to the cluster as a whole (mean similarity >= 60% of threshold),
+    so unrelated prompts cannot chain through one bridging prompt. A request never joins a cluster
+    whose opening verb belongs to a different action group.
+    """
     sets = [set(item["tokens"]) for item in prompts]
     frequency = Counter(token for item in sets for token in item)
     common = {token for token, count in frequency.items() if count > max(20, len(prompts) // 5)}
+    order = sorted(range(len(prompts)), key=lambda index: (prompts[index].get("when") or now()).timestamp())
+    clusters: list[dict] = []
+    index: dict[str, set[int]] = defaultdict(set)
+    for position in order:
+        item = sets[position]
+        verb = prompts[position].get("action")
+        candidates = set().union(*(index[token] for token in item - common)) if item - common else set()
+        best, best_key = None, (0.0, 0.0)
+        for cluster_id in candidates:
+            entry = clusters[cluster_id]
+            if verb and entry["action"] and verb != entry["action"]:
+                continue
+            members = entry["members"][-30:]
+            scores = [jaccard(item, sets[member]) for member in members if len(item & sets[member]) >= 2]
+            if not scores:
+                continue
+            key = (max(scores), sum(scores) / len(members))
+            if key[0] >= threshold and key[1] >= threshold * 0.6 and key > best_key:
+                best, best_key = cluster_id, key
+        if best is None:
+            clusters.append({"members": [], "action": verb, "verbs": Counter()})
+            best = len(clusters) - 1
+        entry = clusters[best]
+        entry["members"].append(position)
+        if verb:
+            entry["verbs"][verb] += 1
+            entry["action"] = entry["verbs"].most_common(1)[0][0]
+        for token in item - common:
+            index[token].add(best)
+    return merge_fragments(clusters, sets, common, threshold)
+
+
+def merge_fragments(clusters: list[dict], sets: list[set], common: set, threshold: float) -> list[list[int]]:
+    """Join clusters that formed separately in time but match each other on average."""
+    parent = list(range(len(clusters)))
+
+    def find(item: int) -> int:
+        while parent[item] != item:
+            parent[item] = parent[parent[item]]
+            item = parent[item]
+        return item
+
+    vocab = [set().union(*(sets[member] for member in entry["members"])) - common for entry in clusters]
     index: dict[str, list[int]] = defaultdict(list)
-    for position, item in enumerate(sets):
-        for token in item - common:
-            index[token].append(position)
-    union = Union(len(prompts))
-    for position, item in enumerate(sets):
-        candidates: Counter = Counter()
-        for token in item - common:
-            for other in index[token]:
-                if other > position:
-                    candidates[other] += 1
-        for other, shared in candidates.items():
-            if shared >= 2 and jaccard(item, sets[other]) >= threshold:
-                union.join(position, other)
-    groups: dict[int, list[int]] = defaultdict(list)
-    for position in range(len(prompts)):
-        groups[union.find(position)].append(position)
-    return list(groups.values())
+    for cluster_id, words in enumerate(vocab):
+        if len(clusters[cluster_id]["members"]) >= 2:
+            for word in words:
+                index[word].append(cluster_id)
+    for left in range(len(clusters)):
+        if len(clusters[left]["members"]) < 2:
+            continue
+        shared = Counter(other for word in vocab[left] for other in index[word] if other > left)
+        for right, overlap in shared.items():
+            if overlap < 2:
+                continue
+            if clusters[left]["action"] and clusters[right]["action"] and clusters[left]["action"] != clusters[right]["action"]:
+                continue
+            scores = [jaccard(sets[a], sets[b]) for a in clusters[left]["members"][:15] for b in clusters[right]["members"][:15]]
+            if max(scores) >= threshold and sum(scores) / len(scores) >= threshold * 0.6:
+                parent[find(left)] = find(right)
+    merged: dict[int, list[int]] = defaultdict(list)
+    for cluster_id, entry in enumerate(clusters):
+        merged[find(cluster_id)].extend(entry["members"])
+    return list(merged.values())
 
 
 def installed_matches(terms: list[str], installed: list[dict]) -> list[dict]:
@@ -423,6 +514,9 @@ def summarize(groups: list[list[int]], prompts: list[dict], kind: str, *, min_se
             continue
         counts = Counter(token for member in members for token in member["tokens"])
         terms = [token for token, _ in counts.most_common(15)]
+        core = [token for token, count in counts.most_common() if count * 2 >= len(members)]
+        sample_sets = [set(member["tokens"]) for member in members[:20]]
+        pairs = [jaccard(a, b) for i, a in enumerate(sample_sets) for b in sample_sets[i + 1:]]
         dates = sorted(member["when"] for member in members if member["when"])
         newest = sorted(members, key=lambda item: -(item["when"] or now()).timestamp())
         first_per_session, seen_sessions = [], set()
@@ -454,7 +548,9 @@ def summarize(groups: list[list[int]], prompts: list[dict], kind: str, *, min_se
             "projects": [project for project, _ in projects.most_common(5)],
             "first": dates[0].date().isoformat() if dates else None,
             "last": dates[-1].date().isoformat() if dates else None,
-            "terms": terms[:8], "verbatim": verbatim,
+            "terms": terms[:8], "core_terms": core[:10], "verbatim": verbatim,
+            "cohesion": round(sum(pairs) / len(pairs), 2) if pairs else 1.0,
+            "rank_score": round(len(by_session) * min(1.0, len(core) / 4), 2),
             "median_words": sorted(len(member["text"].split()) for member in members)[len(members) // 2],
             "samples": samples,
             "installed_matches": installed_matches(terms, installed),
@@ -486,6 +582,8 @@ def installed_skills(roots: dict, projects: list[Path], harnesses: list[str]) ->
 
 
 def scan(args: argparse.Namespace) -> dict:
+    started = time.monotonic()
+    bytes_read = 0
     roots = resolve_roots(Path(args.home) if args.home else None)
     selected = SUPPORTED if args.harness in (None, "auto", "all") else tuple(
         item.strip() for item in args.harness.split(",") if item.strip())
@@ -519,8 +617,11 @@ def scan(args: argparse.Namespace) -> dict:
         else:
             recent = [(_dt.datetime.fromtimestamp(path.stat().st_mtime, _dt.timezone.utc), path) for path in files]
         recent.sort(reverse=True)
+        if len(recent) > args.max_sessions:
+            stats["over_session_cap"] = len(recent) - args.max_sessions
         for _, path in recent[: args.max_sessions]:
             try:
+                bytes_read += path.stat().st_size
                 session = PARSERS[harness](path, roots)
             except OSError:
                 stats["parse_errors"] += 1
@@ -546,7 +647,7 @@ def scan(args: argparse.Namespace) -> dict:
             for prompt in session.prompts:
                 if cutoff and prompt["when"] and prompt["when"] < cutoff:
                     continue
-                words = tokens(prompt["text"])
+                words = tokens(redact(prompt["text"]))
                 if len(words) < 2:
                     coverage["dropped"]["too_short"] += 1
                     continue
@@ -554,6 +655,7 @@ def scan(args: argparse.Namespace) -> dict:
                     coverage["dropped"]["repeat_in_session"] += 1
                     continue
                 kept.append({**prompt, "tokens": words, "session": key, "harness": harness,
+                             "action": action(prompt["text"]) if prompt["kind"] == "request" else None,
                              "project": display(Path(cwd), roots) if cwd else None})
             prompts.extend(kept)
         stats["unknown_records"] = dict(stats["unknown_records"].most_common(10))
@@ -574,9 +676,21 @@ def scan(args: argparse.Namespace) -> dict:
     found += summarize(cluster(corrections, args.threshold), corrections, "correction",
                        min_sessions=args.min_sessions, min_count=max(2, args.min_count - 1),
                        installed=installed, sessions=sessions, roots=roots)
-    found.sort(key=lambda item: (-item["sessions"], -item["prompts"]))
-    for index, item in enumerate(found[:MAX_CLUSTERS], 1):
+    # A repeated request re-states several specifics; a cluster held together by one or two shared
+    # words is usually a topic the user works on, not a request. Rank by sessions weighted by core size.
+    found.sort(key=lambda item: (-item["rank_score"], -item["sessions"], -item["prompts"]))
+    # Repeated requests restate the same specifics; topics are subjects the user keeps returning to
+    # with different asks. Topics get their own small budget so they never crowd out requests.
+    repeats = [item for item in found if (len(item["core_terms"]) >= 4 and item["cohesion"] >= 0.45)
+               or item["cohesion"] >= 0.6]
+    topics = [item for item in found if item not in repeats]
+    for index, item in enumerate(repeats[:MAX_CLUSTERS], 1):
         item["id"] = f"C{index}"
+    for index, item in enumerate(topics[:MAX_TOPICS], 1):
+        item["id"] = f"T{index}"
+        item["samples"] = item["samples"][:TOPIC_SAMPLES]
+        for key in ("installed_matches", "skills_used_in_these_sessions", "verbatim", "median_words"):
+            item.pop(key, None)
     retention = None
     settings, _ = read_json(Path(roots["claude-code"]) / "settings.json")
     if "claude-code" in selected:
@@ -584,6 +698,8 @@ def scan(args: argparse.Namespace) -> dict:
         retention = f"Claude Code deletes transcripts after {days if isinstance(days, int) else 30} days (cleanupPeriodDays)"
     coverage["retention"] = retention
     coverage["sessions_kept"] = len(sessions)
+    coverage["bytes_read"] = bytes_read
+    coverage["elapsed_seconds"] = round(time.monotonic() - started, 2)
     return {
         "schema": SCHEMA,
         "generated_at": now().replace(microsecond=0).isoformat(),
@@ -593,9 +709,12 @@ def scan(args: argparse.Namespace) -> dict:
             "slash_commands": [{"name": name, "count": count} for name, count in slash.most_common(20)],
             "skills_invoked": [{"name": name, "count": count} for name, count in skills_used.most_common(20)],
         },
-        "installed": installed[:200],
-        "clusters": found[:MAX_CLUSTERS],
-        "clusters_omitted": max(0, len(found) - MAX_CLUSTERS),
+        "installed": {harness: sorted({item["name"] for item in installed if item["harness"] == harness})
+                      for harness in selected},
+        "clusters": repeats[:MAX_CLUSTERS],
+        "clusters_omitted": max(0, len(repeats) - MAX_CLUSTERS),
+        "topics": topics[:MAX_TOPICS],
+        "topics_omitted": max(0, len(topics) - MAX_TOPICS),
     }
 
 
