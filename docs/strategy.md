@@ -109,7 +109,15 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
 - **Evidence tier:** `objective` for the extractor (synthetic transcripts per harness with planted
   contamination and secrets); `rubric` for proposals through committed live cases (a planted
   recurring request, a no-recurrence fabrication control, an under-triggering installed skill, and a
-  scope stop). No routing battery: the skill is user-invoked. Live results are not yet recorded.
+  scope stop). No routing battery: the skill is user-invoked.
+- **Measurement (2026-10-04):** `qa/experiments/skill-scout-bench/` holds a planted-ground-truth
+  helper benchmark and proxy model runs. The benchmark found single-link clustering collapsing to
+  0/7 patterns at 600 sessions; the shipped cohesive clustering with a separate topics tier finds
+  6/6 to 7/7 at 50 to 600 sessions with no false positive, leak, or secret exposure, under 2 s for
+  34 MB, with the report capped near 6k tokens. Fresh Opus 5.5 agents running the installed skill
+  passed 6/6, 3/3, and 9/9 pre-declared expectations (independent grader; usefulness 5, 5, 4) at an
+  estimated $0.06 to $0.16 per run inside an existing session. Matching is lexical, so freely
+  rephrased requests can split below the threshold. The committed live suite has not run.
 - **Next:** run the live suite and one real-history pass; keep proposals that the maintainer would
   actually build as the usefulness signal.
 
