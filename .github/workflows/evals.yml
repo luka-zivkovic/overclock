@@ -19,6 +19,7 @@ on:
           - eval-stack/local-eval-stack
           - eval-stack/skill-maintenance
           - groundwork/groundwork
+          - harness-audit/harness-audit
           - lateral-engineering/lateral-engineering
           - learning-loop/lessons-learned
           - natural-writing/natural-writing
@@ -29,6 +30,7 @@ on:
           - session-memory/lessons-learned
           - session-memory/session-handoff
           - session-memory/solutions
+          - skill-scout/skill-scout
           - untangle/untangle
           - critical-thinking
           - discipline-gates
@@ -161,6 +163,7 @@ jobs:
                 eval-stack/local-eval-stack \
                 eval-stack/skill-maintenance \
                 groundwork/groundwork \
+                harness-audit/harness-audit \
                 lateral-engineering/lateral-engineering \
                 learning-loop/lessons-learned \
                 natural-writing/natural-writing \
@@ -171,6 +174,7 @@ jobs:
                 session-memory/lessons-learned \
                 session-memory/session-handoff \
                 session-memory/solutions \
+                skill-scout/skill-scout \
                 untangle/untangle
               ;;
             session-memory)
@@ -269,7 +273,7 @@ jobs:
             session-memory/lessons-learned) run_batteries lessons-learned ;;
             session-memory/session-handoff) run_batteries session-handoff ;;
             session-memory/solutions) run_batteries solutions ;;
-            overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle)
+            overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle|harness-audit/harness-audit|skill-scout/skill-scout)
               echo "::error::No implicit-routing battery exists for the manually invoked target $TARGET."
               exit 2
               ;;

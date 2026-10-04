@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "category": "development",
       "keywords": [
         "setup",
@@ -237,6 +237,39 @@
         "roadmap",
         "plan",
         "untangle"
+      ]
+    },
+    {
+      "name": "harness-audit",
+      "source": "./plugins/harness-audit",
+      "description": "Grade your agent setup before it bites. A report-only audit across Claude Code, Codex, Pi, Cursor, and OpenCode inventories every settings layer, permission rule, hook, MCP server, skill, plugin, and instruction file, flags clashes and unsafe settings with evidence paths, grades safety, coherence, hygiene, and context, and proposes exact fixes without applying any.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "audit",
+        "harness",
+        "configuration",
+        "permissions",
+        "hooks",
+        "mcp",
+        "skills",
+        "security"
+      ]
+    },
+    {
+      "name": "skill-scout",
+      "source": "./plugins/skill-scout",
+      "description": "Find what you keep re-typing. A read-only scan of Claude Code, Codex, and Pi session history keeps only human-typed prompts, redacts secrets, and clusters requests and corrections that recur across sessions, then proposes the right-sized fix for each (skill, command, instruction line, hook, or a trigger fix for a skill that is not firing) with a draft name, description, and evidence-cited reason. It never creates anything.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "skills",
+        "sessions",
+        "history",
+        "patterns",
+        "transcripts",
+        "automation",
+        "proposals"
       ]
     }
   ]

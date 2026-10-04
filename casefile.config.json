@@ -92,6 +92,36 @@
       "ruleId": "capability/secret-env-read",
       "path": "qa/test_untangle.py",
       "reason": "fixture content: writes a planted sprawl repo whose JavaScript reads process.env.SYNC_TOKEN so untangle can be tested on secret non-disclosure; the Python code reads no environment secret"
+    },
+    {
+      "ruleId": "capability/network-call",
+      "path": "plugins/harness-audit/skills/harness-audit/scripts/harness_audit.py",
+      "reason": "detection data: the helper classifies curl/wget/ssh in configured hooks and permission rules; it never opens the network"
+    },
+    {
+      "ruleId": "capability/pipe-to-shell",
+      "path": "qa/test_harness_audit.py",
+      "reason": "planted download-and-execute hook and skill strings that the test asserts the audit flags; never executed"
+    },
+    {
+      "ruleId": "capability/network-call",
+      "path": "qa/test_harness_audit.py",
+      "reason": "planted hook and skill strings asserted as findings; the tests make no network call"
+    },
+    {
+      "ruleId": "capability/secret-env-read",
+      "path": "qa/test_harness_audit.py",
+      "reason": "environment-reference fixtures asserting that ${VAR} values are not reported as secrets"
+    },
+    {
+      "ruleId": "capability/secret-env-read",
+      "path": "qa/fixtures/harness_fixtures.py",
+      "reason": "fixture MCP definitions reference tokens through ${VAR}; nothing reads the environment"
+    },
+    {
+      "ruleId": "capability/write-outside-artifact",
+      "path": "qa/fixtures/harness_fixtures.py",
+      "reason": "fixture builders write only beneath the temporary fixture root they are given"
     }
   ]
 }

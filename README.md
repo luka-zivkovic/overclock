@@ -66,6 +66,8 @@ installs, removes, enables, disables, or edits anything.
 | **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 | **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
+| **harness-audit** | A graded, report-only audit of your whole agent setup across Claude Code, Codex, Pi, Cursor, and OpenCode: clashes, unsafe settings, and exact fixes | `/plugin install harness-audit@overclock` |
+| **skill-scout** | Requests and corrections you keep repeating across Claude Code, Codex, and Pi sessions, turned into right-sized skill proposals | `/plugin install skill-scout@overclock` |
 
 > [!IMPORTANT]
 > Install **either** `session-memory` or `learning-loop`, not both. They intentionally share the
@@ -318,6 +320,47 @@ code quality; those stay with the host's review tools.
 
 </details>
 
+<details>
+<summary><strong>harness-audit</strong> — grade the setup, not just the files in it</summary>
+
+`harness-audit` reads every layer your harnesses load: managed, user, project, and local settings;
+permission and exec rules; hooks; MCP servers in every scope; skills, commands, agents, plugins,
+extensions, and packages; and the CLAUDE.md or AGENTS.md chain with its imports. It covers Claude
+Code, Codex, and Pi in depth and Cursor and OpenCode at the configuration level.
+
+The bundled helper finds what a rule can decide: an allow rule that pre-approves an interpreter, a
+deny rule that silently kills an allow rule, a project setting that overrides a user setting, two
+plugins shipping the same skill, a skill copy that drifted between harness directories, a hook
+pointing at a missing script, an unpinned `npx` MCP server, a literal token in settings. The skill
+then judges what needs reading: whether two skills would fire on the same request, and whether two
+instruction files give rules that cannot both be followed. The report grades safety, coherence,
+hygiene, and context, lists at most five fixes first with exact diffs, and applies none of them.
+
+It never runs a hook or an MCP server, never prints a secret value, and runs `casefile` on each
+skill and plugin only when it is already installed. Usage, real context cost, and install health
+stay with `/skill-doctor`, `/usage`, and `/doctor`.
+
+</details>
+
+<details>
+<summary><strong>skill-scout</strong> — your own history, read for what you keep re-typing</summary>
+
+`skill-scout` mines Claude Code, Codex, and Pi session logs for requests that recur across
+sessions. Its helper keeps only prompts you typed: injected context, tool results, command output,
+subagent transcripts, headless and temp-directory runs, approvals, and in-session retries are
+dropped and counted, and secrets are redacted before anything reaches the conversation.
+
+Each recurring cluster gets the smallest fix that removes the repetition. A procedure you
+re-explain becomes a skill; a standing preference or a repeated correction becomes one instruction
+line; a deterministic reaction to an event becomes a hook; a request that matches an installed
+skill that never fired becomes a trigger fix for that skill. You get at most five proposals, each
+with a draft name, a description with triggers and anti-triggers, and a reason that quotes your own
+prompts and cites exact counts. A history with nothing recurring gets an honest "nothing yet".
+
+It is read-only and never scaffolds a skill. Cursor and OpenCode history is not supported yet.
+
+</details>
+
 ## Hooks and trust
 
 Only the two memory packages ship SessionStart hooks:
@@ -336,7 +379,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 152 declared live cases | 23 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -307,6 +307,44 @@
       ],
       "minimum_host_version": null,
       "selection": "Choose to survey a repository that grew by exploration into one spine plus threads, with a decision-driven plan file and a one-item-at-a-time apply mode that never commits."
+    },
+    {
+      "id": "harness-audit",
+      "display_name": "Harness Audit",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "harness-audit",
+        "configuration-conflict-audit"
+      ],
+      "skill_names": [
+        "harness-audit"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose to grade the whole local agent setup across Claude Code, Codex, Pi, Cursor, and OpenCode for clashing permissions, overlapping skills, contradictory instructions, unsafe hooks or MCP servers, and literal secrets, with exact proposed fixes and no writes."
+    },
+    {
+      "id": "skill-scout",
+      "display_name": "Skill Scout",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "skill-scout",
+        "session-pattern-mining"
+      ],
+      "skill_names": [
+        "skill-scout"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose to mine Claude Code, Codex, and Pi session history for requests and corrections you keep repeating and get at most five right-sized proposals with draft names, descriptions, and evidence-cited reasons, without anything being created."
     }
   ]
 }

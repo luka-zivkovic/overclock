@@ -50,6 +50,69 @@ so it ships to no user and needs no version bump.
 
 Append-only. Each candidate carries a verdict and the evidence behind it.
 
+### harness-audit — BUILD, v0.1.0 authored (2026-10-04)
+- **Demand:** direct maintainer request for a skill that rates the whole agent setup: inspect it,
+  audit and critique it, find clashes and conflicts, suggest improvements, and flag unsafe things in
+  skills. Scope chosen by the maintainer: Overclock first; port to Loadout only once it proves
+  useful. Claude Code, Codex, and Pi are required; Cursor and OpenCode are included because their
+  configuration is small.
+- **Grounding:** `/doctor` covers install health, unused extensions, slow hooks, checked-in
+  CLAUDE.md redundancy, invalid settings, and duplicate subagents in one directory. `/skill-doctor`
+  and `/usage` attribute context cost and invocation frequency. `casefile` scans one skill or plugin
+  at a time for capabilities, injection phrases, and structure. `overclock-setup` plans Overclock
+  installs only. None of them judges how the pieces interact: skills competing for one trigger,
+  instructions that contradict each other, allow rules a deny rule silently kills, a scalar setting
+  overridden in another scope, hooks stacked on one event, unpinned or secret-bearing MCP servers,
+  or the same skill drifting between harness directories. That is the gap. Loadout snapshots
+  deliberately drop MCP definitions, most settings keys, and project/local/managed layers, so the
+  first version audits the live machine; a snapshot-based Loadout port is a later, separate step.
+- **Product shape:** one user-invoked, report-only skill. A bundled read-only helper inventories
+  every configuration layer per harness, emits deterministic findings with rule ids, severity, and
+  evidence paths, prepares candidate skill pairs and instruction directive lines for model
+  judgment, and computes per-area grades (safety, coherence, hygiene, context) from findings. It
+  runs `casefile` when one is already on PATH and otherwise reports that the per-skill safety scan
+  was basic. The report leads with at most five fix-first items, each with an exact proposed change.
+- **Boundaries:** no writes, no hook or MCP execution, no network, secret values never printed
+  (only key names and locations), fixes proposed and never applied. Usage, context cost, and
+  install health are pointers to `/skill-doctor`, `/usage`, and `/doctor`, not reimplemented. A
+  coherent setup yields a short result rather than invented findings.
+- **Evidence tier:** `objective` for the helper (deterministic tests over planted multi-harness
+  fixtures, secret non-disclosure, and the no-write boundary); `rubric` for the skill through
+  committed live cases (planted clashes, a clean-setup fabrication control, and a scope stop). No
+  routing battery: the skill is user-invoked. Live results are not yet recorded.
+- **Next:** run the live suite, audit the maintainer's real machine, and decide on the Loadout port
+  (snapshot rules plus a `--against` clash preview before trying a colleague's setup).
+
+### skill-scout — BUILD, v0.1.0 authored (2026-10-04)
+- **Demand:** direct maintainer request for a skill that analyzes session history, finds recurring
+  patterns, and proposes skills. The maintainer fixed the stopping point: a proposal with a draft
+  name, description, and reason, never a scaffolded skill. Claude Code, Codex, and Pi sessions.
+- **Grounding:** `/insights` reports friction and features to try but does not propose skills from
+  recurring requests. `/fewer-permission-prompts` mines Bash and MCP calls for an allowlist only.
+  `lessons-learned` records corrections inside one session. The ledger's transcript KILLs
+  (transcript-to-runbook, context-budget-postmortem) were single-session distillation and
+  unobtainable signals; this is cross-session recurrence, which the logs do carry. The brainstorm's
+  prong-1 greps repeatedly matched agent-authored text, so a deterministic extractor must keep only
+  human-typed turns before anything is clustered. Loadout promises it never reads transcripts, so
+  this stays out of Loadout.
+- **Product shape:** one user-invoked, read-only skill. A bundled helper reads Claude Code, Codex,
+  and Pi session logs, keeps human-typed prompts only (dropping injected, subagent, notification,
+  command-output, and headless runs), redacts secrets, counts each pattern once per session,
+  clusters recurring requests and corrections deterministically, and matches clusters against
+  installed skills. The model picks the right-sized form for each cluster (skill, command,
+  instruction line, hook, fix an existing skill that under-triggers, or nothing) and returns at most
+  five proposals with a draft name, description, and evidence-cited reason.
+- **Boundaries:** no writes, no scaffolding, defaults of at least three occurrences across two
+  sessions, quotes only from extractor output. The transcript formats are internal to each harness,
+  so the parser is tolerant, counts unknown record types, and reports coverage. Cursor and OpenCode
+  keep sessions in SQLite or split stores and are out of scope for v0.1.
+- **Evidence tier:** `objective` for the extractor (synthetic transcripts per harness with planted
+  contamination and secrets); `rubric` for proposals through committed live cases (a planted
+  recurring request, a no-recurrence fabrication control, an under-triggering installed skill, and a
+  scope stop). No routing battery: the skill is user-invoked. Live results are not yet recorded.
+- **Next:** run the live suite and one real-history pass; keep proposals that the maintainer would
+  actually build as the usefulness signal.
+
 ### agent-bridge — BUILD, v0.1 published; cross-provider validation pending (2026-08-04)
 - **Demand:** direct maintainer request for one harness to consult or delegate a
   bounded implementation subtask to another provider while the original harness

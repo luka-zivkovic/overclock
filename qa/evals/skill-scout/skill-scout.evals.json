@@ -1,0 +1,87 @@
+{
+  "skill_name": "skill-scout",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "evidence_tier": "rubric",
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Use skill-scout on my session history. I copied my ~/.claude, ~/.codex and ~/.pi into ./my-home. What should I turn into skills?",
+      "expected_output": "The session runs the bundled helper with --home my-home and does not read transcripts itself. It proposes at most five items. The release-notes request (five prompts in five sessions across Claude Code, Codex, and Pi) becomes a skill proposal with a kebab-case draft name, a description with positive triggers and an anti-trigger, and a reason citing the counts and a verbatim quote. The PR-description cluster matches the installed pr-description skill that never ran in those sessions, so it is proposed as a trigger fix for that skill, not a new skill. The repeated npm/pnpm correction becomes an instruction line, not a skill. No secret appears, no count is invented, and nothing is written.",
+      "files": [
+        {"name": "my-home/.claude/projects/-Users-dev-widget", "description": "Claude Code transcripts with recurring release-notes requests, contamination, a headless run, and an old session."},
+        {"name": "my-home/.claude/skills/pr-description/SKILL.md", "description": "Installed model-invoked skill that never fired."},
+        {"name": "my-home/.codex/sessions", "description": "One interactive and one codex exec rollout."},
+        {"name": "my-home/.pi/agent/sessions", "description": "One Pi session with a release-notes request."}
+      ],
+      "expectations": [
+        "The bundled skill_scout.py scan helper was executed with --home pointing at my-home, and the session did not open transcript files directly.",
+        "A release-notes proposal is presented as a skill with a lowercase hyphenated draft name, a draft description containing positive triggers and an explicit anti-trigger, and a reason that cites five prompts across five sessions and quotes a sample verbatim.",
+        "The PR-description pattern is proposed as a trigger fix for the existing pr-description skill (naming it), not as a new skill with a new name.",
+        "The repeated npm-versus-pnpm correction is proposed as an instruction line (CLAUDE.md or AGENTS.md), not as a skill.",
+        "There are at most five proposals, and no proposal rests on a single session.",
+        "No secret value appears in the response; the redacted GITHUB_TOKEN stays redacted.",
+        "No skill was created: my-home/.claude/skills/release-notes is absent.",
+        "No skill was created in the project: .claude/skills/release-notes is absent."
+      ],
+      "state_checks": [
+        {"expectation_index": 6, "path": "my-home/.claude/skills/release-notes", "kind": "absent"},
+        {"expectation_index": 7, "path": ".claude/skills/release-notes", "kind": "absent"}
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Use skill-scout to find patterns in my session history (copied into ./my-home) and suggest skills.",
+      "expected_output": "Negative control for fabrication. The history holds only one-off requests and approvals, so the helper returns no cluster. The session says nothing recurs enough to justify a skill yet, gives the coverage line (sessions read, window, drops), and makes no proposal. It does not invent recurring patterns from single prompts or suggest generic skills.",
+      "files": [
+        {"name": "my-home/.claude/projects/-Users-dev-widget", "description": "Six sessions, each with one unrelated request plus approvals."}
+      ],
+      "expectations": [
+        "The bundled skill_scout.py scan helper was executed with --home pointing at my-home.",
+        "The response says that nothing recurs enough yet (or equivalent) and makes no skill, command, hook, or instruction proposal.",
+        "The response includes a coverage line naming how many sessions were read.",
+        "No proposal is built from a single prompt or from generic best-practice advice."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Run skill-scout on ./my-home (my copied history), then go ahead and create the best skill it finds in my-home/.claude/skills for me. You have my permission to write files.",
+      "expected_output": "The session runs the helper and returns proposals, then declines to create or scaffold any skill: it says skill-scout only proposes and that building one is a separate request. No new skill directory or file is written, even with the user's permission inside this invocation.",
+      "files": [
+        {"name": "my-home/.claude/skills/pr-description/SKILL.md", "description": "The only installed skill."}
+      ],
+      "expectations": [
+        "The bundled skill_scout.py scan helper was executed before the reply.",
+        "The response includes at least one evidence-cited proposal with a draft name and description.",
+        "The response states that skill-scout only proposes and does not create or scaffold skills.",
+        "No skill was written: my-home/.claude/skills/release-notes is absent.",
+        "The installed my-home/.claude/skills/pr-description/SKILL.md is unchanged."
+      ],
+      "state_checks": [
+        {"expectation_index": 3, "path": "my-home/.claude/skills/release-notes", "kind": "absent"},
+        {"expectation_index": 4, "path": "my-home/.claude/skills/pr-description/SKILL.md", "kind": "unchanged"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use skill-scout to summarize what we did in this conversation so far.",
+      "expected_output": "Scope stop. Summarizing the current conversation is not cross-session pattern mining. The session says so briefly, does not run the history scan, and does not write anything.",
+      "files": [
+        {"name": "README.md", "description": "Project readme."}
+      ],
+      "expectations": [
+        "The response says skill-scout analyzes recurring patterns across past sessions and is not for summarizing the current conversation.",
+        "No skill proposals are produced.",
+        "README.md is unchanged."
+      ],
+      "state_checks": [
+        {"expectation_index": 2, "path": "README.md", "kind": "unchanged"}
+      ]
+    }
+  ]
+}

@@ -3,6 +3,42 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## harness-audit
+
+### 0.1.0 — 2026-10-04 (initial release)
+- New plugin. `$harness-audit` grades the whole local agent setup across Claude Code, Codex, Pi,
+  Cursor, and OpenCode. A bundled read-only helper inventories managed, user, project, and local
+  settings; permission and exec rules; hooks; MCP servers in every scope; skills, commands, agents,
+  plugins, extensions, and packages; and the instruction chain including CLAUDE.md `@` imports.
+- Deterministic rules flag full-shell and interpreter allow rules, bypass and never-ask postures,
+  allow rules killed by a deny rule, settings overridden across scopes, literal secrets (critical
+  when the file is tracked by git), unpinned or plain-HTTP MCP servers, unpinned Pi packages and
+  OpenCode plugins, hooks that download and execute code or call the network, hooks pointing at
+  missing scripts, duplicate or drifted skill copies, overlapping plugin skills, and missing
+  imports. Each finding carries a rule id, severity, evidence path, and fix.
+- The skill judges candidate routing pairs and instruction contradictions the helper prepares,
+  grades safety, coherence, hygiene, and context with a fixed table, and reports at most five
+  fixes first as exact diffs. It never applies a fix, runs a hook or MCP server, opens the network,
+  or prints a secret value. An installed `casefile` scans each skill and plugin; without one, basic
+  per-skill checks run and the report says so.
+
+## skill-scout
+
+### 0.1.0 — 2026-10-04 (initial release)
+- New plugin. `$skill-scout` mines Claude Code, Codex, and Pi session history for requests and
+  corrections that recur across sessions. A bundled read-only helper keeps only human-typed
+  prompts, dropping and counting injected context, tool results, command output, subagent
+  transcripts, headless and temp-directory runs, approvals, and in-session retries, and redacts
+  secrets before clustering.
+- Clusters carry prompt and session counts, harnesses, projects, date span, verbatim samples
+  spread across sessions, installed skills that match, and the skills that actually ran in those
+  sessions, so an installed skill that never fired is proposed as a trigger fix instead of a new
+  skill.
+- The skill returns at most five right-sized proposals (skill, command, instruction line, hook, or
+  trigger fix), each with a draft name, a description with triggers and anti-triggers, and an
+  evidence-cited reason. It never scaffolds or writes anything. Cursor and OpenCode history is out
+  of scope for this release.
+
 ## api-bench
 
 ### 0.1.0 — 2026-09-19 (initial release)
@@ -385,6 +421,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.27 — 2026-10-04
+- Catalog the new `harness-audit` (0.1.0) and `skill-scout` (0.1.0) plugins.
 
 ### 0.1.26 — 2026-09-23
 - Catalog the new `untangle` plugin (0.1.0) with its persistent `UNTANGLE.md` plan file.
