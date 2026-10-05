@@ -1,0 +1,20 @@
+{
+  "name": "harness-audit",
+  "displayName": "Harness Audit",
+  "description": "Rate your agent setup across Claude Code, Codex, Pi, Cursor, and OpenCode. A read-only helper inventories every settings layer, permission rule, hook, MCP server, skill, plugin, and instruction file, flags clashes and unsafe settings with evidence, and grades safety, coherence, hygiene, and context. The skill judges overlapping skills and contradictory instructions and proposes exact fixes without applying any.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "audit",
+    "harness",
+    "configuration",
+    "permissions",
+    "hooks",
+    "mcp",
+    "skills",
+    "security"
+  ]
+}

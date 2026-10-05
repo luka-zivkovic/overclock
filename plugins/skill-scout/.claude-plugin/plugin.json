@@ -1,0 +1,19 @@
+{
+  "name": "skill-scout",
+  "displayName": "Skill Scout",
+  "description": "Find what you keep re-typing. A read-only helper mines Claude Code, Codex, and Pi session history for requests and corrections that recur across sessions, keeping only human-typed prompts and redacting secrets. The skill turns each pattern into a right-sized proposal (a skill, command, instruction line, hook, or a trigger fix for a skill that is not firing) with a draft name, description, and evidence-cited reason. It never creates anything.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "sessions",
+    "history",
+    "patterns",
+    "transcripts",
+    "automation",
+    "proposals"
+  ]
+}

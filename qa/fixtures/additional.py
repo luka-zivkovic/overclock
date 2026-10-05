@@ -1665,6 +1665,35 @@ def build_api_bench(root: Path) -> None:
         init_repo(base / f"eval-{index}", f"api bench fixture {index}")
 
 
+def build_harness_audit(root: Path) -> None:
+    """Copied-home fixtures: the user's dotfiles live in ./my-home, ignored by the project repo."""
+    import harness_fixtures
+
+    base = root / "harness-audit"
+    for index, builder in enumerate([harness_fixtures.build_planted, harness_fixtures.build_clean,
+                                     harness_fixtures.build_planted, harness_fixtures.build_planted]):
+        work = base / f"eval-{index}"
+        write(work, ".gitignore", "my-home/\n")
+        write(work, "src/server.js", "module.exports = function serve() { return 'ok'; };\n")
+        (work / "my-home").mkdir(parents=True)
+        builder(work / "my-home", work)
+
+
+def build_skill_scout(root: Path) -> None:
+    """Session history copied into ./my-home; the project itself is an ordinary repository."""
+    import harness_fixtures
+
+    base = root / "skill-scout"
+    for index, builder in enumerate([harness_fixtures.build_history, harness_fixtures.build_sparse_history,
+                                     harness_fixtures.build_history, harness_fixtures.build_history]):
+        work = base / f"eval-{index}"
+        write(work, ".gitignore", "my-home/\n")
+        write(work, "README.md", "# widget\n\nA small widget service.\n")
+        (work / "my-home").mkdir(parents=True)
+        builder(work / "my-home")
+        init_repo(work, f"skill scout fixture {index}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build deterministic supplemental live-eval fixtures."
@@ -1687,6 +1716,8 @@ def main() -> int:
     build_untangle(root)
     build_api_bench(root)
     build_lateral_engineering(root)
+    build_harness_audit(root)
+    build_skill_scout(root)
     return 0
 
 
