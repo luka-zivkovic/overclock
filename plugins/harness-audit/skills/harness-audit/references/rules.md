@@ -24,6 +24,21 @@ when the user asks why something was flagged or whether a finding applies to the
 | `casefile/<rule>` | casefile critical → high; injection and supply-chain warnings → medium; other warnings → low | Findings from an installed casefile scan of each skill and plugin. Declared capabilities such as network calls are expected for some skills; judge them against the skill's purpose. |
 | `posture/no-approval-gate`, `posture/default-permissions` | info | Pi never asks before tool calls; OpenCode has no explicit bash permission. Context, not a defect. |
 
+### Replacing a literal secret with a reference
+
+A fix must use the syntax the harness actually expands, or the credential silently breaks:
+
+- **Claude Code:** `settings.json` `env` values are never expanded; remove the key and export the
+  variable from the shell profile, or use `apiKeyHelper`. MCP definitions in `.mcp.json` and
+  `~/.claude.json` expand `${NAME}`.
+- **Codex:** MCP servers forward variables with `env_vars = ["NAME"]`; HTTP servers read a token
+  with `bearer_token_env_var = "NAME"`.
+- **Pi:** `models.json` `apiKey` and header values, and `mcp.json` env and header values, expand
+  `$NAME`, `${NAME}`, or a leading `!command`. A bare name such as `OPENROUTER_API_KEY` is used as
+  the literal key.
+- **Cursor:** `mcp.json` expands `${env:NAME}`.
+- **OpenCode:** configuration values expand `{env:NAME}`.
+
 ## Coherence
 
 | Rule | Severity | Meaning |

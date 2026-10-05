@@ -66,7 +66,8 @@ Fill [assets/report.md](assets/report.md):
 - The grade table, one plain line of why per area.
 - **Fix first:** at most five items, ordered by severity, then by reach (every session and
   every repository before one project). Each item names the evidence path and gives the exact
-  change as a diff or command. Literal secrets always include rotation.
+  change as a diff or command. Literal secrets always include rotation, and the replacement uses
+  that harness's reference syntax from the rule catalog.
 - **Also noted:** the remaining findings as counts per area plus one line for any high item that
   did not fit. No long lists.
 - **Not checked:** the helper's coverage notes, the casefile status, and pointers to `/doctor`,
