@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -307,6 +307,25 @@
       ],
       "minimum_host_version": null,
       "selection": "Choose to survey a repository that grew by exploration into one spine plus threads, with a decision-driven plan file and a one-item-at-a-time apply mode that never commits."
+    },
+    {
+      "id": "notion-docs",
+      "display_name": "Notion Docs",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "notion-feature-docs",
+        "gif-walkthrough-clips"
+      ],
+      "skill_names": [
+        "notion-docs"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [],
+      "minimum_host_version": null,
+      "selection": "Choose to write a Notion documentation page for a web feature with short GIF clips recorded from the real UI that show what to click and what happens, published through the Notion connector or handed over as a local bundle."
     }
   ]
 }

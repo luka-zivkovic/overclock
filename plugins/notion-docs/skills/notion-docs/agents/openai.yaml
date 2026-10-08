@@ -1,0 +1,6 @@
+interface:
+  display_name: "Notion Docs"
+  short_description: "Feature docs for Notion with GIF click-through clips"
+  default_prompt: "Use $notion-docs to document this feature as a Notion page with short recorded GIF clips of what to click and what happens."
+policy:
+  allow_implicit_invocation: false

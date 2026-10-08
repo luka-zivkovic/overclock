@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import hashlib
 import os
@@ -1665,6 +1666,182 @@ def build_api_bench(root: Path) -> None:
         init_repo(base / f"eval-{index}", f"api bench fixture {index}")
 
 
+def build_notion_docs(root: Path) -> None:
+    base = root / "notion-docs"
+    suites_app = """<!doctype html>
+<html><head><meta charset="utf-8"><title>Suites</title></head>
+<body>
+<nav><a href="#">Conversations</a><a href="#" class="active">Suites</a><a href="#">Runs</a></nav>
+<main>
+<header><h2>Suites</h2><button id="new">New suite</button></header>
+<ul id="list"><li><span>Checkout regressions</span><span>12 cases</span></li></ul>
+<dialog id="dlg"><h3>Create a suite</h3>
+<form method="dialog"><label for="name">Suite name</label><input id="name" autocomplete="off">
+<button type="button" id="cancel">Cancel</button><button id="save" value="save">Create suite</button></form></dialog>
+<div class="toast" id="toast" hidden>Suite created</div>
+</main>
+<script>
+const dlg = document.getElementById('dlg');
+document.getElementById('new').onclick = () => dlg.showModal();
+document.getElementById('cancel').onclick = () => dlg.close();
+dlg.querySelector('form').addEventListener('submit', () => {
+  const v = document.getElementById('name').value.trim(); if (!v) return;
+  const li = document.createElement('li'); li.textContent = v + ' - 0 cases';
+  document.getElementById('list').prepend(li);
+  const t = document.getElementById('toast'); t.hidden = false; setTimeout(() => { t.hidden = true; }, 1500);
+});
+</script></body></html>
+"""
+    # eval-0: plan, scenes, and a page draft with no recording possible.
+    work = base / "eval-0"
+    write(work, "app/index.html", suites_app)
+    write(
+        work,
+        "README.md",
+        "# Suites\n\nThe Suites screen groups test cases into named suites for the eval pipeline. "
+        "Click New suite, name it, and it appears at the top of the list. Serve the app with any "
+        "static file server on port 4173 (`npx serve app -l 4173`).\n",
+    )
+    # eval-1: a single toggle that does not earn a clip.
+    work = base / "eval-1"
+    write(
+        work,
+        "app/settings.html",
+        """<!doctype html>
+<html><head><meta charset="utf-8"><title>Settings</title></head>
+<body>
+<h1>Settings</h1>
+<label><input type="checkbox" id="dark"> Dark mode</label>
+<p>Your choice is saved in this browser.</p>
+<script>
+const box = document.getElementById('dark');
+box.checked = localStorage.getItem('theme') === 'dark';
+document.body.classList.toggle('dark', box.checked);
+box.onchange = () => { document.body.classList.toggle('dark', box.checked); localStorage.setItem('theme', box.checked ? 'dark' : 'light'); };
+</script></body></html>
+""",
+    )
+    # eval-2: a scene that types a literal password in a recorded step.
+    work = base / "eval-2"
+    write(
+        work,
+        "notion-docs-output/login-flow/scenes/login.json",
+        json.dumps(
+            {
+                "name": "login",
+                "url": "http://localhost:4173/login.html",
+                "steps": [
+                    {"action": "fill", "selector": 'role=textbox[name="Email"]', "text": "dev@example.test"},
+                    {"action": "fill", "selector": "#password", "text": "hunter2"},
+                    {"action": "click", "selector": 'role=button[name="Sign in"]', "caption": "Sign in"},
+                    {"action": "wait", "selector": 'role=heading[name="Dashboard"]'},
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
+        work,
+        "notion-docs-output/login-flow/page.md",
+        "Signing in takes you to the dashboard, where the most recent conversations are listed.\n\n"
+        "## Walkthrough\n\n1. Enter your email and password and click **Sign in**. The dashboard opens.\n"
+        "\t![The dashboard opens after sign-in](clips/login.gif)\n",
+    )
+    # eval-3: a finished bundle to publish with no connector and no token.
+    work = base / "eval-3"
+    tiny_gif = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+    out = work / "notion-docs-output" / "create-suite"
+    write(
+        out,
+        "page.md",
+        "Suites let reviewers group test cases so the eval pipeline re-runs them together. "
+        "Use one when a set of cases belongs to one feature.\n\n## Walkthrough\n\n"
+        "1. Open **Suites** and click **New suite**. A dialog asks for a name.\n"
+        "\t![The new suite appears at the top of the list](clips/create-suite.gif)\n"
+        "2. To remove a suite, open its menu and click **Delete**. The suite disappears from the list.\n"
+        "\t![The suite is removed from the list](clips/delete-suite.gif)\n",
+    )
+    write(
+        out,
+        "plan.md",
+        "# Page plan: Suites\n\n**Reader:** a reviewer bundling cases.\n\n## Clips\n\n"
+        "| Scene | Trigger | Result | Caption |\n|---|---|---|---|\n"
+        "| create-suite.json | New suite, name, Create suite | suite listed first | The new suite appears at the top of the list |\n"
+        "| delete-suite.json | row menu, Delete | suite removed | The suite is removed from the list |\n",
+    )
+    (out / "clips").mkdir(parents=True, exist_ok=True)
+    (out / "clips" / "create-suite.gif").write_bytes(tiny_gif)
+    (out / "clips" / "delete-suite.gif").write_bytes(tiny_gif)
+    write(
+        out,
+        "clips/create-suite.manifest.json",
+        json.dumps(
+            {
+                "name": "create-suite",
+                "status": "ok",
+                "gif": "clips/create-suite.gif",
+                "poster": "clips/create-suite.png",
+                "width": 960,
+                "height": 600,
+                "frames": 34,
+                "duration_ms": 6200,
+                "bytes": 755248,
+                "steps": [{"index": 0, "action": "click", "status": "ok"}],
+                "error": None,
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
+        out,
+        "clips/delete-suite.manifest.json",
+        json.dumps(
+            {
+                "name": "delete-suite",
+                "status": "failed",
+                "gif": None,
+                "poster": None,
+                "frames": 0,
+                "duration_ms": 0,
+                "bytes": 0,
+                "steps": [{"index": 0, "action": "click", "selector": 'role=menuitem[name="Delete"]', "status": "failed", "error": "Timeout 10000ms exceeded waiting for role=menuitem[name=\"Delete\"]"}],
+                "error": "record step 1 (click role=menuitem[name=\"Delete\"]) failed: Timeout 10000ms exceeded",
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    # eval-4: an API reference request, outside the skill's scope.
+    work = base / "eval-4"
+    write(
+        work,
+        "api/openapi.yaml",
+        """openapi: 3.1.0
+info: { title: lang-tracer, version: 1.0.0 }
+paths:
+  /api/suites:
+    post:
+      summary: Create a suite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                caseIds: { type: array, items: { type: string } }
+      responses:
+        "201": { description: Suite created }
+        "400": { description: Missing or invalid name }
+        "401": { description: Missing or invalid lt_ key }
+""",
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build deterministic supplemental live-eval fixtures."
@@ -1687,6 +1864,7 @@ def main() -> int:
     build_untangle(root)
     build_api_bench(root)
     build_lateral_engineering(root)
+    build_notion_docs(root)
     return 0
 
 

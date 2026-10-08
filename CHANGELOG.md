@@ -3,6 +3,36 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## notion-docs
+
+### 0.1.0 — 2026-10-07 (initial release)
+- New plugin. `/notion-docs` writes a Notion documentation page for one web feature: a
+  one-sentence job statement, numbered steps with a short looping GIF under each step that
+  shows what to click and what happens, an options table, one gotchas callout, and related
+  links. Pages are written in Notion-flavored Markdown and published through the Notion
+  connector's file-upload flow, through a `NOTION_TOKEN` API recipe, or handed over as a local
+  bundle to paste and drag in.
+- Bundle `scripts/record_clip.mjs`, a recorder with one dependency (Playwright, installed by
+  `setup` into `~/.cache/notion-docs/deps`). `snapshot` prints the accessibility tree and
+  `role=` selectors of a screen so scenes are written from the real UI; `validate` checks a
+  scene offline and estimates its length; `record` drives the steps with an in-page cursor,
+  highlight ring, click ripple, and captions, captures frames over the DevTools screencast, and
+  encodes the GIF itself with a 256-color median-cut palette that keeps flat UI colors exact, so
+  no ffmpeg or image library is needed; `login` saves a storage state after a manual sign-in.
+- `check` runs a scene without recording and reports each selector as `ok`, `hidden`,
+  `ambiguous`, or `missing`, then diffs the screen's accessibility tree against a saved baseline
+  so renamed or new controls surface before a clip is re-recorded; `sheet` lays out every clip's
+  final frame as one labelled image; scenes can declare `mutates: true` so orchestration runs
+  data-creating scenes after read-only ones. Together they let a scheduled job re-check a
+  documentation set against a changed UI without a model call.
+- Right-sizing and safety rules: one to four clips per page, 3 to 12 seconds each, one
+  interaction per clip, a static screen gets a sentence rather than a clip; `max_seconds` and an
+  8 MiB cap flag `too_long` and `too_large` clips; credentials enter only through `text_env` in
+  unrecorded `setup` steps or a storage state file, and the validator rejects secrets in recorded
+  steps; output stays under `notion-docs-output/<slug>/`, nothing is committed, Notion changes
+  are additive to the page the user named or a private draft, and the published page is read back
+  once against a review checklist before a single revision.
+
 ## api-bench
 
 ### 0.1.0 — 2026-09-19 (initial release)
@@ -385,6 +415,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.27 — 2026-10-07
+- Catalog the new `notion-docs` plugin (0.1.0); it keeps no persistent files and declares no hooks.
 
 ### 0.1.26 — 2026-09-23
 - Catalog the new `untangle` plugin (0.1.0) with its persistent `UNTANGLE.md` plan file.
