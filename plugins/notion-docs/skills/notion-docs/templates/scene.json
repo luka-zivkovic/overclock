@@ -1,0 +1,23 @@
+{
+  "name": "create-suite",
+  "description": "Create a suite from the Suites screen and see it appear in the list.",
+  "url": "http://localhost:5173/suites",
+  "viewport": { "width": 1280, "height": 800 },
+  "scale": 0.75,
+  "fps": 10,
+  "max_seconds": 12,
+  "end_hold_ms": 1500,
+  "settle_ms": 600,
+  "storage_state": "../../.notion-docs-auth/state.json",
+  "setup": [
+    { "action": "wait", "selector": "role=heading[name=\"Suites\"]" }
+  ],
+  "steps": [
+    { "action": "click", "selector": "role=button[name=\"New suite\"]", "caption": "Click New suite" },
+    { "action": "type", "selector": "role=textbox[name=\"Suite name\"]", "text": "Billing flows", "caption": "Name the suite" },
+    { "action": "click", "selector": "role=button[name=\"Create suite\"]", "caption": "Create it" },
+    { "action": "wait", "selector": "text=Billing flows" },
+    { "action": "caption", "text": "The new suite appears at the top of the list" },
+    { "action": "wait", "ms": 800 }
+  ]
+}

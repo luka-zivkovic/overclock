@@ -1,0 +1,19 @@
+{
+  "name": "notion-docs",
+  "displayName": "Notion Docs",
+  "description": "Write feature documentation for Notion that people can read through: a short page per feature with scripted browser clips recorded as looping GIFs that show what to click and what happens. The bundled recorder drives Playwright, draws a cursor, click ripple, highlight ring, and captions over the real UI, and encodes the GIF itself. Pages publish through the Notion MCP file-upload flow when it is connected, or land as a local bundle to drag in.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "notion",
+    "documentation",
+    "gif",
+    "walkthrough",
+    "playwright",
+    "screen-recording",
+    "feature-docs"
+  ]
+}

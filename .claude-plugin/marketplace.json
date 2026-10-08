@@ -1,6 +1,6 @@
 {
   "name": "overclock",
-  "description": "Overclock — Claude Code plugins that run your model past spec.",
+  "description": "Overclock \u2014 Claude Code plugins that run your model past spec.",
   "owner": {
     "name": "Luka Zivkovic"
   },
@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "category": "development",
       "keywords": [
         "setup",
@@ -237,6 +237,22 @@
         "roadmap",
         "plan",
         "untangle"
+      ]
+    },
+    {
+      "name": "notion-docs",
+      "source": "./plugins/notion-docs",
+      "description": "Feature documentation for Notion that people can read through: one short page per feature with scripted browser clips recorded from the real UI as looping GIFs that show what to click and what happens. The bundled recorder drives Playwright, draws a cursor, highlight ring, click ripple, and captions, and encodes the GIF itself; pages publish through the Notion connector's file-upload flow or land as a local bundle.",
+      "version": "0.1.0",
+      "category": "writing",
+      "keywords": [
+        "notion",
+        "documentation",
+        "gif",
+        "walkthrough",
+        "playwright",
+        "screen-recording",
+        "feature-docs"
       ]
     }
   ]

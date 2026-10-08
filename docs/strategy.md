@@ -82,6 +82,44 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   before treating that provider as supported. Only after that, consider persistent threads,
   background jobs, dirty-worktree snapshots, or full handoff.
 
+### notion-docs — BUILD, v0.1.0 published (2026-10-07)
+- **Demand:** direct maintainer request, modelled on latent-spaces/brag (a project turned into a
+  launch video with one command), for the documentation counterpart: Notion feature pages that
+  are easy to read through because each step carries a small GIF of what to click and what it does.
+  A named first use exists (the lang-tracer suite and review features). Principle 4 is satisfied.
+- **Grounding:** brag's shape transfers (inspect the real thing, plan a storyboard, capture the
+  real UI, render, deliver) but its product does not: brag optimises for a 20-second shareable
+  video with music, this skill for a page someone reads while doing the task. Nothing in the kit
+  owns documentation of a product feature: natural-writing is prose style with no capture or
+  Notion delivery, untangle and api-bench are unrelated. Grounding against the Notion connector
+  showed GIFs placed as image blocks autoplay inline while video blocks do not, which settled GIF
+  over MP4, and showed the file-upload flow (`create-file-upload`, one multipart POST, placing the
+  returned `suggested_markdown`) is enough for publishing. Local tooling grounding showed
+  Playwright's bundled ffmpeg has no GIF encoder, so the recorder captures frames over the
+  DevTools screencast and encodes GIFs itself rather than depending on ffmpeg.
+- **Product shape:** one user-invoked skill (`disable-model-invocation: true`) with a
+  dependency-light recorder. The pipeline is: check the recorder, learn the feature from code and
+  a `snapshot` of the real screen, plan the page and the one to four interactions that earn a clip,
+  write scenes and `record` them, write the page in Notion-flavored Markdown from a template,
+  publish through the connector (or API recipe, or local bundle), read the page back once against
+  a ten-item review checklist, revise once, report.
+- **Fences:** web UIs only; one interaction per clip, 3 to 12 seconds, static states get a
+  sentence; credentials only via `text_env` in unrecorded setup steps or a storage state file,
+  rejected by the validator elsewhere; output confined to `notion-docs-output/<slug>/`, never
+  committed; Notion writes additive to the named page or a private draft, never moving or
+  replacing child pages; only clips whose manifest is `ok` reach the page; unverified claims are
+  named on the page.
+- **Evidence:** tier `objective` for the recorder (deterministic tests over scene validation, the
+  secrets rule, and a PNG-to-GIF round trip decoded by an independent decoder) and `rubric` for
+  the skill via committed live-eval cases that exercise planning, right-sizing, the secrets
+  refusal, and the no-destination draft rule without a browser. A real recording against a local
+  fixture app produced a 34-frame, 7.9-second, 755 KB GIF that Chromium decodes and animates.
+  Live suite results and the first real lang-tracer pages are recorded in
+  `qa/experiments/notion-docs/` as they happen.
+- **Next:** observe the lang-tracer pages for which clips readers actually use, then consider
+  masking regions, a `screenshot` action for static states, and MP4 output for hosts that prefer
+  video. None is authorized yet.
+
 ### untangle — BUILD, v0.1.0 published (2026-09-20)
 - **Demand:** direct maintainer request on behalf of a named non-developer user whose
   repositories grow by exploration: many ideas tried in one folder, a project that reads as

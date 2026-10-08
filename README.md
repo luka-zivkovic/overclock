@@ -66,6 +66,7 @@ installs, removes, enables, disables, or edits anything.
 | **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 | **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
+| **notion-docs** | A Notion feature page with short GIF clips recorded from the real UI that show what to click and what happens | `/plugin install notion-docs@overclock` |
 
 > [!IMPORTANT]
 > Install **either** `session-memory` or `learning-loop`, not both. They intentionally share the
@@ -227,6 +228,27 @@ obligations — the bridge enforces isolation and scope, not consent.
 </details>
 
 <details>
+<summary><strong>notion-docs</strong> — feature docs people actually read, with the click shown</summary>
+
+`/notion-docs` documents one web feature as one Notion page: a sentence on what it does and when
+to use it, numbered steps with a 3-to-12-second looping GIF under each step that shows the control
+being clicked and what happens, an options table, one callout of observed gotchas, and related
+links. The clips come from the real UI. The bundled recorder takes a small JSON scene, drives
+Playwright with an in-page cursor, highlight ring, click ripple, and captions, captures frames over
+the DevTools screencast, and encodes the GIF itself, so Playwright is the only dependency and
+`setup` installs it into a cache directory. `snapshot` prints the accessibility tree and `role=`
+selectors of a screen so scenes are written from what is on screen, and `validate` rejects secrets
+in recorded steps and estimates the clip length before anything is recorded.
+
+Pages are written in Notion-flavored Markdown and published through the Notion connector's
+file-upload flow, through a token-based API recipe, or handed over as a local bundle. Output stays
+under `notion-docs-output/<slug>/`, nothing is committed, Notion changes are additive to the page
+you named (or a private draft), and the published page is read back once against a review
+checklist for a single revision.
+
+</details>
+
+<details>
 <summary><strong>api-bench</strong> — see the transcript before you write the app</summary>
 
 `api-bench` simulates how an application would drive a model API. A JSON spec holds the system
@@ -336,7 +358,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 149 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

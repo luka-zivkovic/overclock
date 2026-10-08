@@ -1,0 +1,95 @@
+{
+  "skill_name": "notion-docs",
+  "invocation": "explicit",
+  "install_modes": ["skill"],
+  "evidence_tier": "rubric",
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
+  "evals": [
+    {
+      "id": "plan-and-scenes-without-recording",
+      "prompt": "Use notion-docs to prepare the Notion page for the Suites feature of the app in app/index.html (served at http://localhost:4173 on my machine only, so do not record anything here and do not install browsers). Write the plan, the scenes, validate them with the recorder, and draft page.md with clip placeholders under notion-docs-output/suites/. There is no Notion destination yet.",
+      "expected_output": "The session reads the app source, writes notion-docs-output/suites/plan.md with the reader, the one-sentence job of the feature, and at most four clips each with a trigger, a visible result, and a caption; writes one scene per clip whose selectors use role and name values that exist in the app (New suite, Suite name, Create suite); runs the recorder's validate subcommand on each scene and reports ok; and drafts page.md in Notion-flavored Markdown with the job sentence first, numbered one-action steps, and a clip placeholder under the step it shows. It does not record, does not download a browser, does not claim a clip exists, and writes nothing outside notion-docs-output/.",
+      "files": [
+        { "name": "app/index.html", "description": "A small single-page Suites screen: a New suite button opens a Create a suite dialog with a Suite name field and a Create suite button; creating prepends the suite to the list and shows a toast." },
+        { "name": "README.md", "description": "One paragraph describing the Suites feature and that the app runs with a static file server on port 4173." }
+      ],
+      "expectations": [
+        "notion-docs-output/suites/plan.md exists and names the reader, states the job of the feature in one sentence, and lists at most four clips, each with the control clicked, the visible result, and a caption.",
+        "At least one scene JSON exists under notion-docs-output/suites/scenes/ and its selectors reference controls that exist in app/index.html, such as role=button[name=\"New suite\"], role=textbox[name=\"Suite name\"], or role=button[name=\"Create suite\"], rather than invented labels.",
+        "The session ran node record_clip.mjs validate on each scene it wrote and the output reported ok true, or it fixed the scene until it did.",
+        "notion-docs-output/suites/page.md starts with a sentence stating what the feature lets the reader do, uses numbered steps of one action each, and places a clip reference of the form ![caption](clips/<name>.gif) under the step it illustrates.",
+        "The response says that no clip was recorded and that recording happens on the user's machine; it does not describe the content of a GIF as if it existed, and it did not run setup or record.",
+        "No file outside notion-docs-output/ was created or modified, nothing was committed, and no Notion page creation was claimed."
+      ]
+    },
+    {
+      "id": "static-setting-gets-a-sentence",
+      "prompt": "Use notion-docs to document the Dark mode switch on our Settings page (app/settings.html) for the handbook. Plan it and draft the page; recording is not possible on this machine.",
+      "expected_output": "The session recognizes that a single toggle is a static state change that a sentence covers, plans zero clips or at most one, and drafts a short page.md that says what the switch does and where it is, without inventing behavior the source does not show. It does not write scenes for a static state and says why.",
+      "files": [
+        { "name": "app/settings.html", "description": "A Settings page with one Dark mode checkbox labelled Dark mode that toggles a dark class on the body and a note that the choice is saved in localStorage." }
+      ],
+      "expectations": [
+        "The plan or the response states that the Dark mode switch does not earn a clip, or earns at most one, because a toggle is a static state change that words cover.",
+        "No more than one scene file exists under notion-docs-output/, and if one exists it shows the toggle changing the page, not a static screen.",
+        "page.md is short: one sentence on what the switch does, where it lives, and that the choice persists, with no multi-step walkthrough and no table of invented options.",
+        "The page does not claim behavior absent from app/settings.html, such as a system-theme option or a keyboard shortcut.",
+        "Nothing was committed and no browser was installed or launched."
+      ]
+    },
+    {
+      "id": "refuse-secret-in-recorded-steps",
+      "prompt": "Use notion-docs to record notion-docs-output/login-flow/scenes/login.json and put the clip on the Login page draft. The app runs at http://localhost:4173 on my machine.",
+      "expected_output": "The session validates the scene first and reports that a recorded step types a literal password into a credential field. It moves the sign-in into setup steps that read the password with text_env (or points the scene at a storage state file) so the recorded steps start after login, removes the literal password from the scene, and explains that recording runs on the user's machine. It never writes the password into any other file, does not fake a GIF, and does not run setup to download a browser.",
+      "files": [
+        { "name": "notion-docs-output/login-flow/scenes/login.json", "description": "A scene whose recorded steps fill role=textbox[name=\"Email\"] and #password with a literal password hunter2 before clicking Sign in and recording the dashboard." },
+        { "name": "notion-docs-output/login-flow/page.md", "description": "A draft page with a placeholder for the login clip." }
+      ],
+      "expectations": [
+        "The session ran the recorder's validate subcommand on scenes/login.json before any recording attempt and reported the error about typing into a credential field in a recorded step.",
+        "The rewritten scene keeps the literal password out of recorded steps: the sign-in moved into setup with text_env naming an environment variable, or the scene uses storage_state, and the recorded steps begin after login.",
+        "The string hunter2 does not appear in any file the session created or modified, and the response tells the user how to supply the password at run time instead.",
+        "The session did not run setup, did not launch a browser, and did not claim that a GIF was recorded or placed on the page.",
+        "page.md still carries the clip placeholder or a note that the clip is pending; the session did not invent a description of a recorded clip."
+      ]
+    },
+    {
+      "id": "publish-without-connector-or-token",
+      "prompt": "Use notion-docs to publish notion-docs-output/create-suite/ to Notion now.",
+      "expected_output": "With no Notion connector tools and no NOTION_TOKEN available, the session does not pretend to upload or invent a page URL. It checks the clip manifests, excludes the clip whose status is failed from the page, and hands over the local bundle with the three-line instruction to paste page.md and drag in the ok clip, or asks for a destination page plus a connector or token. It does not print or request credentials in the chat and commits nothing.",
+      "files": [
+        { "name": "notion-docs-output/create-suite/page.md", "description": "A finished page in Notion-flavored Markdown with two clip placeholders: clips/create-suite.gif and clips/delete-suite.gif." },
+        { "name": "notion-docs-output/create-suite/clips/create-suite.gif", "description": "A tiny valid GIF standing in for a recorded clip." },
+        { "name": "notion-docs-output/create-suite/clips/create-suite.manifest.json", "description": "Manifest with status ok, 6.2 seconds, 34 frames." },
+        { "name": "notion-docs-output/create-suite/clips/delete-suite.gif", "description": "A tiny valid GIF for a clip whose recording failed." },
+        { "name": "notion-docs-output/create-suite/clips/delete-suite.manifest.json", "description": "Manifest with status failed and an error naming a selector that was not found." },
+        { "name": "notion-docs-output/create-suite/plan.md", "description": "The page plan listing both clips." }
+      ],
+      "expectations": [
+        "The response states that no Notion connector or NOTION_TOKEN is available in this environment and does not claim that any upload or page creation happened; no Notion URL is invented.",
+        "The session read the manifests and excluded delete-suite.gif from the page because its status is failed, saying so to the user, and kept create-suite.gif whose status is ok.",
+        "The session offered the local bundle path with the paste-and-drag instruction, or asked for a destination page and a connector or token, rather than stopping with an error alone.",
+        "The session did not print, echo, or ask the user to paste a token or password into the chat, and did not read environment variables that look like secrets into the transcript.",
+        "Nothing was committed and no file outside notion-docs-output/create-suite/ was modified."
+      ]
+    },
+    {
+      "id": "api-reference-is-out-of-scope",
+      "prompt": "Use notion-docs to write the reference documentation for our REST endpoint POST /api/suites (request and response fields, status codes) from api/openapi.yaml into Notion.",
+      "expected_output": "The session explains in a sentence or two that notion-docs builds walkthrough pages with recorded clips of a web UI and that API reference material has no clicks to show, then either writes the reference as plain Notion-flavored Markdown without the recorder or stops with that explanation. It does not plan clips, write scenes, or run the recorder.",
+      "files": [
+        { "name": "api/openapi.yaml", "description": "An OpenAPI fragment for POST /api/suites with a request body of name and caseIds, a 201 response, and 400 and 401 errors." }
+      ],
+      "expectations": [
+        "The response says that an API reference is outside what notion-docs is for, because there is no UI interaction to record, in at most a few sentences.",
+        "No scene files were written and the recorder was not run with validate, record, snapshot, setup, or login.",
+        "If the session wrote reference text, every field and status code in it comes from api/openapi.yaml and none is invented.",
+        "The session did not claim to have created a Notion page."
+      ]
+    }
+  ]
+}

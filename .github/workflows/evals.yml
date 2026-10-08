@@ -22,6 +22,7 @@ on:
           - lateral-engineering/lateral-engineering
           - learning-loop/lessons-learned
           - natural-writing/natural-writing
+          - notion-docs/notion-docs
           - overclock-setup/setup
           - pr-feedback/publish-pr-feedback
           - pr-feedback/resolve-pr-feedback
@@ -164,6 +165,7 @@ jobs:
                 lateral-engineering/lateral-engineering \
                 learning-loop/lessons-learned \
                 natural-writing/natural-writing \
+                notion-docs/notion-docs \
                 overclock-setup/setup \
                 pr-feedback/publish-pr-feedback \
                 pr-feedback/resolve-pr-feedback \
@@ -269,7 +271,7 @@ jobs:
             session-memory/lessons-learned) run_batteries lessons-learned ;;
             session-memory/session-handoff) run_batteries session-handoff ;;
             session-memory/solutions) run_batteries solutions ;;
-            overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle)
+            notion-docs/notion-docs|overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle)
               echo "::error::No implicit-routing battery exists for the manually invoked target $TARGET."
               exit 2
               ;;
