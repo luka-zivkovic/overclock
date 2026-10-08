@@ -70,8 +70,8 @@ curl -sS -X POST "https://api.notion.com/v1/file_uploads/<upload-id>/send" \
   -F "file=@clips/<name>.gif;type=image/gif"
 # -> status "uploaded"
 
-# 3. append the image block to the page
-curl -sS -X PATCH "https://api.notion.com/v1/blocks/<page-id>/children" \
+# 3. append blocks; this is the image block for one clip, placed as a child of its step
+curl -sS -X PATCH "https://api.notion.com/v1/blocks/<step-block-id>/children" \
   -H "Authorization: Bearer $NOTION_TOKEN" -H "Notion-Version: 2022-06-28" \
   -H "Content-Type: application/json" \
   -d '{"children": [{"type": "image", "image": {"type": "file_upload", "file_upload": {"id": "<upload-id>"},
@@ -79,9 +79,16 @@ curl -sS -X PATCH "https://api.notion.com/v1/blocks/<page-id>/children" \
 ```
 
 Newer `Notion-Version` values change the file block shape; if the request is rejected, check the
-current File Upload reference rather than guessing. The page text itself is pasted from `page.md`
-in the Notion UI (Notion converts pasted Markdown into blocks) or appended block by block with the
-same `PATCH` endpoint.
+current File Upload reference rather than guessing.
+
+Build the page in reading order with that same `PATCH` endpoint: append the blocks of `page.md`
+to the page one section at a time, and where `page.md` has a `![caption](clips/<name>.gif)` line
+under a step, append that clip's image block as a child of the step's list item (its block id
+comes back in the response that created it) instead of a paragraph. Do not paste `page.md` into
+the Notion UI and add the images afterwards: the local `clips/` paths would stay in the text and
+the clips would land at the end of the page, away from the steps they illustrate. Finish with the
+same read-back as Path A: one image block per clip, under the right step, and no `clips/` path
+left in the text.
 
 ## Path C: hand over the bundle
 

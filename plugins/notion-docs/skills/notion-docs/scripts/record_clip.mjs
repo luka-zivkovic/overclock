@@ -211,8 +211,8 @@ function validateStep(step, where, inSetup, errors, warnings) {
       if (hasEnv && !inSetup) errors.push(`${where}: text_env is allowed only in setup steps; recorded steps must not type secrets`);
       if (hasEnv && !/^[A-Z][A-Z0-9_]*$/.test(step.text_env)) errors.push(`${where}: text_env must name an environment variable such as APP_PASSWORD`);
       if (hasText && CREDENTIAL_FIELD.test(selector)) {
-        if (inSetup) warnings.push(`${where}: literal text goes into a credential-looking field; prefer text_env so the secret stays out of the scene file`);
-        else errors.push(`${where}: recorded steps must not type into credential fields; log in during setup instead`);
+        if (inSetup) errors.push(`${where}: literal text into a credential-looking field; use text_env so the secret stays out of the scene file`);
+        else errors.push(`${where}: recorded steps must not type into credential fields; log in during setup with text_env instead`);
       }
       if (step.action === 'type' && step.delay_ms !== undefined && !isInt(step.delay_ms, 0, 500)) errors.push(`${where}: delay_ms must be an integer from 0 to 500`);
       break;
@@ -432,7 +432,7 @@ function makeOverlay(page, scene) {
       if (!box) return;
       const x = box.x + box.width / 2;
       const y = box.y + box.height / 2;
-      if (highlight) await evaluate((b) => window.__nd && window.__nd.highlight(b), box);
+      if (highlight && scene.cursor) await evaluate((b) => window.__nd && window.__nd.highlight(b), box);
       if (scene.cursor) {
         await evaluate(([cx, cy]) => window.__nd && window.__nd.move(cx, cy), [x, y]);
         await page.waitForTimeout(CURSOR_TRAVEL_MS);
@@ -504,7 +504,13 @@ async function runStep(page, scene, overlay, step, recording) {
       break;
     case 'wait':
       if (step.ms !== undefined) await page.waitForTimeout(step.ms);
-      else await page.locator(step.selector).first().waitFor({ state: step.state || 'visible' });
+      else {
+        // wait is not strict: without nth it watches the first match, so a wait selector that can
+        // match something already on the page passes at once. Scenes should wait for a state only
+        // the action can produce (a dialog hidden, a toast) or pin the element with nth.
+        const target = step.nth !== undefined ? locate(page, step) : page.locator(step.selector).first();
+        await target.waitFor({ state: step.state || 'visible' });
+      }
       break;
     case 'caption':
       if (recording) {
@@ -1076,20 +1082,34 @@ function cmdEncode(opts) {
 
 const ARIA_INTERACTIVE = new RegExp(`^\\s*-\\s+(${INTERACTIVE_ROLES.join('|')}|tab|heading)\\s+("(?:[^"\\\\]|\\\\.)*")`);
 
-function interactiveLines(aria) {
-  const out = new Set();
+function interactiveCounts(aria) {
+  const out = new Map();
   for (const line of aria.split('\n')) {
     const match = ARIA_INTERACTIVE.exec(line);
-    if (match) out.add(`${match[1]} ${match[2]}`);
+    if (match) {
+      const key = `${match[1]} ${match[2]}`;
+      out.set(key, (out.get(key) || 0) + 1);
+    }
   }
   return out;
 }
 
+// Interactive controls are compared as a multiset, so a second "Delete" button on a screen that
+// already had one is reported; the entry carries the count change when either side had several.
 function diffAria(baselineText, currentText, baselinePath) {
-  const before = interactiveLines(baselineText);
-  const after = interactiveLines(currentText);
-  const added = [...after].filter((x) => !before.has(x)).sort();
-  const removed = [...before].filter((x) => !after.has(x)).sort();
+  const before = interactiveCounts(baselineText);
+  const after = interactiveCounts(currentText);
+  const describe = (key, from, to) => (from === 0 || to === 0) && Math.max(from, to) === 1 ? key : `${key} (${from} -> ${to})`;
+  const added = [];
+  const removed = [];
+  for (const key of new Set([...before.keys(), ...after.keys()])) {
+    const from = before.get(key) || 0;
+    const to = after.get(key) || 0;
+    if (to > from) added.push(describe(key, from, to));
+    else if (from > to) removed.push(describe(key, from, to));
+  }
+  added.sort();
+  removed.sort();
   const beforeLines = new Set(baselineText.split('\n').map((l) => l.trim()).filter(Boolean));
   const afterLines = new Set(currentText.split('\n').map((l) => l.trim()).filter(Boolean));
   let changed = 0;
@@ -1143,6 +1163,9 @@ async function cmdCheck(opts) {
       const step = scene.steps[i];
       const entry = { index: i, action: step.action, selector: step.selector, resolution: 'n/a' };
       if (step.selector && step.action !== 'wait') {
+        // count() does not auto-wait, and check skips settle_ms, so give the selector the same
+        // chance record would: up to timeout_ms for the element to attach after the last action.
+        await page.locator(step.selector).first().waitFor({ state: 'attached', timeout: scene.timeout_ms }).catch(() => {});
         const matches = await page.locator(step.selector).count();
         entry.matches = matches;
         if (matches === 0) entry.resolution = 'missing';

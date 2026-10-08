@@ -2,7 +2,9 @@
 
 A scene is one JSON file that the recorder turns into one GIF. Keep scenes at
 `notion-docs-output/<slug>/scenes/<name>.json` and record them into
-`notion-docs-output/<slug>/clips/`. Start from `templates/scene.json`.
+`notion-docs-output/<slug>/clips/`. Start from `templates/scene.json`. The commands below are
+run from `notion-docs-output/<slug>/`, which is why they say `scenes/` and `clips/`; from any
+other directory, spell out the bundle path.
 
 ```text
 node "${CLAUDE_SKILL_DIR}/scripts/record_clip.mjs" validate scenes/<name>.json
@@ -20,14 +22,14 @@ node "${CLAUDE_SKILL_DIR}/scripts/record_clip.mjs" snapshot scenes/<name>.json -
 | `viewport` | no | 1280×800 | Browser size in CSS pixels. Width 320..3840, height 240..2160. Keep one size per page. |
 | `scale` | no | 0.75 | Output scale. 1280×800 at 0.75 gives a 960×600 GIF, which reads well in Notion. |
 | `fps` | no | 10 | Frames per second kept, 4..15. 10 is smooth enough for UI and keeps files small. |
-| `max_seconds` | no | 15 | Hard cap on recorded interaction time, 1..30. Over it the manifest says `too_long`. |
+| `max_seconds` | no | 15 | Longest accepted interaction time, 1..30. The recorder runs every step regardless and then marks the manifest `too_long` when the recorded time went over; it does not stop a scene early, so shorten the scene rather than rely on it. |
 | `end_hold_ms` | no | 1500 | How long the final frame holds before the loop restarts, so the result registers. |
 | `settle_ms` | no | 600 | Pause after each action so the reader sees what happened before the next move. |
 | `timeout_ms` | no | 10000 | How long to wait for a selector before a step fails. |
-| `cursor` | no | true | Draw the cursor, highlight ring, and click ripple. Set false for a bare recording. |
+| `cursor` | no | true | Draw the cursor, highlight ring, and click ripple. Set false for a bare recording with none of the three. |
 | `captions` | no | true | Show step captions as a pill at the bottom of the frame. |
 | `color_scheme` | no | `light` | `light` or `dark`, passed to the browser. |
-| `storage_state` | no | | Path, relative to the scene file, of a Playwright storage state saved by `login`. |
+| `storage_state` | no | | Path, relative to the scene file, of a Playwright storage state saved by `login`. With the standard layout and a state saved at the project root, that is `../../../.notion-docs-auth/state.json`; the validator checks the file exists. |
 | `mutates` | no | false | Mark true when the recorded steps create or change data (a new suite, a key, a filed case). Orchestration such as a scheduled refresh runs these scenes after the read-only ones, so their side effects do not show up as drift on other screens. |
 | `setup` | no | `[]` | Steps run before recording starts: log in, navigate, open the right screen. |
 | `steps` | yes | | Recorded steps, at least one. |
@@ -65,10 +67,17 @@ reader sees: `role=button[name="New suite"]`, `role=textbox[name="Suite name"]`,
 `text=Suite created`, CSS such as `#save` or `[data-testid="suite-row"]`, and chains with
 `>>` (`role=dialog >> role=button[name="Create"]`).
 
-Selectors are strict: a selector that matches two elements fails with a "strict mode violation"
-naming both. Add `nth`, scope with `>>`, or use a more specific name. Run `snapshot` on the exact
-screen and copy the `suggested_selectors`; `snapshot.aria.yaml` holds the full tree for anything
-the summary left out, and `snapshot --after-steps` shows the tree after the recorded steps have run.
+Selectors on action steps are strict: a selector that matches two elements fails with a "strict
+mode violation" naming both. Add `nth`, scope with `>>`, or use a more specific name. Run
+`snapshot` on the exact screen and copy the `suggested_selectors`; `snapshot.aria.yaml` holds the
+full tree for anything the summary left out, and `snapshot --after-steps` shows the tree after the
+recorded steps have run.
+
+`wait` is the exception: without `nth` it watches the first match, so it never fails for
+ambiguity, and a wait selector that something already on the page can satisfy passes at once
+without proving anything. Disambiguate wait selectors the same way, and prefer a state that only
+the action can produce (`role=dialog` with `state: "hidden"`, a toast, a row with a name no
+seeded data uses).
 
 ## Secrets and logins
 
@@ -114,9 +123,13 @@ the steps after it `not_reached`. With `--baseline`, it also lists interactive e
 links, fields, tabs, headings) that were added or removed since the baseline was saved, so a
 renamed button or a new tab is visible without watching a clip.
 
-`check` runs the steps for real, so a scene that creates data leaves it in the app. Mark such
-scenes `mutates: true` and run them last; otherwise a suite created by one scene appears as an
-added option on the next scene's screen and reads as drift.
+`check` runs the steps for real, as `record` does, so a scene that creates data leaves it in the
+app. Mark such scenes `mutates: true` and run them last; otherwise a suite created by one scene
+appears as an added option on the next scene's screen and reads as drift. Running last protects
+only the other scenes in the same pass: before the next pass, reset the data (reseed the
+development database, or delete what the scene created), or make the scene idempotent. A rerun
+against leftover data fails on a uniqueness error (a suite slug that already exists) or reports
+the previous run's rows as drift.
 
 The report `checks/<name>.check.json` carries `status`: `ok`, `drift` (steps resolve but the
 screen's controls changed), or `broken` (a step is missing, ambiguous, or failed). Exit code 1

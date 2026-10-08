@@ -12,7 +12,7 @@ what break pages, so follow these rules exactly. The full specification is the M
 - Empty lines are stripped. Notion spaces blocks itself; never write `<empty-block/>` to fake
   spacing.
 - Outside code blocks, escape these characters with a backslash when you mean them literally:
-  `\ * ~ ` $ [ ] < > { } | ^`. Inside code blocks, write everything literally.
+  `` \ * ~ ` $ [ ] < > { } | ^ ``. Inside code blocks, write everything literally.
 
 ## Blocks
 

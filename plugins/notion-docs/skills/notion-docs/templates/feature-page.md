@@ -10,6 +10,8 @@
 
 ## Options
 
+<Omit this section when the feature has no settings. When it has any, every one goes in this table and none in prose.>
+
 <table header-row="true">
 	<tr>
 		<td>Option</td>

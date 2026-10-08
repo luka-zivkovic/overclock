@@ -58,7 +58,7 @@ Never describe behavior from memory of a similar product.
 Read the published page as the reader, then answer each question yes or no. Fix every no and
 republish once.
 
-1. After the first sentence, could a new reader say what the feature does and when to use it?
+1. After the opening paragraph, could a new reader say what the feature does and when to use it?
 2. Does every clip show a click and a visible result, in 12 seconds or less?
 3. Does the step text above each clip say the same thing the clip shows, in the same order?
 4. Does every caption state the result the reader should see?

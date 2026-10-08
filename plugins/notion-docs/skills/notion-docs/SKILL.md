@@ -57,9 +57,10 @@ No ffmpeg or image library is needed; the recorder encodes the GIF itself.
 - Read the code, existing docs, and tickets for the feature. Note where it lives in the UI, what
   each control does, and what the reader is trying to get done.
 - Confirm the URL and how to log in. For a login form, write `setup` steps that use `text_env`.
-  For SSO or anything interactive, have the user run `login` once:
+  For SSO or anything interactive, have the user run `login` once from the project root:
   `node "${CLAUDE_SKILL_DIR}/scripts/record_clip.mjs" login --url APP_URL --out .notion-docs-auth/state.json`
-  and point scenes at that file with `storage_state`.
+  and point scenes at that file with `storage_state`, which is relative to the scene file:
+  `"../../../.notion-docs-auth/state.json"` from `notion-docs-output/<slug>/scenes/`.
 - Take a snapshot of each screen you will record so selectors come from the real accessibility
   tree, not from memory:
   `node "${CLAUDE_SKILL_DIR}/scripts/record_clip.mjs" snapshot SCENE.json --out DIR`
@@ -82,7 +83,10 @@ a wall of toggles.
 One scene per clip, starting from [templates/scene.json](templates/scene.json). The field and
 action reference is [references/scene-spec.md](references/scene-spec.md); read it before writing
 a scene, because the validator rejects secrets in recorded steps and the timing fields decide
-whether the clip is readable.
+whether the clip is readable. Run the recorder commands in this step from
+`notion-docs-output/<slug>/`, where `scenes/` and `clips/` live; `${CLAUDE_SKILL_DIR}` is
+absolute, so only the scene and output paths depend on the working directory. From anywhere
+else, write the bundle paths out in full.
 
 ```text
 node "${CLAUDE_SKILL_DIR}/scripts/record_clip.mjs" validate scenes/<name>.json

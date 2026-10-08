@@ -233,16 +233,17 @@ class ValidateTests(unittest.TestCase):
         self.assertEqual(code, 0, result)
         self.assertEqual(result["summary"]["setup_steps"], 3)
 
-    def test_literal_credential_in_recorded_step_is_an_error_and_in_setup_a_warning(self) -> None:
+    def test_literal_credential_is_an_error_in_recorded_and_setup_steps(self) -> None:
         recorded = base_scene()
         recorded["steps"].insert(0, {"action": "fill", "selector": "#password", "text": "hunter2"})
         code, result = validate(recorded, self.dir)
         self.assertEqual(code, 1)
         self.assertTrue(any("must not type into credential fields" in e for e in result["errors"]), result)
-        setup = base_scene(name="setup-warn", setup=[{"action": "fill", "selector": "#password", "text": "hunter2"}])
+        setup = base_scene(name="setup-literal", setup=[{"action": "fill", "selector": "#password", "text": "hunter2"}])
         code, result = validate(setup, self.dir)
-        self.assertEqual(code, 0, result)
-        self.assertTrue(any("prefer text_env" in w for w in result["warnings"]), result)
+        self.assertEqual(code, 1, result)
+        self.assertTrue(any("use text_env" in e for e in result["errors"]), result)
+        self.assertEqual(result["warnings"], [])
 
     def test_structural_errors_are_named(self) -> None:
         scene = base_scene(name="Bad Name", url="localhost:5173", steps=[{"action": "tap", "selector": "#x"}])
