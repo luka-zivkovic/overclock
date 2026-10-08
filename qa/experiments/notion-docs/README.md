@@ -46,14 +46,13 @@ recorded step, publishing with no connector or token, and an API-reference reque
 Live results are not yet recorded; run `qa/run_evals.sh notion-docs/notion-docs` and append the
 result here before claiming the routing or behavioral thresholds are met.
 
-## First real use: lang-tracer (2026-10-07)
+## First real use: a Test suites page (2026-10-07)
 
-Subject: the **Test suites** feature of lang-tracer, documented against the local `pnpm dev`
-stack with seeded demo data. Login ran in unrecorded `setup` steps with the password in
-`LT_DEV_PASSWORD`. Three versions were published as child pages of one private draft page in
-Notion (parent `https://app.notion.com/p/3f25b6e0c94f816abbfdc4bdf7016638`); every version, scene,
-clip, manifest, and the critique live in the lang-tracer checkout under
-`notion-docs-output/test-suites/` (untracked).
+Subject: the **Test suites** feature of an internal evaluation tool, documented against its local
+dev stack with seeded demo data. Login ran in unrecorded `setup` steps with the password read
+through `text_env`. Three versions were published as child pages of one private draft page in
+Notion; every version, scene, clip, manifest, and the critique live in that project's checkout
+under `notion-docs-output/test-suites/` (untracked).
 
 | Version | Clips | What changed |
 |---|---|---|
@@ -75,18 +74,18 @@ steps ran", not "the app did what the caption says". The connector's `suggested_
 (`<image src="file-upload://…"></image>` with the caption as inner text) was verified by fetching
 the pages back and recorded in `references/notion-delivery.md`.
 
-## Second real use: the LangTracer handbook (2026-10-07)
+## Second real use: an eleven-page onboarding handbook (2026-10-07)
 
-Eleven onboarding pages for new LangTracer members, blueprinted on the team's 2026-08-26
-onboarding notes and written from the current app, its in-app manual, the repository docs, and the
-n8n repo's `create-instance-ai-eval` skill. 22 clips (18 new, 4 reused from the Test suites page),
+Eleven onboarding pages for the same tool's new team members, blueprinted on the team's earlier
+onboarding notes and written from the current app, its in-app manual, the repository docs, and a
+sibling repository's eval-authoring skill. 22 clips (18 new, 4 reused from the Test suites page),
 each 4 to 11 seconds, 37 MB in total, published under one private draft parent with cross-links
-between pages: `https://app.notion.com/p/3f25b6e0c94f81d7a2bfd01e18f1a04e`.
+between pages.
 
-What the final-frame check caught before publishing: a clip ending on a LangSmith 502 (the local
-stack has no key) under a caption promising the span tree, a caption that disagreed with an open
+What the final-frame check caught before publishing: a clip ending on an upstream 502 (the local
+stack has no key for that service) under a caption promising the span tree, a caption that disagreed with an open
 dropdown, and a closing Cancel that hid the state the caption described. Two scenes failed on
 strict-mode and a missing control and were fixed from the manifest's error text alone. The pattern
 "look at the last frame; end on a wait only the action can satisfy" held up as the single most
-useful rule of the skill. Full record in the lang-tracer checkout under
+useful rule of the skill. Full record in that project's checkout under
 `notion-docs-output/handbook/CRITIQUE.md`.

@@ -86,7 +86,7 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
 - **Demand:** direct maintainer request, modelled on latent-spaces/brag (a project turned into a
   launch video with one command), for the documentation counterpart: Notion feature pages that
   are easy to read through because each step carries a small GIF of what to click and what it does.
-  A named first use exists (the lang-tracer suite and review features). Principle 4 is satisfied.
+  A named first use exists (an internal evaluation tool's suite and review features). Principle 4 is satisfied.
 - **Grounding:** brag's shape transfers (inspect the real thing, plan a storyboard, capture the
   real UI, render, deliver) but its product does not: brag optimises for a 20-second shareable
   video with music, this skill for a page someone reads while doing the task. Nothing in the kit
@@ -114,9 +114,9 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   the skill via committed live-eval cases that exercise planning, right-sizing, the secrets
   refusal, and the no-destination draft rule without a browser. A real recording against a local
   fixture app produced a 34-frame, 7.9-second, 755 KB GIF that Chromium decodes and animates.
-  Live suite results and the first real lang-tracer pages are recorded in
+  Live suite results and the first real pages are recorded in
   `qa/experiments/notion-docs/` as they happen.
-- **Next:** observe the lang-tracer pages for which clips readers actually use, then consider
+- **Next:** observe the first real pages for which clips readers actually use, then consider
   masking regions, a `screenshot` action for static states, and MP4 output for hosts that prefer
   video. None is authorized yet.
 
