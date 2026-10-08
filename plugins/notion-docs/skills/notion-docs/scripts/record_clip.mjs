@@ -393,6 +393,11 @@ function locate(page, step) {
   return loc;
 }
 
+// The occurrence a non-strict wait watches: the nth one when the step names it, else the first.
+function waitTarget(page, step) {
+  return step.nth !== undefined ? locate(page, step) : page.locator(step.selector).first();
+}
+
 function resolveText(step) {
   if (typeof step.text === 'string') return step.text;
   const value = process.env[step.text_env];
@@ -508,8 +513,7 @@ async function runStep(page, scene, overlay, step, recording) {
         // wait is not strict: without nth it watches the first match, so a wait selector that can
         // match something already on the page passes at once. Scenes should wait for a state only
         // the action can produce (a dialog hidden, a toast) or pin the element with nth.
-        const target = step.nth !== undefined ? locate(page, step) : page.locator(step.selector).first();
-        await target.waitFor({ state: step.state || 'visible' });
+        await waitTarget(page, step).waitFor({ state: step.state || 'visible' });
       }
       break;
     case 'caption':
@@ -1165,7 +1169,7 @@ async function cmdCheck(opts) {
       if (step.selector && step.action !== 'wait') {
         // count() does not auto-wait, and check skips settle_ms, so give the selector the same
         // chance record would: up to timeout_ms for the element to attach after the last action.
-        await page.locator(step.selector).first().waitFor({ state: 'attached', timeout: scene.timeout_ms }).catch(() => {});
+        await waitTarget(page, step).waitFor({ state: 'attached', timeout: scene.timeout_ms }).catch(() => {});
         const matches = await page.locator(step.selector).count();
         entry.matches = matches;
         if (matches === 0) entry.resolution = 'missing';
