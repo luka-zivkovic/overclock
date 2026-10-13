@@ -148,6 +148,26 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   against the agent-bridge, eval-stack, and critical-thinking stack. Live results are not
   yet recorded; run the suites before treating routing thresholds as met.
 
+### mcpfy — BUILD, published as its own repository (2026-10-13)
+- **Demand:** maintainer request for a skill that analyzes any project and produces a complete
+  MCP server so agents and harnesses can work in an app without its UI, then for a toolkit of
+  specialized skills, in the style of impeccable, so each can be evaluated on its own.
+- **Grounding:** FastMCP `from_openapi` and Speakeasy generate one tool per route from a spec,
+  which FastMCP's own docs call a bootstrap. Anthropic's `mcp-builder` is the craft guide for a
+  server around an API already chosen, and Anthropic's tool-writing guidance says not to wrap
+  every endpoint. Nothing starts from the pages, forms, and buttons of a codebase, where part
+  of an app's capability lives; that discovery-and-curation step is the gap.
+- **Decision:** built as eight user-invoked skills over one plan file, `MCPFY.md`, with the
+  leading concept *jobs, not endpoints*: `mcp-survey`, `mcp-shape`, `mcp-build`, `mcp-audit`,
+  plus the polish verbs `mcp-harden`, `mcp-describe`, `mcp-respond`, `mcp-distill`. Authored
+  here as `plugins/mcpfy` 0.1.0–0.2.2, then moved to
+  [luka-zivkovic/mcpfy](https://github.com/luka-zivkovic/mcpfy) as 0.3.0: it is a product of
+  its own rather than an Overclock workflow plugin, so Overclock does not ship it. The design
+  rationale, the evidence (deterministic suites, 31 live cases, a runtime test that builds and
+  drives the generated servers), and the maintainer contract live there.
+- **Collision check:** `untangle` judges coherence, `api-bench` simulates app-to-model calls,
+  `groundwork` elicits requirements from a person; none owns the app-to-agent surface.
+
 ### PR-reviewer / pr-kit — STRONG, Phase-0 candidate (updated 2026-07-17)
 - **Demand:** two prior self-built attempts (`~/startups/n8n-pr-reviewer`, with a
   persona + precedent-PR + embeddings stack; plus an earlier pass). That *is* the
