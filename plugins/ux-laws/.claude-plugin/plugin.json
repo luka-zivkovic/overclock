@@ -1,0 +1,18 @@
+{
+  "name": "ux-laws",
+  "displayName": "UX Laws",
+  "description": "Twenty named UX laws (Hick, Fitts, Jakob, Doherty, Gestalt grouping, progressive disclosure, feedback loops, and more) applied to one screen at a time. A user-invoked build mode designs and implements a view with the laws as decision rules and reports what changed; a read-only review mode reports at most five ranked findings with file:line evidence and fixes. Never commits.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ux",
+    "usability",
+    "interface",
+    "design",
+    "review",
+    "laws-of-ux"
+  ]
+}

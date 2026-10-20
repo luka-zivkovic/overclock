@@ -3,6 +3,26 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## ux-laws
+
+### 0.1.0 — 2026-10-20 (initial release)
+- New plugin. `/ux-laws` applies twenty named UX laws to one screen, view, component, or flow,
+  and runs only when invoked. It frames the screen first (who arrives, its one job and primary
+  action, what happens next), reads the view's code and states, screenshots it at desktop and
+  phone widths when the app runs, and walks five passes: choices, layout, actions, response, and
+  progress and ending. States the app will not show on its own (a failed request, one failure
+  among several, an empty result, a slow response) are forced by stubbing requests, and every
+  state is reported as seen, read from code, or not checked.
+- Build mode implements the view with the project's own components, covers every state the view
+  can be in, and reports at most five `law → decision → file:line` lines for laws that changed a
+  decision. Review mode is read-only and reports at most five ranked findings, with anything that
+  shows the user something untrue ranked first, each with what the user experiences, the law,
+  `file:line` evidence, and a sized fix, plus at most three verified one-line extras; a view in
+  good shape gets a short answer instead of a padded list. Neither mode commits.
+- Ship a standalone reference for all twenty laws with symptoms to look for, default fixes,
+  misuse warnings (Miller's law is not a cap on menu items), a state checklist for async actions
+  and collections, and the common tensions between laws.
+
 ## api-bench
 
 ### 0.1.0 — 2026-09-19 (initial release)
@@ -385,6 +405,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.27 — 2026-10-20
+- Catalog the new `ux-laws` plugin (0.1.0), a user-invoked skill with no persistent files.
 
 ### 0.1.26 — 2026-09-23
 - Catalog the new `untangle` plugin (0.1.0) with its persistent `UNTANGLE.md` plan file.

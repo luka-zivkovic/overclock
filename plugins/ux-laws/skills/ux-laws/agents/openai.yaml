@@ -1,0 +1,6 @@
+interface:
+  display_name: "UX Laws"
+  short_description: "Apply UX laws to build or review one view"
+  default_prompt: "Use $ux-laws to review this view against the UX laws and report the top findings with evidence and fixes."
+policy:
+  allow_implicit_invocation: false

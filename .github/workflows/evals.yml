@@ -30,6 +30,7 @@ on:
           - session-memory/session-handoff
           - session-memory/solutions
           - untangle/untangle
+          - ux-laws/ux-laws
           - critical-thinking
           - discipline-gates
           - pr-feedback
@@ -171,7 +172,8 @@ jobs:
                 session-memory/lessons-learned \
                 session-memory/session-handoff \
                 session-memory/solutions \
-                untangle/untangle
+                untangle/untangle \
+                ux-laws/ux-laws
               ;;
             session-memory)
               run_suite \
@@ -269,7 +271,7 @@ jobs:
             session-memory/lessons-learned) run_batteries lessons-learned ;;
             session-memory/session-handoff) run_batteries session-handoff ;;
             session-memory/solutions) run_batteries solutions ;;
-            overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle)
+            overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle|ux-laws/ux-laws)
               echo "::error::No implicit-routing battery exists for the manually invoked target $TARGET."
               exit 2
               ;;

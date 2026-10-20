@@ -82,6 +82,28 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   before treating that provider as supported. Only after that, consider persistent threads,
   background jobs, dirty-worktree snapshots, or full handoff.
 
+### ux-laws — BUILD, v0.1.0 authored (2026-10-20)
+- **Demand:** direct maintainer request. They struggle with UX when building an app or a view
+  and asked for a skill built on a twenty-item "UX laws" list (sixteen from lawsofux.com plus
+  visual hierarchy, progressive disclosure, recognition over recall, and feedback loops), and
+  chose explicit invocation only.
+- **Grounding:** nothing in the kit touches interfaces. Installed `frontend-design` owns visual
+  identity (type, palette, avoiding templated looks), not interaction. The design plugin's
+  `design-critique` reviews mockups under generic headings and names no laws. `impeccable`
+  (24 commands, visual-leaning) names none of these laws either; its `shape`, `onboard`, and
+  `harden` touch flows. The open gap is the laws as decision rules applied to one screen's
+  choices, layout, actions, response states, and ending, while building or reviewing it.
+- **Product shape:** one user-invoked skill with build and review modes. Frame the screen first
+  (who arrives, one job, primary action), read the code and every state, screenshot it when the
+  app runs, walk five passes, and resolve tensions between laws explicitly. Build reports at most
+  five `law → decision → file:line` lines; review is read-only with at most five ranked findings
+  and a short answer for a view in good shape. Law detail, a state checklist, and tensions live in
+  one reference. No hooks, scripts, writes outside the view, or commits.
+- **Evidence:** tier `rubric`. Five live cases: a planted-problem review, a well-built page as
+  a fabrication control, a twelve-setting build, a backend scope stop, and a one-line tweak whose
+  label also resets in a `finally` block. Each has deterministic unchanged-file checks. No routing
+  battery: the skill is user-invoked.
+
 ### untangle — BUILD, v0.1.0 published (2026-09-20)
 - **Demand:** direct maintainer request on behalf of a named non-developer user whose
   repositories grow by exploration: many ideas tried in one folder, a project that reads as

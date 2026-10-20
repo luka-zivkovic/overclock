@@ -1,0 +1,244 @@
+{
+  "skill_name": "ux-laws",
+  "invocation": "explicit",
+  "install_modes": [
+    "skill"
+  ],
+  "evidence_tier": "rubric",
+  "value_gate": {
+    "min_case_wins": 1,
+    "max_case_losses": 0,
+    "min_total_expectation_lift": 1
+  },
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "/ux-laws review the invite page",
+      "expected_output": "A read-only review of the invite page that frames it (new workspace owners, one job: invite people, primary action: Send invites), then reports at most five ranked findings with the law, file:line evidence, and a sized fix. The silent send (no pending, success, or error feedback) is among them, alongside other planted problems. No file is edited.",
+      "files": [
+        {
+          "name": "index.html",
+          "description": "Invite page markup: a duplicate Send invites button in the header and three equal-weight footer buttons."
+        },
+        {
+          "name": "src/invite.js",
+          "description": "Strict lowercase-only email regex on the raw value, free-text role entry, and a send handler with no pending state that clears rows on success and only logs failures."
+        },
+        {
+          "name": "src/invite.css",
+          "description": "Labels spaced 24px from their own input and 4px from the previous row; a 14px remove button; one button style for every action."
+        },
+        {
+          "name": "src/api.js",
+          "description": "Fake server: send takes 1.5 s and rejects more than five invites."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/invite.js has unchanged bytes and permissions.",
+        "Final file state: src/invite.css has unchanged bytes and permissions.",
+        "The report has at most five findings, ranked by cost to the user's main job, and each finding states what the user experiences, names a law, cites file:line evidence from this repository, and gives a concrete fix with a small, medium, or large cost.",
+        "One finding is the send action giving no feedback: the button stays enabled during the 1.5 s request, success silently clears the rows, and failures only reach console.error. It cites src/invite.js and names feedback loops, the Doherty threshold, or the peak-end rule.",
+        "At least two more findings match planted problems: the email check rejecting harmless variants such as uppercase letters, surrounding spaces, or subdomains (Postel); the 14px remove target beside the role field (Fitts); three equal-weight footer buttons plus a duplicate Send invites in the header (Hick, visual hierarchy, or Von Restorff); labels sitting closer to the previous row than to their own input (proximity); free-text role entry where a choice would do (recognition over recall).",
+        "No finding is contradicted by the code, Miller's law is not used to cap a list, and no conversion, speed, or satisfaction numbers are predicted.",
+        "Process: no file is edited and nothing is committed; the response offers to apply the fixes instead of applying them."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/invite.js",
+          "kind": "unchanged"
+        },
+        {
+          "expectation_index": 1,
+          "path": "src/invite.css",
+          "kind": "unchanged"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "/ux-laws review the sign-in page",
+      "expected_output": "Negative control for fabrication. The sign-in page already has adjacent labels, one primary action with 44px targets, a pending state, an inline error that keeps input, and normalized email. The review says it is in good shape and reports at most two minor findings, or none.",
+      "files": [
+        {
+          "name": "index.html",
+          "description": "Labeled email and password fields, one full-width primary button, a reset link, and a sign-up link."
+        },
+        {
+          "name": "src/signin.js",
+          "description": "Trims and lowercases the email, disables the button with a Signing in label while pending, shows server errors inline, and keeps the typed email."
+        },
+        {
+          "name": "src/signin.css",
+          "description": "Labels 4px from their input and 20px between fields; 44px minimum height on inputs and the primary button."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/signin.js has unchanged bytes and permissions.",
+        "Final file state: src/signin.css has unchanged bytes and permissions.",
+        "The response says the sign-in view is in good shape, or equivalent, instead of delivering a five-item list.",
+        "It reports at most two findings, each minor and each with file:line evidence; none claims a missing pending state, a missing or input-clearing error state, an unlabeled field, rejected email variants, or a small primary target, all of which the code already handles.",
+        "Process: no file is edited and nothing is committed."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/signin.js",
+          "kind": "unchanged"
+        },
+        {
+          "expectation_index": 1,
+          "path": "src/signin.css",
+          "kind": "unchanged"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/ux-laws build the notification settings page described in docs/settings-spec.md",
+      "expected_output": "Build mode. The session frames the page (most members visit once to turn notifications down; admins tune the rest), implements all twelve settings with the four everyday ones first and the advanced ones grouped behind a disclosure or a secondary section, covers loading, pending, success, and error states, reuses the existing styles, and reports at most five law-to-decision lines with file references. Nothing is committed.",
+      "files": [
+        {
+          "name": "docs/settings-spec.md",
+          "description": "Twelve settings in one flat table with types and notes; no grouping is given."
+        },
+        {
+          "name": "src/settings.js",
+          "description": "A stub that renders placeholder text and imports loadSettings and saveSettings."
+        },
+        {
+          "name": "src/styles.css",
+          "description": "Design tokens plus field, hint, button, and notice classes the project already uses."
+        },
+        {
+          "name": "src/api.js",
+          "description": "Fake server: load takes 0.7 s; save takes 0.9 s and rejects a non-https webhook or a digest hour outside 0 to 23."
+        },
+        {
+          "name": "package.json",
+          "description": "No dependencies."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/api.js has unchanged bytes and permissions.",
+        "Final file state: package.json has unchanged bytes and permissions, so no dependency was added.",
+        "src/settings.js, plus any stylesheet or markup it loads, renders all twelve settings from docs/settings-spec.md, loads current values through loadSettings, and saves through saveSettings.",
+        "The four everyday settings (email notifications, digest, mention alerts, mobile push) come first, the eight advanced ones are grouped separately behind a disclosure or in a clearly secondary section, and related settings sit together (quiet hours start and end; digest frequency and delivery hour).",
+        "The page shows a loading state before values arrive; Save shows a pending state as soon as it is clicked, a visible success confirmation, and the server's rejection message in place while keeping the user's edits.",
+        "Fixed sets use toggles, selects, or radio groups rather than free text (digest frequency, email format, channel overrides), the time zone is prefilled or picked rather than typed from memory, and the webhook field trims whitespace or states the https rule next to the field.",
+        "The final report lists at most five UX decisions, each naming a law, the decision it drove, and a file reference, and lists only laws that changed something.",
+        "Process: existing classes and tokens from src/styles.css are reused rather than replaced, no dependency or framework is added, and nothing is committed."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/api.js",
+          "kind": "unchanged"
+        },
+        {
+          "expectation_index": 1,
+          "path": "package.json",
+          "kind": "unchanged"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/ux-laws review the orders endpoint in src/orders.js",
+      "expected_output": "Scope stop. The repository is a JSON API with no interface, so the session says there is no user-facing interface in scope for this skill and stops without a UX findings report.",
+      "files": [
+        {
+          "name": "src/orders.js",
+          "description": "An order-creation handler returning status codes and JSON bodies."
+        },
+        {
+          "name": "README.md",
+          "description": "States that no frontend lives in this repository."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/orders.js has unchanged bytes and permissions.",
+        "The response says there is no user-facing interface in scope for this skill and stops; it does not produce ranked UX-law findings about the endpoint. At most one sentence noting that a law such as Postel's could inform API design is acceptable.",
+        "Process: no file is edited and nothing is committed."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/orders.js",
+          "kind": "unchanged"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/ux-laws change the Sign in button label to Log in",
+      "expected_output": "Right-sizing control. A one-line label change gets the change and at most one sentence naming a law, with no five-pass walk. The label must also change where src/signin.js resets it after a request, or the button reverts to Sign in after the first attempt.",
+      "files": [
+        {
+          "name": "index.html",
+          "description": "The button markup with the Sign in label."
+        },
+        {
+          "name": "src/signin.js",
+          "description": "Sets a Signing in label while pending and resets the label to Sign in in a finally block."
+        },
+        {
+          "name": "src/signin.css",
+          "description": "Styles that the label change does not need."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/signin.css has unchanged bytes and permissions.",
+        "Final file state: src/api.js has unchanged bytes and permissions.",
+        "The button reads Log in in index.html and in the label src/signin.js restores after a request, so it does not revert to Sign in after a failed attempt; a matching pending label such as Logging in is acceptable.",
+        "The response is short: no five-pass walk and no findings list, and at most one sentence naming a law.",
+        "Process: nothing is committed."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/signin.css",
+          "kind": "unchanged"
+        },
+        {
+          "expectation_index": 1,
+          "path": "src/api.js",
+          "kind": "unchanged"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/ux-laws review the projects page",
+      "expected_output": "False-state ranking. The page loads two services with Promise.all, and any failure falls through to the first-use empty state, which tells an everyday member they have no projects and invites them to create one. That finding is ranked first, found by forcing a failed request or reading the code, and the review says which states it did not check.",
+      "files": [
+        {
+          "name": "src/projects.js",
+          "description": "Promise.all over two fetches; the catch shows a banner and leaves the list empty, so renderEmpty runs on any failure."
+        },
+        {
+          "name": "src/projects.css",
+          "description": "The error banner is 12px light grey text."
+        },
+        {
+          "name": "src/api.js",
+          "description": "Two fake services that both succeed by default, after 0.4 s and 0.9 s."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/projects.js has unchanged bytes and permissions.",
+        "The first-ranked finding is that a failure of either request renders \"No projects yet\" with a create-your-first-project action, so a member who has projects is told they have none and invited to create duplicates. It cites src/projects.js (the Promise.all catch falling through to renderEmpty) and names feedback loops or the state checklist; it was found by forcing a failed request or by reading the code, not assumed.",
+        "The review says which states it saw rendered, which it read from code, and which it did not check.",
+        "There are at most five findings plus at most three one-line Also noticed items, each with file:line evidence; none is generic advice without a location in this repository.",
+        "Process: no file is edited and nothing is committed."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/projects.js",
+          "kind": "unchanged"
+        }
+      ]
+    }
+  ]
+}

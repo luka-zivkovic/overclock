@@ -9,7 +9,7 @@
       "name": "overclock-setup",
       "source": "./plugins/overclock-setup",
       "description": "Choose Overclock plugins without guesswork. A manual, report-only advisor that inventories installed packages and project instruction metadata, detects standalone overlap, blocks incompatible combinations, and returns exact proposed commands and minimal instruction diffs without executing or writing anything. User-level instruction inspection is explicit opt-in.",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "category": "development",
       "keywords": [
         "setup",
@@ -237,6 +237,21 @@
         "roadmap",
         "plan",
         "untangle"
+      ]
+    },
+    {
+      "name": "ux-laws",
+      "source": "./plugins/ux-laws",
+      "description": "Twenty named UX laws (Hick, Fitts, Jakob, Doherty, Gestalt grouping, progressive disclosure, feedback loops, and more) applied to one screen at a time. A user-invoked build mode designs and implements a view with the laws as decision rules and reports what changed; a read-only review mode reports at most five ranked findings with file:line evidence and fixes. Never commits.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "ux",
+        "usability",
+        "interface",
+        "design",
+        "review",
+        "laws-of-ux"
       ]
     }
   ]

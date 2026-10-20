@@ -64,6 +64,7 @@ installs, removes, enables, disables, or edits anything.
 | **natural-writing** | Voice-preserving long-form prose with a plainspoken fallback style | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
 | **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
+| **ux-laws** | One screen built or reviewed against twenty named UX laws, with at most five findings or decisions that cite `file:line` | `/plugin install ux-laws@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 | **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
 
@@ -318,6 +319,27 @@ code quality; those stay with the host's review tools.
 
 </details>
 
+<details>
+<summary><strong>ux-laws</strong> — Hick, Fitts, and friends as decision rules for one screen</summary>
+
+`/ux-laws` applies twenty named UX laws (Hick, Fitts, Jakob, Miller, Doherty, the Gestalt
+grouping laws, visual hierarchy, progressive disclosure, recognition over recall, Von Restorff,
+peak-end, goal-gradient, serial position, Tesler, Postel, Occam, feedback loops, and the
+aesthetic-usability effect) to one screen at a time. It frames the screen first: who arrives,
+its one job and primary action, and what happens next. Then it reads the view's code and states,
+screenshots it at desktop and phone widths when the app runs, and walks five passes: choices,
+layout, actions, response, and progress and ending.
+
+Build mode implements the view with the project's own components and every state it can be in,
+then lists at most five laws that changed a decision, each with `file:line`. Review mode is
+read-only and reports at most five ranked findings, each with what the user experiences, the law,
+evidence, and a sized fix. A view in good shape gets a short answer instead of a padded list.
+
+It runs only when invoked and is out of scope for backend work, brand or visual identity,
+copy-only edits, and formal WCAG audits. It never commits.
+
+</details>
+
 ## Hooks and trust
 
 Only the two memory packages ship SessionStart hooks:
@@ -336,7 +358,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 150 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

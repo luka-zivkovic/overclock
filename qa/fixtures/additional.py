@@ -1492,6 +1492,550 @@ def build_lateral_engineering(root: Path) -> None:
         init_repo(work, f"lateral engineering advisory fixture {index}")
 
 
+UX_PAGE = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title} · Teamroom</title>
+{links}
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
+
+
+def ux_page(title: str, styles: list[str], body: str) -> str:
+    links = "\n".join(f'  <link rel="stylesheet" href="{href}">' for href in styles)
+    return UX_PAGE.format(title=title, links=links, body=body.rstrip("\n"))
+
+
+def build_ux_laws_invite(work: Path) -> None:
+    """An invite page with planted UX-law problems for the review case."""
+    write(
+        work,
+        "README.md",
+        "# Teamroom\n\nA small team workspace. This repository holds the invite page: `index.html` loads\n"
+        "`src/invite.js` and `src/invite.css`; `src/api.js` fakes the server with realistic delays.\n"
+        "Serve the folder with any static server (for example `python3 -m http.server`).\n\n"
+        "New workspace owners land here right after creating a workspace.\n",
+    )
+    write(
+        work,
+        "index.html",
+        ux_page(
+            "Invite teammates",
+            ["src/invite.css"],
+            """  <header class="top">
+    <h1>Invite teammates</h1>
+    <button class="btn" id="send-top">Send invites</button>
+  </header>
+  <main>
+    <p class="hint">Add the people you want to invite. Each invite needs an email and a role.</p>
+    <div id="rows"></div>
+    <button class="btn" id="add-row">Add another</button>
+    <p id="error" class="error"></p>
+  </main>
+  <footer class="actions">
+    <button class="btn" id="send">Send invites</button>
+    <button class="btn" id="draft">Save draft</button>
+    <button class="btn" id="cancel">Cancel</button>
+  </footer>
+  <script type="module" src="src/invite.js"></script>
+""",
+        ),
+    )
+    write(
+        work,
+        "src/invite.js",
+        """import { sendInvites, saveDraft } from "./api.js";
+
+const EMAIL = /^[a-z0-9._]+@[a-z0-9]+\\.[a-z]{2,}$/;
+const rows = document.getElementById("rows");
+const error = document.getElementById("error");
+
+function addRow() {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `
+    <div class="field"><label>Email</label><input class="email" type="text"></div>
+    <div class="field"><label>Role</label><input class="role" type="text" placeholder="admin, editor, or viewer"></div>
+    <button class="remove" title="Remove">×</button>
+  `;
+  row.querySelector(".remove").onclick = () => row.remove();
+  rows.appendChild(row);
+}
+
+function collect() {
+  const invites = [];
+  for (const row of rows.querySelectorAll(".row")) {
+    const email = row.querySelector(".email").value;
+    const role = row.querySelector(".role").value;
+    if (!EMAIL.test(email)) {
+      error.textContent = "Invalid format. Use lowercase letters and no spaces.";
+      return null;
+    }
+    if (!["admin", "editor", "viewer"].includes(role)) {
+      error.textContent = "Unknown role.";
+      return null;
+    }
+    invites.push({ email, role });
+  }
+  return invites;
+}
+
+async function send() {
+  const invites = collect();
+  if (!invites) return;
+  try {
+    await sendInvites(invites);
+    rows.innerHTML = "";
+    addRow();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+document.getElementById("send").onclick = send;
+document.getElementById("send-top").onclick = send;
+document.getElementById("add-row").onclick = addRow;
+document.getElementById("draft").onclick = () => saveDraft(collect());
+document.getElementById("cancel").onclick = () => history.back();
+addRow();
+""",
+    )
+    write(
+        work,
+        "src/invite.css",
+        """:root { --ink: #1f2328; --muted: #59636e; --line: #d1d9e0; --accent: #0969da; --danger: #d1242f; }
+body { margin: 0; font: 15px/1.5 system-ui, sans-serif; color: var(--ink); }
+.top { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+main { max-width: 640px; padding: 24px; }
+.hint { color: var(--muted); }
+.row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 4px; }
+.field label { display: block; margin-bottom: 24px; color: var(--muted); font-size: 13px; }
+.field input { padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; }
+.btn { padding: 6px 14px; border: 1px solid var(--line); border-radius: 6px; background: #f6f8fa; font-size: 14px; }
+.remove { width: 14px; height: 14px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 10px; }
+.error { color: var(--danger); font-size: 13px; }
+.actions { display: flex; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line); }
+""",
+    )
+    write(
+        work,
+        "src/api.js",
+        """// Fake server: resolves after a delay like a real request.
+export function sendInvites(invites) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (invites.length > 5) reject(new Error("Too many invites at once (max 5)."));
+      else resolve({ sent: invites.length });
+    }, 1500);
+  });
+}
+
+export function saveDraft(invites) {
+  return new Promise(resolve => setTimeout(() => resolve({ saved: (invites || []).length }), 600));
+}
+""",
+    )
+
+
+def build_ux_laws_signin(work: Path) -> None:
+    """A sign-in page that already handles its states; the fabrication control."""
+    write(
+        work,
+        "README.md",
+        "# Teamroom\n\nThe sign-in page: `index.html`, `src/signin.js`, and `src/signin.css`; `src/api.js` fakes\n"
+        "the server. Returning members sign in here every few days.\n",
+    )
+    write(
+        work,
+        "index.html",
+        ux_page(
+            "Sign in",
+            ["src/signin.css"],
+            """  <main class="card">
+    <h1>Sign in to Teamroom</h1>
+    <form id="signin" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <a class="aside" href="/reset">Forgot password?</a>
+      </div>
+      <p id="error" class="error" role="alert" hidden></p>
+      <button id="submit" class="primary" type="submit">Sign in</button>
+    </form>
+    <p class="aside">New to Teamroom? <a href="/signup">Create an account</a></p>
+  </main>
+  <script type="module" src="src/signin.js"></script>
+""",
+        ),
+    )
+    write(
+        work,
+        "src/signin.js",
+        """import { signIn } from "./api.js";
+
+const form = document.getElementById("signin");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const submit = document.getElementById("submit");
+const error = document.getElementById("error");
+
+function showError(message) {
+  error.textContent = message;
+  error.hidden = false;
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+  error.hidden = true;
+  const address = email.value.trim().toLowerCase();
+  if (!address.includes("@")) {
+    showError("Enter the email address you signed up with, like ana@example.com.");
+    email.focus();
+    return;
+  }
+  if (!password.value) {
+    showError("Enter your password.");
+    password.focus();
+    return;
+  }
+  submit.disabled = true;
+  submit.textContent = "Signing in…";
+  try {
+    await signIn(address, password.value);
+    window.location.assign("/home");
+  } catch (err) {
+    showError(err.message || "Could not sign in. Check your connection and try again.");
+    password.select();
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Sign in";
+  }
+});
+""",
+    )
+    write(
+        work,
+        "src/signin.css",
+        """:root { --ink: #1f2328; --muted: #59636e; --line: #d1d9e0; --accent: #0969da; --danger: #d1242f; }
+body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--ink); background: #f6f8fa; }
+.card { max-width: 360px; margin: 64px auto; padding: 32px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+h1 { margin: 0 0 24px; font-size: 22px; }
+.field { margin-bottom: 20px; }
+.field label { display: block; margin-bottom: 4px; font-weight: 600; }
+.field input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+.aside { display: inline-block; margin-top: 8px; padding: 4px 0; color: var(--muted); font-size: 14px; }
+.error { margin: 0 0 16px; color: var(--danger); }
+.primary { width: 100%; min-height: 44px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; }
+.primary:disabled { opacity: 0.7; }
+""",
+    )
+    write(
+        work,
+        "src/api.js",
+        """// Fake server: resolves after a delay like a real request.
+export function signIn(email, password) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (password === "wrong") {
+        reject(new Error("That email and password do not match. Try again or reset your password."));
+      } else {
+        resolve({ email });
+      }
+    }, 800);
+  });
+}
+""",
+    )
+
+
+def build_ux_laws_settings(work: Path) -> None:
+    """A stub settings page plus a flat spec for the build case."""
+    write(
+        work,
+        "README.md",
+        "# Teamroom\n\nThe notification settings page. `index.html` loads `src/settings.js`; shared styles and\n"
+        "tokens live in `src/styles.css`; `src/api.js` fakes the server. Most members open this page once,\n"
+        "to turn noisy notifications down; a few admins tune the advanced options.\n",
+    )
+    write(work, "package.json", '{"name": "teamroom", "private": true, "type": "module", "dependencies": {}}\n')
+    write(
+        work,
+        "index.html",
+        ux_page(
+            "Notification settings",
+            ["src/styles.css"],
+            """  <main id="app"></main>
+  <script type="module" src="src/settings.js"></script>
+""",
+        ),
+    )
+    write(
+        work,
+        "src/settings.js",
+        """import { loadSettings, saveSettings } from "./api.js";
+
+// TODO: build the notification settings page described in docs/settings-spec.md.
+export function renderSettings(root) {
+  root.textContent = "Settings go here.";
+}
+
+renderSettings(document.getElementById("app"));
+""",
+    )
+    write(
+        work,
+        "src/styles.css",
+        """:root {
+  --ink: #1f2328; --muted: #59636e; --line: #d1d9e0; --surface: #ffffff; --canvas: #f6f8fa;
+  --accent: #0969da; --danger: #d1242f; --success: #1a7f37;
+  --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 40px;
+  --radius: 6px;
+}
+body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--canvas); }
+.card { max-width: 640px; margin: var(--space-5) auto; padding: var(--space-4); border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.field { margin-bottom: var(--space-3); }
+.field label { display: block; margin-bottom: var(--space-1); font-weight: 600; }
+.hint { margin-top: var(--space-1); color: var(--muted); font-size: 14px; }
+input, select { box-sizing: border-box; min-height: 40px; padding: var(--space-2) 12px; border: 1px solid var(--line); border-radius: var(--radius); font: inherit; }
+.btn { min-height: 40px; padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); font: inherit; }
+.btn-primary { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 600; }
+.btn:disabled { opacity: 0.6; }
+.notice { padding: var(--space-2) var(--space-3); border-radius: var(--radius); }
+.notice-error { background: #ffebe9; color: var(--danger); }
+.notice-success { background: #dafbe1; color: var(--success); }
+""",
+    )
+    write(
+        work,
+        "src/api.js",
+        """// Fake server with realistic delays.
+const stored = {
+  emailNotifications: true,
+  digestFrequency: "daily",
+  mentionAlerts: true,
+  mobilePush: false,
+  digestHour: 8,
+  quietHoursStart: "22:00",
+  quietHoursEnd: "07:00",
+  timezone: "Europe/Belgrade",
+  channelOverrides: {},
+  webhookUrl: "",
+  productNews: true,
+  emailFormat: "html",
+};
+
+export function loadSettings() {
+  return new Promise(resolve => setTimeout(() => resolve(structuredClone(stored)), 700));
+}
+
+export function saveSettings(next) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (next.webhookUrl && !/^https:\\/\\//.test(next.webhookUrl)) {
+        reject(new Error("Webhook URL must start with https://"));
+        return;
+      }
+      if (!(Number.isInteger(next.digestHour) && next.digestHour >= 0 && next.digestHour <= 23)) {
+        reject(new Error("Digest hour must be between 0 and 23."));
+        return;
+      }
+      Object.assign(stored, next);
+      resolve(structuredClone(stored));
+    }, 900);
+  });
+}
+""",
+    )
+    write(
+        work,
+        "docs/settings-spec.md",
+        """# Notification settings
+
+One page where a member controls which notifications Teamroom sends them. Changes apply when the
+member saves. The server can reject a save (see `src/api.js`).
+
+| Key | Label | Type | Notes |
+|---|---|---|---|
+| emailNotifications | Email notifications | on/off | |
+| digestFrequency | Digest | never, daily, weekly | |
+| mentionAlerts | Alert me when someone mentions me | on/off | |
+| mobilePush | Push notifications on mobile | on/off | |
+| digestHour | Digest delivery hour | 0 to 23 | Hour of day in the member's time zone |
+| quietHoursStart | Quiet hours start | time | No push notifications during quiet hours |
+| quietHoursEnd | Quiet hours end | time | |
+| timezone | Time zone | IANA zone name | |
+| channelOverrides | Per-channel overrides | channel to all, mentions, or none | Channels: general, design, engineering, random |
+| webhookUrl | Forward notifications to a webhook | URL | Must be https |
+| productNews | Product news emails | on/off | |
+| emailFormat | Email format | HTML or plain text | |
+""",
+    )
+
+
+def build_ux_laws_backend(work: Path) -> None:
+    """A JSON API with no interface; the scope-stop control."""
+    write(work, "README.md", "# Orders API\n\nA JSON HTTP service. No frontend lives in this repository.\n")
+    write(work, "package.json", '{"name": "orders-api", "private": true, "type": "module", "scripts": {"start": "node src/server.js"}}\n')
+    write(
+        work,
+        "src/orders.js",
+        """export function createOrder(body) {
+  if (!body || !Array.isArray(body.items) || body.items.length === 0) {
+    return { status: 400, body: { error: "items must be a non-empty array" } };
+  }
+  const total = body.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  return { status: 201, body: { id: `ord_${Date.now()}`, total } };
+}
+""",
+    )
+    write(
+        work,
+        "src/server.js",
+        """import { createServer } from "node:http";
+import { createOrder } from "./orders.js";
+
+createServer((request, response) => {
+  if (request.method !== "POST" || request.url !== "/orders") {
+    response.writeHead(404).end();
+    return;
+  }
+  let raw = "";
+  request.on("data", chunk => { raw += chunk; });
+  request.on("end", () => {
+    const result = createOrder(JSON.parse(raw || "null"));
+    response.writeHead(result.status, { "content-type": "application/json" });
+    response.end(JSON.stringify(result.body));
+  });
+}).listen(3000);
+""",
+    )
+
+
+def build_ux_laws_projects(work: Path) -> None:
+    """A list whose failed load renders the first-use empty state; the false-state case."""
+    write(
+        work,
+        "README.md",
+        "# Teamroom\n\nThe projects list: `index.html`, `src/projects.js`, and `src/projects.css`; `src/api.js`\n"
+        "fakes the two services behind it. Members open this page every day to jump into a project.\n",
+    )
+    write(
+        work,
+        "index.html",
+        ux_page(
+            "Projects",
+            ["src/projects.css"],
+            """  <header class="top">
+    <h1>Projects</h1>
+    <button class="btn primary" id="new">New project</button>
+  </header>
+  <p id="banner" class="banner" hidden></p>
+  <main id="list"></main>
+  <script type="module" src="src/projects.js"></script>
+""",
+        ),
+    )
+    write(
+        work,
+        "src/projects.js",
+        """import { fetchOwnedProjects, fetchSharedProjects } from "./api.js";
+
+const list = document.getElementById("list");
+const banner = document.getElementById("banner");
+
+function renderEmpty() {
+  list.innerHTML = `
+    <div class="empty">
+      <h2>No projects yet</h2>
+      <p>Create your first project to start collecting feedback.</p>
+      <button class="btn primary" id="empty-new">New project</button>
+    </div>`;
+}
+
+function renderProjects(projects) {
+  list.innerHTML = projects
+    .map(p => `<a class="project" href="/projects/${p.id}"><strong>${p.name}</strong><span>${p.updated}</span></a>`)
+    .join("");
+}
+
+async function load() {
+  list.textContent = "Loading…";
+  let projects = [];
+  try {
+    const [owned, shared] = await Promise.all([fetchOwnedProjects(), fetchSharedProjects()]);
+    projects = [...owned, ...shared];
+  } catch (err) {
+    banner.textContent = err.message;
+    banner.hidden = false;
+  }
+  if (projects.length === 0) renderEmpty();
+  else renderProjects(projects);
+}
+
+load();
+""",
+    )
+    write(
+        work,
+        "src/projects.css",
+        """:root { --ink: #1f2328; --muted: #59636e; --line: #d1d9e0; --accent: #0969da; }
+body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--ink); }
+.top { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+.banner { margin: 8px 24px; color: #8c959f; font-size: 12px; }
+main { max-width: 720px; padding: 8px 24px; }
+.project { display: flex; justify-content: space-between; min-height: 44px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+.project span { color: var(--muted); font-size: 14px; }
+.empty { padding: 48px 0; text-align: center; }
+.btn { min-height: 40px; padding: 8px 16px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+.primary { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 600; }
+""",
+    )
+    write(
+        work,
+        "src/api.js",
+        """// Fake services with realistic delays. Shared projects come from a separate service.
+const delay = (ms, value) => new Promise(resolve => setTimeout(() => resolve(value), ms));
+
+export function fetchOwnedProjects() {
+  return delay(400, [
+    { id: "p1", name: "Checkout redesign", updated: "Updated 2 days ago" },
+    { id: "p2", name: "Onboarding survey", updated: "Updated last week" },
+  ]);
+}
+
+export function fetchSharedProjects() {
+  return delay(900, [{ id: "p9", name: "Brand refresh (shared)", updated: "Updated today" }]);
+}
+""",
+    )
+
+
+def build_ux_laws(root: Path) -> None:
+    base = root / "ux-laws"
+    builders = (
+        (build_ux_laws_invite, "invite page"),
+        (build_ux_laws_signin, "sign-in page"),
+        (build_ux_laws_settings, "settings stub"),
+        (build_ux_laws_backend, "orders api"),
+        (build_ux_laws_signin, "sign-in page"),
+        (build_ux_laws_projects, "projects list"),
+    )
+    for index, (builder, label) in enumerate(builders):
+        work = base / f"eval-{index}"
+        builder(work)
+        init_repo(work, f"ux-laws {label} baseline")
+
+
 def _bench_tool(name: str, description: str, properties: dict, required: list[str]) -> dict:
     return {
         "name": name,
@@ -1687,6 +2231,7 @@ def main() -> int:
     build_untangle(root)
     build_api_bench(root)
     build_lateral_engineering(root)
+    build_ux_laws(root)
     return 0
 
 
