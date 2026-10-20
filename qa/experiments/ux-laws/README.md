@@ -95,3 +95,20 @@ no new live case was added for it.
   its expected time, say what to check, stop automatic refreshing), with live case 6, and build
   mode now offers problems outside the request instead of fixing them unasked, added to case 2's
   process expectation. Neither change has been rerun against Rubrist.
+
+## Redesign round: Loadout (2026-10-20)
+
+- **Target:** Loadout (`luka-zivkovic/loadout` at `b4600a4`), the My devices page (`/devices`,
+  `Devices` in `web/Views.tsx`): connect and approve were split into unrelated panels, CLI steps
+  showed before any device existed, and a member arriving from the CLI's `/devices?code=` link
+  found the prefilled code below the fold under "No devices connected".
+- **Request, identical for both arms:** redesign the whole screen (layout, order, copy, and
+  components may all change), keeping the visual language and existing API calls, web only.
+  Builds used the latest skill, including the scope and pending-bound rules.
+- **Setup:** two git worktrees, each with its own server and data. One harness then started a
+  fresh instance per build, claimed the same admin, ran a real `team login` from the CLI, captured
+  seven states, approved the real code through the API, and confirmed the CLI reported
+  "Connected" for every build. Three-column images (original, without skill, with the skill) are
+  in [redesign-screens/](redesign-screens/).
+- **Verification:** the builders reported `npm run check` and `npm test` (72 tests) passing; the
+  author's rerun and the blind judgment are pending.
