@@ -12,7 +12,8 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   phone widths when the app runs, and walks five passes: choices, layout, actions, response, and
   progress and ending. States the app will not show on its own (a failed request, one failure
   among several, an empty result, a slow response) are forced by stubbing requests, and every
-  state is reported as seen, read from code, or not checked.
+  state is reported as seen, read from code, or not checked. Behavior seen on demo or mock data is
+  checked against the real storage or API code before it is reported.
 - Build mode implements the view with the project's own components, covers every state the view
   can be in, and reports at most five `law → decision → file:line` lines for laws that changed a
   decision. Review mode is read-only and reports at most five ranked findings, with anything that

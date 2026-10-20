@@ -101,8 +101,20 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   one reference. No hooks, scripts, writes outside the view, or commits.
 - **Evidence:** tier `rubric`. Five live cases: a planted-problem review, a well-built page as
   a fabrication control, a twelve-setting build, a backend scope stop, and a one-line tweak whose
-  label also resets in a `finally` block. Each has deterministic unchanged-file checks. No routing
-  battery: the skill is user-invoked.
+  label also resets in a `finally` block, plus a list whose failed load renders the first-use
+  empty state. Each has deterministic unchanged-file checks. No routing battery: the skill is
+  user-invoked. Live results are not recorded yet.
+- **Author-run A/B (2026-10-20):** review mode on Rubrist's unaudited `/integrations` page, a
+  no-skill baseline against the draft and then the revised skill, recorded in
+  `qa/experiments/ux-laws/`. The draft was precise but found less than the baseline and missed
+  its most serious problem (a failed load shown as "no integrations") because it never forced
+  error states. The revision (forced states, false states first, Also noticed) ranked that
+  problem first, added a silent-overwrite problem the baseline missed, and avoided a demo-only
+  artifact both earlier runs reported. The baseline stays broader on accessibility and polish.
+  Author-judged, one page, review mode only.
+- **Next:** the maintainer is still deciding whether the skill earns its place. Test build mode
+  (the motivating use) against a no-skill baseline on a real feature, then a second app, before
+  treating the comparison as settled.
 
 ### untangle — BUILD, v0.1.0 published (2026-09-20)
 - **Demand:** direct maintainer request on behalf of a named non-developer user whose

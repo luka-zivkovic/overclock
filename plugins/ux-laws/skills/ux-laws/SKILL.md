@@ -124,3 +124,5 @@ job, and say which won and why. The common pairs are under Tensions in
 - Miller's law is about working memory, not a cap on menu items. Do not cite it to cut a list to
   seven.
 - Keep what you observed (code, screenshot) separate from what you assume about users.
+- When the running app uses demo, mock, or seeded data, check what you saw against the real
+  storage or API code before reporting it. Behavior only the demo produces is not a finding.
