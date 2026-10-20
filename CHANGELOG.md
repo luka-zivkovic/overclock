@@ -14,15 +14,17 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   among several, an empty result, a slow response) are forced by stubbing requests, and every
   state is reported as seen, read from code, or not checked. Behavior seen on demo or mock data is
   checked against the real storage or API code before it is reported.
-- Build mode implements the view with the project's own components, covers every state the view
-  can be in, and reports at most five `law → decision → file:line` lines for laws that changed a
+- Build mode implements the view with the project's own components, changes only what the
+  request covers (problems found elsewhere are offered, not fixed unasked), covers every state the
+  view can be in, and reports at most five `law → decision → file:line` lines for laws that changed a
   decision. Review mode is read-only and reports at most five ranked findings, with anything that
   shows the user something untrue ranked first, each with what the user experiences, the law,
   `file:line` evidence, and a sized fix, plus at most three verified one-line extras; a view in
   good shape gets a short answer instead of a padded list. Neither mode commits.
 - Ship a standalone reference for all twenty laws with symptoms to look for, default fixes,
   misuse warnings (Miller's law is not a cap on menu items), a state checklist for async actions
-  and collections, and the common tensions between laws.
+  and collections (including an upper bound on pending work), and the common tensions between
+  laws.
 
 ## api-bench
 

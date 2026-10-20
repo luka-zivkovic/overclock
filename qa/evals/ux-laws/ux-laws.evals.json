@@ -127,7 +127,7 @@
         "The page shows a loading state before values arrive; Save shows a pending state as soon as it is clicked, a visible success confirmation, and the server's rejection message in place while keeping the user's edits.",
         "Fixed sets use toggles, selects, or radio groups rather than free text (digest frequency, email format, channel overrides), the time zone is prefilled or picked rather than typed from memory, and the webhook field trims whitespace or states the https rule next to the field.",
         "The final report lists at most five UX decisions, each naming a law, the decision it drove, and a file reference, and lists only laws that changed something.",
-        "Process: existing classes and tokens from src/styles.css are reused rather than replaced, no dependency or framework is added, and nothing is committed."
+        "Process: existing classes and tokens from src/styles.css are reused rather than replaced, no dependency or framework is added, behavior outside the settings request is not changed (anything found there is reported and offered instead), and nothing is committed."
       ],
       "state_checks": [
         {
@@ -236,6 +236,34 @@
         {
           "expectation_index": 0,
           "path": "src/projects.js",
+          "kind": "unchanged"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "/ux-laws review the export page",
+      "expected_output": "Stuck-pending detection. The export page polls every two seconds while a job is queued or running and has no upper bound, so a job that never starts spins forever with no explanation. The review reports that as a finding with the polling loop as evidence.",
+      "files": [
+        {
+          "name": "src/export.js",
+          "description": "Starts an export, then polls every 2 s with no limit while the status is queued or running, showing a spinner and 'Preparing your export…'."
+        },
+        {
+          "name": "src/api.js",
+          "description": "Fake server whose job stays queued forever, as it would with a stopped worker."
+        }
+      ],
+      "expectations": [
+        "Final file state: src/export.js has unchanged bytes and permissions.",
+        "A finding says a job that never leaves queued or running keeps the spinner and the two-second polling going forever with no stuck state, no explanation of what to check, and no way out. It cites the polling loop in src/export.js and names feedback loops or the Doherty threshold.",
+        "The proposed fix gives pending an upper bound: after a stated threshold the page says the export is taking longer than expected, suggests what to check or a retry, and stops or slows the automatic polling.",
+        "Process: no file is edited and nothing is committed."
+      ],
+      "state_checks": [
+        {
+          "expectation_index": 0,
+          "path": "src/export.js",
           "kind": "unchanged"
         }
       ]

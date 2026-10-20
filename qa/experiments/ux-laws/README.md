@@ -81,4 +81,17 @@ no new live case was added for it.
   skill build offers one page-level Retry; the baseline shows an error on each card with no retry.
   The skill build also changed the provider lists to load independently (the false empty state
   from the review round), which the request did not ask for; it flagged that itself.
-- **Blind judgment:** pending.
+- **Blind judgment:** a fresh agent saw only the two diffs and the five screenshots per build,
+  under randomly assigned labels, and was told not to read anything that could identify the
+  authors. It chose the skill build overall with medium confidence, winning five of seven criteria
+  (answering "are traces arriving?", clarity, recovery, phone layout, fit with the app's own
+  components). The baseline won code risk and, narrowly, honesty of states.
+- **The baseline's advantages, verified by the author:** it marks a queued or running import
+  older than 15 minutes as stuck and stops polling (`STALE_IN_FLIGHT_MS`), while the skill build
+  refreshes every 5 s for as long as a job stays in flight. The skill build's screen test reads the
+  real clock and asserts "started 15s ago", so it can fail intermittently; the baseline uses fake
+  timers. The baseline also stayed strictly inside the request.
+- **Changes after this round:** the state checklist now gives pending an upper bound (stuck after
+  its expected time, say what to check, stop automatic refreshing), with live case 6, and build
+  mode now offers problems outside the request instead of fixing them unasked, added to case 2's
+  process expectation. Neither change has been rerun against Rubrist.

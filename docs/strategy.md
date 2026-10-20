@@ -112,9 +112,16 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   problem first, added a silent-overwrite problem the baseline missed, and avoided a demo-only
   artifact both earlier runs reported. The baseline stays broader on accessibility and polish.
   Author-judged, one page, review mode only.
-- **Next:** the maintainer is still deciding whether the skill earns its place. Test build mode
-  (the motivating use) against a no-skill baseline on a real feature, then a second app, before
-  treating the comparison as settled.
+- **Build-mode A/B (2026-10-20):** both arms built per-connection import activity on the same
+  page in separate worktrees; both pass typecheck and the full web suite. A blind judge given only
+  diffs and identical stubbed screenshots chose the skill build (medium confidence, five of seven
+  criteria: answer first, history on demand, a real Retry, phone layout, the app's own load and
+  error components). The baseline won code risk: it bounds in-flight imports as stuck, uses fake
+  timers in tests, and stayed inside the request. Those gaps became an upper bound on pending in
+  the state checklist (live case 6) and a build-mode rule to offer, not make, changes outside the
+  request.
+- **Next:** the maintainer is still deciding whether the skill earns its place. Rerun build mode
+  with the latest rules and test a second app before treating the comparison as settled.
 
 ### untangle — BUILD, v0.1.0 published (2026-09-20)
 - **Demand:** direct maintainer request on behalf of a named non-developer user whose

@@ -2020,6 +2020,76 @@ export function fetchSharedProjects() {
     )
 
 
+def build_ux_laws_export(work: Path) -> None:
+    """An export page that polls a job forever; the stuck-pending case."""
+    write(
+        work,
+        "README.md",
+        "# Teamroom\n\nThe data export page: `index.html` and `src/export.js`; `src/api.js` fakes the export\n"
+        "service. Exports normally finish within a minute.\n",
+    )
+    write(
+        work,
+        "index.html",
+        ux_page(
+            "Export data",
+            [],
+            """  <main>
+    <h1>Export workspace data</h1>
+    <p>Download every project, comment, and file as a ZIP archive.</p>
+    <button id="start">Start export</button>
+    <p id="status" role="status"></p>
+  </main>
+  <script type="module" src="src/export.js"></script>
+""",
+        ),
+    )
+    write(
+        work,
+        "src/export.js",
+        """import { startExport, getExport } from "./api.js";
+
+const start = document.getElementById("start");
+const status = document.getElementById("status");
+
+async function poll(id) {
+  const job = await getExport(id);
+  if (job.status === "queued" || job.status === "running") {
+    status.textContent = "⏳ Preparing your export…";
+    setTimeout(() => poll(id), 2000);
+    return;
+  }
+  if (job.status === "done") {
+    status.innerHTML = `Export ready. <a href="${job.url}">Download ZIP</a>`;
+  } else {
+    status.textContent = `Export failed: ${job.error}`;
+  }
+  start.disabled = false;
+}
+
+start.addEventListener("click", async () => {
+  start.disabled = true;
+  status.textContent = "Starting export…";
+  const job = await startExport();
+  poll(job.id);
+});
+""",
+    )
+    write(
+        work,
+        "src/api.js",
+        """// Fake export service. The worker is stopped, so every job stays queued.
+export function startExport() {
+  return new Promise(resolve => setTimeout(() => resolve({ id: "exp_1", status: "queued" }), 300));
+}
+
+export function getExport(id) {
+  return new Promise(resolve => setTimeout(() => resolve({ id, status: "queued" }), 200));
+}
+""",
+    )
+
+
 def build_ux_laws(root: Path) -> None:
     base = root / "ux-laws"
     builders = (
@@ -2029,6 +2099,7 @@ def build_ux_laws(root: Path) -> None:
         (build_ux_laws_backend, "orders api"),
         (build_ux_laws_signin, "sign-in page"),
         (build_ux_laws_projects, "projects list"),
+        (build_ux_laws_export, "export page"),
     )
     for index, (builder, label) in enumerate(builders):
         work = base / f"eval-{index}"

@@ -185,7 +185,9 @@ People judge an experience mostly by its most intense moment and its end, not it
 
 For every async action:
 - idle: enabled, or disabled with the reason visible;
-- pending: acknowledged within 400 ms, trigger disabled, progress near the trigger;
+- pending: acknowledged within 400 ms, trigger disabled, progress near the trigger, and an upper
+  bound: work pending well past its expected time reads as stuck, says what to check, and stops
+  any automatic refreshing;
 - success: confirmed where the user is looking, with the next step if there is one;
 - error: shown in place, saying what happened and what to do, input kept, retry when retrying can
   work.
