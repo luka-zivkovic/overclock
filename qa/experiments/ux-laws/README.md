@@ -61,3 +61,24 @@ no new live case was added for it.
   for the user is not settled by one page.
 - Not established: build mode, other pages or apps, blind judging, repeated runs, or live-suite
   results.
+
+## Build round (2026-10-20)
+
+- **Request, identical for both arms:** show on each connection card of `/integrations` what its
+  imports have actually done, using the existing `fetchImportJobs` client, web app only.
+- **Setup:** two git worktrees of Rubrist at `78dcecc`, each with its own demo instance. The
+  baseline got the request as written; the skill arm got it as `/ux-laws build …` and read
+  `SKILL.md` (revised version, including the demo-data rule). Neither committed.
+- **Verification:** both builds pass `pnpm --filter @rubrist/web typecheck` and the full web suite
+  when rerun by the author (baseline 91 files and 640 tests, skill 90 files and 636 tests).
+- **Screens:** one harness stubbed identical integrations and import jobs for both builds and
+  captured five states. Side-by-side images (baseline left, skill right) are in
+  [build-screens/](build-screens/): mixed history, phone width, no imports, import history
+  failing, and import history still loading.
+- **Observed differences:** the skill build leads each card with the answer ("25 new traces
+  arrived 11 min ago") and keeps history behind a closed disclosure; the baseline places the
+  section below the existing facts and lists every recent import. On a failed history request the
+  skill build offers one page-level Retry; the baseline shows an error on each card with no retry.
+  The skill build also changed the provider lists to load independently (the false empty state
+  from the review round), which the request did not ask for; it flagged that itself.
+- **Blind judgment:** pending.
