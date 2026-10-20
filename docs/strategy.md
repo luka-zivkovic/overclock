@@ -120,8 +120,18 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   timers in tests, and stayed inside the request. Those gaps became an upper bound on pending in
   the state checklist (live case 6) and a build-mode rule to offer, not make, changes outside the
   request.
-- **Next:** the maintainer is still deciding whether the skill earns its place. Rerun build mode
-  with the latest rules and test a second app before treating the comparison as settled.
+- **Second app, full-screen redesign (2026-10-20):** Loadout's My devices page, "rethink the whole
+  screen" for both arms, captured on fresh instances with a real CLI device login. Both redesigns
+  pass check and 72 tests and both beat the original. A blind judge chose the skill build with
+  low confidence (3–3, two ties): it won the CLI-link arrival, honest states, and phone; the
+  baseline won the first visit, the returning member, and visual fit. The skill build's state
+  thoroughness came as 18 independent flags and a regex on server messages, which became a
+  build-mode rule (one explicit state value, branch on codes). Answer to "can it redesign a bad
+  screen": yes, one screen at a time within the existing visual language; not a multi-screen or
+  visual-identity overhaul.
+- **Next:** the maintainer is still deciding whether the skill earns its place. Across three
+  rounds the skill won once at medium and once at low confidence against a strong plain request;
+  rerun with the latest rules before treating the margin as settled.
 
 ### untangle — BUILD, v0.1.0 published (2026-09-20)
 - **Demand:** direct maintainer request on behalf of a named non-developer user whose

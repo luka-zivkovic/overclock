@@ -92,7 +92,9 @@ job, and say which won and why. The common pairs are under Tensions in
   the brand, or edit files beyond the view and what it directly needs without asking first.
 - Change only what the request covers. A problem you find outside it, even in the same file, goes
   in the report as an offer; fix it only after the user agrees.
-- Build every state the view can be in, not only the happy path.
+- Build every state the view can be in, not only the happy path. Model a flow's states as one
+  explicit value with named steps, not a set of independent flags, and branch on error codes or
+  statuses rather than on message text.
 - If the app runs, screenshot the result and recheck it against the five passes before reporting.
 - Report what you built, then **UX decisions**: at most five lines, each
   `law → decision → file:line`, only for laws that changed something.

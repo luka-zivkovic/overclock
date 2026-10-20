@@ -16,7 +16,7 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   checked against the real storage or API code before it is reported.
 - Build mode implements the view with the project's own components, changes only what the
   request covers (problems found elsewhere are offered, not fixed unasked), covers every state the
-  view can be in, and reports at most five `law → decision → file:line` lines for laws that changed a
+  view can be in as one explicit state value rather than independent flags, and reports at most five `law → decision → file:line` lines for laws that changed a
   decision. Review mode is read-only and reports at most five ranked findings, with anything that
   shows the user something untrue ranked first, each with what the user experiences, the law,
   `file:line` evidence, and a sized fix, plus at most three verified one-line extras; a view in

@@ -110,5 +110,32 @@ no new live case was added for it.
   seven states, approved the real code through the API, and confirmed the CLI reported
   "Connected" for every build. Three-column images (original, without skill, with the skill) are
   in [redesign-screens/](redesign-screens/).
-- **Verification:** the builders reported `npm run check` and `npm test` (72 tests) passing; the
-  author's rerun and the blind judgment are pending.
+- **Verification:** the author reran both builds: `npm run check` passes and `npm test` passes
+  72 of 72 for each. The baseline changed 5 files (+1,021/−366); the skill build changed 3
+  (+1,328/−351).
+- **Blind judgment:** the same protocol as the build round, with the original screens as a shared
+  "before". The judge also applied each patch to a scratch copy and type-checked it. It chose the
+  skill build with **low** confidence, splitting the eight criteria 3–3 with two ties. The skill
+  build won arriving from the CLI link (Approve above the fold on desktop and at the fold on
+  phone, versus a scroll), honesty of states (slow, stale-list, and stalled states; expired codes
+  hide Approve), and phone layout. The baseline won the first visit (a vertical, tagged step list
+  where the skill's two columns put an empty code box at top right), the returning member, and fit
+  with the visual language. Copy and code quality tied.
+- **Both are clearly better than the original**, per the judge: one guided flow with approval in
+  place replaces the separate dialog and side panel.
+- **Verified by the author:** the skill build adds 18 `useState` flags to `Views.tsx` against the
+  baseline's 5 and sorts errors by regex on the server's message text (`Views.tsx:1081`); the
+  baseline's step 1 falls back to "Loading instructions…" if instructions fail, and only the skill
+  build uses `preventScroll` when moving focus.
+- **Change after this round:** build mode now models a flow's states as one explicit value with
+  named steps and branches on codes or statuses, not message text, with case 2's state
+  expectation extended. Not yet rerun.
+
+## Can it redesign a whole bad screen?
+
+On this evidence, yes for one screen at a time: both arms rewrote the page's structure, flow,
+states, and copy within the existing visual language, and both results beat the original. The
+skill's edge over a strong plain request was small here (a low-confidence win), concentrated on
+the most common path and on honest states, and it cost code complexity. Outside what was tested:
+a multi-screen or navigation redesign, and a visual-identity overhaul, which the skill
+deliberately leaves to the project's style and to visual-design tools.
