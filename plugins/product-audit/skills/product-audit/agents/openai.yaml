@@ -1,6 +1,4 @@
 interface:
   display_name: "Product Audit"
   short_description: "Find which features earn their keep and where to cut"
-  default_prompt: "Use $product-audit to take stock of this product, judge which features earn their keep, and write PRODUCT-AUDIT.md for me to decide on."
-policy:
-  allow_implicit_invocation: false
+  default_prompt: "Use $product-audit to take stock of this product: what it promises, which features earn their keep, and whether its direction still holds."

@@ -1,0 +1,34 @@
+{
+  "skill": "product-audit",
+  "plugin": "product-audit",
+  "install_modes": ["skill"],
+  "samples": 3,
+  "thresholds": {"precision": 0.9, "recall": 0.8, "specificity": 0.9},
+  "note": "product-audit should fire when someone wants to step back and assess a whole product they have already built: which features deserve to stay, whether it has grown too complicated, whether its direction still holds. It must stay silent for a decision about one feature, a visual design critique, a diff or bug, building or fixing something, repository cleanup, and research on an idea with no code.",
+  "should_trigger": [
+    {"prompt": "ok so I've been hacking on this budgeting app on weekends for like 14 months and I keep bolting stuff on. honestly not sure all of it deserves to be there anymore. can you take a look at the whole thing and tell me where I stand?", "allowed_skills": ["product-audit"]},
+    {"prompt": "Do a product audit of this repo. I want to know which features are earning their keep and which are dead weight.", "allowed_skills": ["product-audit"]},
+    {"prompt": "This started as a tiny CLI for renaming photos and now it has 31 subcommands. Is it bloated? What would you cut, and does the direction still make sense?", "allowed_skills": ["product-audit"]},
+    {"prompt": "I feel like my app lost the plot somewhere. The README says it's a reading tracker but half my recent commits are for a book-club chat thing. Step back and give me an honest read on the whole product.", "allowed_skills": ["product-audit"]},
+    {"prompt": "feature audit pls. side project, solo dev, way too many settings and screens by now. tell me what to keep, what to kill, and compare against similar apps so I know if I'm off base", "allowed_skills": ["product-audit"]},
+    {"prompt": "Before I spend another month on this, I want a sanity check on the product as a whole: scope, complexity, direction. It's the Next.js project in this folder.", "allowed_skills": ["product-audit"]},
+    {"prompt": "I maintain this plugin collection alone and keep adding plugins. Not sure every one deserves its place or whether the kit still has a clear point. Review it as a product.", "allowed_skills": ["product-audit"]},
+    {"prompt": "Has the UX of this app gotten overcomplicated? I mean overall, the number of screens, menus, and options, not the styling. And which features would you drop?", "allowed_skills": ["product-audit"]},
+    {"prompt": "I have a few personal projects that all grew a lot of features. Start with this one: where am I with it, what actually matters, what's just accumulated?", "allowed_skills": ["product-audit"]}
+  ],
+  "should_not": [
+    {"prompt": "Should I add dark mode to this app? A couple of friends asked for it.", "allowed_skills": []},
+    {"prompt": "The settings page looks cramped on mobile. Can you fix the spacing and make the toggles line up?", "allowed_skills": []},
+    {"prompt": "Review my last commit for bugs before I push.", "allowed_skills": []},
+    {"prompt": "Add a CSV export button to the reports screen and wire it to the existing /api/export route.", "allowed_skills": []},
+    {"prompt": "I'm thinking of building an app that tells hikers trail conditions. Nothing is built yet. Who are the competitors and is there room for it?", "allowed_skills": []},
+    {"prompt": "This repo is full of old experiment folders and half-finished branches. Help me clean it up and figure out which directories are dead.", "allowed_skills": []},
+    {"prompt": "Delete the recipes feature: remove the routes, the Prisma models, and the menu entry.", "allowed_skills": []},
+    {"prompt": "Write a README for this project that explains what it does and how to run it.", "allowed_skills": []},
+    {"prompt": "What does the journal feature do? Walk me through the code path when a user saves an entry.", "allowed_skills": []},
+    {"prompt": "Critique the visual design of this landing page screenshot: colours, type, hierarchy.", "allowed_skills": []},
+    {"prompt": "The stats page is slow. Profile it and tell me where the time goes.", "allowed_skills": []},
+    {"prompt": "Rename the Friends tab to Community everywhere in the app.", "allowed_skills": []},
+    {"prompt": "Which is better for this project, Postgres or SQLite? I need to pick one this week.", "allowed_skills": []}
+  ]
+}

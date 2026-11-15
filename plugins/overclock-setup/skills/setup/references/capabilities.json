@@ -326,7 +326,7 @@
         "PRODUCT-AUDIT.md"
       ],
       "minimum_host_version": null,
-      "selection": "Choose to take stock of a product that grew feature by feature: which features earn their keep, where it is more complicated than its promise needs, and whether its direction holds, with an optional cited comparison against similar products. Report-only; skip for a single feature decision, a visual design critique, or repository cleanup."
+      "selection": "Choose for an honest read on a whole product you have built: which features earn their keep, whether it has grown too complicated, and whether its direction holds, with a cited comparison against similar products. Skip for a single feature decision, a visual design critique, or repository cleanup."
     }
   ]
 }

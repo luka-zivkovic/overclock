@@ -242,7 +242,7 @@
     {
       "name": "product-audit",
       "source": "./plugins/product-audit",
-      "description": "Take stock of a product that grew one feature at a time. A read-only audit states the promise, inventories the real surface from code, judges each feature on promise fit, carrying cost, and usage, checks structural complexity and direction, and sanity-checks the verdicts against a few cited comparable products. It writes one report with recommendations the owner decides on. Never edits product code and never commits.",
+      "description": "An honest read on a product that grew one feature at a time: what it promises, which features earn their keep, whether it has become more complicated than its job needs, and whether its direction still holds. It asks the owner what the project is for and what gets used before judging, checks itself against a few cited comparable products, and writes one report. Never edits the product and never commits.",
       "version": "0.1.0",
       "category": "development",
       "keywords": [

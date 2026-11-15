@@ -234,6 +234,7 @@ jobs:
                 learning-loop-lessons-learned \
                 lessons-learned \
                 natural-writing \
+                product-audit \
                 project-vocabulary \
                 resolve-pr-feedback \
                 session-handoff \
@@ -267,11 +268,12 @@ jobs:
             learning-loop/lessons-learned) run_batteries learning-loop-lessons-learned ;;
             natural-writing/natural-writing) run_batteries natural-writing ;;
             pr-feedback/resolve-pr-feedback) run_batteries resolve-pr-feedback ;;
+            product-audit/product-audit) run_batteries product-audit ;;
             project-vocabulary/project-vocabulary) run_batteries project-vocabulary ;;
             session-memory/lessons-learned) run_batteries lessons-learned ;;
             session-memory/session-handoff) run_batteries session-handoff ;;
             session-memory/solutions) run_batteries solutions ;;
-            overclock-setup/setup|pr-feedback/publish-pr-feedback|product-audit/product-audit|untangle/untangle)
+            overclock-setup/setup|pr-feedback/publish-pr-feedback|untangle/untangle)
               echo "::error::No implicit-routing battery exists for the manually invoked target $TARGET."
               exit 2
               ;;

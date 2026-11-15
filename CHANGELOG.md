@@ -6,38 +6,26 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
 ## product-audit
 
 ### 0.1.0 — 2026-11-15 (initial release)
-- New plugin: a user-invoked audit for a product that grew one feature at a time. It states
-  the promise (who the product is for and what it does for them), inventories the real
-  surface, names the features a user would recognize, and gives each a class against the
-  promise (core, supporting, adjacent, off-promise), a carrying cost from counted surface, its
-  usage evidence, and one verdict: keep, finish, simplify, merge, park, or cut. A cut needs
-  usage evidence, a core feature is never parked or cut, and only the owner decides.
-- A deterministic read-only scan reports what the product says about itself, its screens,
-  endpoints, commands, data models, packages, plugins and agent skills, integrations (and
-  whether any file imports them), navigation hubs, settings, unlinked screens, and unfinished
-  markers. From git it adds when each item arrived (carried across renames, and dated by its
-  own line when several share a file), surface added per quarter, every commit in a recent
-  window with the directories it touched, and uncommitted-change counts. It follows common
-  web, mobile, server, and command-line conventions, says so when it recognizes none, never
-  opens environment files, and does not follow symlinks.
-- Structural complexity check capped at five findings (steps to the core action, top-level
-  destinations, settings) and a direction verdict of focused, drifting, split, or undefined,
-  with two or three options when it is not focused.
+- New plugin: an honest read on a product that grew one feature at a time. It reads the
+  project and its git history, states the promise, lists the features in the user's terms,
+  and asks the owner what the project is for and which features get used before judging any
+  of them. With no owner to ask, it says what that limits and recommends nothing for deletion.
+- Judges each feature on fit with the promise, what it carries, and use, and recommends keep,
+  finish, simplify, merge, park, or cut, each with a reason. A cut needs evidence the feature
+  is unused; a heavily used feature outside the promise becomes a question about direction.
+- Checks the structure a user meets (steps to the main action, what the menu ranks first,
+  settings, duplicate paths, dead ends) and reads the direction as focused, drifting, split,
+  or undefined from where recent work went, with options when it is not focused.
 - Outside view as a sanity check: three to five comparable products found through generic
-  category searches, each cited with a URL and the date it was read, used only to support or
-  question the audit's own verdicts. At most three gaps, and a competitor's feature is never
-  a reason to build. Without web access the section records that it did not run.
-- Writes one report, `PRODUCT-AUDIT.md`, which the helper's `check` validates: fixed scales,
-  snapshot counts that match the table, caps, cited ids, dated sources, ordered history. A
-  second audit carries the owner's decisions forward and reports what moved. Never edits
-  product code and never commits.
-- Unit tests pin planted-surface recall, history and rename handling, the no-write scan
-  boundary, environment-file and symlink refusal, convention false positives found on six
-  public repositories, and every report rule. Seven live cases cover a planted feature-creep
-  audit with an embedded instruction, a focused-product fabrication control, two scope stops,
-  owner answers that turn a cut into a direction question, a second audit that respects
-  earlier decisions, and a requested comparison with no web access. Evidence tier: objective
-  for the helper; rubric for behavior, with live results not yet recorded.
+  category searches, each cited with its URL and the date it was read, used only to support
+  or question the audit's own read. Without web access it reports the comparison as not run.
+- Answers in about one screen and writes `PRODUCT-AUDIT.md`. A later audit carries the owner's
+  decisions forward and reports what moved. Never edits the product and never commits.
+- A small read-only helper reports the git facts that are slow to work out by hand: when each
+  directory first appeared (carried across renames), commits per directory, every commit in
+  a recent window with the places it touched, and uncommitted-change counts.
+- Model-invoked, with a routing battery of stepping-back requests against single-feature,
+  design, bug, cleanup, and unbuilt-idea near misses.
 
 ## api-bench
 

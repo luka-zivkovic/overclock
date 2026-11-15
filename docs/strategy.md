@@ -123,44 +123,44 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
 - **Demand:** direct maintainer request: personal projects that accumulated features over
   time, with no way left to tell whether each feature deserves its keep, whether the
   experience is overcomplicated, or whether the direction still makes sense, plus a sanity
-  check against similar products. A direct request with a named recurring use satisfies
-  principle 4.
-- **Grounding:** nothing in the kit judges a product. `untangle` surveys repository coherence
-  and its unit is a thread of work; this audits what a user meets and its unit is a feature.
-  critical-thinking judges one decision, groundwork elicits requirements for work not yet
-  built, and the host's review tools are diff-scoped. Three ledger traps shaped the design.
-  Findings must cite a file, the owner, or a URL, so the result cannot be a generic advice
-  list (untangle's failed-result rule). Usage is a signal no file-reading skill can obtain
-  (the moat-signal-unobtainable pattern), so the skill asks the owner and refuses to cut on
-  unknown usage instead of guessing. And the comparison is bounded, cited, and barred from
-  adding features, because "a competitor has it" is the reasoning feature creep runs on.
-- **Product shape:** one user-invoked skill with one mode. Promise first, then a
-  deterministic scan, features named in user terms, a keep test on fixed scales (class, cost,
-  usage, verdict), a structural complexity check capped at five, a direction verdict with a
-  choice, an outside view of three to five cited products, and one validated report,
-  `PRODUCT-AUDIT.md`, followed by a single question to the owner. A second audit carries the
-  owner's decisions forward and appends a history line.
-- **Fences that keep it right-sized:** user-invoked only, with scope stops for one feature
-  decision, visual design critique, diffs and bugs, repository cleanup, and ideas with no
-  code. A small focused product gets a short "focused, nothing to cut" result. It writes only
-  the report, never edits product code, never commits, never opens environment files,
-  databases, or analytics, and searches only generic category terms. Without web access the
-  comparison is recorded as not run; products recalled from memory are not evidence.
-- **Evidence:** deterministic tests pin planted-surface recall, history and rename handling,
-  the no-write scan boundary, environment-file and symlink refusal, and every report rule
-  (objective). The scan's conventions were corrected against six public repositories (a
-  Next.js app, a FastAPI and TanStack Router template, a click CLI, a SvelteKit app, an
-  Express API, and a large Electron monorepo) and against this repository, which is why
-  plugin collections inventory as packages. Seven live cases are committed (rubric): a
-  planted feature-creep audit carrying an embedded instruction, a focused-product fabrication
-  control, two scope stops, owner answers that turn a cut into a direction question, a second
-  audit that respects earlier decisions, and a requested comparison with no web access. Live
-  results are not yet recorded; the harness denies web access, so the comparison's positive
-  path is covered only by the report rules and author-run sessions. No routing battery: the
-  skill is user-invoked.
-- **Next:** run the live suite, then observe real use on the maintainer's projects. Candidate
-  follow-ups, none authorized: a portfolio view across several projects, and reading usage
-  from an analytics export the owner supplies.
+  check against similar products.
+- **How it was built:** at the maintainer's request this skill was designed on its own merits
+  and not to this repository's house pattern. A first version mirrored `untangle`: a
+  1,900-line convention scanner, a verdict lookup table, and a thirty-rule report validator.
+  Three author-run sessions showed it produced useful audits but was brittle (the scanner read
+  this repository backwards on its first run), slow, and wrote a first report whose verdicts
+  were mostly placeholders because usage had not been asked for. It was replaced before
+  release by the lean version described here; the heavy version is commit `b7ce9e4` on the
+  development branch.
+- **Product shape:** one model-invoked skill. Read the project and its history, state the
+  promise, list the features in the user's terms, and ask the owner what the project is for
+  and what gets used before judging anything. Then judge fit, carrying cost, and use; check
+  structural complexity; read the direction; compare against three to five cited products;
+  answer in about a screen and write `PRODUCT-AUDIT.md`. A small read-only helper reports the
+  git facts that are slow to work out by hand.
+- **Boundaries:** the report is the only file written. No edits to the product and no commits;
+  no environment files, databases, or analytics; searches use generic category terms only;
+  without web access the comparison is reported as not run; a cut needs evidence that the
+  feature is unused.
+- **Evidence:** subjective tier for the skill's behavior, objective for the helper (unit tests
+  over planted history, renames, the read-only boundary, and edge cases). Author-run
+  comparison on two cases, each run with the skill and with no skill by fresh agents and
+  graded by a separate agent: a planted feature-creep project with an owner who answers, and
+  this repository with no owner available. With the skill 13 of 14 and 12 of 13 assertions
+  passed; without it 11 of 14 and 10 of 13. Two cases with one run each is a first look, not
+  a measurement, and the grader judged the second case closer than the scores suggest. The
+  graded runs used the first lean draft; the text was revised afterwards and not re-run.
+  Seven behavioral cases and a routing battery are committed for the live harness and have
+  not been run.
+- **Honest limits:** the no-skill baseline is strong. Without the skill, Claude also asked the
+  owner before judging and gave specific, well-evidenced verdicts, and it found
+  implementation-level problems the skill runs did not report. What the skill added in these
+  runs was the comparison against similar products, which the baseline skipped both times, a
+  report a later audit can pick up, and direction framed as options. That is the case for
+  keeping the skill small.
+- **Next:** observe real use on the maintainer's projects; run the live suite. Candidate
+  follow-ups, none authorized: a view across several projects, and reading usage from an
+  analytics export the owner supplies.
 
 ### api-bench — BUILD, v0.1.0 published (2026-09-19)
 - **Demand:** direct maintainer request to simulate, from inside Claude Code, how an

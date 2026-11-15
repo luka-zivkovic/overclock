@@ -1552,10 +1552,20 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
             ".gitignore": "node_modules\n.next\n.env\n",
             "prisma/schema.prisma": _STREAKLY_SCHEMA_CORE,
             "lib/db.ts": 'import { PrismaClient } from "@prisma/client";\n\nexport const db = new PrismaClient();\n',
+            "lib/auth.ts": (
+                'import EmailProvider from "next-auth/providers/email";\n\n'
+                "export const authOptions = {\n"
+                "  providers: [EmailProvider({ server: process.env.EMAIL_SERVER, from: process.env.EMAIL_FROM })],\n"
+                "};\n"
+            ),
+            "app/api/auth/[...nextauth]/route.ts": (
+                'import NextAuth from "next-auth";\nimport { authOptions } from "../../../../lib/auth";\n\n'
+                "const handler = NextAuth(authOptions);\n\nexport { handler as GET, handler as POST };\n"
+            ),
             "lib/session.ts": (
-                'import { getServerSession } from "next-auth";\n\n'
+                'import { getServerSession } from "next-auth";\nimport { authOptions } from "./auth";\n\n'
                 "export async function currentUserId(): Promise<string> {\n"
-                "  const session = await getServerSession();\n"
+                "  const session = await getServerSession(authOptions);\n"
                 '  if (!session?.user?.email) throw new Error("not signed in");\n'
                 "  return session.user.email;\n}\n"
             ),
@@ -1841,88 +1851,85 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
     ),
 ]
 
-PRODUCT_AUDIT_REPORT = """# Product audit
+PRODUCT_AUDIT_REPORT = """# Product audit: Streakly
 
-<!-- product-audit: v1 -->
+Audited 2026-06-21 at commit "friends feed placeholder". Verdicts are recommendations; the
+Decision column is the owner's.
 
-## 1. Promise
+## Where you are
 
-Streakly is a simple daily habit tracker for one person: add a habit, check it off each day, and keep the streak going.
+Streakly promises a simple daily habit tracker for one person, and that part works and has not
+changed since September. Since April nearly every commit went into a recipe planner the promise
+never mentions, and the menu and home screen now lead with it. The product is drifting: the
+core is finished and small, and most of what a user meets is something else.
 
-Source: README.md, package.json
-Stage: used only by the owner, who wants a tool they keep opening (the owner)
+## Promise
 
-## 2. Snapshot
+Streakly is a simple daily habit tracker for one person: add a habit, check it off each day,
+and keep the streak going.
 
-| Measure | Count |
-|---------|-------|
-| Features | 11 |
-| Core | 3 |
-| Supporting | 2 |
-| Adjacent | 4 |
-| Off-promise | 2 |
-| Screens | 12 |
-| Endpoints | 10 |
-| Commands | 0 |
-| Data models | 6 |
-| Packages | 0 |
-| Settings and flags | 13 |
-| Integrations | 2 |
-| Top-level destinations | 7 |
-| Steps to the core action | 3 |
+- Sources: README.md, package.json
+- What the owner wants from it: a tool for themselves that they keep opening (the owner)
 
-## 3. Features
+## Features
 
-| ID | Feature | Class | Evidence | Cost | Usage | Verdict | Decision | Decided by |
-|----|---------|-------|----------|------|-------|---------|----------|------------|
-| F1 | Add and edit habits | core | app/habits, app/api/habits/route.ts, prisma Habit | moderate | owner: regular | keep | keep | audit |
-| F2 | Check off today's habits | core | app/today/page.tsx, app/api/checkins/route.ts, prisma Checkin | moderate | owner: regular | keep | keep | audit |
-| F3 | See the current streak | core | lib/streaks.ts, app/habits/[id]/page.tsx | light | owner: regular | keep | keep | audit |
-| F4 | Sign in | supporting | app/login/page.tsx, next-auth, prisma User | moderate | owner: regular | keep | keep | audit |
-| F5 | Settings | supporting | app/settings/page.tsx (13 settings), app/api/settings/route.ts | moderate | owner: rare | simplify | simplify | owner |
-| F6 | Recipe planner with AI suggestions | off-promise | app/recipes (3 screens), prisma Recipe and Ingredient, openai | heavy | owner: rare | park | park | owner |
-| F7 | Friends feed | off-promise | app/friends/page.tsx (coming soon) | light | owner: never | cut | cut | owner |
-| F8 | Journal | adjacent | app/journal/page.tsx, app/api/journal/route.ts, prisma JournalEntry | moderate | owner: rare | park | keep | owner |
-| F9 | Export habits as CSV | adjacent | app/api/export/route.ts | light | owner: never | cut | cut | owner |
-| F10 | Stats page | adjacent | app/stats/page.tsx (no link leads to it) | light | owner: never | cut | cut | owner |
-| F11 | Colour themes | adjacent | lib/themes.ts, app/settings/page.tsx | light | owner: rare | keep | keep | audit |
+| Feature | Fit | What it carries | Used | Verdict | Why | Decision |
+|---|---|---|---|---|---|---|
+| Add and list habits | core | app/habits, app/api/habits/route.ts, Habit model | often | keep | the promise is false without it | keep (audit) |
+| Check off today's habits | core | app/today/page.tsx, app/api/checkins/route.ts, Checkin model | often | keep | the main action | keep (audit) |
+| See the current streak | core | lib/streaks.ts, app/habits/[id]/page.tsx | often | keep | the reason to come back | keep (audit) |
+| Sign in | supporting | app/login/page.tsx, lib/session.ts, next-auth, User model | often | keep | habits belong to a user | keep (audit) |
+| Settings beyond the theme | supporting | app/settings/page.tsx (12 settings nothing reads) | never | simplify | twelve switches for one person who changes none | simplify (owner) |
+| Colour themes | adjacent | lib/themes.ts, one select in settings | sometimes | keep | cheap, and used | keep (audit) |
+| Recipe planner with AI suggestions | off-promise | app/recipes (3 screens), app/api/recipes, Recipe and Ingredient models, openai | sometimes | park | a different job from tracking habits, and the heaviest thing here | park (owner) |
+| Friends feed | off-promise | app/friends/page.tsx (says "coming soon"), menu entry | never | cut | nothing behind it and nobody waiting | cut (owner) |
+| Journal | adjacent | app/journal/page.tsx, app/api/journal/route.ts, JournalEntry model | sometimes | park | on the subject but the promise holds without it | keep (owner) |
+| Export habits as CSV | adjacent | app/api/export/route.ts, link in settings | never | cut | never used | cut (owner) |
+| Stats by weekday | adjacent | app/stats/page.tsx (nothing links to it) | never | cut | unreachable and never used | cut (owner) |
 
-## 4. Complexity
+Fit: core, supporting, adjacent, off-promise. Used: often, sometimes, never, or unknown.
+Verdict: keep, finish, simplify, merge, park, cut. Decision: pending until the owner decides,
+then their choice with "(owner)"; "keep (audit)" when nothing changes.
 
-| ID | Finding | Evidence | Simpler |
-|----|---------|----------|---------|
-| X1 | The daily check-in sits behind a dashboard that leads with recipes, and Today is fourth in the menu | app/page.tsx, components/Sidebar.tsx | Open on Today and put Today and Habits first in the menu |
-| X2 | Settings holds 13 settings, half of them for features outside the promise | app/settings/page.tsx | Keep theme and week start; drop each other control with the feature it serves |
-| X3 | The menu links to a Friends page that does nothing yet | app/friends/page.tsx, components/Sidebar.tsx | Remove the entry until the feature exists |
+Promised but not built: reminders, listed in the README as coming soon
+Built but never mentioned: recipes, journal, stats, export, friends, settings
 
-## 5. Direction
+## Complexity
 
-Verdict: drifting
+- The daily check-in is not the first thing a user meets — app/page.tsx leads with a recipe
+  link and components/Sidebar.tsx puts Today fourth of seven — open on Today and list Today
+  and Habits first; nothing is given up.
+- Thirteen settings on one screen, twelve of which nothing reads — app/settings/page.tsx —
+  keep the theme, drop each other switch with the feature it was for.
+- A menu entry leads to a page that does nothing — app/friends/page.tsx — remove the entry.
 
-The promise is a habit tracker, but every commit since April went into the recipe planner or the friends placeholder, while habits, check-in, and streaks have not changed since September.
+Visual design was not checked.
 
-### The choice
+## Direction
 
-- D1 Narrow to the habit tracker: park recipes, cut friends, and open on Today (recommended)
-- D2 Rename the product a daily-routine companion and make recipes a second core
+**drifting.** The promise is clear and all three of its sources agree, but six of the last
+seven commits went into recipes or the friends placeholder while the habit, check-in, and
+streak files have not changed since 2025-09-10.
 
-## 6. Outside view
+Options:
 
-Not run: no web access
+1. Narrow to the habit tracker: park recipes, cut friends, open on Today **(recommended)**:
+   the core is finished and everything drifting is recent and reversible.
+2. Rename the product a daily-routine companion and make recipes a second core.
 
-## 7. Next moves
+## Outside view
 
-### Next
+Not run: no web access.
 
-- N1 (F6) Take Recipes out of the menu and off the dashboard
+## Next move
 
-### Then
+Take Recipes out of the menu and off the home screen. It is right under either option: even a
+routine companion should not lead with it.
 
-- N2 (X1) Open the app on Today
-- N3 (F7) Delete the Friends placeholder page and its menu entry
-- N4 (F9) Remove the CSV export route and its link in Settings
+Later: open the app on Today; delete the Friends page and its menu entry; remove the CSV
+export route and its link; remove the stats page.
 
-## 8. History
+## History
 
 - 2026-06-21: 11 features (3 core, 2 supporting, 4 adjacent, 2 off-promise); direction drifting
 """
