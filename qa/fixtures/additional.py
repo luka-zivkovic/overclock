@@ -1485,6 +1485,52 @@ def build_untangle(root: Path) -> None:
     subprocess.run(["git", "commit", "-qm", "read the file argument once"], cwd=work, check=True)
 
 
+_STREAKLY_SIDEBAR = (
+    'import Link from "next/link";\n\n'
+    "export function Sidebar() {\n  return (\n    <nav>\n{links}"
+    "    </nav>\n  );\n}\n"
+)
+
+
+def _streakly_sidebar(*entries: tuple[str, str]) -> str:
+    links = "".join(f'      <Link href="{href}">{label}</Link>\n' for href, label in entries)
+    return _STREAKLY_SIDEBAR.replace("{links}", links)
+
+
+def _streakly_manifest(*extra: str) -> str:
+    dependencies = {
+        "next": "^15", "react": "^19", "react-dom": "^19", "@prisma/client": "^6", "next-auth": "^4",
+    }
+    dependencies.update({name: "^5" for name in extra})
+    return json.dumps(
+        {
+            "name": "streakly",
+            "private": True,
+            "description": "A simple daily habit tracker",
+            "scripts": {"dev": "next dev", "build": "next build"},
+            "dependencies": dependencies,
+            "devDependencies": {"prisma": "^6", "typescript": "^5"},
+        },
+        indent=2,
+    ) + "\n"
+
+
+_STREAKLY_SCHEMA_CORE = (
+    "model User {\n  id     String  @id @default(cuid())\n  email  String  @unique\n  habits Habit[]\n}\n\n"
+    "model Habit {\n  id       String    @id @default(cuid())\n  name     String\n  userId   String\n"
+    "  user     User      @relation(fields: [userId], references: [id])\n  checkins Checkin[]\n}\n\n"
+    "model Checkin {\n  id      String   @id @default(cuid())\n  habitId String\n"
+    "  habit   Habit    @relation(fields: [habitId], references: [id])\n  day     DateTime\n}\n"
+)
+_STREAKLY_SCHEMA_JOURNAL = (
+    "\nmodel JournalEntry {\n  id   String   @id @default(cuid())\n  day  DateTime @default(now())\n  text String\n}\n"
+)
+_STREAKLY_SCHEMA_RECIPES = (
+    "\nmodel Recipe {\n  id          String       @id @default(cuid())\n  title       String\n  ingredients Ingredient[]\n}\n\n"
+    "model Ingredient {\n  id       String @id @default(cuid())\n  recipeId String\n"
+    "  recipe   Recipe @relation(fields: [recipeId], references: [id])\n  name     String\n}\n"
+)
+
 PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
     (
         "2025-09-10T10:00:00",
@@ -1502,39 +1548,28 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
                 "- Reminders (coming soon)\n\n"
                 "## Development\n\nRun `npm install` and `npm run dev`.\n"
             ),
-            "package.json": json.dumps(
-                {
-                    "name": "streakly",
-                    "private": True,
-                    "description": "A simple daily habit tracker",
-                    "scripts": {"dev": "next dev", "build": "next build"},
-                    "dependencies": {
-                        "next": "^15", "react": "^19", "react-dom": "^19",
-                        "@prisma/client": "^6", "next-auth": "^4",
-                    },
-                    "devDependencies": {"prisma": "^6", "typescript": "^5"},
-                },
-                indent=2,
-            ) + "\n",
+            "package.json": _streakly_manifest(),
             ".gitignore": "node_modules\n.next\n.env\n",
-            "prisma/schema.prisma": (
-                "model User {\n  id    String @id\n  email String @unique\n  habits Habit[]\n}\n\n"
-                "model Habit {\n  id     String @id\n  name   String\n  userId String\n  checkins Checkin[]\n}\n\n"
-                "model Checkin {\n  id      String   @id\n  habitId String\n  day     DateTime\n}\n"
+            "prisma/schema.prisma": _STREAKLY_SCHEMA_CORE,
+            "lib/db.ts": 'import { PrismaClient } from "@prisma/client";\n\nexport const db = new PrismaClient();\n',
+            "lib/session.ts": (
+                'import { getServerSession } from "next-auth";\n\n'
+                "export async function currentUserId(): Promise<string> {\n"
+                "  const session = await getServerSession();\n"
+                '  if (!session?.user?.email) throw new Error("not signed in");\n'
+                "  return session.user.email;\n}\n"
             ),
-            "lib/db.ts": 'import { PrismaClient } from "@prisma/client";\nexport const db = new PrismaClient();\n',
             "lib/streaks.ts": (
-                "export function currentStreak(days: Date[]): number {\n"
-                "  let streak = 0;\n  for (const _day of days) streak += 1;\n  return streak;\n}\n"
+                "const DAY = 24 * 60 * 60 * 1000;\n\n"
+                "export function currentStreak(days: Date[], today: Date = new Date()): number {\n"
+                "  const done = new Set(days.map((day) => Math.floor(day.getTime() / DAY)));\n"
+                "  let cursor = Math.floor(today.getTime() / DAY);\n"
+                "  if (!done.has(cursor)) cursor -= 1;\n"
+                "  let streak = 0;\n"
+                "  while (done.has(cursor)) {\n    streak += 1;\n    cursor -= 1;\n  }\n"
+                "  return streak;\n}\n"
             ),
-            "components/Sidebar.tsx": (
-                'import Link from "next/link";\n\n'
-                "export function Sidebar() {\n  return (\n    <nav>\n"
-                '      <Link href="/today">Today</Link>\n'
-                '      <Link href="/habits">Habits</Link>\n'
-                '      <Link href="/login">Sign in</Link>\n'
-                "    </nav>\n  );\n}\n"
-            ),
+            "components/Sidebar.tsx": _streakly_sidebar(("/today", "Today"), ("/habits", "Habits"), ("/login", "Sign in")),
             "app/layout.tsx": (
                 'import { Sidebar } from "../components/Sidebar";\n\n'
                 'export const metadata = { title: "Streakly", description: "A simple daily habit tracker" };\n\n'
@@ -1542,43 +1577,56 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
                 "  return (\n    <html>\n      <body>\n        <Sidebar />\n        {children}\n      </body>\n    </html>\n  );\n}\n"
             ),
             "app/page.tsx": (
-                'import Link from "next/link";\n\n'
+                'import { redirect } from "next/navigation";\n\n'
                 "export default function Home() {\n"
-                '  return <Link href="/today">Check in for today</Link>;\n}\n'
+                '  redirect("/today");\n}\n'
             ),
             "app/today/page.tsx": (
-                'import { db } from "../../lib/db";\n\n'
+                'import { db } from "../../lib/db";\nimport { currentUserId } from "../../lib/session";\n\n'
                 "export default async function Today() {\n"
-                "  const habits = await db.habit.findMany();\n"
+                "  const habits = await db.habit.findMany({ where: { userId: await currentUserId() } });\n"
                 "  return (\n    <form action=\"/api/checkins\" method=\"post\">\n"
                 "      {habits.map((habit) => (\n"
                 '        <label key={habit.id}><input type="checkbox" name="habit" value={habit.id} />{habit.name}</label>\n'
                 "      ))}\n      <button>Save today</button>\n    </form>\n  );\n}\n"
             ),
             "app/habits/page.tsx": (
-                'import Link from "next/link";\nimport { db } from "../../lib/db";\n\n'
+                'import Link from "next/link";\nimport { db } from "../../lib/db";\nimport { currentUserId } from "../../lib/session";\n\n'
                 "export default async function Habits() {\n"
-                "  const habits = await db.habit.findMany();\n"
+                "  const habits = await db.habit.findMany({ where: { userId: await currentUserId() } });\n"
                 "  return (\n    <div>\n"
                 "      {habits.map((habit) => (<Link key={habit.id} href={`/habits/${habit.id}`}>{habit.name}</Link>))}\n"
                 '      <form action="/api/habits" method="post"><input name="name" /><button>Add habit</button></form>\n'
                 "    </div>\n  );\n}\n"
             ),
             "app/habits/[id]/page.tsx": (
-                'import { currentStreak } from "../../../lib/streaks";\n\n'
-                "export default function Habit() {\n  return <p>Current streak: {currentStreak([])} days</p>;\n}\n"
+                'import { db } from "../../../lib/db";\nimport { currentStreak } from "../../../lib/streaks";\n\n'
+                "export default async function Habit({ params }: { params: { id: string } }) {\n"
+                "  const checkins = await db.checkin.findMany({ where: { habitId: params.id } });\n"
+                "  return <p>Current streak: {currentStreak(checkins.map((checkin) => checkin.day))} days</p>;\n}\n"
             ),
             "app/login/page.tsx": (
-                "export default function Login() {\n"
-                '  return <form><input name="email" /><button>Send sign-in link</button></form>;\n}\n'
+                '"use client";\n\nimport { signIn } from "next-auth/react";\n\n'
+                "export default function Login() {\n  return (\n"
+                '    <form action={(data) => signIn("email", { email: String(data.get("email")) })}>\n'
+                '      <input name="email" />\n      <button>Send sign-in link</button>\n    </form>\n  );\n}\n'
             ),
             "app/api/habits/route.ts": (
-                'import { db } from "../../../lib/db";\n\n'
-                "export async function GET() {\n  return Response.json(await db.habit.findMany());\n}\n\n"
-                "export async function POST(request: Request) {\n  return Response.json(await request.json());\n}\n"
+                'import { redirect } from "next/navigation";\nimport { db } from "../../../lib/db";\nimport { currentUserId } from "../../../lib/session";\n\n'
+                "export async function GET() {\n"
+                "  return Response.json(await db.habit.findMany({ where: { userId: await currentUserId() } }));\n}\n\n"
+                "export async function POST(request: Request) {\n"
+                "  const form = await request.formData();\n"
+                '  await db.habit.create({ data: { name: String(form.get("name")), userId: await currentUserId() } });\n'
+                '  redirect("/habits");\n}\n'
             ),
             "app/api/checkins/route.ts": (
-                "export async function POST(request: Request) {\n  return Response.json(await request.json());\n}\n"
+                'import { redirect } from "next/navigation";\nimport { db } from "../../../lib/db";\n\n'
+                "export async function POST(request: Request) {\n"
+                "  const form = await request.formData();\n"
+                '  const habitIds = form.getAll("habit").map(String);\n'
+                "  await db.checkin.createMany({ data: habitIds.map((habitId) => ({ habitId, day: new Date() })) });\n"
+                '  redirect("/today");\n}\n'
             ),
         },
     ),
@@ -1591,7 +1639,7 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
             ),
             "app/settings/page.tsx": (
                 'import { themes } from "../../lib/themes";\n\n'
-                "export default function Settings() {\n  return (\n    <form>\n"
+                "export default function Settings() {\n  return (\n    <form action=\"/api/settings\" method=\"post\">\n"
                 '      <select name="theme">{themes.map((theme) => (<option key={theme}>{theme}</option>))}</select>\n'
                 '      <select name="weekStart"><option>Monday</option><option>Sunday</option></select>\n'
                 '      <select name="dateFormat"><option>ISO</option><option>US</option></select>\n'
@@ -1608,17 +1656,30 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
                 '      <a href="/api/export">Export habits as CSV</a>\n'
                 "      <button>Save settings</button>\n    </form>\n  );\n}\n"
             ),
-            "app/api/export/route.ts": (
-                'export async function GET() {\n  return new Response("habit,day\\n", { headers: { "content-type": "text/csv" } });\n}\n'
+            "app/api/settings/route.ts": (
+                'import { cookies } from "next/headers";\nimport { redirect } from "next/navigation";\n\n'
+                "export async function POST(request: Request) {\n"
+                "  const form = await request.formData();\n"
+                "  const jar = await cookies();\n"
+                "  for (const [name, value] of form.entries()) jar.set(name, String(value));\n"
+                '  redirect("/settings");\n}\n'
             ),
-            "components/Sidebar.tsx": (
-                'import Link from "next/link";\n\n'
-                "export function Sidebar() {\n  return (\n    <nav>\n"
-                '      <Link href="/today">Today</Link>\n'
-                '      <Link href="/habits">Habits</Link>\n'
-                '      <Link href="/settings">Settings</Link>\n'
-                '      <Link href="/login">Sign in</Link>\n'
-                "    </nav>\n  );\n}\n"
+            "app/layout.tsx": (
+                'import { cookies } from "next/headers";\nimport { Sidebar } from "../components/Sidebar";\n\n'
+                'export const metadata = { title: "Streakly", description: "A simple daily habit tracker" };\n\n'
+                "export default async function RootLayout({ children }: { children: React.ReactNode }) {\n"
+                '  const theme = (await cookies()).get("theme")?.value ?? "paper";\n'
+                "  return (\n    <html data-theme={theme}>\n      <body>\n        <Sidebar />\n        {children}\n      </body>\n    </html>\n  );\n}\n"
+            ),
+            "app/api/export/route.ts": (
+                'import { db } from "../../../lib/db";\n\n'
+                "export async function GET() {\n"
+                "  const checkins = await db.checkin.findMany({ include: { habit: true } });\n"
+                '  const rows = checkins.map((checkin) => `${checkin.habit.name},${checkin.day.toISOString()}`);\n'
+                '  return new Response(["habit,day", ...rows].join("\\n"), { headers: { "content-type": "text/csv" } });\n}\n'
+            ),
+            "components/Sidebar.tsx": _streakly_sidebar(
+                ("/today", "Today"), ("/habits", "Habits"), ("/settings", "Settings"), ("/login", "Sign in"),
             ),
         },
     ),
@@ -1626,32 +1687,35 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
         "2026-01-20T10:00:00",
         "journal and stats",
         {
-            "prisma/schema.prisma": (
-                "model User {\n  id    String @id\n  email String @unique\n  habits Habit[]\n}\n\n"
-                "model Habit {\n  id     String @id\n  name   String\n  userId String\n  checkins Checkin[]\n}\n\n"
-                "model Checkin {\n  id      String   @id\n  habitId String\n  day     DateTime\n}\n\n"
-                "model JournalEntry {\n  id   String   @id\n  day  DateTime\n  text String\n}\n"
-            ),
+            "prisma/schema.prisma": _STREAKLY_SCHEMA_CORE + _STREAKLY_SCHEMA_JOURNAL,
             "app/journal/page.tsx": (
-                "export default function Journal() {\n"
-                '  return <form action="/api/journal" method="post"><textarea name="text" /><button>Save entry</button></form>;\n}\n'
+                'import { db } from "../../lib/db";\n\n'
+                "export default async function Journal() {\n"
+                '  const entries = await db.journalEntry.findMany({ orderBy: { day: "desc" } });\n'
+                "  return (\n    <div>\n"
+                '      <form action="/api/journal" method="post"><textarea name="text" /><button>Save entry</button></form>\n'
+                "      {entries.map((entry) => (<p key={entry.id}>{entry.text}</p>))}\n"
+                "    </div>\n  );\n}\n"
             ),
             "app/api/journal/route.ts": (
-                "export async function GET() {\n  return Response.json([]);\n}\n\n"
-                "export async function POST(request: Request) {\n  return Response.json(await request.json());\n}\n"
+                'import { redirect } from "next/navigation";\nimport { db } from "../../../lib/db";\n\n'
+                "export async function GET() {\n  return Response.json(await db.journalEntry.findMany());\n}\n\n"
+                "export async function POST(request: Request) {\n"
+                "  const form = await request.formData();\n"
+                '  await db.journalEntry.create({ data: { text: String(form.get("text")) } });\n'
+                '  redirect("/journal");\n}\n'
             ),
             "app/stats/page.tsx": (
-                "export default function Stats() {\n  return <p>Completion rate by weekday and by month.</p>;\n}\n"
+                'import { db } from "../../lib/db";\n\n'
+                "export default async function Stats() {\n"
+                "  const checkins = await db.checkin.findMany();\n"
+                "  const byWeekday = [0, 0, 0, 0, 0, 0, 0];\n"
+                "  for (const checkin of checkins) byWeekday[checkin.day.getDay()] += 1;\n"
+                "  return <ol>{byWeekday.map((count, weekday) => (<li key={weekday}>{count} check-ins</li>))}</ol>;\n}\n"
             ),
-            "components/Sidebar.tsx": (
-                'import Link from "next/link";\n\n'
-                "export function Sidebar() {\n  return (\n    <nav>\n"
-                '      <Link href="/journal">Journal</Link>\n'
-                '      <Link href="/today">Today</Link>\n'
-                '      <Link href="/habits">Habits</Link>\n'
-                '      <Link href="/settings">Settings</Link>\n'
-                '      <Link href="/login">Sign in</Link>\n'
-                "    </nav>\n  );\n}\n"
+            "components/Sidebar.tsx": _streakly_sidebar(
+                ("/journal", "Journal"), ("/today", "Today"), ("/habits", "Habits"),
+                ("/settings", "Settings"), ("/login", "Sign in"),
             ),
         },
     ),
@@ -1659,33 +1723,29 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
         "2026-04-03T10:00:00",
         "recipe planner",
         {
-            "prisma/schema.prisma": (
-                "model User {\n  id    String @id\n  email String @unique\n  habits Habit[]\n}\n\n"
-                "model Habit {\n  id     String @id\n  name   String\n  userId String\n  checkins Checkin[]\n}\n\n"
-                "model Checkin {\n  id      String   @id\n  habitId String\n  day     DateTime\n}\n\n"
-                "model JournalEntry {\n  id   String   @id\n  day  DateTime\n  text String\n}\n\n"
-                "model Recipe {\n  id    String @id\n  title String\n  ingredients Ingredient[]\n}\n\n"
-                "model Ingredient {\n  id       String @id\n  recipeId String\n  name     String\n}\n"
-            ),
+            "prisma/schema.prisma": _STREAKLY_SCHEMA_CORE + _STREAKLY_SCHEMA_JOURNAL + _STREAKLY_SCHEMA_RECIPES,
             "app/recipes/page.tsx": (
-                'import Link from "next/link";\n\n'
-                "export default function Recipes() {\n"
-                '  return <div><h1>Meal plan for the week</h1><Link href="/recipes/new">New recipe</Link></div>;\n}\n'
+                'import Link from "next/link";\nimport { db } from "../../lib/db";\n\n'
+                "export default async function Recipes() {\n"
+                "  const recipes = await db.recipe.findMany();\n"
+                "  return (\n    <div>\n      <h1>Meal plan for the week</h1>\n"
+                "      {recipes.map((recipe) => (<p key={recipe.id}>{recipe.title}</p>))}\n"
+                "    </div>\n  );\n}\n"
             ),
             "app/api/recipes/route.ts": (
-                "export async function GET() {\n  return Response.json([]);\n}\n\n"
-                "export async function POST(request: Request) {\n  return Response.json(await request.json());\n}\n"
+                'import { redirect } from "next/navigation";\nimport { db } from "../../../lib/db";\n\n'
+                "export async function GET() {\n  return Response.json(await db.recipe.findMany({ include: { ingredients: true } }));\n}\n\n"
+                "export async function POST(request: Request) {\n"
+                "  const form = await request.formData();\n"
+                '  const names = String(form.get("ingredients")).split("\\n").filter(Boolean);\n'
+                "  await db.recipe.create({\n"
+                '    data: { title: String(form.get("title")), ingredients: { create: names.map((name) => ({ name })) } },\n'
+                "  });\n"
+                '  redirect("/recipes");\n}\n'
             ),
-            "components/Sidebar.tsx": (
-                'import Link from "next/link";\n\n'
-                "export function Sidebar() {\n  return (\n    <nav>\n"
-                '      <Link href="/recipes">Recipes</Link>\n'
-                '      <Link href="/journal">Journal</Link>\n'
-                '      <Link href="/today">Today</Link>\n'
-                '      <Link href="/habits">Habits</Link>\n'
-                '      <Link href="/settings">Settings</Link>\n'
-                '      <Link href="/login">Sign in</Link>\n'
-                "    </nav>\n  );\n}\n"
+            "components/Sidebar.tsx": _streakly_sidebar(
+                ("/recipes", "Recipes"), ("/journal", "Journal"), ("/today", "Today"), ("/habits", "Habits"),
+                ("/settings", "Settings"), ("/login", "Sign in"),
             ),
         },
     ),
@@ -1693,12 +1753,28 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
         "2026-04-18T10:00:00",
         "recipe detail and new recipe form",
         {
+            "app/recipes/page.tsx": (
+                'import Link from "next/link";\nimport { db } from "../../lib/db";\n\n'
+                "export default async function Recipes() {\n"
+                "  const recipes = await db.recipe.findMany();\n"
+                "  return (\n    <div>\n      <h1>Meal plan for the week</h1>\n"
+                "      {recipes.map((recipe) => (<Link key={recipe.id} href={`/recipes/${recipe.id}`}>{recipe.title}</Link>))}\n"
+                '      <Link href="/recipes/new">New recipe</Link>\n'
+                "    </div>\n  );\n}\n"
+            ),
             "app/recipes/[id]/page.tsx": (
-                "export default function Recipe() {\n  return <article><h1>Recipe</h1><button>Add to this week</button></article>;\n}\n"
+                'import { db } from "../../../lib/db";\n\n'
+                "export default async function Recipe({ params }: { params: { id: string } }) {\n"
+                "  const recipe = await db.recipe.findUnique({ where: { id: params.id }, include: { ingredients: true } });\n"
+                "  return (\n    <article>\n      <h1>{recipe?.title}</h1>\n"
+                "      <ul>{recipe?.ingredients.map((ingredient) => (<li key={ingredient.id}>{ingredient.name}</li>))}</ul>\n"
+                "    </article>\n  );\n}\n"
             ),
             "app/recipes/new/page.tsx": (
-                "export default function NewRecipe() {\n"
-                '  return <form action="/api/recipes" method="post"><input name="title" /><textarea name="ingredients" /><button>Save recipe</button></form>;\n}\n'
+                "export default function NewRecipe() {\n  return (\n"
+                '    <form action="/api/recipes" method="post">\n'
+                '      <input name="title" />\n      <textarea name="ingredients" />\n      <button>Save recipe</button>\n'
+                "    </form>\n  );\n}\n"
             ),
         },
     ),
@@ -1706,25 +1782,17 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
         "2026-05-02T10:00:00",
         "ai recipe suggestions",
         {
-            "package.json": json.dumps(
-                {
-                    "name": "streakly",
-                    "private": True,
-                    "description": "A simple daily habit tracker",
-                    "scripts": {"dev": "next dev", "build": "next build"},
-                    "dependencies": {
-                        "next": "^15", "react": "^19", "react-dom": "^19",
-                        "@prisma/client": "^6", "next-auth": "^4", "openai": "^5",
-                    },
-                    "devDependencies": {"prisma": "^6", "typescript": "^5"},
-                },
-                indent=2,
-            ) + "\n",
+            "package.json": _streakly_manifest("openai"),
             "app/api/recipes/suggest/route.ts": (
-                'import OpenAI from "openai";\n\n'
+                'import OpenAI from "openai";\nimport { redirect } from "next/navigation";\nimport { db } from "../../../../lib/db";\n\n'
                 "export async function POST() {\n"
                 "  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });\n"
-                "  return Response.json({ model: client ? \"suggestions\" : null });\n}\n"
+                "  const completion = await client.chat.completions.create({\n"
+                '    model: "gpt-4o-mini",\n'
+                '    messages: [{ role: "user", content: "Suggest one dinner recipe title for tonight." }],\n'
+                "  });\n"
+                '  await db.recipe.create({ data: { title: completion.choices[0].message.content ?? "Dinner" } });\n'
+                '  redirect("/recipes");\n}\n'
             ),
         },
     ),
@@ -1744,14 +1812,16 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
     ),
     (
         "2026-06-05T10:00:00",
-        "weekly meal plan layout",
+        "suggest button on the meal plan",
         {
             "app/recipes/page.tsx": (
-                'import Link from "next/link";\n\n'
-                "export default function Recipes() {\n  return (\n    <div>\n"
-                "      <h1>Meal plan for the week</h1>\n"
+                'import Link from "next/link";\nimport { db } from "../../lib/db";\n\n'
+                "export default async function Recipes() {\n"
+                "  const recipes = await db.recipe.findMany();\n"
+                "  return (\n    <div>\n      <h1>Meal plan for the week</h1>\n"
+                "      {recipes.map((recipe) => (<Link key={recipe.id} href={`/recipes/${recipe.id}`}>{recipe.title}</Link>))}\n"
                 '      <Link href="/recipes/new">New recipe</Link>\n'
-                "      <button>Suggest a recipe</button>\n"
+                '      <form action="/api/recipes/suggest" method="post"><button>Suggest a recipe</button></form>\n'
                 "    </div>\n  );\n}\n"
             ),
         },
@@ -1763,17 +1833,9 @@ PRODUCT_AUDIT_STAGES: list[tuple[str, str, dict[str, str]]] = [
             "app/friends/page.tsx": (
                 "export default function Friends() {\n  return <p>Friends feed: coming soon.</p>;\n}\n"
             ),
-            "components/Sidebar.tsx": (
-                'import Link from "next/link";\n\n'
-                "export function Sidebar() {\n  return (\n    <nav>\n"
-                '      <Link href="/recipes">Recipes</Link>\n'
-                '      <Link href="/friends">Friends</Link>\n'
-                '      <Link href="/journal">Journal</Link>\n'
-                '      <Link href="/today">Today</Link>\n'
-                '      <Link href="/habits">Habits</Link>\n'
-                '      <Link href="/settings">Settings</Link>\n'
-                '      <Link href="/login">Sign in</Link>\n'
-                "    </nav>\n  );\n}\n"
+            "components/Sidebar.tsx": _streakly_sidebar(
+                ("/recipes", "Recipes"), ("/friends", "Friends"), ("/journal", "Journal"), ("/today", "Today"),
+                ("/habits", "Habits"), ("/settings", "Settings"), ("/login", "Sign in"),
             ),
         },
     ),
@@ -1800,10 +1862,11 @@ Stage: used only by the owner, who wants a tool they keep opening (the owner)
 | Adjacent | 4 |
 | Off-promise | 2 |
 | Screens | 12 |
-| Endpoints | 9 |
+| Endpoints | 10 |
 | Commands | 0 |
 | Data models | 6 |
-| Settings and flags | 14 |
+| Packages | 0 |
+| Settings and flags | 13 |
 | Integrations | 2 |
 | Top-level destinations | 7 |
 | Steps to the core action | 3 |
@@ -1816,7 +1879,7 @@ Stage: used only by the owner, who wants a tool they keep opening (the owner)
 | F2 | Check off today's habits | core | app/today/page.tsx, app/api/checkins/route.ts, prisma Checkin | moderate | owner: regular | keep | keep | audit |
 | F3 | See the current streak | core | lib/streaks.ts, app/habits/[id]/page.tsx | light | owner: regular | keep | keep | audit |
 | F4 | Sign in | supporting | app/login/page.tsx, next-auth, prisma User | moderate | owner: regular | keep | keep | audit |
-| F5 | Settings | supporting | app/settings/page.tsx (14 controls) | moderate | owner: rare | simplify | simplify | owner |
+| F5 | Settings | supporting | app/settings/page.tsx (13 settings), app/api/settings/route.ts | moderate | owner: rare | simplify | simplify | owner |
 | F6 | Recipe planner with AI suggestions | off-promise | app/recipes (3 screens), prisma Recipe and Ingredient, openai | heavy | owner: rare | park | park | owner |
 | F7 | Friends feed | off-promise | app/friends/page.tsx (coming soon) | light | owner: never | cut | cut | owner |
 | F8 | Journal | adjacent | app/journal/page.tsx, app/api/journal/route.ts, prisma JournalEntry | moderate | owner: rare | park | keep | owner |
@@ -1829,7 +1892,7 @@ Stage: used only by the owner, who wants a tool they keep opening (the owner)
 | ID | Finding | Evidence | Simpler |
 |----|---------|----------|---------|
 | X1 | The daily check-in sits behind a dashboard that leads with recipes, and Today is fourth in the menu | app/page.tsx, components/Sidebar.tsx | Open on Today and put Today and Habits first in the menu |
-| X2 | Settings holds 14 controls, half of them for features outside the promise | app/settings/page.tsx | Keep theme and week start; drop each other control with the feature it serves |
+| X2 | Settings holds 13 settings, half of them for features outside the promise | app/settings/page.tsx | Keep theme and week start; drop each other control with the feature it serves |
 | X3 | The menu links to a Friends page that does nothing yet | app/friends/page.tsx, components/Sidebar.tsx | Remove the entry until the feature exists |
 
 ## 5. Direction

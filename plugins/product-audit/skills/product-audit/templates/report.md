@@ -7,6 +7,8 @@ and what to do next. Verdicts are the audit's recommendations; the Decision colu
 the owner. Edit anything in plain language; keep the `F1`, `X1`, `D1`, `O1`, `G1`, `N1` labels
 so the pieces can point at each other.
 
+<!-- guide: every "guide" comment is an instruction for filling the template. Delete them all; the check rejects a report that still has one. -->
+
 ## 1. Promise
 
 <One sentence: who this is for and what it does for them.>
@@ -27,12 +29,13 @@ Stage: <who uses it today and what the owner wants from it, with where that came
 | Endpoints | n/a |
 | Commands | n/a |
 | Data models | n/a |
+| Packages | n/a |
 | Settings and flags | n/a |
 | Integrations | n/a |
 | Top-level destinations | n/a |
 | Steps to the core action | n/a |
 
-Counts are whole numbers, or `n/a` when they could not be measured.
+Measured: <the path walked to the core action, and how any measure was translated for this product>
 
 ## 3. Features
 
@@ -47,10 +50,12 @@ Verdict and Decision: `keep`, `finish`, `simplify`, `merge`, `park`, `cut`; a De
 be `pending`. Decided by: `audit` only for keeping what the audit would keep, otherwise `owner`
 or `owner-delegated`, and `—` while pending.
 
+Promised but not built: <claims in the README or a roadmap with no code behind them, or "nothing">
+Built but never mentioned: <features the README does not mention, or "nothing">
+
 ## 4. Complexity
 
-At most five structural findings. How a screen looks is not listed here. With no finding, keep
-the line `None.` and no rows.
+<!-- guide: at most five structural findings; how a screen looks is not listed here. With no finding, keep the line "None." and no rows; with findings, delete it. -->
 
 | ID | Finding | Evidence | Simpler |
 |----|---------|----------|---------|
@@ -65,12 +70,14 @@ Verdict: <focused, drifting, split, or undefined>
 
 ### The choice
 
-- D1 <an option the owner could take, and what follows from it> (recommended)
+<!-- guide: two or three options unless the verdict is focused; then write "None." instead. -->
+
+- D1 <an option the owner could take, and what follows from it> (recommended): <one-line reason tied to the evidence>
 - D2 <another option>
 
 ## 6. Outside view
 
-Keep either the product table with its sources, or one `Not run:` line. Never both.
+<!-- guide: keep either the product table with its sources, or one "Not run:" line with nothing else in the section. Never both. -->
 
 Not run: <the reason it was skipped>
 
@@ -78,13 +85,16 @@ Not run: <the reason it was skipped>
 |----|---------|----------------|----------------|--------|
 | O1 | <product name> | <same job, similar scale> | <one line> | <page URL> (checked <YYYY-MM-DD>) |
 
+Searched: <the search terms used, and how many searches and pages>
+Differentiator: <what this product does that none of the others mention>
+
 ### Readings
 
 - (F2) supports: <what the comparison shows about that verdict>
 
 ### Gaps
 
-- G1 <something nearly every comparable product has and the core job needs, as a question>
+- G1 <something all or all but one of the products have and the core job needs, as a question>
 
 ## 7. Next moves
 
@@ -92,11 +102,11 @@ A suggestion, not a commitment. Every move points at a feature, finding, option,
 
 ### Next
 
-- N1 (F2) <the one move to make first>
+- N1 (F2) <the one move that is right whichever option the owner picks>
 
 ### Then
 
-- N2 (X1) <a later move>
+- N2 (X1, F2) <a later move>
 
 ## 8. History
 

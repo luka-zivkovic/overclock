@@ -76,10 +76,11 @@ BARE_TEXT_NAMES = {"Gemfile", "Podfile", "Pipfile"}
 README_RE = re.compile(r"^readme(\.(md|markdown|rst|txt))?$", re.IGNORECASE)
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 DIRECTION_DOC_RE = re.compile(
-    r"^(roadmap|todo|todos|plan|plans|planning|ideas|backlog|vision|prd|spec|strategy|"
-    r"next|milestones|product)([-_. ].*)?\.(md|markdown|txt)$",
+    r"(^|[-_. ])(roadmap|todo|todos|plan|plans|planning|ideas|backlog|vision|prd|strategy|"
+    r"milestones|shortlist)([-_. ]|$)",
     re.IGNORECASE,
 )
+RELEASE_NOTES_RE = re.compile(r"^(changelog|changes|history|releases|release[-_ ]notes)(\.(md|markdown|txt|rst))?$", re.IGNORECASE)
 FEATURE_HEADING_RE = re.compile(
     r"^(#{1,4})\s+.*\b(features?|highlights|capabilities|functionality|what (it|you) (does|can do)|"
     r"what's included|what is included)\b",
@@ -335,7 +336,7 @@ REPORT_SECTIONS = [
 ]
 SNAPSHOT_MEASURES = [
     "Features", "Core", "Supporting", "Adjacent", "Off-promise", "Screens", "Endpoints",
-    "Commands", "Data models", "Settings and flags", "Integrations",
+    "Commands", "Data models", "Packages", "Settings and flags", "Integrations",
     "Top-level destinations", "Steps to the core action",
 ]
 FEATURE_CLASSES = ["core", "supporting", "adjacent", "off-promise"]
@@ -473,7 +474,7 @@ def git_history(root: Path, window_days: int) -> dict:
         return history
     raw = git(
         root, "log", "--no-merges", "--reverse", "-M", "--relative", "--name-status",
-        "--date=short", "--format=@%H%x09%ad",
+        "--date=short", "--format=@%H%x09%ad%x09%s",
     )
     if raw is None:
         return history
@@ -490,23 +491,39 @@ def git_history(root: Path, window_days: int) -> dict:
     current_date = None
     is_recent = False
     touched_dirs: set[str] = set()
+    commit_dates: dict[str, str] = {}
+    recent_log: list[dict] = []
+    current_subject = ""
+    touched_leaves: Counter[str] = Counter()
 
     def flush() -> None:
         for directory in touched_dirs:
             dir_commits[directory] += 1
             if is_recent:
                 dir_recent[directory] += 1
+        if is_recent and current_date is not None and (touched_leaves or current_subject):
+            entry = {
+                "date": current_date,
+                "subject": clip(current_subject, 100),
+                "touched": sorted(name for name, _ in touched_leaves.most_common(MAX_TOUCHED)),
+            }
+            if len(touched_leaves) > MAX_TOUCHED:
+                entry["more_places"] = len(touched_leaves) - MAX_TOUCHED
+            recent_log.append(entry)
         touched_dirs.clear()
+        touched_leaves.clear()
 
     for line in raw.splitlines():
         if not line:
             continue
         if line.startswith("@"):
             flush()
-            parts = line[1:].split("\t")
+            parts = line[1:].split("\t", 2)
             current_date = parts[1] if len(parts) > 1 else None
+            current_subject = parts[2] if len(parts) > 2 else ""
             if current_date is None:
                 continue
+            commit_dates[parts[0]] = current_date
             first_date = first_date or current_date
             try:
                 is_recent = dt.date.fromisoformat(current_date) >= cutoff
@@ -545,8 +562,11 @@ def git_history(root: Path, window_days: int) -> dict:
         segments = path.split("/")[:-1]
         for depth in range(1, min(len(segments), 4) + 1):
             touched_dirs.add("/".join(segments[:depth]))
+        touched_leaves["/".join(segments[:3]) or "."] += 1
     flush()
     shallow = (git(root, "rev-parse", "--is-shallow-repository") or "").strip() == "true"
+    status = git(root, "status", "--porcelain", "--untracked-files=normal", "--", ".") or ""
+    dirty = [line for line in status.splitlines() if line.strip() and not line[3:].strip().endswith(SCAN_NAME)]
     history.update(
         {
             "available": True,
@@ -554,6 +574,10 @@ def git_history(root: Path, window_days: int) -> dict:
             "head_date": head_date_raw,
             "first_commit_date": first_date,
             "shallow": shallow,
+            "uncommitted": {
+                "modified": sum(1 for line in dirty if not line.startswith("??")),
+                "untracked": sum(1 for line in dirty if line.startswith("??")),
+            },
             "window_days": window_days,
             "commits": total,
             "recent_commits": recent_total,
@@ -564,9 +588,60 @@ def git_history(root: Path, window_days: int) -> dict:
             "_recent": recent,
             "_dir_commits": dir_commits,
             "_dir_recent": dir_recent,
+            "_commit_dates": commit_dates,
+            "_recent_log": recent_log[::-1],
         }
     )
     return history
+
+
+MAX_TOUCHED = 10
+BLAME_HEADER_RE = re.compile(r"^([0-9a-f]{40}) \d+ (\d+)(?: \d+)?$")
+MAX_BLAMED_FILES = 60
+
+
+def line_dates(root: Path, path: str, history: dict) -> dict[int, str | None]:
+    """Map each line of a file to the day it was last changed, for items that share a file."""
+    raw = git(root, "blame", "--porcelain", "--", path)
+    if raw is None:
+        return {}
+    known: dict[str, str] = dict(history.get("_commit_dates", {}))
+    owner: dict[int, str] = {}
+    current = None
+    for line in raw.splitlines():
+        header = BLAME_HEADER_RE.match(line)
+        if header:
+            current = header.group(1)
+            owner[int(header.group(2))] = current
+        elif line.startswith("author-time ") and current is not None and current not in known:
+            try:
+                moment = dt.datetime.fromtimestamp(int(line.split()[1]), dt.timezone.utc)
+            except (ValueError, OverflowError, OSError):
+                continue
+            known[current] = moment.date().isoformat()
+    # An all-zero commit id marks a line that is not committed yet.
+    return {number: (None if set(sha) == {"0"} else known.get(sha)) for number, sha in owner.items()}
+
+
+def date_shared_items(root: Path, history: dict, groups: list[list[dict]]) -> None:
+    """Items that share a file get the date of their own defining line, not the file's."""
+    if not history.get("available"):
+        return
+    by_path: dict[str, list[dict]] = {}
+    for group in groups:
+        for item in group:
+            if "line" in item:
+                by_path.setdefault(item["path"], []).append(item)
+    shared = sorted(path for path, items in by_path.items() if len(items) > 1)[:MAX_BLAMED_FILES]
+    for path in shared:
+        dates = line_dates(root, path, history)
+        if not dates:
+            continue
+        for item in by_path[path]:
+            item["added"] = dates.get(item["line"])
+            item["dated_by"] = "line"
+            for key in ("last_touched", "commits", "recent_commits"):
+                item.pop(key, None)  # those describe the whole file, not this item
 
 
 def stamp(item: dict, history: dict) -> dict:
@@ -770,10 +845,24 @@ def detect_packages(contents: dict[str, str], manifests: list[dict]) -> list[dic
                 "kind": "agent-skill", "path": relative,
                 "user_invoked": (_frontmatter_value(block, "disable-model-invocation") or "").lower() == "true",
             }
+            hint = _frontmatter_value(block, "argument-hint")
+            if hint:
+                entry["argument_hint"] = clip(hint, 120)
             description = _frontmatter_value(block, "description")
             if description:
                 entry["description"] = clip(description, 200)
             packages.append(entry)
+    plugin_roots = {
+        package["path"][: -len("/.claude-plugin/plugin.json")]: package
+        for package in packages if package["kind"] == "plugin"
+    }
+    for plugin_root, plugin in plugin_roots.items():
+        plugin["has_hooks"] = f"{plugin_root}/hooks/hooks.json" in contents
+    for package in packages:
+        if package["kind"] == "agent-skill":
+            owner = next((root for root in plugin_roots if package["path"].startswith(root + "/")), None)
+            if owner is not None:
+                package["plugin"] = plugin_roots[owner]["name"]
     return packages
 
 
@@ -1141,6 +1230,22 @@ def count_controls(text: str, suffix: str) -> dict[str, int]:
     return {label: len(pattern.findall(text)) for label, pattern in rules.items()}
 
 
+PY_IMPORT_RE = re.compile(r"^\s*(?:from|import)\s+([A-Za-z_][\w]*)", re.MULTILINE)
+
+
+def imported_packages(text: str, suffix: str) -> set[str]:
+    """Package names a source file imports, normalized like dependency names."""
+    if suffix == ".py":
+        return {normalize_dep(name) for name in PY_IMPORT_RE.findall(text)}
+    names = set()
+    for specifier in IMPORT_RE.findall(text):
+        if specifier.startswith((".", "/", "~", "#")):
+            continue
+        parts = specifier.split("/")
+        names.add("/".join(parts[:2]) if specifier.startswith("@") and len(parts) > 1 else parts[0])
+    return names
+
+
 def import_stems(text: str) -> set[str]:
     stems = set()
     for match in IMPORT_RE.finditer(text):
@@ -1196,7 +1301,7 @@ def scan(root: Path, window_days: int) -> dict:
     commands: list[dict] = []
     models: dict[str, dict] = {}
     cli_options: set[str] = set()
-    env_names: set[str] = set()
+    env_names: dict[str, str] = {}
     preference_keys: set[str] = set()
     unfinished: list[dict] = []
     todo_counts: dict[str, int] = {}
@@ -1208,6 +1313,7 @@ def scan(root: Path, window_days: int) -> dict:
     declared_routes: list[dict] = []
     nav_declared: list[dict] = []
     native_text: dict[str, str] = {}
+    importers: Counter[str] = Counter()
     source_files = source_lines = ui_files = 0
     dir_all: Counter[str] = Counter()
     dir_files: Counter[str] = Counter()
@@ -1219,10 +1325,14 @@ def scan(root: Path, window_days: int) -> dict:
         for depth in range(1, min(len(segments), 4) + 1):
             dir_all["/".join(segments[:depth])] += 1
 
-    def add_model(name: str, kind: str, relative: str) -> None:
+    def add_model(match: re.Match, kind: str, relative: str) -> None:
+        name = match.group(1)
         if BOOKKEEPING_TABLE_RE.search(name):
             return
-        entry = models.setdefault((name.lower(), kind in ORM_KINDS), {"name": name, "kind": kind, "path": relative})
+        models.setdefault(
+            (name.lower(), kind in ORM_KINDS),
+            {"name": name, "kind": kind, "path": relative, "line": line_of(match.string, match.start(1))},
+        )
 
     for relative, text in contents.items():
         parts = relative.split("/")
@@ -1252,18 +1362,22 @@ def scan(root: Path, window_days: int) -> dict:
             stems = import_stems(text)
             if stems:
                 imports[relative] = stems
+            if suffix == ".py" or suffix in JS_SUFFIXES | {".vue", ".svelte", ".astro"}:
+                importers.update(imported_packages(text, suffix))
             if suffix in NATIVE_UI_SUFFIXES | {".java"}:
                 native_text[relative] = text
-            for match in UNFINISHED_RE.finditer(text):
-                if len(unfinished) < 400:
-                    number = line_of(text, match.start())
-                    unfinished.append({
-                        "path": relative, "line": number,
-                        "text": clip(text.splitlines()[number - 1], 160),
-                    })
-            todos = len(TODO_RE.findall(text))
-            if todos:
-                todo_counts[relative] = todos
+            if UNFINISHED_RE.search(text) or TODO_RE.search(text):
+                todos = 0
+                for number, line in enumerate(text.splitlines(), start=1):
+                    phrases = {m.group(0).lower() for m in UNFINISHED_RE.finditer(line)}
+                    notes = {m.group(0) for m in TODO_RE.finditer(line)}
+                    if len(phrases) > 1 or len(notes) > 1:
+                        continue  # a line naming several markers defines them; it is not one
+                    if phrases and len(unfinished) < 400:
+                        unfinished.append({"path": relative, "line": number, "text": clip(line, 160)})
+                    todos += len(notes)
+                if todos:
+                    todo_counts[relative] = todos
 
         if suffix in UI_SUFFIXES or suffix in JS_SUFFIXES:
             controls = count_controls(text, suffix)
@@ -1289,9 +1403,12 @@ def scan(root: Path, window_days: int) -> dict:
             if surface == "screens":
                 screens.append({"route": route or "/", "path": relative, "kind": kind})
             else:
-                methods = sorted(set(HTTP_EXPORT_RE.findall(text))) or ["ANY"]
-                for method in methods:
-                    endpoints.append({"method": method, "route": route or "/", "path": relative, "kind": kind})
+                exports = {m.group(1): line_of(text, m.start()) for m in HTTP_EXPORT_RE.finditer(text)}
+                for method in sorted(exports) or ["ANY"]:
+                    entry = {"method": method, "route": route or "/", "path": relative, "kind": kind}
+                    if method in exports:
+                        entry["line"] = exports[method]
+                    endpoints.append(entry)
         else:
             screen_name = generic_screen(relative, stack, siblings)
             if screen_name:
@@ -1323,6 +1440,7 @@ def scan(root: Path, window_days: int) -> dict:
                 endpoints.append({
                     "method": match.group("verb").upper().replace("ALL", "ANY"),
                     "route": match.group("route"), "path": relative, "kind": "http-handler",
+                    "line": line_of(text, match.start()),
                 })
             controller = NEST_CONTROLLER_RE.search(text)
             if controller:
@@ -1330,21 +1448,21 @@ def scan(root: Path, window_days: int) -> dict:
                 for match in NEST_METHOD_RE.finditer(text):
                     tail = (match.group(2) or "").strip("/")
                     route = (prefix.rstrip("/") + "/" + tail).rstrip("/") or "/"
-                    endpoints.append({"method": match.group(1).upper(), "route": route, "path": relative, "kind": "nest"})
+                    endpoints.append({"method": match.group(1).upper(), "route": route, "path": relative, "kind": "nest", "line": line_of(text, match.start())})
             if TRPC_MARKER_RE.search(text):
                 for match in TRPC_PROC_RE.finditer(text):
-                    endpoints.append({"method": "RPC", "route": match.group(1), "path": relative, "kind": "trpc"})
+                    endpoints.append({"method": "RPC", "route": match.group(1), "path": relative, "kind": "trpc", "line": line_of(text, match.start())})
             if USE_SERVER_RE.match(text):
                 for match in SERVER_ACTION_RE.finditer(text):
                     endpoints.append({
                         "method": "ACTION", "route": match.group(1) or match.group(2), "path": relative,
-                        "kind": "server-action",
+                        "kind": "server-action", "line": line_of(text, match.start()),
                     })
             if "convex" in parts[:-1] and "_generated" not in parts:
                 for match in CONVEX_RE.finditer(text):
-                    endpoints.append({"method": match.group(2).upper(), "route": match.group(1), "path": relative, "kind": "convex"})
+                    endpoints.append({"method": match.group(2).upper(), "route": match.group(1), "path": relative, "kind": "convex", "line": line_of(text, match.start())})
             for match in CLOUD_FN_RE.finditer(text):
-                endpoints.append({"method": match.group(2), "route": match.group(1), "path": relative, "kind": "cloud-function"})
+                endpoints.append({"method": match.group(2), "route": match.group(1), "path": relative, "kind": "cloud-function", "line": line_of(text, match.start())})
         elif suffix == ".py":
             prefixes = {}
             for match in PY_PREFIX_RE.finditer(text):
@@ -1362,32 +1480,41 @@ def scan(root: Path, window_days: int) -> dict:
                     methods = re.findall(r"[A-Z]+", listed.group(1).upper()) if listed else ["GET"]
                 route = prefixes.get(receiver, "") + match.group("route") or "/"
                 for method in methods:
-                    endpoints.append({"method": method, "route": route, "path": relative, "kind": "http-handler"})
+                    endpoints.append({
+                        "method": method, "route": route, "path": relative, "kind": "http-handler",
+                        "line": line_of(text, match.start()) + (1 if text[match.start()] == "\n" else 0),
+                    })
             if name == "urls.py":
                 for match in DJANGO_PATH_RE.finditer(text):
-                    endpoints.append({"method": "ANY", "route": "/" + match.group(1), "path": relative, "kind": "django-url"})
+                    endpoints.append({"method": "ANY", "route": "/" + match.group(1), "path": relative, "kind": "django-url", "line": line_of(text, match.start())})
         elif suffix == ".rb" and relative.endswith("config/routes.rb"):
             for match in RAILS_ROUTE_RE.finditer(text):
-                endpoints.append({"method": match.group(1).upper(), "route": match.group(2), "path": relative, "kind": "rails-route"})
+                endpoints.append({"method": match.group(1).upper(), "route": match.group(2), "path": relative, "kind": "rails-route", "line": line_of(text, match.start())})
         elif suffix == ".go":
             for match in GO_ROUTE_RE.finditer(text):
                 verb = match.group(1).upper()
                 endpoints.append({
                     "method": "ANY" if verb.startswith("HANDLE") else verb, "route": match.group(2),
-                    "path": relative, "kind": "http-handler",
+                    "path": relative, "kind": "http-handler", "line": line_of(text, match.start()),
                 })
             if "cobra.Command" in text:
                 for match in COBRA_RE.finditer(text):
-                    commands.append({"name": match.group(1), "path": relative, "kind": "cobra"})
+                    commands.append({"name": match.group(1), "path": relative, "kind": "cobra", "line": line_of(text, match.start())})
         elif suffix in {".graphql", ".gql"}:
             for root_type in GRAPHQL_ROOT_RE.finditer(text):
                 for field in GRAPHQL_FIELD_RE.finditer(root_type.group(2)):
-                    endpoints.append({"method": root_type.group(1).upper(), "route": field.group(1), "path": relative, "kind": "graphql"})
+                    endpoints.append({
+                        "method": root_type.group(1).upper(), "route": field.group(1), "path": relative,
+                        "kind": "graphql", "line": line_of(text, root_type.start(2) + field.start(1)),
+                    })
 
         # Commands ---------------------------------------------------------------------------
-        if suffix == ".py":
+        inside_skill = any(relative.startswith(skill_root + "/") for skill_root in skill_roots)
+        if inside_skill:
+            pass  # run by the agent, never typed by a user
+        elif suffix == ".py":
             for match in ARGPARSE_RE.finditer(text):
-                commands.append({"name": match.group(1), "path": relative, "kind": "argparse"})
+                commands.append({"name": match.group(1), "path": relative, "kind": "argparse", "line": line_of(text, match.start())})
             for match in CLICK_RE.finditer(text):
                 if match.group("recv") in {"click", "typer"}:
                     continue  # the root command or group is the program itself
@@ -1397,10 +1524,13 @@ def scan(root: Path, window_days: int) -> dict:
                     following = PY_DEF_RE.search(text, match.end())
                     command = following.group(1).replace("_", "-") if following else None
                 if command:
-                    commands.append({"name": command, "path": relative, "kind": "click-" + match.group("kind")})
+                    commands.append({
+                        "name": command, "path": relative, "kind": "click-" + match.group("kind"),
+                        "line": line_of(text, match.start("recv")),
+                    })
         elif suffix in JS_SUFFIXES and ".command(" in text and re.search(r"\b(commander|yargs|cac|program)\b", text):
             for match in JS_COMMAND_RE.finditer(text):
-                commands.append({"name": match.group(1), "path": relative, "kind": "js-cli"})
+                commands.append({"name": match.group(1), "path": relative, "kind": "js-cli", "line": line_of(text, match.start())})
         elif suffix == ".rs":
             for enum in CLAP_ENUM_RE.finditer(text):
                 depth, index = 1, enum.end()
@@ -1409,43 +1539,46 @@ def scan(root: Path, window_days: int) -> dict:
                     index += 1
                 body = re.sub(r"\{[^{}]*\}|\([^()]*\)", "", text[enum.end():index - 1])
                 for variant in CLAP_VARIANT_RE.finditer(body):
-                    commands.append({"name": variant.group(1), "path": relative, "kind": "clap"})
-        if suffix == ".py" or suffix in JS_SUFFIXES:
+                    commands.append({
+                        "name": variant.group(1), "path": relative, "kind": "clap",
+                        "line": line_of(text, enum.start()),
+                    })
+        if not inside_skill and (suffix == ".py" or suffix in JS_SUFFIXES):
             cli_options.update(CLI_OPTION_RE.findall(text))
 
         # Data models --------------------------------------------------------------------------
         if suffix == ".prisma":
             for match in PRISMA_MODEL_RE.finditer(text):
-                add_model(match.group(1), "prisma", relative)
+                add_model(match, "prisma", relative)
         elif suffix == ".py":
             for pattern, kind in ((DJANGO_MODEL_RE, "django"), (TABLENAME_RE, "sqlalchemy"), (SQLMODEL_RE, "sqlmodel")):
                 for match in pattern.finditer(text):
-                    add_model(match.group(1), kind, relative)
+                    add_model(match, kind, relative)
         elif suffix == ".sql":
             for match in SQL_TABLE_RE.finditer(text):
-                add_model(match.group(1), "sql", relative)
+                add_model(match, "sql", relative)
         elif suffix == ".rb":
             if relative.endswith("db/schema.rb") or "/migrate/" in relative:
                 for match in RAILS_TABLE_RE.finditer(text):
-                    add_model(match.group(1), "rails", relative)
+                    add_model(match, "rails", relative)
         elif suffix == ".swift":
             for match in SWIFTDATA_RE.finditer(text):
-                add_model(match.group(1), "swiftdata", relative)
+                add_model(match, "swiftdata", relative)
         if suffix in JS_SUFFIXES | {".kt", ".java"}:
             for pattern, kind in (
                 (DRIZZLE_RE, "drizzle"), (ENTITY_RE, "entity"), (MONGOOSE_RE, "mongoose"),
                 (SEQUELIZE_RE, "sequelize"), (CONVEX_TABLE_RE, "convex"),
             ):
                 for match in pattern.finditer(text):
-                    add_model(match.group(1), kind, relative)
+                    add_model(match, kind, relative)
             if "firestore" in text.lower():
                 for match in FIRESTORE_RE.finditer(text):
-                    add_model(match.group(1), "firestore", relative)
+                    add_model(match, "firestore", relative)
 
         # Settings ---------------------------------------------------------------------------
         if is_source:
             for match in ENV_ACCESS_RE.finditer(text):
-                env_names.add(next(group for group in match.groups() if group))
+                env_names.setdefault(next(group for group in match.groups() if group), relative)
             for pattern in PREFERENCE_KEY_RES:
                 for match in pattern.finditer(text):
                     if not NOT_A_PREFERENCE_RE.search(match.group(1)):
@@ -1517,6 +1650,24 @@ def scan(root: Path, window_days: int) -> dict:
             hits[declared_in] -= 1  # the declaration itself is not a link
         return sum(1 for other, count in hits.items() if count > 0 and other != own)
 
+    static_routes = {screen["route"] for screen in screens if is_static_route(screen.get("route"))}
+
+    def files_building(route: str, own: str) -> int | None:
+        """Files that build a link into a dynamic route: its static prefix followed by a value."""
+        prefix = re.split(r"[\[:$*{]", route, maxsplit=1)[0]
+        if prefix.count("/") < 2 or not prefix.endswith("/"):
+            return None  # no static prefix to look for
+        hits: set[str] = set()
+        for literal in literal_keys:
+            if literal == route:
+                hits.update(literal_files[literal])
+            elif literal.startswith(prefix) and literal.rstrip("/") not in static_routes and not any(
+                literal.startswith(known + "/") for known in static_routes if known.startswith(prefix)
+            ):
+                hits.update(literal_files[literal])
+        hits.discard(own)
+        return len(hits)
+
     for screen in screens:
         own = screen["path"]
         declared_in = screen.get("declared_in")
@@ -1526,6 +1677,11 @@ def scan(root: Path, window_days: int) -> dict:
         if is_static_route(route) and not screen.get("relative_route"):
             linked += files_naming(route, own if screen["kind"] != "declared-route" else "", declared_in)
             measured = True
+        elif route and route != "/" and not screen.get("relative_route") and screen["kind"] != "declared-route":
+            built = files_building(route, own)
+            if built is not None:
+                linked += built
+                measured = True
         if screen.get("screen_name"):
             hits = Counter(word_files.get(screen["screen_name"], {}))
             if declared_in:
@@ -1550,10 +1706,13 @@ def scan(root: Path, window_days: int) -> dict:
             screen["controls"] = controls["total"]
         stamp(screen, history)
 
+    # Dynamic routes are often linked from data, so they stay out of this list; their own
+    # linked_from still shows whether any file builds a link to them.
     unlinked = [
         {"route": s.get("route"), "name": s.get("name") or s.get("screen_name"), "path": s["path"]}
         for s in screens
         if s["linked_from"] == 0 and not SPECIAL_ROUTE_RE.search(s.get("route") or "")
+        and (not s.get("route") or is_static_route(s["route"]))
     ]
 
     # Dedupe and stamp ---------------------------------------------------------------------------
@@ -1572,6 +1731,7 @@ def scan(root: Path, window_days: int) -> dict:
     commands = [stamp(c, history) for c in unique_commands.values()]
     model_list = [stamp(m, history) for m in model_list]
     packages = [stamp(package, history) for package in packages]
+    date_shared_items(root, history, [endpoints, commands, model_list])
     screens.sort(key=lambda s: ((s.get("route") or "~"), s["path"]))
     endpoints.sort(key=lambda e: (e["route"], e["method"], e["path"]))
     commands.sort(key=lambda c: (c["name"], c["path"]))
@@ -1579,7 +1739,8 @@ def scan(root: Path, window_days: int) -> dict:
     flag_like = sorted(name for name in env_names if FLAG_NAME_RE.match(name))
     settings_screens = sorted(
         (
-            {"path": path, **counts} for path, counts in control_table.items()
+            {"path": path, "settings": counts["toggles"] + counts["choices"] + counts["inputs"], **counts}
+            for path, counts in control_table.items()
             if SETTINGS_PATH_RE.search(path.rsplit("/", 1)[-1]) or ("/" in path and SETTINGS_PATH_RE.search(path.split("/")[-2]))
         ),
         key=lambda item: (-item["total"], item["path"]),
@@ -1643,7 +1804,9 @@ def scan(root: Path, window_days: int) -> dict:
                 "recent_commits": history["_dir_recent"].get(directory, 0),
             })
         areas.append(row)
+    # Top-level directories lead, then the product's own areas, then tests and tooling.
     areas.sort(key=lambda row: (
+        "/" in row["path"], row.get("non_product", False),
         -row.get("recent_commits", 0), -row.get("commits", 0), -row["source_lines"], -row["files"], row["path"],
     ))
 
@@ -1652,8 +1815,15 @@ def scan(root: Path, window_days: int) -> dict:
         note = "Recognized routing, command, data, or package conventions. Treat the lists as a floor: read the entry points for surface the patterns miss."
     else:
         note = "No routing, command, data-model, or package convention was recognized. Inventory the surface by reading the entry points and documentation."
+    for integration in integrations:
+        # Python import names often differ from package names, so a miss there proves nothing.
+        counts = [importers.get(normalize_dep(dependency) if not dependency.startswith("@") else dependency, 0)
+                  for dependency in integration["dependencies"]]
+        javascript = all(path.endswith("package.json") for path in integration["manifests"])
+        integration["imported_by_files"] = sum(counts) if (javascript or sum(counts)) else None
     analytics = [i for i in integrations if i["kind"] == "analytics"]
 
+    recent_log = history.get("_recent_log", [])
     for key in list(history):
         if key.startswith("_"):
             del history[key]
@@ -1670,7 +1840,12 @@ def scan(root: Path, window_days: int) -> dict:
         "claimed_features": cap(claimed_features(contents), 80),
         "direction_documents": sorted(
             relative for relative in relatives
-            if DIRECTION_DOC_RE.match(relative.rsplit("/", 1)[-1]) and relative.count("/") <= 2
+            if relative.count("/") <= 2 and relative.rsplit(".", 1)[-1].lower() in {"md", "markdown", "txt"}
+            and DIRECTION_DOC_RE.search(relative.rsplit("/", 1)[-1].rsplit(".", 1)[0])
+        )[:30],
+        "release_notes": sorted(
+            relative for relative in relatives
+            if relative.count("/") <= 1 and RELEASE_NOTES_RE.match(relative.rsplit("/", 1)[-1])
         ),
         "stack": stack_list,
         "coverage": {
@@ -1696,7 +1871,9 @@ def scan(root: Path, window_days: int) -> dict:
                 "preference_keys": cap(sorted(preference_keys), 80),
                 "command_options": cap(sorted(cli_options), 120),
                 "settings_screens": settings_screens[:15],
-                "environment_variables": len(env_names),
+                "environment_variables": cap(
+                    [{"name": name, "path": env_names[name]} for name in sorted(env_names)], 60
+                ),
             },
         },
         "signals": {
@@ -1714,9 +1891,10 @@ def scan(root: Path, window_days: int) -> dict:
             },
         },
         "growth": growth,
+        "recent_commits": cap(recent_log, 60),
         "areas": {
             "window_days": window_days,
-            **cap(areas, 80),
+            **cap(areas, 40),
         },
         "weight": {
             "source_files": source_files,
@@ -1735,8 +1913,9 @@ SECTION_RE = re.compile(r"^## (\d)\. (.+?)\s*$", re.MULTILINE)
 ROW_RE = re.compile(r"^\|\s*([A-Z]\d+)\s*\|(.*)$")
 MEASURE_ROW_RE = re.compile(r"^\|\s*([A-Za-z][A-Za-z \-]+?)\s*\|\s*([^|]*?)\s*\|\s*$")
 ITEM_RE = re.compile(r"^- ([A-Z]\d+) (.+?)\s*$")
-CITED_ITEM_RE = re.compile(r"^- ([A-Z]\d+) \(([A-Z]\d+)\) (.+?)\s*$")
-READING_RE = re.compile(r"^- \(([A-Z]\d+)\) (supports|contradicts|silent)\b(.*)$")
+CITED_ITEM_RE = re.compile(r"^- ([A-Z]\d+) \(([A-Z]\d+(?:, ?[A-Z]\d+)*)\) (.+?)\s*$")
+READING_RE = re.compile(r"^- \(([A-Z]\d+(?:, ?[A-Z]\d+)*)\) (supports|contradicts|mixed|silent)\b(.*)$")
+GUIDE_COMMENT_RE = re.compile(r"<!--\s*guide:")
 HISTORY_RE = re.compile(r"^- (\d{4}-\d{2}-\d{2}): (.+?)\s*$")
 URL_RE = re.compile(r"https?://[^\s|)>\]]+")
 CHECKED_RE = re.compile(r"checked (\d{4}-\d{2}-\d{2})")
@@ -1795,6 +1974,8 @@ def parse_report(text: str) -> tuple[dict, list[str]]:
     for match in PLACEHOLDER_RE.finditer(text):
         if match.group(1).split()[0].lower() not in HTML_NAMES:
             errors.append(f"template placeholder left in report: <{clip(match.group(1), 60)}>")
+    if GUIDE_COMMENT_RE.search(text):
+        errors.append("template guidance left in report: delete every '<!-- guide: ... -->' comment")
 
     # 1. Promise
     promise_lines = [line.strip() for line in sections["Promise"].splitlines() if line.strip()]
@@ -1955,9 +2136,9 @@ def parse_report(text: str) -> tuple[dict, list[str]]:
     for line in outside_parts.get("readings", []):
         match = READING_RE.match(line)
         if match:
-            readings.append(match.group(1))
+            readings.extend(cited.strip() for cited in match.group(1).split(","))
         elif line.startswith("- "):
-            errors.append(f"malformed reading: {line!r} (expected '- (F3) supports|contradicts|silent: ...')")
+            errors.append(f"malformed reading: {line!r} (expected '- (F3) supports|contradicts|mixed: ...')")
     if not_run and (products or gaps or readings):
         errors.append("Outside view says 'Not run' but also lists products, readings, or gaps")
     if not_run and len(not_run[0]) <= len("Not run:") + 1:
@@ -1984,11 +2165,12 @@ def parse_report(text: str) -> tuple[dict, list[str]]:
         for line in moves_parts.get(bucket, []):
             match = CITED_ITEM_RE.match(line)
             if match and match.group(1).startswith("N"):
-                if match.group(2) not in known:
-                    errors.append(f"{match.group(1)} cites unknown id {match.group(2)}")
+                for cited in (part.strip() for part in match.group(2).split(",")):
+                    if cited not in known:
+                        errors.append(f"{match.group(1)} cites unknown id {cited}")
                 target.append(match.group(1))
             elif line.startswith("- "):
-                errors.append(f"malformed move: {line!r} (expected '- N1 (F3) what to do')")
+                errors.append(f"malformed move: {line!r} (expected '- N1 (F3) what to do' or '- N1 (F3, X1) ...')")
     nothing = NOTHING_NEXT in sections["Next moves"].lower()
     if len(next_items) > 1:
         errors.append("Next holds exactly one move")

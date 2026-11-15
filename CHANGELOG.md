@@ -13,12 +13,13 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   usage evidence, and one verdict: keep, finish, simplify, merge, park, or cut. A cut needs
   usage evidence, a core feature is never parked or cut, and only the owner decides.
 - A deterministic read-only scan reports what the product says about itself, its screens,
-  endpoints, commands, data models, packages, plugins and agent skills, integrations,
-  navigation hubs, settings, unlinked screens, and unfinished markers, plus when each item's
-  file first appeared (carried across renames), surface added per quarter, and commits per
-  directory inside a recent window measured from the newest commit. It follows common web,
-  mobile, server, and command-line conventions, says so when it recognizes none, never opens
-  environment files, and does not follow symlinks.
+  endpoints, commands, data models, packages, plugins and agent skills, integrations (and
+  whether any file imports them), navigation hubs, settings, unlinked screens, and unfinished
+  markers. From git it adds when each item arrived (carried across renames, and dated by its
+  own line when several share a file), surface added per quarter, every commit in a recent
+  window with the directories it touched, and uncommitted-change counts. It follows common
+  web, mobile, server, and command-line conventions, says so when it recognizes none, never
+  opens environment files, and does not follow symlinks.
 - Structural complexity check capped at five findings (steps to the core action, top-level
   destinations, settings) and a direction verdict of focused, drifting, split, or undefined,
   with two or three options when it is not focused.

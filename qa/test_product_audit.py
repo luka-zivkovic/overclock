@@ -113,15 +113,22 @@ class ScanPlantedProductTests(unittest.TestCase):
         endpoints = {(e["method"], e["route"]) for e in self.inventory["surface"]["endpoints"]["items"]}
         self.assertIn(("POST", "/api/recipes/suggest"), endpoints)
         self.assertIn(("GET", "/api/export"), endpoints)
-        self.assertEqual(len(endpoints), 9)
+        self.assertIn(("POST", "/api/settings"), endpoints)
+        self.assertEqual(len(endpoints), 10)
         models = [model["name"] for model in self.inventory["surface"]["data_models"]["items"]]
         self.assertEqual(models, ["Checkin", "Habit", "Ingredient", "JournalEntry", "Recipe", "User"])
         self.assertEqual(self.inventory["coverage"]["screens"], 12)
         self.assertTrue(self.inventory["coverage"]["recognized"])
 
     def test_reports_integrations_navigation_and_settings_weight(self) -> None:
-        services = {(i["service"], i["kind"]) for i in self.inventory["surface"]["integrations"]}
-        self.assertEqual(services, {("OpenAI", "ai"), ("Auth provider", "auth")})
+        integrations = {i["service"]: i for i in self.inventory["surface"]["integrations"]}
+        self.assertEqual({(i["service"], i["kind"]) for i in integrations.values()}, {("OpenAI", "ai"), ("Auth provider", "auth")})
+        self.assertEqual(integrations["OpenAI"]["imported_by_files"], 1)
+        self.assertEqual(integrations["Auth provider"]["imported_by_files"], 2)
+        self.assertEqual(
+            self.inventory["surface"]["settings"]["environment_variables"]["items"],
+            [{"name": "OPENAI_API_KEY", "path": "app/api/recipes/suggest/route.ts"}],
+        )
         navigation = self.inventory["surface"]["navigation"]
         self.assertEqual(navigation[0]["path"], "components/Sidebar.tsx")
         self.assertEqual(navigation[0]["destinations"], 7)
@@ -130,6 +137,7 @@ class ScanPlantedProductTests(unittest.TestCase):
         self.assertEqual(settings[0]["path"], "app/settings/page.tsx")
         self.assertEqual(settings[0]["total"], 14)
         self.assertEqual(settings[0]["toggles"], 10)
+        self.assertEqual(settings[0]["settings"], 13)  # the save button is a control, not a setting
         self.assertEqual(self.inventory["signals"]["dense_ui_files"][0]["path"], "app/settings/page.tsx")
 
     def test_leads_point_at_the_dead_and_the_unfinished_surface(self) -> None:
@@ -140,7 +148,8 @@ class ScanPlantedProductTests(unittest.TestCase):
         self.assertEqual(self.inventory["signals"]["usage_evidence"]["analytics"], [])
         linked = {s["route"]: s["linked_from"] for s in self.inventory["surface"]["screens"]["items"]}
         self.assertIsNone(linked["/"])
-        self.assertIsNone(linked["/habits/[id]"])
+        self.assertEqual(linked["/habits/[id]"], 1)  # app/habits/page.tsx builds /habits/${id}
+        self.assertEqual(linked["/recipes/[id]"], 1)
         self.assertGreaterEqual(linked["/recipes"], 2)
 
     def test_history_is_measured_from_the_newest_commit(self) -> None:
@@ -161,11 +170,35 @@ class ScanPlantedProductTests(unittest.TestCase):
         latest = self.inventory["growth"]["by_quarter"][-1]
         self.assertEqual(latest["quarter"], "2026-Q2")
         self.assertEqual((latest["commits"], latest["screens"], latest["endpoints"]), (6, 4, 3))
+        models_by_quarter = {row["quarter"]: row["data_models"] for row in self.inventory["growth"]["by_quarter"]}
+        self.assertEqual(models_by_quarter, {"2025-Q3": 3, "2025-Q4": 0, "2026-Q1": 1, "2026-Q2": 2})
         areas = {area["path"]: area for area in self.inventory["areas"]["items"]}
         self.assertEqual(areas["app/recipes"]["added"], "2026-04-03")
         self.assertEqual(areas["app/recipes"]["recent_commits"], 3)
         self.assertEqual(areas["app/habits"]["recent_commits"], 0)
         self.assertEqual(self.inventory["areas"]["window_days"], 180)
+
+    def test_items_sharing_a_file_are_dated_by_their_own_line(self) -> None:
+        models = {model["name"]: model for model in self.inventory["surface"]["data_models"]["items"]}
+        self.assertEqual(models["Habit"]["added"], "2025-09-10")
+        self.assertEqual(models["JournalEntry"]["added"], "2026-01-20")
+        self.assertEqual(models["Recipe"]["added"], "2026-04-03")
+        self.assertEqual(models["Recipe"]["dated_by"], "line")
+        self.assertNotIn("commits", models["Recipe"])  # a file-level count would mislead
+        endpoints = {(e["method"], e["route"]): e for e in self.inventory["surface"]["endpoints"]["items"]}
+        alone = endpoints[("POST", "/api/checkins")]
+        self.assertNotIn("dated_by", alone)
+        self.assertEqual((alone["added"], alone["commits"], alone["line"]), ("2025-09-10", 1, 4))
+
+    def test_recent_commits_say_what_each_one_touched(self) -> None:
+        log = self.inventory["recent_commits"]
+        self.assertEqual(log["total"], 7)
+        self.assertEqual(log["items"][0], {
+            "date": "2026-06-20", "subject": "friends feed placeholder", "touched": ["app/friends", "components"],
+        })
+        self.assertEqual(log["items"][-1]["subject"], "journal and stats")
+        recipes = [entry for entry in log["items"] if any("recipes" in path for path in entry["touched"])]
+        self.assertEqual(len(recipes), 4)
 
     def test_scan_changes_nothing_and_never_opens_environment_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -322,7 +355,10 @@ class ScanConventionTests(unittest.TestCase):
             self.assertEqual([m["name"] for m in models["items"]], ["Note", "tags"])
             self.assertEqual(models["sql_tables_folded_into_orm_models"], 1)
             self.assertEqual(inventory["signals"]["usage_evidence"]["analytics"], ["posthog"])
-            self.assertIn(("Stripe", "payments"), {(i["service"], i["kind"]) for i in inventory["surface"]["integrations"]})
+            integrations = {i["service"]: i for i in inventory["surface"]["integrations"]}
+            self.assertEqual(integrations["Stripe"]["kind"], "payments")
+            # Python import names differ from package names, so "not imported" is left unsaid.
+            self.assertIsNone(integrations["Stripe"]["imported_by_files"])
             self.assertIn("ask the owner for the numbers", inventory["signals"]["usage_evidence"]["note"])
 
     def test_declared_routes_merge_with_their_screen_files(self) -> None:
@@ -359,6 +395,25 @@ class ScanConventionTests(unittest.TestCase):
                 ["src/pages/Orphan.tsx"],
             )
             self.assertEqual(inventory["surface"]["navigation"][0]["path"], "src/components/Nav.tsx")
+
+    def test_dynamic_routes_and_declared_dependencies_are_checked_for_use(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write(root, "package.json", next_manifest("next", "react", "stripe", "posthog-js"))
+            write(root, "app/page.tsx", 'import posthog from "posthog-js";\n\nexport default function Home() {\n  return <a href="/items/new">New</a>;\n}\n')
+            write(root, "app/items/new/page.tsx", "export default function New() {\n  return null;\n}\n")
+            write(root, "app/items/[id]/page.tsx", "export default function Item() {\n  return null;\n}\n")
+            write(root, "app/orders/[id]/page.tsx", "export default function Order() {\n  return null;\n}\n")
+            write(root, "app/orders/list.tsx", "export function List({ orders }) {\n  return orders.map((o) => <a href={`/orders/${o.id}`}>{o.id}</a>);\n}\n")
+            inventory = scan(root)
+            linked = {s["route"]: s["linked_from"] for s in inventory["surface"]["screens"]["items"]}
+            self.assertEqual(linked["/orders/[id]"], 1)
+            self.assertEqual(linked["/items/[id]"], 0)  # /items/new is a sibling, not a link into it
+            self.assertEqual(linked["/items/new"], 1)
+            # Dynamic routes stay out of the lead list: their links often come from data.
+            self.assertEqual(inventory["signals"]["unlinked_screens"]["total"], 0)
+            integrations = {i["service"]: i["imported_by_files"] for i in inventory["surface"]["integrations"]}
+            self.assertEqual(integrations, {"Stripe": 0, "Product analytics": 1})
 
     def test_layouts_colocated_components_and_content_folders_are_not_screens(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -420,13 +475,19 @@ class ScanConventionTests(unittest.TestCase):
                 root,
                 "plugins/alpha/skills/draft/SKILL.md",
                 "---\nname: draft\ndescription: >\n  Draft long prose in the author's voice.\n  Use when asked to write.\n"
-                "disable-model-invocation: true\n---\n\n# Draft\n",
+                'argument-hint: "[topic]"\ndisable-model-invocation: true\n---\n\n# Draft\n',
             )
             write(
                 root,
                 "plugins/alpha/skills/draft/scripts/helper.py",
-                'import argparse\n\nparser = argparse.ArgumentParser()\nparser.add_subparsers().add_parser("outline")\n',
+                'import argparse\n\nparser = argparse.ArgumentParser()\nparser.add_subparsers().add_parser("outline")\n'
+                'parser.add_argument("--depth")\n',
             )
+            write(root, "plugins/alpha/hooks/hooks.json", "{}\n")
+            write(root, ".ai/loop-backlog.md", "# Backlog\n")
+            write(root, "docs/q3-plan.md", "# Plan\n")
+            write(root, "docs/planets.md", "# Not a plan\n")
+            write(root, "CHANGELOG.md", "# Changelog\n")
             write(root, ".claude/skills/local/SKILL.md", "---\nname: local\ndescription: The developer's own helper.\n---\n")
             write(root, "qa/experiments/trial/skills/trial/SKILL.md", "---\nname: trial\ndescription: Unpublished.\n---\n")
             write(root, "scripts/release.py", 'import argparse\n\nargparse.ArgumentParser().add_subparsers().add_parser("publish")\n')
@@ -462,16 +523,26 @@ class ScanConventionTests(unittest.TestCase):
             quarters = {row["quarter"]: row["packages"] for row in inventory["growth"]["by_quarter"]}
             self.assertEqual(quarters, {"2026-Q1": 3, "2026-Q2": 2})
 
-            # A skill's bundled scripts are what it ships; top-level developer scripts are not.
-            self.assertEqual([c["name"] for c in inventory["surface"]["commands"]["items"]], ["outline"])
+            self.assertEqual(draft["plugin"], "alpha")
+            self.assertEqual(draft["argument_hint"], "[topic]")
+            self.assertTrue(packages[("plugin", "alpha")]["has_hooks"])
+            self.assertFalse(packages[("plugin", "beta")]["has_hooks"])
+
+            # A skill's bundled helper counts as shipped code, but the agent runs it: its
+            # subcommands and flags are not commands a user types. Developer scripts are neither.
+            self.assertEqual(inventory["surface"]["commands"]["items"], [])
+            self.assertEqual(inventory["surface"]["settings"]["command_options"]["items"], [])
             self.assertEqual(inventory["weight"]["source_files"], 1)
+            self.assertEqual(inventory["direction_documents"], [".ai/loop-backlog.md", "docs/q3-plan.md"])
+            self.assertEqual(inventory["release_notes"], ["CHANGELOG.md"])
             areas = {area["path"]: area for area in inventory["areas"]["items"]}
             self.assertNotIn("non_product", areas["plugins/alpha"])
             self.assertTrue(areas["scripts"]["non_product"])
             self.assertTrue(areas["qa"]["non_product"])
             self.assertEqual(areas["plugins/alpha"]["added"], "2026-01-10")
             self.assertEqual(areas["plugins/beta"]["added"], "2026-05-02")
-            self.assertNotIn("plugins/alpha/skills", areas)  # the parent holds nothing else
+            self.assertIn("plugins/alpha/skills", areas)
+            self.assertNotIn("plugins/alpha/skills/draft", areas)  # its parent holds nothing else
             self.assertFalse(any(path.startswith(".") for path in areas))
 
     def test_readme_opening_is_the_statement_of_purpose_not_setup_text(self) -> None:
@@ -485,6 +556,52 @@ class ScanConventionTests(unittest.TestCase):
         for text, title, opening in cases:
             with self.subTest(text=text[:40]):
                 self.assertEqual(product_audit.readme_purpose(text), (title, opening))
+
+    def test_marker_definitions_are_not_markers_and_each_line_counts_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write(root, "package.json", next_manifest("next", "react"))
+            write(
+                root,
+                "app/page.tsx",
+                "// TODO wire the real data\n"
+                'const MARKERS = /coming soon|not implemented|under construction/;\n'
+                'const NOTES = /TODO|FIXME|HACK/;\n'
+                "export default function Home() {\n"
+                "  return <p>Coming soon, coming soon</p>;\n}\n",
+            )
+            inventory = scan(root)
+            markers = inventory["signals"]["unfinished_markers"]["items"]
+            self.assertEqual([(m["path"], m["line"]) for m in markers], [("app/page.tsx", 5)])
+            self.assertEqual(inventory["signals"]["todos_in_surface_files"]["items"], [{"path": "app/page.tsx", "count": 1}])
+
+    def test_uncommitted_work_is_counted_so_the_reader_knows_the_tree_moved(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "pace"
+            build_product_audit_focused(root)
+            self.assertEqual(scan(root)["history"]["uncommitted"], {"modified": 0, "untracked": 0})
+            write(root, "app/extra/page.tsx", "export default function Extra() {\n  return null;\n}\n")
+            with (root / "README.md").open("a", encoding="utf-8") as handle:
+                handle.write("\nEdited.\n")
+            written = run("scan", "--root", str(root), "--out", str(root / ".product-audit-scan.json"))
+            self.assertEqual(written.returncode, 0, written.stderr)
+            inventory = scan(root)
+            # The scan's own output file is not the owner's work.
+            self.assertEqual(inventory["history"]["uncommitted"], {"modified": 1, "untracked": 1})
+            extra = next(s for s in inventory["surface"]["screens"]["items"] if s["route"] == "/extra")
+            self.assertIsNone(extra["added"])
+
+    def test_a_commit_touching_many_places_says_how_many_are_not_listed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for index in range(13):
+                write(root, f"area{index:02d}/file.py", "x = 1\n")
+            git(root, "init", "-q", "-b", "main")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "everything at once", date="2026-02-01T10:00:00")
+            entry = scan(root)["recent_commits"]["items"][0]
+            self.assertEqual(len(entry["touched"]), 10)
+            self.assertEqual(entry["more_places"], 3)
 
     def test_symlinks_are_not_followed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -556,6 +673,12 @@ class ReportCheckTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1)
         self.assertIn("template placeholder left in report", completed.stderr)
         self.assertIn("History needs one dated line per audit", completed.stderr)
+        self.assertIn("template guidance left in report", completed.stderr)
+        self.assert_rejects(
+            self.edit("## 4. Complexity\n", "## 4. Complexity\n\n<!-- guide: at most five findings -->\n"),
+            "template guidance left in report",
+        )
+        self.assert_rejects(self.edit("| Packages | 0 |\n", ""), "Snapshot is missing the measure 'Packages'")
 
     def test_structure_is_required(self) -> None:
         self.assert_rejects(self.edit("<!-- product-audit: v1 -->\n", ""), "missing report marker")
@@ -673,9 +796,14 @@ class ReportCheckTests(unittest.TestCase):
         base = "| ID | Product | Why comparable | What it covers | Source |\n|----|---|---|---|---|\n| O1 | Product | same job | habits | owner |\n"
         gaps = base + "\n### Gaps\n\n" + "".join(f"- G{n} Is a reminder needed for F2?\n" for n in range(1, 5))
         self.assert_rejects(self.edit("Not run: no web access\n", gaps), "Gaps are capped at three")
-        readings = base + "\n### Readings\n\n- (F6) supports: none of them plans meals\n- (F99) contradicts: all of them export\n"
+        readings = base + "\n### Readings\n\n- (F6) supports: none of them plans meals\n- (F9, F99) contradicts: all of them export\n"
         self.assert_rejects(self.edit("Not run: no web access\n", readings), "a reading cites unknown id F99")
-        valid = base + "\n### Readings\n\n- (F6) supports: none of them plans meals\n\n### Gaps\n\n- G1 Does the daily check-in need a reminder?\n"
+        valid = (
+            base + "\nSearched: habit tracker daily check-in app (2 searches, 4 pages)\n"
+            "Differentiator: none of them mentions a meal plan\n"
+            "\n### Readings\n\n- (F6, F7) supports: none of them plans meals\n- (F10) mixed: two of four chart completion\n"
+            "\n### Gaps\n\n- G1 Does the daily check-in need a reminder?\n"
+        )
         completed = self.check(self.edit("Not run: no web access\n", valid))
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertEqual(json.loads(completed.stdout)["gaps"], 1)
@@ -692,6 +820,11 @@ class ReportCheckTests(unittest.TestCase):
         )
         self.assert_rejects(self.edit("- N1 (F6) Take Recipes out of the menu and off the dashboard\n", ""), "Next needs one move citing an id")
         self.assert_rejects(self.edit("- N2 (X1) Open the app on Today", "- N2 Open the app on Today"), "malformed move")
+        several = self.edit("- N2 (X1) Open the app on Today", "- N2 (X1, X3, F5) Open the app on Today and trim the menu")
+        self.assertEqual(self.check(several).returncode, 0)
+        self.assert_rejects(
+            self.edit("- N2 (X1) Open the app on Today", "- N2 (X1, X9) Open the app on Today"), "N2 cites unknown id X9"
+        )
         nothing = self.edit(
             "- N1 (F6) Take Recipes out of the menu and off the dashboard\n",
             "Nothing obvious; next is whatever you decide to build.\n",

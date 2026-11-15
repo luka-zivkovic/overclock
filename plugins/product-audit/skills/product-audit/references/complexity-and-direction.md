@@ -3,17 +3,32 @@
 Both checks are about the product as a whole. Both stay structural: they rest on counts and
 paths the code shows, not on how a screen feels.
 
-## Three measures first
+## Filling the Snapshot
 
-Take these before writing any finding. They go in the Snapshot, so the next audit can compare.
+Take the numbers before writing any finding, so the next audit can compare like with like.
+Each is a whole number, or `n/a` when it cannot be measured for this kind of product. Write
+`0` when the scan could have found the thing and found none.
 
-- **Steps to the core action.** From opening the product, signed in and past first run, to
-  finishing the main thing the promise names. Each screen change, required form, or required
-  choice is one step. Cite the files you walked. Use `n/a` when the path cannot be traced
-  from code.
-- **Top-level destinations.** Entries in the primary navigation: sidebar, tab bar, top menu,
-  or the first level of commands.
-- **Settings and flags.** User-facing settings, flag-like variables, and command options.
+| Measure | What to count |
+|---|---|
+| Screens, Endpoints, Commands, Data models, Packages | The scan's totals, corrected for anything you found by reading. Endpoints count one per method, as the scan lists them. |
+| Settings and flags | Settings on settings screens (`settings`, which leaves out buttons), plus flag-like variables, preference keys, and command options a user is expected to set. |
+| Integrations | Services in the scan's list. Note in the evidence any that no file imports. |
+| Top-level destinations | Entries in the primary navigation: sidebar, tab bar, top menu, the first level of commands, or the main list a user picks from. |
+| Steps to the core action | See below. |
+
+Prefer the scan's number when the scan measures the right thing, so the next audit can
+compare; count by hand when it does not. Either way the `Measured:` line under the table says
+which numbers were translated or hand-counted, and how. For a collection of packages, the
+destinations are the units a user chooses between, and first-time installation is not a step
+to the core action unless every use repeats it.
+
+**Steps to the core action.** The core action is the thing the promise says a returning user
+does, not one-time setup: checking off a habit, not creating one. The first screen after
+opening the product, signed in and past first run, is step 0. Each move to another screen is
+one step. Completing the action on its screen (filling the form and submitting it) is one
+step, however many fields it has. Opening on a home page, going to Today, then ticking and
+saving is 2. Cite the files you walked.
 
 ## What counts as a complexity finding
 
@@ -29,11 +44,13 @@ Take these before writing any finding. They go in the Snapshot, so the next audi
 - Surface a user can reach that does nothing yet: a "coming soon" page, a placeholder, a
   permanently disabled control.
 - One screen with far more controls than the rest, mixing controls from several features.
+- Surface the owner maintains that no user is offered: a second packaging, a parallel
+  configuration, a compatibility layer nothing documents.
 
 ## What does not count
 
 - Colour, spacing, typography, icons, wording, accessibility, performance.
-- Code structure, naming, or duplication.
+- Code structure, naming, or duplication, except as evidence that one feature exists twice.
 - "It feels cluttered" with no count behind it.
 - Anything that needs the rendered screen, unless the owner supplied a screenshot; then cite
   the screenshot.
@@ -50,6 +67,10 @@ At most five, ranked by how much of the core path each one touches. Each row nee
 - **Simpler**: the smaller shape, stated as what is removed, merged, or demoted, and what the
   user gives up, if anything.
 
+A finding has no decision column. The owner accepts it by leaving its move in Next moves, or
+declines it; then end the Finding cell with `(declined by owner)` and do not raise it again
+unless the evidence changes.
+
 If none qualifies, write `None.` A product whose front door is short and whose menu matches
 its promise has no findings.
 
@@ -62,11 +83,16 @@ its promise has no findings.
 | `split` | Two clusters of features each have their own core, their own data, and their own user or job, so one promise cannot cover both; or the purpose sources describe two products. |
 | `undefined` | No source states a promise and the features do not point to one, or the only honest promise is a list of features. |
 
+When two verdicts fit, give the one whose options the owner could act on, name the other, and
+say what evidence would tip it. If two honest wordings of the promise would class a feature
+differently, say which features depend on the wording.
+
 Any verdict other than `focused` cites at least two of:
 
 - **Class shares** from the Features table.
-- **Recent effort**: commits inside the recent window, by `areas`, mapped to the features that
-  live there ("31 of the last 40 commits touched the recipe planner").
+- **Recent effort**: the scan's `recent_commits`, each mapped to the feature its paths belong
+  to ("5 of the last 7 commits went to the recipe planner"). `areas` gives the same picture by
+  directory, but a commit touching several directories counts in each.
 - **Growth**: what kind of surface arrived in the latest quarters.
 - **Purpose sources** that disagree with each other or with the code.
 - **Direction documents** promising something the code went away from.
@@ -74,7 +100,9 @@ Any verdict other than `focused` cites at least two of:
 - **The owner's usage**, once they answer: the feature in daily use is not the core.
 
 Work on plumbing is not drift: upgrades, refactors, sign-in, and deployment serve every
-feature. When the history is shallow or missing, say that the effort evidence is partial.
+feature. A menu file edited only to add entries for new features is those features' work, not
+plumbing. "Recent" ends at the newest commit, so give that date, and say so when it is months
+old. When the history is shallow or missing, say that the effort evidence is partial.
 
 ## The choice
 
@@ -86,20 +114,22 @@ really take, stated as what the product becomes and what follows from it:
 - split into two products;
 - for `undefined`: pick one user and one job, write the promise, and audit again.
 
-Mark exactly one `(recommended)` with a one-line reason tied to the evidence. With a `focused`
-verdict, write `None.` under The choice.
+Mark exactly one `(recommended)` and follow it with a one-line reason tied to the evidence.
+With a `focused` verdict, write `None.` under The choice.
 
 If critical-thinking is installed, the owner may hand the recommended option to it for a stress
 test. If it is not, the recommendation stands as the audit's own reasoning.
 
 ## Ordering the next moves
 
-1. Finish a core feature that users can reach unfinished.
-2. Settle the direction when it is not `focused`; every later move depends on it.
-3. Park or cut the heaviest features that do not earn their keep.
-4. Shorten the front door.
-5. Gaps from the outside view, last.
+Next is the single move that is right whichever option the owner picks. Finishing a core
+feature users can reach unfinished usually qualifies; so does removing a dead placeholder. If
+no move survives every option, Next is choosing the option. After that:
 
-Next holds the single move that removes the most weight or risk and needs no further
-decision. With nothing evidenced, write "Nothing obvious; next is whatever you decide to
-build."
+1. Settle the direction when it is not `focused`.
+2. Park or cut the heaviest features that do not earn their keep.
+3. Shorten the front door.
+4. Gaps from the outside view, last.
+
+A move may cite several ids, as `(F1, F2, X1)`. With nothing evidenced, write "Nothing
+obvious; next is whatever you decide to build."
