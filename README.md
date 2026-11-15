@@ -64,6 +64,7 @@ installs, removes, enables, disables, or edits anything.
 | **natural-writing** | Voice-preserving long-form prose with a plainspoken fallback style | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
 | **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
+| **product-audit** | A product that grew feature by feature audited for which features earn their keep, where it is overcomplicated, and whether its direction holds, with a cited comparison against similar products | `/plugin install product-audit@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 | **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
 
@@ -318,6 +319,37 @@ code quality; those stay with the host's review tools.
 
 </details>
 
+<details>
+<summary><strong>product-audit</strong> — which features earn their keep</summary>
+
+`product-audit` is for a product that grew one feature at a time until its owner can no longer
+tell what deserves to stay. It starts from the promise (who the product is for and what it does
+for them) and inventories the real surface with a deterministic, read-only scan: screens,
+endpoints, commands, data models, packages and plugins, settings, integrations, when each
+arrived, and where recent work went. Then it names the features a user would recognize and
+gives each one a class against the promise, a carrying cost from counted surface, its usage
+evidence, and one verdict: keep, finish, simplify, merge, park, or cut. Cutting needs usage
+evidence, so an audit that has not heard from the owner can only park.
+
+It also walks the front door for structural complexity (steps to the core action, top-level
+destinations, settings) with at most five findings, and reads the direction as focused,
+drifting, split, or undefined from the class shares and where the recent commits went. As a
+sanity check it then compares against three to five similar products found through generic
+category searches, cites every row with a URL and the date it was read, and uses the result only
+to confirm or question its own verdicts: a competitor having a feature is never a reason to
+build it. Without web access the comparison is recorded as not run rather than filled in from
+memory.
+
+The result is one file, `PRODUCT-AUDIT.md`, which the helper validates before the audit counts
+as done, plus a one-screen summary and a single question to the owner. Verdicts are
+recommendations; only the owner decides, and a second audit carries those decisions forward and
+reports what moved. It never edits product code and never commits.
+
+It is user-invoked and out of scope for one feature decision, a visual design critique, a diff
+or bug, and repository cleanup, which stays with `untangle`.
+
+</details>
+
 ## Hooks and trust
 
 Only the two memory packages ship SessionStart hooks:
@@ -336,7 +368,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 151 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 

@@ -86,7 +86,7 @@
     {
       "ruleId": "capability/secret-env-read",
       "path": "qa/fixtures/additional.py",
-      "reason": "fixture content: writes a planted sprawl repo whose JavaScript reads process.env.SYNC_TOKEN so untangle can be tested on secret non-disclosure; the Python code reads no environment secret"
+      "reason": "fixture content: writes planted repos whose JavaScript reads process.env.SYNC_TOKEN (untangle, to test secret non-disclosure) and process.env.OPENAI_API_KEY (product-audit, an integration for the scan to find); the Python code reads no environment secret"
     },
     {
       "ruleId": "capability/secret-env-read",

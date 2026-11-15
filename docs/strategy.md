@@ -119,6 +119,49 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   yet: per-item confirmed commits in apply for non-developers, and sharing scan scaffolding with the
   architecture survey if that candidate is built.
 
+### product-audit — BUILD, v0.1.0 published (2026-11-15)
+- **Demand:** direct maintainer request: personal projects that accumulated features over
+  time, with no way left to tell whether each feature deserves its keep, whether the
+  experience is overcomplicated, or whether the direction still makes sense, plus a sanity
+  check against similar products. A direct request with a named recurring use satisfies
+  principle 4.
+- **Grounding:** nothing in the kit judges a product. `untangle` surveys repository coherence
+  and its unit is a thread of work; this audits what a user meets and its unit is a feature.
+  critical-thinking judges one decision, groundwork elicits requirements for work not yet
+  built, and the host's review tools are diff-scoped. Three ledger traps shaped the design.
+  Findings must cite a file, the owner, or a URL, so the result cannot be a generic advice
+  list (untangle's failed-result rule). Usage is a signal no file-reading skill can obtain
+  (the moat-signal-unobtainable pattern), so the skill asks the owner and refuses to cut on
+  unknown usage instead of guessing. And the comparison is bounded, cited, and barred from
+  adding features, because "a competitor has it" is the reasoning feature creep runs on.
+- **Product shape:** one user-invoked skill with one mode. Promise first, then a
+  deterministic scan, features named in user terms, a keep test on fixed scales (class, cost,
+  usage, verdict), a structural complexity check capped at five, a direction verdict with a
+  choice, an outside view of three to five cited products, and one validated report,
+  `PRODUCT-AUDIT.md`, followed by a single question to the owner. A second audit carries the
+  owner's decisions forward and appends a history line.
+- **Fences that keep it right-sized:** user-invoked only, with scope stops for one feature
+  decision, visual design critique, diffs and bugs, repository cleanup, and ideas with no
+  code. A small focused product gets a short "focused, nothing to cut" result. It writes only
+  the report, never edits product code, never commits, never opens environment files,
+  databases, or analytics, and searches only generic category terms. Without web access the
+  comparison is recorded as not run; products recalled from memory are not evidence.
+- **Evidence:** deterministic tests pin planted-surface recall, history and rename handling,
+  the no-write scan boundary, environment-file and symlink refusal, and every report rule
+  (objective). The scan's conventions were corrected against six public repositories (a
+  Next.js app, a FastAPI and TanStack Router template, a click CLI, a SvelteKit app, an
+  Express API, and a large Electron monorepo) and against this repository, which is why
+  plugin collections inventory as packages. Seven live cases are committed (rubric): a
+  planted feature-creep audit carrying an embedded instruction, a focused-product fabrication
+  control, two scope stops, owner answers that turn a cut into a direction question, a second
+  audit that respects earlier decisions, and a requested comparison with no web access. Live
+  results are not yet recorded; the harness denies web access, so the comparison's positive
+  path is covered only by the report rules and author-run sessions. No routing battery: the
+  skill is user-invoked.
+- **Next:** run the live suite, then observe real use on the maintainer's projects. Candidate
+  follow-ups, none authorized: a portfolio view across several projects, and reading usage
+  from an analytics export the owner supplies.
+
 ### api-bench — BUILD, v0.1.0 published (2026-09-19)
 - **Demand:** direct maintainer request to simulate, from inside Claude Code, how an
   application would use Claude (or any model) through the API, and the follow-up

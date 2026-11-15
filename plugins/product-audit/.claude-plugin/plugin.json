@@ -1,0 +1,19 @@
+{
+  "name": "product-audit",
+  "displayName": "Product Audit",
+  "description": "Take stock of a product that grew one feature at a time. A read-only audit states the promise, inventories the real surface from code, judges each feature on promise fit, carrying cost, and usage, checks structural complexity and direction, and sanity-checks the verdicts against a few cited comparable products. It writes one report with recommendations the owner decides on. Never edits product code and never commits.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luka Zivkovic"
+  },
+  "license": "MIT",
+  "keywords": [
+    "product",
+    "features",
+    "audit",
+    "scope",
+    "complexity",
+    "direction",
+    "comparison"
+  ]
+}
