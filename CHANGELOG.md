@@ -3,6 +3,30 @@
 Versions are per-plugin. A version bump is what ships an update to installed
 users; the CI version-bump guard enforces that plugin content changes carry one.
 
+## product-audit
+
+### 0.1.0 — 2026-11-15 (initial release)
+- New plugin: an honest read on a product that grew one feature at a time. It reads the
+  project and its git history, states the promise, lists the features in the user's terms,
+  and asks the owner what the project is for and which features get used before judging any
+  of them. With no owner to ask, it says what that limits and recommends nothing for deletion.
+- Judges each feature on fit with the promise, what it carries, and use, and recommends keep,
+  finish, simplify, merge, park, or cut, each with a reason. A cut needs evidence the feature
+  is unused; a heavily used feature outside the promise becomes a question about direction.
+- Checks the structure a user meets (steps to the main action, what the menu ranks first,
+  settings, duplicate paths, dead ends) and reads the direction as focused, drifting, split,
+  or undefined from where recent work went, with options when it is not focused.
+- Outside view as a sanity check: three to five comparable products found through generic
+  category searches, each cited with its URL and the date it was read, used only to support
+  or question the audit's own read. Without web access it reports the comparison as not run.
+- Answers in about one screen and writes `PRODUCT-AUDIT.md`. A later audit carries the owner's
+  decisions forward and reports what moved. Never edits the product and never commits.
+- A small read-only helper reports the git facts that are slow to work out by hand: when each
+  directory first appeared (carried across renames), commits per directory, every commit in
+  a recent window with the places it touched, and uncommitted-change counts.
+- Model-invoked, with a routing battery of stepping-back requests against single-feature,
+  design, bug, cleanup, and unbuilt-idea near misses.
+
 ## api-bench
 
 ### 0.1.0 — 2026-09-19 (initial release)
@@ -385,6 +409,9 @@ users; the CI version-bump guard enforces that plugin content changes carry one.
   routing trigger battery with produce-side and non-GitHub anti-triggers.
 
 ## overclock-setup
+
+### 0.1.27 — 2026-11-15
+- Catalog the new `product-audit` plugin (0.1.0) with its persistent `PRODUCT-AUDIT.md` report.
 
 ### 0.1.26 — 2026-09-23
 - Catalog the new `untangle` plugin (0.1.0) with its persistent `UNTANGLE.md` plan file.

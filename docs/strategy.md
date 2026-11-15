@@ -119,6 +119,49 @@ Append-only. Each candidate carries a verdict and the evidence behind it.
   yet: per-item confirmed commits in apply for non-developers, and sharing scan scaffolding with the
   architecture survey if that candidate is built.
 
+### product-audit — BUILD, v0.1.0 published (2026-11-15)
+- **Demand:** direct maintainer request: personal projects that accumulated features over
+  time, with no way left to tell whether each feature deserves its keep, whether the
+  experience is overcomplicated, or whether the direction still makes sense, plus a sanity
+  check against similar products.
+- **How it was built:** at the maintainer's request this skill was designed on its own merits
+  and not to this repository's house pattern. A first version mirrored `untangle`: a
+  1,900-line convention scanner, a verdict lookup table, and a thirty-rule report validator.
+  Three author-run sessions showed it produced useful audits but was brittle (the scanner read
+  this repository backwards on its first run), slow, and wrote a first report whose verdicts
+  were mostly placeholders because usage had not been asked for. It was replaced before
+  release by the lean version described here; the heavy version is commit `b7ce9e4` on the
+  development branch.
+- **Product shape:** one model-invoked skill. Read the project and its history, state the
+  promise, list the features in the user's terms, and ask the owner what the project is for
+  and what gets used before judging anything. Then judge fit, carrying cost, and use; check
+  structural complexity; read the direction; compare against three to five cited products;
+  answer in about a screen and write `PRODUCT-AUDIT.md`. A small read-only helper reports the
+  git facts that are slow to work out by hand.
+- **Boundaries:** the report is the only file written. No edits to the product and no commits;
+  no environment files, databases, or analytics; searches use generic category terms only;
+  without web access the comparison is reported as not run; a cut needs evidence that the
+  feature is unused.
+- **Evidence:** subjective tier for the skill's behavior, objective for the helper (unit tests
+  over planted history, renames, the read-only boundary, and edge cases). Author-run
+  comparison on two cases, each run with the skill and with no skill by fresh agents and
+  graded by a separate agent: a planted feature-creep project with an owner who answers, and
+  this repository with no owner available. With the skill 13 of 14 and 12 of 13 assertions
+  passed; without it 11 of 14 and 10 of 13. Two cases with one run each is a first look, not
+  a measurement, and the grader judged the second case closer than the scores suggest. The
+  graded runs used the first lean draft; the text was revised afterwards and not re-run.
+  Seven behavioral cases and a routing battery are committed for the live harness and have
+  not been run.
+- **Honest limits:** the no-skill baseline is strong. Without the skill, Claude also asked the
+  owner before judging and gave specific, well-evidenced verdicts, and it found
+  implementation-level problems the skill runs did not report. What the skill added in these
+  runs was the comparison against similar products, which the baseline skipped both times, a
+  report a later audit can pick up, and direction framed as options. That is the case for
+  keeping the skill small.
+- **Next:** observe real use on the maintainer's projects; run the live suite. Candidate
+  follow-ups, none authorized: a view across several projects, and reading usage from an
+  analytics export the owner supplies.
+
 ### api-bench — BUILD, v0.1.0 published (2026-09-19)
 - **Demand:** direct maintainer request to simulate, from inside Claude Code, how an
   application would use Claude (or any model) through the API, and the follow-up

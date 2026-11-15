@@ -5,7 +5,7 @@
     {
       "id": "overclock-setup",
       "display_name": "Overclock Setup",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "publication_status": "published",
       "provides": [
         "setup-advisor"
@@ -307,6 +307,26 @@
       ],
       "minimum_host_version": null,
       "selection": "Choose to survey a repository that grew by exploration into one spine plus threads, with a decision-driven plan file and a one-item-at-a-time apply mode that never commits."
+    },
+    {
+      "id": "product-audit",
+      "display_name": "Product Audit",
+      "version": "0.1.0",
+      "publication_status": "published",
+      "provides": [
+        "product-audit"
+      ],
+      "skill_names": [
+        "product-audit"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "hooks": [],
+      "persistent_files": [
+        "PRODUCT-AUDIT.md"
+      ],
+      "minimum_host_version": null,
+      "selection": "Choose for an honest read on a whole product you have built: which features earn their keep, whether it has grown too complicated, and whether its direction holds, with a cited comparison against similar products. Skip for a single feature decision, a visual design critique, or repository cleanup."
     }
   ]
 }

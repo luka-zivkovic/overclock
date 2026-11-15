@@ -64,6 +64,7 @@ installs, removes, enables, disables, or edits anything.
 | **natural-writing** | Voice-preserving long-form prose with a plainspoken fallback style | `/plugin install natural-writing@overclock` |
 | **pr-feedback** | Reviewer comments judged and fixed locally, plus an explicit digest-locked publisher | `/plugin install pr-feedback@overclock` |
 | **untangle** | A sprawling exploratory repo surveyed into one spine, a decision-driven plan file, and a one-item-at-a-time apply mode | `/plugin install untangle@overclock` |
+| **product-audit** | An honest read on a product you have built: which features earn their keep, whether it has grown too complicated, and whether its direction holds, with a cited comparison against similar products | `/plugin install product-audit@overclock` |
 | **agent-bridge** | Consult or delegate a bounded subtask to another installed harness (Codex, Gemini) while you keep task ownership | `/plugin install agent-bridge@overclock` |
 | **api-bench** | A budget-capped dry run of how your app would call the Claude API or an OpenAI-compatible endpoint, with the exact transcript to review | `/plugin install api-bench@overclock` |
 
@@ -318,6 +319,35 @@ code quality; those stay with the host's review tools.
 
 </details>
 
+<details>
+<summary><strong>product-audit</strong> — which features earn their keep</summary>
+
+`product-audit` is for a product that grew one feature at a time until its owner can no longer
+tell what deserves to stay. It reads the project and its git history, states the promise (who
+the product is for and what it does for them), lists the features the way a user would name
+them, and then asks the owner three things before judging anything: is that promise right,
+what do they want the project to be, and which features actually get used. An audit written
+without those answers is mostly guesswork.
+
+With the answers it judges each feature on fit with the promise, what it carries, and use, and
+recommends keep, finish, simplify, merge, park, or cut. It will not recommend cutting something
+it does not know is unused, and when the feature the owner uses most sits outside the promise
+it raises that as a question about direction instead. It also checks the structure a user
+meets (steps to the main action, what the menu ranks first, how many settings), reads the
+direction as focused, drifting, split, or undefined from where recent commits went, and lays
+out options when it is not focused.
+
+As a sanity check it compares against three to five similar products found through generic
+category searches, cites each page with the date it was read, and uses the result only to
+support or question its own read: a competitor having a feature is never a reason to build it.
+Without web access it says the comparison did not run and does not fill the gap from memory.
+
+The answer fits about one screen, with the full picture in `PRODUCT-AUDIT.md`. Recommendations
+are the audit's, decisions are the owner's, and a later audit carries those decisions forward
+and reports what moved. It never edits the product and never commits.
+
+</details>
+
 ## Hooks and trust
 
 Only the two memory packages ship SessionStart hooks:
@@ -336,7 +366,7 @@ auditable in
 
 ## Evidence, not vibes
 
-| 144 declared live cases | 21 shipped skill distributions | Isolated git fixtures | Independent grading |
+| 151 declared live cases | 22 shipped skill distributions | Isolated git fixtures | Independent grading |
 |:---:|:---:|:---:|:---:|
 | Positive and negative controls | Secret and symlink traps | Mutation restore checks | Baseline comparison support |
 
