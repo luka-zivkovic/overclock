@@ -2,7 +2,7 @@
   "skill_name": "product-audit",
   "invocation": "explicit",
   "install_modes": ["skill"],
-  "evidence_tier": "rubric",
+  "evidence_tier": "subjective",
   "value_gate": {
     "min_case_wins": 1,
     "max_case_losses": 0,
